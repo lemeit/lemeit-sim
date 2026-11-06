@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es-AR" class="lm-root" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lemeit Sim · Simulador de procesos</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/lemeit-theme.css"><link rel="stylesheet" href="style.css">
+  <script src="theme-toggle.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="https://profe.lemeit.ar/" title="Portal de Luciano Lamaita"><span class="brand-mark">L</span><span>lemeit<span class="brand-sub">LABORATORIO DE PROCESOS</span></span></a>
+    <span class="edition">Balance de materia y energía <span>·</span> v0.2 · piloto</span>
+    <div class="header-actions"><span id="engine-state" class="engine-state">Conectando al motor…</span><button id="theme-toggle" class="tex-theme-toggle" accesskey="t" aria-label="Cambiar a tema oscuro" title="Cambiar a tema oscuro (Alt + T)"><svg class="moon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+<svg class="sun" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg></button><button id="about-button" class="icon-button" aria-label="Acerca del simulador" title="Acerca del simulador">?</button></div>
+  </header>
+  <main>
+    <section class="project-bar" aria-label="Proyecto">
+      <div><p class="eyebrow">SIMULAR PARA ENTENDER</p><input id="project-title" class="project-title" aria-label="Nombre del proceso" maxlength="70" value="Mezcla de agua"><p class="project-description">Conectá las corrientes. Elegí el modelo. Explorá los balances.</p></div>
+      <div class="project-actions"><select id="example-select" aria-label="Ejemplo para cargar"><option value="mix">Mezcla de agua</option><option value="ConversionReactor">Reactor de conversión</option><option value="EquilibriumReactor">Reactor de equilibrio</option></select><button id="example-button" class="quiet-button">Cargar ejemplo</button><button id="open-button" class="quiet-button">Abrir</button><button id="save-button" class="outline-button">Guardar</button><button id="calculate-button" class="calculate-button" disabled><span aria-hidden="true">▷</span> Calcular proceso</button></div>
+      <input type="file" id="file-input" accept=".json,application/json" hidden>
+    </section>
+    <section class="model-bar" aria-label="Modelo termodinámico"><span class="model-label">TERMODINÁMICA</span><label for="model-select">Modelo</label><select id="model-select" disabled><option>Conectando…</option></select><span class="compound-pill" id="compound-summary">Agua pura</span><button id="compound-button" class="text-button">Editar compuestos</button><span class="model-note" id="model-note">Propiedades calculadas por DWSIM</span></section>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section class="workspace" aria-label="Editor de procesos">
+      <aside class="equipment-panel"><div class="panel-heading"><h2>Equipos y corrientes</h2><span>01</span></div><p class="hint">Arrastrá al diagrama o tocá para agregar.</p><div id="palette"></div><a class="catalog-link" href="catalogo.html" target="_blank">Ver catálogo de objetos ↗</a><div class="palette-help"><span class="small-rule"></span><strong>Un proceso, paso a paso</strong><p>Seleccioná una salida y después una entrada para conectarlas.</p><div><i class="port-key"></i> Materia <i class="port-key energy-key"></i> Energía</div><p class="mini">Cada puerto admite una conexión.</p></div></aside>
+      <div class="diagram-panel"><div class="diagram-toolbar"><div><span class="live-dot"></span><strong>Diagrama de proceso</strong><span id="object-count" class="muted"></span></div><div class="zoom-controls"><button id="zoom-out" aria-label="Alejar">−</button><span id="zoom-label">100 %</span><button id="zoom-in" aria-label="Acercar">+</button><button id="fit-button" title="Ajustar diagrama">Ajustar</button></div></div>
+        <div id="canvas-wrap" class="canvas-wrap"><svg id="diagram" viewBox="0 0 1000 520" role="group" aria-label="Diagrama editable: seleccioná objetos y conectá sus puertos"></svg><div id="connection-hint" class="connection-hint">Seleccioná un equipo o una corriente para editar sus propiedades.</div><div class="canvas-caption">RÉGIMEN ESTACIONARIO <span>→</span> SIN RECIRCULACIONES</div></div>
+        <div class="diagram-footer"><span id="calculation-state">Ejemplo listo para calcular</span><span>Los cambios invalidan los resultados anteriores.</span></div>
+      </div>
+      <aside class="inspector-panel"><div class="panel-heading"><h2>Propiedades</h2><span>02</span></div><div id="inspector"></div></aside>
+    </section>
+    <section class="results-panel" aria-label="Resultados del cálculo"><div class="results-heading"><div><p class="eyebrow">LEER EL PROCESO</p><h2>Corrientes y balances</h2></div><span id="result-meta" class="muted">Sin resultados calculados</span></div><div id="results"><div class="results-empty"><span class="empty-equation">Σ ṁ<sub>entrada</sub> = Σ ṁ<sub>salida</sub></span><p>El diagrama está listo. Calculá para consultar caudales, temperaturas y energía.</p></div></div></section>
+  </main>
+  <footer class="site-footer"><a href="https://lemeit.ar/">Proyectos <b class="footer-wordmark">lem<span>e</span>it</b> ↗</a><span>Motor DWSIM · <a href="https://github.com/lemeit/lemeit-sim">Código fuente</a> · <a href="licenses/DWSIM-GPL-3.txt">GPL v3</a> · <a href="licenses/NOTICE.md">Componentes y licencias</a></span></footer>
+  <dialog id="compounds-dialog"><form method="dialog"><div class="dialog-heading"><h2>Compuestos del proceso</h2><button aria-label="Cerrar" class="icon-button">×</button></div><p>Catálogo real del motor. Seleccioná hasta 8 compuestos; después completá las fracciones másicas de cada alimentación.</p><label for="compound-search">Buscar un compuesto (nombre del catálogo)</label><input id="compound-search" type="search" placeholder="Water, Ethanol, Methane…" autocomplete="off"><div id="selected-compounds" class="selected-compounds"></div><div id="compound-list" class="compound-list"></div><p class="mini">La disponibilidad de un compuesto no garantiza que cualquier modelo sea apropiado para esa mezcla.</p><button class="calculate-button dialog-done">Listo</button></form></dialog>
+  <dialog id="about-dialog"><form method="dialog"><div class="dialog-heading"><h2>Procesos · Lemeit</h2><button aria-label="Cerrar" class="icon-button">×</button></div><p>Editor pedagógico conectado a <strong>DWSIM 10.2.15</strong>. Los resultados se calculan en el servidor conectado a DWSIM. Los archivos se guardan en tu navegador, pero las condiciones del proceso se envían al servidor para calcular.</p><h3>Alcance de esta primera versión</h3><p>Procesos en régimen estacionario, sin recirculaciones. Mezclador, divisor, calentador, enfriador y reactores de conversión y equilibrio, con una reacción por reactor. Se desprecia la variación de energía cinética y potencial.</p><p>Los calentadores y enfriadores se especifican por temperatura de salida. El balance muestra la potencia térmica neta transferida al fluido. No representa todavía el consumo ni el costo de un servicio industrial.</p><p>Las propiedades dependen del modelo seleccionado. La entalpía usa la referencia del modelo; para un balance se emplean diferencias calculadas de forma consistente.</p><p>No hay cuentas ni guardado en la nube. <strong>Guardar</strong> descarga un archivo del proceso; el navegador conserva también una copia local automática.</p><p><a href="catalogo.html">Catálogo de objetos y próximas incorporaciones</a> · <a href="https://github.com/lemeit/lemeit-sim/blob/main/docs/roadmap.md">Hoja de ruta y documentación</a></p><p><a href="licenses/NOTICE.md" target="_blank">Atribuciones, fuentes y licencias</a></p><button class="outline-button">Volver al diagrama</button></form></dialog>
+</body></html>

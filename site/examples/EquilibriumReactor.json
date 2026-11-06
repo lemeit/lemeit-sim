@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "title": "Síntesis de amoníaco · equilibrio",
+  "compounds": [
+    "Nitrogen",
+    "Hydrogen",
+    "Ammonia"
+  ],
+  "model": "Peng-Robinson (PR)",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Alimentación",
+      "temperature_C": 500,
+      "pressure_kPa": 20000,
+      "mass_flow": 1,
+      "composition": {
+        "Nitrogen": 0.8224,
+        "Hydrogen": 0.1776,
+        "Ammonia": 0
+      },
+      "x": 70,
+      "y": 200
+    },
+    {
+      "id": "reactor",
+      "name": "Reactor",
+      "type": "EquilibriumReactor",
+      "x": 430,
+      "y": 180,
+      "outlet_C": 500,
+      "conversion": 50,
+      "phase": "Vapor",
+      "base_compound": "Nitrogen",
+      "stoichiometry": {
+        "Nitrogen": -1,
+        "Hydrogen": -3,
+        "Ammonia": 2
+      }
+    },
+    {
+      "id": "vapor",
+      "name": "Producto vapor",
+      "type": "MaterialStream",
+      "x": 740,
+      "y": 105
+    },
+    {
+      "id": "liquid",
+      "name": "Producto líquido",
+      "type": "MaterialStream",
+      "x": 740,
+      "y": 320
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "reactor"
+    },
+    {
+      "from": "reactor",
+      "to": "vapor"
+    },
+    {
+      "from": "reactor",
+      "to": "liquid",
+      "fromIndex": 1
+    }
+  ]
+}

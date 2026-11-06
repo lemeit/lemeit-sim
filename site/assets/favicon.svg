@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>lemeit — L caligráfica</title>
+  <rect width="64" height="64" rx="12" fill="#1A1612"/>
+  <path d="M148 83 C195 124 308 125 350 91 C374 72 370 48 341 43 C294 33 258 61 237 101 C212 147 191 218 164 263 C145 296 118 314 98 297 C80 283 87 262 109 261 C146 259 202 289 252 301 C292 311 334 316 367 302 C387 293 391 277 384 265"
+        transform="translate(-8 2) scale(.17)" fill="none" stroke="#C45A00" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

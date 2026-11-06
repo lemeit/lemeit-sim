@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "title": "Formación de agua · conversión",
+  "compounds": [
+    "Hydrogen",
+    "Oxygen",
+    "Water"
+  ],
+  "model": "Peng-Robinson (PR)",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Alimentación",
+      "temperature_C": 500,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Hydrogen": 0.1119,
+        "Oxygen": 0.8881,
+        "Water": 0
+      },
+      "x": 70,
+      "y": 200
+    },
+    {
+      "id": "reactor",
+      "name": "Reactor",
+      "type": "ConversionReactor",
+      "x": 430,
+      "y": 180,
+      "outlet_C": 500,
+      "conversion": 50,
+      "phase": "Vapor",
+      "base_compound": "Hydrogen",
+      "stoichiometry": {
+        "Hydrogen": -2,
+        "Oxygen": -1,
+        "Water": 2
+      }
+    },
+    {
+      "id": "vapor",
+      "name": "Producto vapor",
+      "type": "MaterialStream",
+      "x": 740,
+      "y": 105
+    },
+    {
+      "id": "liquid",
+      "name": "Producto líquido",
+      "type": "MaterialStream",
+      "x": 740,
+      "y": 320
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "reactor"
+    },
+    {
+      "from": "reactor",
+      "to": "vapor"
+    },
+    {
+      "from": "reactor",
+      "to": "liquid",
+      "fromIndex": 1
+    }
+  ]
+}

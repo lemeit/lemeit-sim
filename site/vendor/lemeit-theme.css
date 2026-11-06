@@ -1,0 +1,415 @@
+/**
+ * lemeit-theme.css — sistema de diseño compartido para los portales
+ * ambientales de lemeit.ar (emas, aq, wq) y de profe.lemeit.ar.
+ *
+ * Paleta y tipografía tomadas de profe.lemeit.ar (tema PaperMod, paleta
+ * "X-Wing Poe Dameron": naranja óxido sobre crema en modo claro, negro
+ * cálido con acentos naranja en modo oscuro). Ver /docs/tokens.md en este
+ * mismo repo para la lista completa con su origen.
+ *
+ * Uso: <link rel="stylesheet" href="https://design.lemeit.ar/lemeit-theme.css">
+ * en el <head>, ANTES de los estilos propios de cada sitio (así los
+ * pueden sobreescribir donde haga falta). El toggle claro/oscuro se
+ * controla con el atributo data-theme en <html> (ver lemeit-common.js).
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* — Paleta base (modo claro) — */
+  --lm-bg:          #FAF7F2;
+  --lm-surface:     #FFFFFF;
+  --lm-surface-2:   #F0EBE2;
+  --lm-border:      #E0D9CC;
+  --lm-text:        #2A211A;
+  --lm-text-dim:    #6B5C4E;
+  --lm-accent:      #9B3D00;
+  --lm-accent-dim:  #F0DDCC;
+  --lm-good:        #4C7A3D;
+  --lm-moderate:    #A6720A;
+  --lm-bad:         #A33131;
+  --lm-shadow:      rgba(43, 30, 20, 0.08);
+
+  /* — Chips de metadata estilo shields.io (ver sección CHIPS más abajo) —
+     fijos, no cambian con el tema claro/oscuro, igual que un badge real
+     de shields.io. */
+  --lm-chip-label:  #555555;
+  --lm-chip-value:  #009688;
+  --lm-chip-accent: #FF5722;
+
+  /* — Colores de marca por sitio (logo/ícono/favicon de cada portal,
+     distintos entre sí para diferenciarlos a simple vista) — familia
+     verde-azulado → celeste, fijos igual que los chips de arriba.
+     --lm-site-aq es el mismo verde que --lm-chip-value (setiembre 2026,
+     antes todos los portales compartían el naranja de --lm-accent acá
+     arriba). --lm-site-wq queda pendiente de asignar. */
+  --lm-site-aq:   #009688;
+  --lm-site-emas: #0097A7;
+
+  /* — Tipografía — */
+  --lm-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --lm-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    Consolas, "Liberation Mono", monospace;
+
+  /* — Espaciado y forma — */
+  --lm-radius: 10px;
+  --lm-radius-sm: 6px;
+}
+
+:root[data-theme="dark"] {
+  --lm-bg:          #1A1612;
+  --lm-surface:     #221E18;
+  --lm-surface-2:   #2B241D;
+  --lm-border:      #3D3028;
+  --lm-text:        #F2ECE4;
+  --lm-text-dim:    #C9BEB2;
+  --lm-accent:      #D9691F;
+  --lm-accent-dim:  #3D2A1A;
+  --lm-good:        #8FB56B;
+  --lm-moderate:    #D9A441;
+  --lm-bad:         #D9736F;
+  --lm-shadow:      rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+.lm-root, .lm-root body {
+  background: var(--lm-bg);
+  color: var(--lm-text);
+  font-family: var(--lm-font-sans);
+  transition: background .2s, color .2s;
+}
+.lm-root * { box-sizing: border-box; }
+.lm-mono { font-family: var(--lm-font-mono); }
+
+/* ═══════════════════════════════════════════
+   HEADER + SITE SWITCHER
+═══════════════════════════════════════════ */
+.lm-header {
+  background: var(--lm-surface);
+  border-bottom: 1px solid var(--lm-border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 1px 4px var(--lm-shadow);
+}
+.lm-logo {
+  font-family: var(--lm-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--lm-accent);
+  padding: 4px 8px;
+  border-radius: var(--lm-radius-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.lm-header-mid { flex: 1; min-width: 0; }
+.lm-header-mid h1 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lm-header-mid p {
+  font-family: var(--lm-font-mono);
+  font-size: 10px;
+  color: var(--lm-text-dim);
+  margin: 2px 0 0;
+}
+.lm-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.lm-switcher { position: relative; }
+.lm-switcher-btn {
+  background: var(--lm-surface-2);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius-sm);
+  color: var(--lm-text);
+  font-family: var(--lm-font-mono);
+  font-size: 11px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lm-switcher-btn:hover { background: var(--lm-border); }
+.lm-switcher-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--lm-surface);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  box-shadow: 0 8px 24px var(--lm-shadow);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 300;
+}
+.lm-switcher-menu.open { display: block; }
+.lm-switcher-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  color: var(--lm-text);
+  text-decoration: none;
+  font-size: 13px;
+  border-bottom: 1px solid var(--lm-border);
+}
+.lm-switcher-menu a:last-child { border-bottom: none; }
+.lm-switcher-menu a:hover { background: var(--lm-surface-2); }
+.lm-switcher-menu a span {
+  font-family: var(--lm-font-mono);
+  font-size: 10px;
+  color: var(--lm-text-dim);
+}
+.lm-switcher-menu a.lm-current { background: var(--lm-accent-dim); }
+
+.lm-theme-btn {
+  background: var(--lm-surface-2);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius-sm);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.lm-theme-btn:hover { background: var(--lm-border); }
+
+/* ═══════════════════════════════════════════
+   NAV TABS
+═══════════════════════════════════════════ */
+.lm-nav {
+  background: var(--lm-surface);
+  border-bottom: 1px solid var(--lm-border);
+  padding: 0 20px;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  z-index: 190;
+}
+.lm-nav::-webkit-scrollbar { display: none; }
+.lm-nav-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--lm-text-dim);
+  font-family: var(--lm-font-sans);
+  font-size: 13px;
+  padding: 10px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.lm-nav-btn.active { color: var(--lm-accent); border-bottom-color: var(--lm-accent); }
+.lm-nav-btn:hover:not(.active) { color: var(--lm-text); }
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.lm-card {
+  background: var(--lm-surface);
+  border: 1px solid var(--lm-border);
+  border-radius: var(--lm-radius);
+  padding: 16px;
+  transition: border-color .2s, transform .15s, box-shadow .2s;
+}
+.lm-card.lm-hover:hover {
+  border-color: var(--lm-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--lm-shadow);
+}
+.lm-card-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--lm-text-dim);
+  margin-bottom: 6px;
+}
+.lm-card-value {
+  font-family: var(--lm-font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--lm-accent);
+  line-height: 1;
+}
+.lm-card-unit {
+  font-family: var(--lm-font-mono);
+  font-size: 10px;
+  color: var(--lm-text-dim);
+  margin-left: 2px;
+}
+.lm-card-sub {
+  font-family: var(--lm-font-mono);
+  font-size: 10px;
+  color: var(--lm-text-dim);
+  margin-top: 5px;
+}
+
+/* ═══════════════════════════════════════════
+   BADGES / ESTADOS
+═══════════════════════════════════════════ */
+.lm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--lm-font-mono);
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+}
+.lm-badge-good     { color: var(--lm-good);     background: color-mix(in srgb, var(--lm-good) 14%, transparent);     border-color: color-mix(in srgb, var(--lm-good) 30%, transparent); }
+.lm-badge-moderate { color: var(--lm-moderate); background: color-mix(in srgb, var(--lm-moderate) 14%, transparent); border-color: color-mix(in srgb, var(--lm-moderate) 30%, transparent); }
+.lm-badge-bad      { color: var(--lm-bad);      background: color-mix(in srgb, var(--lm-bad) 14%, transparent);      border-color: color-mix(in srgb, var(--lm-bad) 30%, transparent); }
+
+.lm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lm-text-dim); flex-shrink: 0; display: inline-block; }
+.lm-dot.lm-ok { background: var(--lm-good); animation: lm-pulse 2s ease-in-out infinite; }
+.lm-dot.lm-error { background: var(--lm-bad); }
+@keyframes lm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* ═══════════════════════════════════════════
+   CHIPS DE METADATA (estilo shields.io — label gris + valor verde-azulado,
+   con naranja como acento opcional). Para metadata fija de un proyecto
+   ("sitio | aq.lemeit.ar", "docs | wiki.lemeit.ar", "licencia | MIT"), no
+   para estado — para eso está .lm-badge de arriba. Pensado para encabezar
+   el README de cada repo y, portado acá, para usarse también en la propia
+   página (ej. footer o tarjeta "Acerca de").
+═══════════════════════════════════════════ */
+.lm-chip {
+  display: inline-flex;
+  align-items: stretch;
+  font-family: var(--lm-font-mono);
+  font-size: 11px;
+  border-radius: 4px;
+  overflow: hidden;
+  line-height: 1.9;
+}
+.lm-chip-label,
+.lm-chip-value {
+  padding: 2px 8px;
+  color: #fff;
+  white-space: nowrap;
+}
+.lm-chip-label { background: var(--lm-chip-label); }
+.lm-chip-value { background: var(--lm-chip-value); }
+.lm-chip.lm-chip-accent .lm-chip-value { background: var(--lm-chip-accent); }
+
+/* ═══════════════════════════════════════════
+   BOTONES / SELECTS
+═══════════════════════════════════════════ */
+.lm-select {
+  background: var(--lm-surface-2);
+  border: 1px solid var(--lm-border);
+  color: var(--lm-text);
+  font-family: var(--lm-font-mono);
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: var(--lm-radius-sm);
+  cursor: pointer;
+}
+.lm-btn {
+  background: var(--lm-accent);
+  color: #fff;
+  border: none;
+  font-family: var(--lm-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--lm-radius-sm);
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.lm-btn:hover { opacity: .88; }
+.lm-btn-ghost {
+  background: var(--lm-surface-2);
+  color: var(--lm-text);
+  border: 1px solid var(--lm-border);
+}
+
+/* ═══════════════════════════════════════════
+   ATRIBUCIÓN (logos de redes/programas asociados a un portal — OpenAQ,
+   PurpleAir, AirGradient, Municipalidad, etc.). Un solo set de clases
+   compartido entre el footer (LemeitCommon.renderFooter, ver
+   lemeit-common.js) y cualquier otro lugar de un portal que quiera mostrar
+   los mismos logos (ej. la pestaña "Acerca de" de aq.lemeit.ar).
+═══════════════════════════════════════════ */
+.lm-attrib-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.lm-attrib-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: var(--lm-radius-sm);
+  background: #ffffff;
+  line-height: 0;
+  transition: opacity .15s, transform .15s;
+}
+.lm-attrib-chip:hover { opacity: .85; transform: translateY(-1px); }
+.lm-attrib-chip img { display: block; height: 20px; width: auto; }
+/* Modificador para un logo que solo tenga versión blanca/transparente
+   (necesita fondo oscuro fijo para leerse) — no depende del tema del sitio. */
+.lm-attrib-chip-dark { background: #1a1a1a; }
+/* Variante chica, pensada para el footer */
+.lm-attrib-row-sm .lm-attrib-chip { padding: 5px 10px; }
+.lm-attrib-row-sm .lm-attrib-chip img { height: 15px; }
+/* Variante grande, pensada para paneles "Acerca de" — se diferencia tanto
+   del tamaño chico del footer como del tamaño por defecto (20px). */
+.lm-attrib-row-lg { gap: 14px; }
+.lm-attrib-row-lg .lm-attrib-chip { padding: 12px 20px; }
+.lm-attrib-row-lg .lm-attrib-chip img { height: 32px; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.lm-footer {
+  text-align: center;
+  padding: 32px 20px 28px;
+  color: var(--lm-text-dim);
+  font-family: var(--lm-font-mono);
+  font-size: 11px;
+  background: var(--lm-surface);
+  border-top: 1px solid var(--lm-border);
+  margin-top: 32px;
+}
+.lm-footer a { color: var(--lm-accent); text-decoration: none; }
+.lm-footer a:hover { text-decoration: underline; }
+.lm-footer-credit { line-height: 1.6; }
+.lm-footer-logos { margin-bottom: 16px; }
+.lm-footer-divider {
+  width: 32px;
+  height: 1px;
+  background: var(--lm-border);
+  margin: 16px auto;
+}
+.lm-footer-version {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--lm-surface-2);
+  border: 1px solid var(--lm-border);
+  font-size: 10px;
+  opacity: .85;
+}
