@@ -40,3 +40,21 @@ IAPWS-IF97, creación de diagrama vacío y habilitación de la biblioteca, agreg
 de una corriente y apertura explícita de un ejemplo mediante confirmación propia.
 El inicio no recupera automáticamente ni el ejemplo ni el último proyecto.
 El pie y los iconos claro/oscuro provienen del sitio TeX solicitado.
+
+## Publicación conectada y comprobada
+
+El usuario autorizó explícitamente el túnel y engine-sim.lemeit.ar. La conexión
+usa el secreto de servidor ya configurado, sin incorporarlo al código ni al navegador.
+Verificación pública: /api/catalog devolvió HTTP 200 con 1620 nombres válidos
+(se excluyó la entrada vacía del catálogo del motor) y 18 modelos.
+/api/simulate resolvió mezcla de agua y reactor de conversión, con residuo de masa
+cero en ambos casos. La mezcla dio 50.0213867577 °C y 2 kg/s.
+
+Se corrigió redirect:error, no admitido en Workers, por redirect:manual. No se siguen
+redirecciones, para no reenviar la credencial a otro destino. Las seis pruebas del
+Worker pasaron, incluida la opción de redirección y la ausencia de la clave de origen
+en las respuestas. No se modificaron las protecciones de la zona Cloudflare.
+El ajuste de conexión publicado se propone por rama/PR, sin fusionarlo automáticamente.
+
+Siguen pendientes las pruebas de carga de una clase y el siguiente bloque de equipos.
+La PC debe estar encendida para calcular; no se instaló inicio automático de Windows.
