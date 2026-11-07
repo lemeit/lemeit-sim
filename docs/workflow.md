@@ -138,3 +138,32 @@ materia. Se especifica la temperatura de salida y el motor calcula la potencia.
 Un intercambiador completo de dos fluidos, con cuatro puertos de materia, sigue
 pendiente; no debe confundirse con el calentador/enfriador de un solo lado.
 Referencia: https://dwsim.org/help/main/24-unit-operations.html
+
+## Corrientes y propiedades · 0.2.0
+
+Seleccionar una corriente abre Condiciones, Composición y Resultados. Solo las
+alimentaciones admiten datos de entrada. Las demás corrientes se calculan desde
+su equipo de origen. Los archivos anteriores conservan TP, kg/s y base másica.
+
+La especificación flash fija dos propiedades independientes: TP (temperatura y
+presión), PH (presión y entalpía), PS (presión y entropía), PV (presión y fracción
+molar de vapor) o TV (temperatura y fracción molar de vapor). Cada modelo tiene
+un dominio de aplicación; el motor puede rechazar estados sin solución. La
+referencia de entalpía/entropía depende del modelo. PS con IAPWS-IF97 se bloquea
+porque una prueba real devolvió un estado con entropía distinta de la pedida;
+PS se verificó con NRTL. No se sustituyen modelos automáticamente.
+
+Elegir una unidad convierte la presentación y mantiene el valor físico canónico
+del proyecto. Puede especificarse caudal másico o molar. Al elegir una base nueva
+de caudal debe completarse su valor. Las fracciones suman 1. Al cambiar de base
+de composición en mezclas se vacían: hay que ingresarlas en la nueva base. En
+base molar el servidor obtiene las masas molares de DWSIM y convierte a base
+másica para el conector, sin usar tablas aproximadas propias.
+
+Resultados muestra mezcla global y fases presentes, con composición másica y
+molar, entalpía, entropía y densidad. Líquido total agrega las fases líquidas y
+no debe sumarse otra vez a Líquido 1/2. El caudal volumétrico global se obtiene
+como caudal másico/densidad. El conector original devuelve cero para algunas
+propiedades ausentes: se omiten fases sin fracción y densidades no positivas.
+Las unidades de resultados pueden cambiarse sin recalcular. Cambiar datos físicos
+invalida resultados anteriores. No se implementan aquí dinámica ni fase forzada.

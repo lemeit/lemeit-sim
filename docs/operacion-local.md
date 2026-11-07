@@ -37,3 +37,9 @@ separado. No hay inicio automático de Windows configurado por estos scripts.
 
 ## Motor dentro del repositorio
 Ubicación predeterminada: .local/runtime (privada y excluida de Git). Desde la raíz del repositorio ejecutar ./start-online.ps1 o ./stop-online.ps1 sin parámetros. Para una ubicación distinta sigue disponible -EngineRoot. El modo local se inicia con ./start-local.ps1. Los registros quedan en .local/runtime.
+
+## Actualizar a 0.2.0
+Esta entrega cambia server.py además de la interfaz. Tras actualizar el código,
+reiniciar el servicio local para cargar el backend nuevo. Al publicar, detener
+y volver a iniciar el servicio online desde el repositorio; el motor binario y
+las claves no cambian. No hace falta iniciar MCP 5901.

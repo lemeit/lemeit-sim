@@ -198,3 +198,19 @@ El nuevo arranque busca servicios por EngineRoot/puerto para evitar duplicados y
 el apagado ya no depende únicamente de un PID registrado por la última copia.
 
 La autenticación queda como propuesta documentada: no se activó registro ni login.
+
+## Corrientes y propiedades 0.2.0
+
+- 30 pruebas JS aprobadas: editor, Worker, exportaciones, monitor y conversiones de unidades.
+- Validación Python: entradas activas según flash, bases, fracciones y bloqueo PS/IAPWS.
+- Integración real aislada: TP→PH y TP→PS (NRTL), equivalencia PV/TV a 25 % molar de vapor,
+  y mezcla Water/Ethanol con composición molar y caudal molar comparada con la base másica.
+- Regresión real de mezcla de agua, reactor de conversión, equilibrio químico y rechazo
+  de reacción sin balance de elementos.
+- Se detectó que IAPWS/PS devuelve 373.1243 K frente a 323.15 K de referencia con la misma
+  entropía solicitada. Se bloquea esa combinación y se verifica que PH/PS conserven
+  la propiedad especificada antes de aceptar resultados del motor.
+- Prueba de navegador en 5916: conversión 1 kg/s a 3600 kg/h, entrada PH de 209.4 kJ/kg,
+  resultado de alimentación 49.9969 °C y mezcla adiabática con corriente a 80 °C.
+  Proyecto recuperado desde almacenamiento local y recalculado.
+- El servidor de pruebas usa procesos DWSIM aislados; no requiere iniciar MCP 5901.

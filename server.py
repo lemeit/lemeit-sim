@@ -206,13 +206,22 @@ def validate_graph(graph, catalog):
             if kind == 'EnergyStream' and len(incoming) + len(outgoing) != 1:
                 raise InputError(f'{name}: conectá la corriente de energía a un solo equipo.')
             if kind == 'MaterialStream' and not incoming:
-                number(node.get('temperature_C'), name + ': temperatura (°C)', -273.14, 3000)
-                number(node.get('pressure_kPa'), name + ': presión (kPa)', .001, 1000000)
-                number(node.get('mass_flow'), name + ': caudal (kg/s)', .000001, 1000000)
+                spec = node.get('flash_spec', 'TP')
+                if spec not in ('TP', 'PH', 'PS', 'PV', 'TV'): raise InputError(f'{name}: especificación flash inválida.')
+                if spec in ('TP', 'TV'): number(node.get('temperature_C'), name + ': temperatura (°C)', -273.14, 3000)
+                if spec != 'TV': number(node.get('pressure_kPa'), name + ': presión (kPa)', .001, 1000000)
+                if spec == 'PH': number(node.get('enthalpy_kJ_kg'), name + ': entalpía (kJ/kg)', -1000000, 1000000)
+                if spec == 'PS' and graph['model'] == 'Steam Tables (IAPWS-IF97)': raise InputError(f'{name}: presión–entropía no está habilitada con IAPWS-IF97 por una discrepancia verificada en el motor. Usá TP o PH.')
+                if spec == 'PS': number(node.get('entropy_kJ_kgK'), name + ': entropía (kJ/(kg·K))', -10000, 10000)
+                if spec in ('PV', 'TV'): number(node.get('vapor_fraction'), name + ': fracción molar de vapor', 0, 1)
+                basis = node.get('flow_basis', 'mass')
+                if basis not in ('mass', 'molar'): raise InputError(f'{name}: base de caudal inválida.')
+                number(node.get('mass_flow' if basis == 'mass' else 'molar_flow'), name + ': caudal', .000001, 1000000)
+                if node.get('composition_basis', 'mass') not in ('mass', 'molar'): raise InputError(f'{name}: base de composición inválida.')
                 fractions = node.get('composition', {})
                 if not isinstance(fractions, dict) or set(fractions) != set(compounds): raise InputError(f'{name}: completá la composición.')
-                for value in fractions.values(): number(value, name + ': fracción másica', 0, 1)
-                if abs(sum(fractions.values()) - 1) > .000001: raise InputError(f'{name}: las fracciones másicas deben sumar 1.')
+                for value in fractions.values(): number(value, name + ': fracción', 0, 1)
+                if abs(sum(fractions.values()) - 1) > .000001: raise InputError(f'{name}: las fracciones deben sumar 1.')
         else:
             ins = [e for e in incoming if e.get('toPort', 'in') == 'in']
             outs = [e for e in outgoing if e.get('fromPort', 'out') == 'out']
@@ -245,6 +254,14 @@ def simulate(engine, graph):
     try:
         call('dwsim_thermo_add_compounds', names=graph['compounds'])
         call('dwsim_thermo_set_property_package', name=graph['model'])
+        molecular_weights = {}
+        if any(n.get('composition_basis') == 'molar' for n in graph['nodes']):
+            exported = call('dwsim_flowsheet_get_xml')
+            if exported.get('truncated'): raise InputError('No se pudieron leer las masas molares completas del motor.')
+            for compound in ET.fromstring(exported['xml']).findall('./Compounds/Compound'):
+                molecular_weights[compound.findtext('Name')] = float(compound.findtext('Molar_Weight', '0'))
+            if any(not math.isfinite(molecular_weights.get(c, 0)) or molecular_weights.get(c, 0) <= 0 for c in graph['compounds']):
+                raise InputError('DWSIM no informó una masa molar válida para todos los compuestos.')
         for node in graph['nodes']:
             if node['type'] in REACTORS:
                 kw = {'name': node['id'] + '-reaction', 'stoichiometry': {c:v for c,v in node['stoichiometry'].items() if v},
@@ -256,10 +273,23 @@ def simulate(engine, graph):
             kind = node['type']
             if kind == 'MaterialStream':
                 kw = {'name': node['name']}
+                spec = node.get('flash_spec', 'TP')
                 if not any(e['to'] == node['id'] for e in graph['edges']):
-                    kw.update(temperature_K=node['temperature_C'] + 273.15, pressure_Pa=node['pressure_kPa'] * 1000,
-                              mass_flow_kg_s=node['mass_flow'], composition=node['composition'])
+                    spec = node.get('flash_spec', 'TP')
+                    if spec in ('TP', 'TV'): kw['temperature_K'] = node['temperature_C'] + 273.15
+                    if spec != 'TV': kw['pressure_Pa'] = node['pressure_kPa'] * 1000
+                    if spec in ('PV', 'TV'): kw['vapor_fraction'] = node['vapor_fraction']
+                    if node.get('flow_basis', 'mass') == 'mass': kw['mass_flow_kg_s'] = node['mass_flow']
+                    else: kw['molar_flow_mol_s'] = node['molar_flow']
+                    fractions = node['composition']
+                    if node.get('composition_basis', 'mass') == 'molar':
+                        total = sum(v * molecular_weights[c] for c, v in fractions.items())
+                        fractions = {c: v * molecular_weights[c] / total for c, v in fractions.items()}
+                    kw['composition'] = fractions
                 call('dwsim_stream_add_material', **kw)
+                if not any(e['to'] == node['id'] for e in graph['edges']) and spec in ('PH', 'PS'):
+                    prop, key, mode = ('PROP_MS_7', 'enthalpy_kJ_kg', 'Pressure_and_Enthalpy') if spec == 'PH' else ('PROP_MS_8', 'entropy_kJ_kgK', 'Pressure_and_Entropy')
+                    call('dwsim_unitop_set', name=node['name'], properties={'SpecType': mode, prop: node[key]})
             elif kind == 'EnergyStream': call('dwsim_stream_add_energy', name=node['name'])
             else: call('dwsim_unitop_add', type=kind, name=node['name'])
         for edge in graph['edges']:
@@ -286,6 +316,15 @@ def simulate(engine, graph):
         for node in graph['nodes']:
             if node['type'] == 'MaterialStream': streams[node['id']] = call('dwsim_stream_get_results', name=node['name'])
             elif not node['type'].endswith('Stream'): equipment[node['id']] = call('dwsim_unitop_get_results', name=node['name'])
+        # Algunos paquetes pueden informar éxito sin respetar la especificación solicitada.
+        for node in graph['nodes']:
+            if node['type'] != 'MaterialStream' or any(e['to'] == node['id'] for e in graph['edges']): continue
+            spec = node.get('flash_spec', 'TP')
+            if spec in ('PH', 'PS'):
+                key = 'enthalpy_kJ_kg' if spec == 'PH' else 'entropy_kJ_kgK'
+                actual = streams[node['id']]['phases'][0][key]
+                if not math.isclose(actual, node[key], rel_tol=1e-4, abs_tol=1e-4):
+                    raise InputError(f"{node['name']}: el motor no conservó la especificación {spec}. Revisá el modelo y el estado solicitado.")
         def h(ident): return streams[ident]['phases'][0]['enthalpy_kJ_kg']
         reactor_heat = {}
         if any(n['type'] in REACTORS for n in graph['nodes']):
