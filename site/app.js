@@ -123,7 +123,7 @@ function renderDiagram(){
     }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${equipmentSymbol(n.type)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
     const readingX=g?g.label.x:t.w*scale/2,readingY=g?g.label.y+32:t.h*scale+52;
     if(r)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(r.temperature_K-273.15,2)} °C · ${fmt(r.mass_flow_kg_s)} kg/s</text>`;
-    else if(feed)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(n.temperature_C,1)} °C · ${fmt(n.mass_flow)} kg/s</text>`;
+    else if(feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass')html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(n.temperature_C,1)} °C · ${fmt(n.mass_flow)} kg/s</text>`;
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${isReactor(n)&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
@@ -142,6 +142,43 @@ function field(key,label,unit,value,options={}){
   return `<label class="field"><span class="field-label"><span>${esc(label)}</span><span>${esc(unit)}</span></span><input data-field="${key}" type="${options.text?'text':'number'}" value="${esc(value??'')}" ${options.text?'maxlength="45"':'step="any" '+(options.min!==undefined?`min="${options.min}"`:'')} required></label>`;
 }
 function selectField(key,label,values,value){return `<label class="field"><span class="field-label">${esc(label)}</span><select data-field="${key}">${values.map(([v,l])=>`<option value="${esc(v)}" ${v===value?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`;}
+const streamTabs=new Map();
+const streamLabels={temperature_C:'Temperatura',pressure_kPa:'Presión absoluta',mass_flow:'Caudal másico',molar_flow:'Caudal molar',enthalpy_kJ_kg:'Entalpía específica',entropy_kJ_kgK:'Entropía específica',vapor_fraction:'Fracción molar de vapor'};
+function streamField(n,key){const unit=SimproxStreams.unit(n,key),value=SimproxStreams.fromCanonical(key,n[key],unit);return `<label class="field stream-field"><span class="field-label">${streamLabels[key]}</span><span class="stream-value-unit"><input type="number" step="any" data-field="${key}" data-stream-value="true" aria-label="${streamLabels[key]}" value="${value===null?'':esc(Number(value.toPrecision(12)))}"><select data-field="unit:${key}" aria-label="Unidad de ${streamLabels[key]}">${Object.keys(SimproxStreams.units[key]).map(u=>`<option ${u===unit?'selected':''}>${esc(u)}</option>`).join('')}</select></span></label>`;}
+function streamReading(n,key,value){const unit=SimproxStreams.unit(n,key),converted=SimproxStreams.fromCanonical(key,value,unit);return `<div class="reading-row"><span>${streamLabels[key]}</span><b>${converted===null?'—':fmt(converted,5)} ${esc(unit)}</b></div>`;}
+function renderStreamInspector(n,r){
+  const tab=streamTabs.get(n.id)||'conditions',feed=isFeed(n);
+  let html=`<div class="stream-tabs" role="group" aria-label="Propiedades de la corriente">${[['conditions','Condiciones'],['composition','Composición'],['results','Resultados']].map(([key,label])=>`<button type="button" data-stream-tab="${key}" aria-pressed="${tab===key}">${label}</button>`).join('')}</div>`;
+  if(tab==='conditions'){
+    html+=`<p class="mini">Paquete de propiedades: <strong>${esc(graph.model)}</strong></p>`;
+    if(feed){html+='<p class="mini">Datos de entrada: dos propiedades independientes, un caudal y la composición. El motor calcula las demás propiedades.</p>';
+      html+=selectField('flash_spec','Especificación flash',[['TP','Temperatura y presión (TP)'],['PH','Presión y entalpía (PH)'],['PS','Presión y entropía (PS)'],['PV','Presión y fracción de vapor (PV)'],['TV','Temperatura y fracción de vapor (TV)']],n.flash_spec||'TP').replace('<option value="PS"',graph.model==='Steam Tables (IAPWS-IF97)'?'<option disabled value="PS"':'<option value="PS"');
+      if(graph.model==='Steam Tables (IAPWS-IF97)')html+='<p class="mini">PS no está habilitado con IAPWS-IF97: detectamos una discrepancia del motor en esa combinación.</p>';
+      for(const key of SimproxStreams.specs[n.flash_spec||'TP']||[])html+=streamField(n,key);
+      if(['PH','PS'].includes(n.flash_spec))html+='<p class="mini">Usá la referencia de entalpía/entropía del paquete seleccionado. Cambiar de modelo puede cambiar esa referencia.</p>';
+      html+=selectField('flow_basis','Base del caudal',[['mass','Másico'],['molar','Molar']],n.flow_basis||'mass')+streamField(n,(n.flow_basis||'mass')==='mass'?'mass_flow':'molar_flow');
+      if(['PV','TV'].includes(n.flash_spec))html+='<p class="mini">Fracción molar de vapor: 0 corresponde al punto de burbuja y 1 al punto de rocío, cuando el modelo y el estado permiten ese equilibrio.</p>';
+    }else html+='<p class="inspector-description">Corriente calculada por el equipo de origen. Sus condiciones se consultan en Resultados. Para especificarla como alimentación, desconectá su entrada.</p>';
+  }else if(tab==='composition'){
+    if(feed){html+=selectField('composition_basis','Base de las fracciones',[['mass','Másica · kg/kg'],['molar','Molar · mol/mol']],n.composition_basis||'mass')+'<p class="mini">Al cambiar de base en una mezcla se vacían las fracciones: ingresalas en la nueva base. No se reinterpretan los valores anteriores.</p>';
+      for(const c of graph.compounds)html+=field(`fraction:${c}`,c,n.composition_basis==='molar'?'mol/mol':'kg/kg',n.composition?.[c]??0,{min:0});
+      const sum=graph.compounds.reduce((total,c)=>total+(n.composition?.[c]||0),0);html+=`<p class="mini" role="status">Suma: ${fmt(sum,6)} / 1${Math.abs(sum-1)>1e-6?' · Completá la composición.':''}</p>`;
+    }else html+='<p class="mini">La composición de esta corriente la determina el cálculo. Consultá Resultados para ver las fracciones másicas y molares.</p>';
+  }else{
+    if(!r)return html+'<p class="mini">Sin resultados vigentes. Ejecutá Calcular para obtener las propiedades reales de DWSIM.</p>';
+    const mixture=r.phases?.find(p=>p.name==='Mixture')||r.phases?.[0];
+    html+='<details class="stream-phase"><summary>Unidades de los resultados</summary>'+Object.keys(streamLabels).filter(k=>k!=='vapor_fraction').map(k=>selectField('unit:'+k,streamLabels[k],Object.keys(SimproxStreams.units[k]).map(u=>[u,u]),SimproxStreams.unit(n,k))).join('')+'</details>';
+    html+='<p class="inspector-section">ESTADO GLOBAL · CALCULADO POR DWSIM</p><div class="inspector-readings">'+streamReading(n,'temperature_C',r.temperature_K-273.15)+streamReading(n,'pressure_kPa',r.pressure_Pa/1000)+streamReading(n,'mass_flow',r.mass_flow_kg_s)+streamReading(n,'molar_flow',r.molar_flow_mol_s)+streamReading(n,'vapor_fraction',r.phases?.find(p=>p.name==='Vapor')?.fraction??0)+streamReading(n,'enthalpy_kJ_kg',mixture?.enthalpy_kJ_kg)+streamReading(n,'entropy_kJ_kgK',mixture?.entropy_kJ_kgK)+`<div class="reading-row"><span>Densidad</span><b>${Number.isFinite(mixture?.density_kg_m3)&&mixture.density_kg_m3>0?fmt(mixture.density_kg_m3,5)+' kg/m³':'—'}</b></div>`+`<div class="reading-row"><span>Caudal volumétrico</span><b>${mixture?.density_kg_m3>0?fmt(r.mass_flow_kg_s/mixture.density_kg_m3,6)+' m³/s':'—'}</b></div></div>`;
+    html+='<p class="inspector-section">COMPOSICIÓN Y FASES</p><p class="mini">Fracción de fase en base molar. Líquido es el agregado de las fases líquidas: no se suma nuevamente a Líquido 1/2. Las fases ausentes se omiten. El conector puede devolver cero para propiedades no informadas.</p>';
+    const names={Mixture:'Mezcla global',Vapor:'Vapor',Liquid:'Líquido total',OverallLiquid:'Líquido total',Liquid1:'Líquido 1',Liquid2:'Líquido 2',Aqueous:'Acuosa',Solid:'Sólido'};
+    for(const phase of r.phases||[]){if(phase!==mixture&&!(phase.fraction>1e-10))continue;html+=`<details class="stream-phase" ${phase===mixture?'open':''}><summary>${esc(names[phase.name]||phase.name)} · ${fmt(phase.fraction,6)} mol/mol</summary>`;
+      if(phase!==mixture)html+=`<div class="inspector-readings">${streamReading(n,'enthalpy_kJ_kg',phase.enthalpy_kJ_kg)}${streamReading(n,'entropy_kJ_kgK',phase.entropy_kJ_kgK)}<div class="reading-row"><span>Densidad</span><b>${phase.density_kg_m3>0?fmt(phase.density_kg_m3,5)+' kg/m³':'—'}</b></div></div>`;
+      html+='<table class="stream-composition"><thead><tr><th>Compuesto</th><th>kg/kg</th><th>mol/mol</th></tr></thead><tbody>'+graph.compounds.map(c=>`<tr><th>${esc(c)}</th><td>${fmt(phase.compounds?.[c]?.mass_fraction,6)}</td><td>${fmt(phase.compounds?.[c]?.mole_fraction,6)}</td></tr>`).join('')+'</tbody></table></details>';
+    }
+  }
+  return html;
+}
+
 function renderInspector(){
   const container=$('inspector');
   if(selection?.edge!==undefined){
@@ -153,14 +190,7 @@ function renderInspector(){
   let html=`<p class="inspector-type">${esc(t.label.toUpperCase())}</p><h3 class="inspector-title">${esc(n.name)}</h3>${field('name','Nombre','',n.name,{text:true})}`;
   if(isStream(n)&&!(graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)))html+=selectField('orientation','Dirección del extremo libre',[['auto','Automática'],['right','→ Derecha'],['left','← Izquierda'],['up','↑ Arriba'],['down','↓ Abajo']],n.orientation||'auto');
   if(!isStream(n))html+=`<p class="inspector-section">DISEÑO</p><label class="field"><span class="field-label">Tamaño del símbolo · %</span><input data-field="scale" type="number" min="50" max="300" step="10" value="${Math.round(symbolScale(n)*100)}"></label><p class="mini">Tamaño gráfico; no modifica las dimensiones físicas del equipo.</p>`;
-  if(isFeed(n)){
-    html+='<p class="inspector-description">Condiciones de alimentación. La composición se expresa en fracciones másicas.</p>';
-    html+=field('temperature_C','Temperatura','°C',n.temperature_C,{min:-273.14})+field('pressure_kPa','Presión absoluta','kPa',n.pressure_kPa,{min:0.001})+field('mass_flow','Caudal másico','kg/s',n.mass_flow,{min:0.000001});
-    html+='<p class="inspector-section">COMPOSICIÓN MÁSICA</p>';
-    for(const c of graph.compounds)html+=field(`fraction:${c}`,c,'kg/kg',n.composition?.[c]??0,{min:0});
-    const sum=graph.compounds.reduce((s,c)=>s+(n.composition?.[c]||0),0);
-    html+=`<p class="mini">Suma: ${fmt(sum,6)} / 1${Math.abs(sum-1)>1e-6?' · Ajustá la composición antes de calcular.':''}</p>`;
-  }else if(n.type==='MaterialStream')html+='<p class="inspector-description">DWSIM calcula sus condiciones a partir del equipo de origen. Para convertirla en alimentación, quitá su conexión de entrada.</p>';
+  if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${field('outlet_C','Temperatura de salida','°C',n.outlet_C,{min:-273.14})}`;
   if(n.type==='Splitter')html+=`<p class="inspector-description">Dos salidas con la misma composición. La fracción restante sale por el puerto 2.</p>${field('split','Fracción hacia salida 1','kg/kg',n.split,{min:0.000001})}<p class="mini">Salida 2: ${fmt(1-n.split,4)}</p>`;
   if(n.type==='Mixer')html+='<p class="inspector-description">Mezcla adiabática, sin trabajo de eje. Admite hasta 3 entradas; la presión de salida es la menor de las entradas.</p><p class="mini">Σ ṁ<sub>e</sub> = ṁ<sub>s</sub><br>Σ (ṁ · h)<sub>e</sub> = (ṁ · h)<sub>s</sub></p>';
@@ -176,7 +206,7 @@ function renderInspector(){
     for(const c of graph.compounds)html+=field(`stoich:${c}`,c,'mol/mol',n.stoichiometry?.[c]??0);
   }
   if(n.type==='EnergyStream')html+='<p class="inspector-description">Representa calor transferido, sin caudal de materia. En los calentadores y enfriadores actuales se especifica la temperatura de salida: DWSIM calcula la potencia térmica, que se consulta en el balance del equipo. Las corrientes de energía también pueden representar trabajo en otros equipos.</p>';
-  if(r)html+=`<p class="inspector-section">RESULTADOS DE DWSIM</p><div class="inspector-readings"><div class="reading-row">Temperatura <b>${fmt(r.temperature_K-273.15)} °C</b></div><div class="reading-row">Presión <b>${fmt(r.pressure_Pa/1000)} kPa</b></div><div class="reading-row">Caudal <b>${fmt(r.mass_flow_kg_s)} kg/s</b></div></div>`;
+  if(r&&n.type!=='MaterialStream')html+=`<p class="inspector-section">RESULTADOS DE DWSIM</p><div class="inspector-readings"><div class="reading-row">Temperatura <b>${fmt(r.temperature_K-273.15)} °C</b></div><div class="reading-row">Presión <b>${fmt(r.pressure_Pa/1000)} kPa</b></div><div class="reading-row">Caudal <b>${fmt(r.mass_flow_kg_s)} kg/s</b></div></div>`;
   html+='<button class="delete-button" id="delete-selected">Eliminar objeto y sus conexiones</button>';container.innerHTML=html;
 }
 function addNode(type,pos){
@@ -284,7 +314,7 @@ function loadGraph(data){
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
   const ids=new Set();
-  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
+  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const [key,allowed] of Object.entries({flash_spec:['TP','PH','PS','PV','TV'],flow_basis:['mass','molar'],composition_basis:['mass','molar']}))if(n[key]!==undefined&&!allowed.includes(n[key]))throw new Error('Especificación de corriente inválida.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
   graph=structuredClone(data);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
@@ -361,10 +391,11 @@ function bindEvents(){
   });
   document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||e.target.closest('dialog'))return;if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;renderDiagram();}if(e.key==='Delete'){e.preventDefault();removeSelected();}});
   $('canvas-wrap').addEventListener('dragover',e=>{if(paletteDragType)e.preventDefault();});$('canvas-wrap').addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('application/x-lemeit-object');if(!paletteDragType||type!==paletteDragType||!Object.hasOwn(TYPES,type))return;paletteDragType=null;suppressPaletteUntil=performance.now()+500;const p=svgPoint(e);addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});});
-  $('inspector').addEventListener('click',e=>{if(e.target.closest('#delete-selected'))removeSelected();});
+  $('inspector').addEventListener('click',e=>{const tab=e.target.closest('[data-stream-tab]');if(tab){streamTabs.set(selection.node,tab.dataset.streamTab);renderInspector();return;}if(e.target.closest('#delete-selected'))removeSelected();});
   $('inspector').addEventListener('input',e=>{
     if(busy)return;const key=e.target.dataset.field,n=nodeById(selection?.node);
     if(!key||!n||e.target.value===''||e.target.tagName==='SELECT')return;
+    if(e.target.dataset.streamValue){const value=Number(e.target.value);if(Number.isFinite(value)){n[key]=SimproxStreams.toCanonical(key,value,SimproxStreams.unit(n,key));changed();}return;}
     if(key==='orientation'){orientStream(n,e.target.value);changed({physical:false});renderInspector();return;}
     if(key==='scale'){const value=Number(e.target.value);if(Number.isFinite(value)&&value>=50&&value<=300){n.scale=value/100;changed({physical:false});}return;}
     if(key==='name'){const value=e.target.value.trim();if(value&&!graph.nodes.some(other=>other!==n&&other.name===value)){n.name=value;changed({physical:false});if(result)renderResults();}return;}
@@ -374,6 +405,9 @@ function bindEvents(){
   });
   $('inspector').addEventListener('change',e=>{
     if(busy)return;const key=e.target.dataset.field,n=nodeById(selection?.node);if(!key||!n)return;
+    if(e.target.dataset.streamValue){const value=Number(e.target.value);if(e.target.value===''||!Number.isFinite(value))delete n[key];else n[key]=SimproxStreams.toCanonical(key,value,SimproxStreams.unit(n,key));changed();renderInspector();return;}
+    if(key.startsWith('unit:')){n.units??={};n.units[key.slice(5)]=e.target.value;changed({physical:false});renderInspector();return;}
+    if(['flash_spec','flow_basis','composition_basis'].includes(key)){const old=n[key]||(key==='flash_spec'?'TP':'mass');n[key]=e.target.value;if(key==='composition_basis'&&old!==n[key]){n.composition=Object.fromEntries(graph.compounds.map(c=>[c,graph.compounds.length===1?1:0]));notice('Cambiaste la base de composición. Ingresá las fracciones en la nueva base antes de calcular.');}changed();renderInspector();return;}
     if(key==='orientation'){orientStream(n,e.target.value);changed({physical:false});renderInspector();return;}
     if(key==='scale'){const value=Number(e.target.value);if(Number.isFinite(value)&&value>=50&&value<=300){n.scale=value/100;changed({physical:false});}else notice('El tamaño gráfico debe estar entre 50 y 300 %.',true);renderInspector();return;}
     if(['base_compound','phase','reactor-type'].includes(key)){if(key==='reactor-type')n.type=e.target.value;else n[key]=e.target.value;changed();renderInspector();return;}
@@ -509,7 +543,7 @@ function reviewGraph(){
   if(!graph.nodes.length)issues.push('El diagrama está vacío.');
   if(!graph.model)issues.push('Elegí un modelo de propiedades en Simulación.');
   for(const n of graph.nodes){
-    if(isFeed(n)){const sum=Object.values(n.composition||{}).reduce((a,b)=>a+Number(b),0);if(!Number.isFinite(sum)||Math.abs(sum-1)>1e-6)issues.push(`${n.name}: las fracciones másicas deben sumar 1.`);if(!(n.mass_flow>0))issues.push(`${n.name}: completá el caudal másico positivo.`);if(!(n.pressure_kPa>0))issues.push(`${n.name}: la presión absoluta debe ser positiva.`);}
+    if(isFeed(n)){issues.push(...SimproxStreams.issues(n,graph.compounds).map(issue=>`${n.name}: ${issue}`));if(n.flash_spec==='PS'&&graph.model==='Steam Tables (IAPWS-IF97)')issues.push(`${n.name}: PS no está habilitado con IAPWS-IF97; usá TP o PH.`);}
     if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if((n.type==='Splitter'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
   }
   return [...new Set(issues)];

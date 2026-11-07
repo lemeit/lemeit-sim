@@ -6,6 +6,18 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.2.0 — 2026-11-07
+
+- Inspector de corrientes con Condiciones, Composición y Resultados.
+- TP, PH, PS, PV y TV; solo se envían las propiedades independientes activas.
+- Unidades de temperatura, presión, caudal, entalpía, entropía y fracción de vapor.
+- Caudal másico o molar, composición másica o molar. Las masas molares provienen del XML de DWSIM.
+- Resultados globales y por fase: entalpía, entropía, densidad y fracciones másicas/molares.
+- Caudal volumétrico global derivado de caudal másico/densidad calculados por DWSIM.
+- Compatibilidad de proyectos anteriores: TP, kg/s y composición másica por defecto.
+- PS/IAPWS-IF97 bloqueado: prueba de ida y vuelta detectó falta de conservación de la entropía solicitada. PS validado con NRTL.
+- Cambiar la base de composición vacía los valores de mezclas para evitar reinterpretarlos sin conversión.
+
 ## 0.1.1 — 2026-11-07
 
 - Ventanas minimalistas con identidad SIMPROX, sin control circular tipo Mac.
