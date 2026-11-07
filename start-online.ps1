@@ -10,7 +10,7 @@ $existing = $null
 if (Test-Path -LiteralPath $pidFile) {
     $previousId = [int](Get-Content -LiteralPath $pidFile -Raw)
     $candidate = Get-CimInstance Win32_Process -Filter "ProcessId = $previousId"
-    if ($candidate -and $candidate.CommandLine.Contains($serverPath) -and $candidate.CommandLine.Contains('5911')) { $existing = $candidate }
+    if ($candidate -and $candidate.CommandLine.Replace('/','\').Contains($serverPath) -and $candidate.CommandLine.Contains('5911')) { $existing = $candidate }
 }
 if (!$existing) {
     $gateway = Start-Process python -ArgumentList @(('"'+$serverPath+'"'),'--engine-root',('"'+$runtime+'"'),'--port','5911','--public-origin','https://sim.lemeit.ar','--origin-key-file',('"'+(Join-Path $runtime 'origin-key.txt')+'"')) -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtime 'public-gateway.stdout.log') -RedirectStandardError (Join-Path $runtime 'public-gateway.stderr.log') -PassThru

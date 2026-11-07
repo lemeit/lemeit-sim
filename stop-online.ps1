@@ -8,7 +8,7 @@ foreach ($name in @('public-gateway','tunnel')) {
     $ownedId = [int](Get-Content -LiteralPath $pidFile -Raw)
     $candidate = Get-CimInstance Win32_Process -Filter "ProcessId = $ownedId"
     if (!$candidate) { continue }
-    $matches = if ($name -eq 'tunnel') { $candidate.ExecutablePath -eq (Join-Path $runtime 'cloudflared.exe') } else { $candidate.CommandLine.Contains($serverPath) -and $candidate.CommandLine.Contains('5911') }
+    $matches = if ($name -eq 'tunnel') { $candidate.ExecutablePath -eq (Join-Path $runtime 'cloudflared.exe') } else { $candidate.CommandLine.Replace('/','\').Contains($serverPath) -and $candidate.CommandLine.Contains('5911') }
     if (!$matches) { throw "El PID de $name corresponde a otro programa; no se detuvo." }
     Stop-Process -Id $ownedId
 }
