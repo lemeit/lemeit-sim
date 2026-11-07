@@ -1,20 +1,19 @@
-# SIMPROX
+# ΣIM
 
 Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
-Marca: SIMPROX · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
-Sitio: https://sim.lemeit.ar · Identidad propia SIMPROX, inspirada en tecnología retro: negro, blanco y rojo.
+Marca: ΣIM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
+Sitio: https://sim.lemeit.ar · Identidad propia ΣIM, inspirada en tecnología retro: negro, blanco y rojo.
 
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
 
-**0.2.2 — Monitor de conexión y cálculos**, en desarrollo.
-La versión pública comprobada es **0.2.1**, publicada mediante Workers Builds.
-El monitor distingue consultas de disponibilidad y ejecuciones del cálculo;
-registra inicio, finalización o error, HTTP y duración de cada solicitud.
-Las consultas de catálogo no cambian el estado del último cálculo.
-Ver [despliegue automático](docs/despliegue-automatico.md).
+**0.3.0 — Identidad ΣIM y edición directa de corrientes**, en desarrollo.
+Σ griega mayúscula seguida de I y M latinas. Bajada: Simulación de procesos.
+Logo independiente SVG con letras trazadas, basado en la opción 02 Retro técnico.
+La versión 0.2.2 es la base fusionada en main; esta entrega espera su propio PR.
+Ver [identidad visual y archivos del logo](docs/brand-sim.md).
 La versión del portal es independiente del motor DWSIM 10.2.15.
 Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 
@@ -65,7 +64,7 @@ reactor se lee de DeltaQ del motor e incluye el calor de reacción.
 ### Edición, resultados y operación
 
 - Corrientes con extremos reconectables y recorrido ortogonal ajustable; orientación
-  horizontal/vertical y símbolos de equipos con tamaño gráfico ajustable.
+  automática al arrastrar extremos, codos movibles en ambos ejes y símbolos de equipos con tamaño gráfico ajustable.
 - Paneles laterales y balances ajustables; diagrama y resultados separables en ventanas
   sincronizadas del mismo navegador. Mantener abierta la ventana principal.
 - Balances de materia y energía, exportación CSV y Excel, diagnóstico con mensaje

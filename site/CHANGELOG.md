@@ -1,10 +1,19 @@
-# Historial de versiones de SIMPROX
+# Historial de versiones de ΣIM (antes SIMPROX)
 
 La numeración del portal comienza en 0.1.0; las entregas anteriores no tenían versión explícita.
 Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.0;
 1.0.0 quedará reservada para la primera versión estable para alumnos.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
+
+## 0.3.0 — 2026-11-07
+
+- SIMPROX pasa a llamarse ΣIM · Simulación de procesos. Dominio y repositorio sin cambios.
+- Logo vectorial independiente según la opción 02 Retro técnico: Σ roja, IM blanco cálido, letras y bajada convertidas en curvas. Favicon sigma.
+- Paleta carbón #101215, blanco cálido #F4F3EE y rojo #CF263B.
+- Se elimina Dirección del extremo libre del inspector. La dirección sigue la posición de los extremos arrastrados; los puertos conectados conservan su normal.
+- El control del codo admite arrastre horizontal o vertical. Mover un extremo reinicia el recorrido manual anterior y elimina la orientación heredada.
+- La vista previa de desconexión orienta el extremo libre durante el arrastre, no recién al soltarlo.
 
 ## 0.2.2 — 2026-11-07
 
