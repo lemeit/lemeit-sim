@@ -138,3 +138,28 @@ claro/oscuro, acceso a las herramientas y vista separada con biblioteca. Menú m
 comprobado dentro del ancho de la ventana tras corregir la posición de Simulación.
 No se cambió el motor. Las 17 pruebas existentes y sintaxis JavaScript pasaron.
 El build queda preparado, sin publicación ni fusión automáticas.
+
+## Menús, diagnóstico y resultados
+
+Pasaron 20 pruebas (11 editor, 6 Worker, 3 exportación). XLSX contrastado con zipfile
+(CRC) y XML parser: dos hojas de prueba, valores originales y ausencia de fórmulas.
+Con un cálculo DWSIM real en la vista local 5915 se descargaron un XLSX con cuatro
+hojas y un CSV con tres corrientes: Agua mezclada 2 kg/s, 50.021386757683786 °C.
+La descarga mediante la herramienta del navegador tuvo una demora importante;
+los archivos se verificaron en disco. No se atribuye esa demora al generador.
+
+Estado: API disponible, 1620 compuestos y 18 modelos; latencia medida en esa consulta
+15 ms. No es una métrica de rendimiento general. Se provocó caudal cero y se verificó
+el error original, revisión específica y sugerencias. HTTP 400 fue esperado en esa
+prueba, sin conservar resultados anteriores como vigentes.
+
+Se redimensionó el panel de 160 a 180 px con teclado, se ocultó y recuperó desde Ver,
+y se abrió la vista separada con los mismos resultados reales. Cambiar seis menús
+con mouse dejó exactamente uno abierto en cada caso; navegación con flecha derecha
+pasó Archivo → Simulación. Se corrigió la interacción entre hover y clic detectada
+durante esa prueba. Configuración y exportaciones no modifican ecuaciones del motor.
+
+Publicación y fusión quedan pendientes de aprobación del usuario.
+
+También se verificó altura por arrastre de 200 a 245 px y configuración de tablas
+a dos decimales (50,02 °C), restaurando luego tres decimales.

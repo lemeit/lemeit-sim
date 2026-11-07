@@ -110,3 +110,10 @@ Integración y símbolos DWSIM: GPL-3.0-or-later; ver LICENSE y
 El pie de dos colores y el control de tema se adaptaron del sitio tex.lemeit.ar.
 No se incorporan componentes exclusivos de Patreon. Esta integración no es una
 edición oficial de DWSIM.
+
+## Herramientas de trabajo
+
+Menús con navegación por teclado, configuración de presentación, comprobación manual
+de conexión y diagnóstico del último cálculo. Resultados redimensionables, ocultables
+y separables en otra vista sincronizada. Exportación local CSV y Excel .xlsx de
+resultados vigentes. Ver [guía de trabajo](docs/workflow.md).
