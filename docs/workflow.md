@@ -34,3 +34,13 @@ Alt + arrastrar, o arrastrar con el botón central, desplaza el lienzo.
 En pantallas de más de 760 px, arrastrar el borde interior de los paneles laterales
 cambia su ancho. También se puede enfocar el separador con Tab y usar las flechas;
 un doble clic restaura el ancho original.
+
+## Conectar corrientes mediante sus extremos
+
+Seleccioná la corriente para mostrar sus dos extremos. Arrastrá la punta a la entrada
+de un equipo, o su inicio a la salida de un equipo. Los puertos aparecen al pasar
+sobre el símbolo. Soltar en un espacio libre deja ese extremo desconectado.
+Se rechazan puertos ocupados, materia/energía incompatibles y sentidos incorrectos.
+Los clics de salida a entrada siguen disponibles como alternativa de teclado.
+La corriente completa es una única línea seleccionable; no hay una flecha separada
+para cada conexión. Los proyectos guardados antes de este cambio se conservan.

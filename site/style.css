@@ -922,3 +922,18 @@ footer.site-footer{font-family:var(--lm-font-mono)}.footer-wordmark{font-family:
 @media(min-width:1101px){.sim-shell .workspace{grid-template-columns:var(--equipment-width,186px) minmax(0,1fr) var(--inspector-width,265px)}}
 @media(min-width:761px) and (max-width:1100px){.sim-shell .workspace{grid-template-columns:minmax(140px,min(var(--equipment-width,145px),30vw)) minmax(120px,1fr) minmax(210px,min(var(--inspector-width,220px),35vw))}}
 @media(max-width:760px){.panel-resizer{display:none}}
+
+/* Símbolos genéricos de proceso y una única línea por corriente. */
+.node .stream-hit{fill:none;stroke:transparent;stroke-width:18;pointer-events:stroke}
+.node .stream-line{pointer-events:none;stroke:var(--lm-text);stroke-width:1.8}
+.node .stream-line.energy{stroke:var(--lm-good)}
+.node.selected .stream-line{stroke:var(--lm-accent);stroke-width:2.5}
+.node .equipment-symbol{fill:var(--lm-surface);stroke:var(--lm-text);stroke-width:1.8;stroke-linejoin:round}
+.node.selected .equipment-symbol{stroke:var(--lm-accent);stroke-width:2.5}
+.node .equipment-symbol .symbol-sign{fill:var(--lm-text);stroke:none;font-size:16px}
+.node.stream-node .stream-label{pointer-events:all;cursor:move;paint-order:stroke;stroke:var(--lm-surface);stroke-width:5px;stroke-linejoin:round}
+.stream-node [data-port]{cursor:crosshair}
+.node:not(.selected):not(:hover) .port{opacity:0}
+.node:not(.selected):not(:hover) .port.pending{opacity:1}
+
+.palette-symbol{width:26px;height:26px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:5;stroke-linejoin:round}.palette-symbol .symbol-sign{fill:currentColor;stroke:none}

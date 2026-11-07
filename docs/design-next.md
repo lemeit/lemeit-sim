@@ -1,8 +1,7 @@
-# Próxima iteración: diagramas de proceso más simples
+# Diagramas de proceso: dirección visual y alcance
 
 Referencia visual aportada por Luciano: diagrama PFD con columnas, intercambiadores,
-válvulas, equipos auxiliares y corrientes de materia. Es una orientación para una
-próxima iteración; no cambia el alcance de cálculo ni se presenta como un caso simulado.
+válvulas, equipos auxiliares y corrientes de materia. Orienta la representación gráfica; no cambia el alcance de cálculo ni se presenta como un caso simulado.
 La imagen permanece como referencia local y no se redistribuye en este repositorio.
 
 ## Dirección acordada
@@ -21,3 +20,28 @@ La imagen permanece como referencia local y no se redistribuye en este repositor
 
 La próxima prioridad funcional sigue siendo bombas, válvulas, intercambiadores y
 separadores. No agregar complejidad gráfica antes de verificar sus modelos y puertos.
+
+## Implementado el 7 de noviembre de 2026
+
+Los objetos disponibles se dibujan como símbolos SVG propios y genéricos: mezclador
+convergente, divisor divergente, unidad térmica circular y recipiente reactor. Los
+modelos de conversión y equilibrio comparten el recipiente; se distinguen por nombre
+y propiedades. No se asigna una geometría física o un mecanismo de reacción que el
+modelo no especifica. La biblioteca usa los mismos símbolos que el lienzo.
+
+Cada corriente se representa por un único recorrido ortogonal y una flecha final.
+Sus extremos libres o conectados son parte de la corriente, no objetos adicionales.
+Arrastrar un extremo a un puerto compatible crea o reemplaza esa conexión; soltarlo
+en un espacio libre la desconecta. Un puerto ocupado o incompatible conserva la
+conexión anterior. Las corrientes siguen a los equipos al moverlos.
+
+Referencias:
+- [Diagrama AmineTreating de Wikimedia Commons](https://commons.wikimedia.org/wiki/File:AmineTreating.png),
+  aportado por el usuario como referencia visual. No se incorpora ni calca su imagen.
+- [ISO 10628-2:2012](https://www.iso.org/standard/51841.html), referencia para símbolos
+  de diagramas de las industrias química y petroquímica y su relación con ISO 14617.
+  Esta implementación usa símbolos genéricos propios: no se afirma conformidad
+  completa con la norma ni se reproduce su catálogo de pago.
+
+Pendiente: ajuste manual de tramos/codos, prevención de solapamientos y símbolos de
+los próximos equipos cuando sus modelos de cálculo estén implementados.

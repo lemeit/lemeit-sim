@@ -71,3 +71,16 @@ en esa sesión. El gesto físico de pinza y el desplazamiento con Alt quedan pen
 de comprobación manual. node --check site/app.js y las seis pruebas del Worker pasaron.
 Se conserva CSP script-src self y se agrega no-transform para evitar inyección
 automática de analíticas. La consola administrativa solo se planifica en la hoja de ruta.
+
+## Corrientes integradas y símbolos PFD: 7 de noviembre de 2026
+
+Cinco pruebas del editor verifican seguimiento al mover equipos, extremo libre,
+reconexión, rechazo de puerto ocupado/sentido incorrecto y conexión del inicio de
+una corriente. Pasaron junto a las seis pruebas del Worker y el build.
+
+Comprobación en sim.lemeit.ar: el ejemplo tiene tres paths de corriente, cero
+paths adicionales de conexión y cero rectángulos de tarjeta. Se reconectó Agua fría
+desde Entrada 1 a Entrada 3 del mezclador arrastrando el extremo con el mouse.
+La web confirmó Corriente conectada y DWSIM resolvió nuevamente el caso en 6 s.
+Se corrigió durante la prueba el orden de dibujo que tapaba los extremos con los
+puertos del equipo. El backend y sus ecuaciones no se modificaron.

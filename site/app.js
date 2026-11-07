@@ -12,7 +12,7 @@ const TYPES = {
   EquilibriumReactor: {label:'Reactor de equilibrio',short:'Equilibrio',icon:'reactor_equilibrium',prefix:'R',w:130,h:110},
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
-let viewX=0, viewY=0, panning=null;
+let viewX=0, viewY=0, panning=null, endpointDrag=null;
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 const emptyProject=()=>({version:1,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
@@ -48,40 +48,54 @@ function isFeed(n){return n.type==='MaterialStream'&&!graph.edges.some(e=>e.to==
 function portList(n){
   const {w,h}=TYPES[n.type], list=[];
   if(isStream(n)){
-    const medium=n.type==='EnergyStream'?'energy':'material';
-    return [{side:'in',index:0,x:0,y:h/2,medium},{side:'out',index:0,x:w,y:h/2,medium}];
+    const medium=n.type==='EnergyStream'?'energy':'material',g=streamGeometry(n);
+    return [{side:'in',index:0,x:g.a.x-n.x,y:g.a.y-n.y,medium},{side:'out',index:0,x:g.b.x-n.x,y:g.b.y-n.y,medium}];
   }
-  const ins=n.type==='Mixer'?3:1, outs=n.type==='Splitter'||isReactor(n)?2:1;
-  for(let i=0;i<ins;i++)list.push({side:'in',index:i,x:0,y:h*(i+1)/(ins+1),medium:'material'});
-  for(let i=0;i<outs;i++)list.push({side:'out',index:i,x:w,y:h*(i+1)/(outs+1),medium:'material'});
-  if(n.type==='Heater')list.push({side:'energy-in',index:0,x:w/2,y:h,medium:'energy'});
-  if(n.type==='Cooler')list.push({side:'energy-out',index:0,x:w/2,y:h,medium:'energy'});
+  if(n.type==='Mixer')return [{side:'in',index:0,x:0,y:25,medium:'material'},{side:'in',index:1,x:0,y:75,medium:'material'},{side:'in',index:2,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'}];
+  if(n.type==='Splitter')return [{side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:25,medium:'material'},{side:'out',index:1,x:120,y:75,medium:'material'}];
+  if(isReactor(n))return [{side:'in',index:0,x:0,y:55,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
+  list.push({side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'});
+  if(n.type==='Heater')list.push({side:'energy-in',index:0,x:60,y:100,medium:'energy'});
+  if(n.type==='Cooler')list.push({side:'energy-out',index:0,x:60,y:100,medium:'energy'});
   return list;
 }
 function point(n,side,index=0){const p=portList(n).find(p=>p.side===side&&p.index===index);return p?{x:n.x+p.x,y:n.y+p.y,medium:p.medium}:null;}
+function streamGeometry(n){
+  const source=graph.edges.find(e=>e.to===n.id),target=graph.edges.find(e=>e.from===n.id);
+  const a=source?point(nodeById(source.from),source.fromPort||'out',source.fromIndex||0):{x:n.startX??n.x,y:n.startY??(n.y+TYPES[n.type].h/2)};
+  const b=target?point(nodeById(target.to),target.toPort||'in',target.toIndex||0):{x:n.endX??(n.x+TYPES[n.type].w),y:n.endY??(n.y+TYPES[n.type].h/2)};
+  const g={a:{...a},b:{...b}};
+  if(endpointDrag?.node===n.id&&endpointDrag.moved)g[endpointDrag.side==='in'?'a':'b']={...endpointDrag.preview};
+  const mid=(g.a.x+g.b.x)/2;
+  g.d=`M${g.a.x} ${g.a.y} H${mid} V${g.b.y} H${g.b.x}`;
+  g.label={x:mid,y:(g.a.y+g.b.y)/2-15};return g;
+}
+function equipmentSymbol(type){
+  if(type==='Mixer')return '<path d="M20 25 L100 50 L20 75 Z M0 25 H20 M0 75 H20 M0 50 H20 M100 50 H120"/>';
+  if(type==='Splitter')return '<path d="M20 50 L100 25 V75 Z M0 50 H20 M100 25 H120 M100 75 H120"/>';
+  if(type==='Heater'||type==='Cooler')return `<circle cx="60" cy="50" r="35"/><path d="M0 50 H25 M95 50 H120 M35 50 L45 35 L55 65 L65 35 L75 65 L85 50 M60 85 V100"/><text class="symbol-sign" x="60" y="21" text-anchor="middle">${type==='Heater'?'+':'−'}</text>`;
+  return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
+}
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" draggable="true" title="Agregar ${esc(t.label.toLowerCase())}"><img src="assets/dwsim/${t.icon}.png" alt=""><span>${t.label}</span><span class="add-sign">+</span></button>`).join('');
+  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" draggable="true" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span><span class="add-sign">+</span></button>`).join('');
   $('palette').addEventListener('click',e=>{const b=e.target.closest('[data-type]');if(b)addNode(b.dataset.type);});
   $('palette').addEventListener('dragstart',e=>{const b=e.target.closest('[data-type]');if(b)e.dataTransfer.setData('text/plain',b.dataset.type);});
 }
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  let html='<defs><marker id="arrow-material" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--lm-accent)"/></marker><marker id="arrow-energy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--lm-good)"/></marker></defs>';
-  graph.edges.forEach((edge,i)=>{
-    const a=nodeById(edge.from),b=nodeById(edge.to);if(!a||!b)return;
-    const p=point(a,edge.fromPort||'out',edge.fromIndex||0),q=point(b,edge.toPort||'in',edge.toIndex||0);if(!p||!q)return;
-    const mid=(p.x+q.x)/2,d=p.medium==='energy'?`M${p.x},${p.y} V${Math.max(p.y,q.y)+38} H${q.x} V${q.y}`:`M${p.x},${p.y} H${mid} V${q.y} H${q.x}`;
-    html+=`<g class="edge ${selection?.edge===i?'selected':''}" data-edge="${i}" tabindex="0" role="button" aria-label="Conexión de ${esc(a.name)} a ${esc(b.name)}"><path class="edge-hit" d="${d}"/><path class="edge-line ${p.medium==='energy'?'energy':''}" d="${d}" marker-end="url(#arrow-${p.medium})"/></g>`;
-  });
-  graph.nodes.forEach(n=>{
+  let html='<defs><marker id="arrow-material" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--lm-text)"/></marker><marker id="arrow-energy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--lm-good)"/></marker></defs>';
+  [...graph.nodes].sort((a,b)=>Number(isStream(a))-Number(isStream(b))).forEach(n=>{
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n);
-    html+=`<g transform="translate(${n.x} ${n.y})" class="node ${isStream(n)?'stream-node':''} ${selection?.node===n.id?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
-    if(isStream(n)){
-      html+=`<rect class="stream-hit" width="${t.w}" height="${t.h}"/><path class="stream-line ${n.type==='EnergyStream'?'energy':''}" d="M0 ${t.h/2} H${t.w}" marker-end="url(#arrow-${n.type==='EnergyStream'?'energy':'material'})"/><text text-anchor="middle" x="${t.w/2}" y="${t.h/2-13}">${esc(n.name.length>20?n.name.slice(0,19)+'…':n.name)}</text>`;
-    }else html+=`<rect class="body" width="${t.w}" height="${t.h}" rx="8"/><image href="assets/dwsim/${t.icon}.png" x="40" y="13" width="40" height="40"/><text text-anchor="middle" x="60" y="72">${esc(n.name.length>17?n.name.slice(0,16)+'…':n.name)}</text><text text-anchor="middle" class="node-kind" x="60" y="87">${esc(t.short.toUpperCase())}</text>`;
-    if(r)html+=`<text class="node-reading" x="${t.w/2}" y="${t.h+19}" text-anchor="middle">${fmt(r.temperature_K-273.15,2)} °C · ${fmt(r.mass_flow_kg_s)} kg/s</text>`;
-    else if(feed)html+=`<text class="node-reading" x="${t.w/2}" y="${t.h+19}" text-anchor="middle">${fmt(n.temperature_C,1)} °C · ${fmt(n.mass_flow)} kg/s</text>`;
-    for(const p of portList(n)){
+    const g=isStream(n)?streamGeometry(n):null;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node ${isStream(n)?'stream-node':'equipment-node'} ${selection?.node===n.id?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
+    if(g){
+      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line ${n.type==='EnergyStream'?'energy':''}" d="${g.d}" marker-end="url(#arrow-${n.type==='EnergyStream'?'energy':'material'})"/><text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
+    }else html+=`<g class="equipment-symbol">${equipmentSymbol(n.type)}</g><text text-anchor="middle" x="${t.w/2}" y="${t.h+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${t.w/2}" y="${t.h+35}">${esc(t.short.toUpperCase())}</text>`;
+    const readingX=g?g.label.x:t.w/2,readingY=g?g.label.y+32:t.h+52;
+    if(r)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(r.temperature_K-273.15,2)} °C · ${fmt(r.mass_flow_kg_s)} kg/s</text>`;
+    else if(feed)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(n.temperature_C,1)} °C · ${fmt(n.mass_flow)} kg/s</text>`;
+    for(const raw of portList(n)){
+      const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${isReactor(n)&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
       html+=`<g data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
@@ -89,7 +103,7 @@ function renderDiagram(){
   });
   svg.innerHTML=html;$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
-  $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Seleccioná un equipo o una corriente para editar sus propiedades.';
+  $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
   updateControls();
 }
@@ -153,6 +167,29 @@ function connect(owner,side,index){
   if(graph.edges.some(e=>(e.from===a.id&&(e.fromPort||'out')===pending.side&&(e.fromIndex||0)===pending.index)||(e.to===owner&&(e.toPort||'in')===side&&(e.toIndex||0)===index)))return notice('Ese puerto ya tiene una conexión. Seleccioná la línea para eliminarla.',true);
   graph.edges.push({from:a.id,to:owner,fromPort:pending.side,fromIndex:pending.index,toPort:side,toIndex:index});pending=null;changed();renderInspector();notice('');
 }
+function finishEndpointDrag(drag){
+  const n=nodeById(drag.node),medium=n.type==='EnergyStream'?'energy':'material',out=drag.side==='out';
+  let nearest=null,distance=Infinity;
+  for(const unit of graph.nodes.filter(n=>!isStream(n)))for(const p of portList(unit)){
+    const q={x:unit.x+p.x,y:unit.y+p.y},d=Math.hypot(q.x-drag.preview.x,q.y-drag.preview.y);
+    if(d<distance){nearest={unit,p};distance=d;}
+  }
+  const scale=$('diagram').getScreenCTM(),radius=22/Math.hypot(scale.a,scale.b);
+  if(distance<radius){
+    const {unit,p}=nearest;
+    if(p.medium!==medium||p.side.endsWith('in')!==out){notice('Ese puerto no es compatible con este extremo de la corriente.',true);renderDiagram();return;}
+    const occupied=graph.edges.some(e=>out?(e.to===unit.id&&(e.toPort||'in')===p.side&&(e.toIndex||0)===p.index&&e.from!==n.id):(e.from===unit.id&&(e.fromPort||'out')===p.side&&(e.fromIndex||0)===p.index&&e.to!==n.id));
+    if(occupied){notice('Ese puerto ya tiene otra corriente conectada.',true);renderDiagram();return;}
+    graph.edges=graph.edges.filter(e=>out?e.from!==n.id:e.to!==n.id);
+    graph.edges.push(out?{from:n.id,to:unit.id,fromPort:'out',fromIndex:0,toPort:p.side,toIndex:p.index}:{from:unit.id,to:n.id,fromPort:p.side,fromIndex:p.index,toPort:'in',toIndex:0});
+    notice('Corriente conectada.');
+  }else{
+    graph.edges=graph.edges.filter(e=>out?e.from!==n.id:e.to!==n.id);
+    n[out?'endX':'startX']=Math.max(0,Math.min(4000,drag.preview.x));n[out?'endY':'startY']=Math.max(0,Math.min(4000,drag.preview.y));
+    notice('Extremo libre. Arrastralo a un puerto para conectarlo.');
+  }
+  pending=null;changed();renderInspector();
+}
 function removeSelected(){
   if(busy)return;
   if(selection?.node){graph.nodes=graph.nodes.filter(n=>n.id!==selection.node);graph.edges=graph.edges.filter(e=>e.from!==selection.node&&e.to!==selection.node);}
@@ -206,8 +243,8 @@ function loadGraph(data){
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
   const ids=new Set();
-  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');ids.add(n.id);}
-  for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');}
+  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');for(const k of ['startX','startY','endX','endY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
+  for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
   graph=structuredClone(data);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
@@ -218,13 +255,13 @@ function bindEvents(){
   svg.addEventListener('pointerdown',e=>{
     if(e.button===1||(e.button===0&&e.altKey)){e.preventDefault();panning={x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:svg.getScreenCTM().inverse()};svg.setPointerCapture(e.pointerId);return;}
     if(busy||e.button!==0)return;
-    const port=e.target.closest('[data-port]');if(port){e.preventDefault();connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
+    const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
-    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
+    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
     const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();
   });
-  svg.addEventListener('pointermove',e=>{if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;renderDiagram();return;}if(!dragging)return;const p=svgPoint(e),n=nodeById(dragging.node);n.x=Math.max(15,Math.min(2700,dragging.x+p.x-dragging.start.x));n.y=Math.max(45,Math.min(1800,dragging.y+p.y-dragging.start.y));dragging.moved=true;renderDiagram();});
-  const endDrag=()=>{if(dragging?.moved)changed({physical:false});dragging=null;panning=null;};svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+  svg.addEventListener('pointermove',e=>{if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;renderDiagram();return;}if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;renderDiagram();return;}if(!dragging)return;const p=svgPoint(e),n=nodeById(dragging.node);n.x=Math.max(15,Math.min(2700,dragging.x+p.x-dragging.start.x));n.y=Math.max(45,Math.min(1800,dragging.y+p.y-dragging.start.y));for(const [key,value] of Object.entries(dragging.endpoints))n[key]=value+(key.endsWith('X')?n.x-dragging.x:n.y-dragging.y);dragging.moved=true;renderDiagram();});
+  const endDrag=e=>{if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type==='pointercancel'){renderDiagram();return;}if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}if(dragging?.moved)changed({physical:false});dragging=null;panning=null;};svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
   svg.addEventListener('keydown',e=>{
     if(busy)return;
     const port=e.target.closest('[data-port]');if(port&&(e.key==='Enter'||e.key===' ')){e.preventDefault();connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
@@ -232,7 +269,7 @@ function bindEvents(){
     if(node&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const n=nodeById(node.dataset.node);n.x=Math.max(15,n.x+({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0));n.y=Math.max(45,n.y+({'ArrowUp':-10,'ArrowDown':10}[e.key]||0));changed({physical:false});svg.querySelector(`[data-node="${n.id}"]`)?.focus();}
     const edge=e.target.closest('[data-edge]');if(edge&&e.key==='Enter'){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();}
   });
-  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||e.target.closest('dialog'))return;if(e.key==='Escape'){pending=null;renderDiagram();}if(e.key==='Delete'){e.preventDefault();removeSelected();}});
+  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||e.target.closest('dialog'))return;if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;renderDiagram();}if(e.key==='Delete'){e.preventDefault();removeSelected();}});
   $('canvas-wrap').addEventListener('dragover',e=>e.preventDefault());$('canvas-wrap').addEventListener('drop',e=>{e.preventDefault();const p=svgPoint(e);addNode(e.dataTransfer.getData('text/plain'),{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});});
   $('inspector').addEventListener('click',e=>{if(e.target.closest('#delete-selected'))removeSelected();});
   $('inspector').addEventListener('input',e=>{
@@ -258,7 +295,7 @@ function bindEvents(){
   $('compounds-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-add-compound]'),remove=e.target.closest('[data-remove-compound]');if(add)updateCompound(add.dataset.addCompound,false);if(remove)updateCompound(remove.dataset.removeCompound,true);});
   $('about-button').onclick=()=>$('about-dialog').showModal();
   const changeZoom=(next,anchor)=>{const before=anchor?svgPoint(anchor):{x:viewX+500/zoom,y:viewY+260/zoom};const old=zoom;zoom=Math.max(.2,Math.min(4,next));viewX=before.x-(before.x-viewX)*old/zoom;viewY=before.y-(before.y-viewY)*old/zoom;renderDiagram();};
-  svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
+  svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=()=>{viewX=0;viewY=0;const maxX=Math.max(1000,...graph.nodes.map(n=>n.x+TYPES[n.type].w+45)),maxY=Math.max(520,...graph.nodes.map(n=>n.y+TYPES[n.type].h+55));zoom=Math.max(.3,Math.min(1000/maxX,520/maxY));renderDiagram();};
   $('save-button').onclick=()=>{const blob=new Blob([JSON.stringify(graph,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='proceso-lemeit.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Proceso descargado. El archivo conserva el diagrama, los compuestos y las condiciones.');};
