@@ -44,3 +44,23 @@ Se rechazan puertos ocupados, materia/energía incompatibles y sentidos incorrec
 Los clics de salida a entrada siguen disponibles como alternativa de teclado.
 La corriente completa es una única línea seleccionable; no hay una flecha separada
 para cada conexión. Los proyectos guardados antes de este cambio se conservan.
+
+## Espacio de diseño ampliado y ventana independiente
+
+- **Solo diagrama** oculta encabezado, biblioteca, propiedades y resultados.
+  **Volver a paneles** o Escape recupera el entorno completo.
+- **⛶** solicita pantalla completa al navegador.
+- **Separar ↗** abre una ventana del mismo proyecto. Puede requerir habilitar ventanas
+  emergentes. Las vistas abiertas se sincronizan en el mismo navegador mediante
+  BroadcastChannel; no necesita otro servicio. No es una función multiusuario.
+  Mantener abierta la vista principal mientras se abre o recarga la secundaria.
+- **Agregar…** incorpora un único objeto desde la barra del propio diagrama.
+
+Seleccioná un equipo y arrastrá el cuadrado de su esquina inferior derecha para
+cambiar el tamaño. También se puede indicar un porcentaje (50–300 %) en Propiedades.
+Se escala el símbolo con sus puertos: no se dimensiona físicamente el equipo ni
+se cambian sus resultados termodinámicos.
+
+Seleccioná una corriente y arrastrá el círculo central para desplazar su codo.
+Al arrastrar un extremo cerca de un puerto compatible y libre, el puerto se resalta
+y el extremo se ajusta a él. Los puertos ocupados siguen protegidos.

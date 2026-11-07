@@ -937,3 +937,26 @@ footer.site-footer{font-family:var(--lm-font-mono)}.footer-wordmark{font-family:
 .node:not(.selected):not(:hover) .port.pending{opacity:1}
 
 .palette-symbol{width:26px;height:26px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:5;stroke-linejoin:round}.palette-symbol .symbol-sign{fill:currentColor;stroke:none}
+
+#diagram{touch-action:none;user-select:none}
+.palette-symbol,.palette-item span{pointer-events:none}
+.node .resize-handle,.node .bend-handle{fill:var(--lm-surface);stroke:var(--lm-accent);stroke-width:2}
+.resize-handle{cursor:nwse-resize}.bend-handle{cursor:ew-resize}
+.node .snap-target .port{opacity:1;fill:var(--lm-good);stroke:var(--lm-good);stroke-width:5}
+.node .snap-target .port-target{fill:var(--lm-good);opacity:.16}
+.equipment-symbol{vector-effect:non-scaling-stroke}
+
+body.diagram-focus .app-header,body.diagram-focus .project-bar,body.diagram-focus .model-bar,body.diagram-focus .results-panel,body.diagram-focus .equipment-panel,body.diagram-focus .inspector-panel,body.diagram-focus footer{display:none}
+body.diagram-focus main{padding:0;gap:0}
+body.diagram-focus .workspace{display:block;flex:1;min-height:0;border:0}
+body.diagram-focus .diagram-panel{height:100%;display:flex;flex-direction:column}
+body.diagram-focus .canvas-wrap{flex:1;min-height:0;overflow:hidden}
+body.diagram-focus .canvas-wrap svg{position:absolute;width:100%;height:100%;min-width:0}
+body.diagram-focus .notice{margin:0}
+body.diagram-focus{height:100dvh;overflow:hidden}
+#diagram-focus,#diagram-popout{width:auto;white-space:nowrap;padding:0 8px;font-size:10px}
+
+#diagram-add{font-size:10px;width:105px;padding:3px;min-height:25px}.node .equipment-symbol .symbol-sign{font-size:23px;font-family:var(--lm-font-mono)}
+.diagram-toolbar{flex-wrap:wrap;gap:6px}.zoom-controls{flex-wrap:wrap;gap:3px}
+
+.zoom-controls #diagram-popout{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--lm-border);border-radius:4px;color:var(--lm-text);text-decoration:none;min-height:25px;background:var(--lm-surface);cursor:pointer}

@@ -2,9 +2,10 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {webcrypto} from 'node:crypto';
 const source=readFileSync(new URL('../site/app.js',import.meta.url),'utf8').replace(/^init\(\);$/m,'');
 function editor(){
- const context=vm.createContext({document:{getElementById:id=>({innerHTML:'',getScreenCTM:()=>({a:1,b:0})})},console});
+ const context=vm.createContext({URLSearchParams,location:{search:''},crypto:webcrypto,document:{getElementById:id=>({innerHTML:'',getScreenCTM:()=>({a:1,b:0})})},console});
  vm.runInContext(source,context);
  vm.runInContext(`graph=example();changed=()=>{};renderInspector=()=>{};renderDiagram=()=>{};notice=()=>{};`,context);
  return code=>JSON.parse(vm.runInContext(`JSON.stringify((()=>{${code}})())`,context));
@@ -29,4 +30,16 @@ test('un puerto ocupado o del sentido incorrecto no destruye la conexión previa
 test('la salida libre puede conectarse desde el extremo inicial al equipo',()=>{
  const run=editor();const actual=run(`graph.edges=graph.edges.filter(e=>e.to!=='c3');finishEndpointDrag({node:'c3',side:'in',preview:{x:555,y:240}});return graph.edges.find(e=>e.to==='c3');`);
  assert.equal(actual.from,'m1');assert.equal(actual.to,'c3');
+});
+test('redimensionar un símbolo mueve los puertos y las corrientes conectadas sin alterar topología',()=>{
+ const run=editor();const actual=run(`const before=JSON.stringify(graph.edges);nodeById('m1').scale=2;return {end:streamGeometry(nodeById('c3')).a,edges:before===JSON.stringify(graph.edges),nodes:graph.nodes.length};`);
+ assert.equal(actual.end.x,675);assert.equal(actual.end.y,290);assert.equal(actual.edges,true);assert.equal(actual.nodes,4);
+});
+test('el movimiento de una corriente libre respeta ambos extremos explícitos',()=>{
+ const run=editor();const actual=run(`const n=nodeById('c1');graph.edges=graph.edges.filter(e=>e.from!=='c1');Object.assign(n,{startX:80,startY:90,endX:250,endY:120});moveNode(n,{start:{x:0,y:0},x:n.x,y:n.y,endpoints:{startX:80,startY:90,endX:250,endY:120}},{x:30,y:40});return streamGeometry(n);`);
+ assert.deepEqual(actual.a,{x:110,y:130});assert.deepEqual(actual.b,{x:280,y:160});
+});
+test('acomodar el recorrido no agrega objetos ni cambia la conexión',()=>{
+ const run=editor();const actual=run(`const before=JSON.stringify(graph.edges);nodeById('c1').routeX=300;return {path:streamGeometry(nodeById('c1')).d,edges:before===JSON.stringify(graph.edges),nodes:graph.nodes.length};`);
+ assert.match(actual.path,/H300/);assert.equal(actual.edges,true);assert.equal(actual.nodes,4);
 });
