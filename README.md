@@ -1,6 +1,7 @@
-# Lemeit Sim
+# SIMPROX
 
 Simulador pedagógico de procesos, con interfaz web en español y motor DWSIM.
+Marca: SIMPROX · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
 Sitio: https://sim.lemeit.ar · Diseño: https://design.lemeit.ar
 
 Es un piloto, no una réplica completa del editor de DWSIM.

@@ -22,6 +22,17 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Para reactores, Q procede de DeltaQ del motor (kW) leído de su estado XML;
   incorpora calor de reacción. No se estima solamente con diferencias de entalpía sensible.
 
+## Prioridad actual: edición de corrientes próxima a DWSIM
+
+Después de compactar la interfaz e incorporar SIMPROX, completar la ventana de
+corrientes antes de nuevas expansiones visuales o 3D:
+
+- Condiciones, composición y resultados en secciones claras.
+- Unidades seleccionables y caudales expresados por masa o moles de forma consistente.
+- Mostrar propiedades de mezcla y por fase disponibles en el motor.
+- Ampliar las especificaciones de estado que admita la API instalada, verificando cada
+  una con DWSIM. No habilitar campos incompatibles simultáneamente ni inventar datos.
+
 ## Próxima etapa: versión de administración
 
 Antes de preparar la versión para alumnos, incorporar un panel de administración:

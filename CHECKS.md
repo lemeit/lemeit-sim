@@ -125,3 +125,16 @@ En la vista previa local se desconectó la punta derecha: quedó un path válido
 La ventana separada mostró la biblioteca al abrir; agregar una corriente desde
 ella se reflejó en la principal (cinco objetos), y eliminarla volvió a cuatro.
 No se ejecutó un cálculo nuevo: estos cambios corresponden al editor.
+
+## SIMPROX y barra compacta: 7 de noviembre de 2026
+
+Cabecera 42 px y barra única 34 px medidos en la vista previa local; cero project-bar
+adicionales. El nombre del proyecto se integra a la barra, y modelo/compuestos al
+menú Simulación. Se incorpora la opción A del PNG del usuario, con clipping SVG;
+el wordmark aún no es un SVG independiente. Nuevo favicon vectorial del emblema.
+
+Se verificaron carga de ejemplo, menú de modelo, diálogo de componentes, temas
+claro/oscuro, acceso a las herramientas y vista separada con biblioteca. Menú móvil
+comprobado dentro del ancho de la ventana tras corregir la posición de Simulación.
+No se cambió el motor. Las 17 pruebas existentes y sintaxis JavaScript pasaron.
+El build queda preparado, sin publicación ni fusión automáticas.

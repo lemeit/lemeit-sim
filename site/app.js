@@ -34,14 +34,14 @@ function changed({physical=true}={}){
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);
 }
 function updateControls(){
-  $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
-  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><div><button class="outline-button" data-start="new">Nuevo proyecto</button><button class="quiet-button" data-start="open">Abrir proyecto…</button></div>';
+  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · Abrir proyecto</p>';
   document.body.classList.toggle('no-project',!hasProject);
 }
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
@@ -231,7 +231,7 @@ async function calculate(){
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
     result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
   }catch(error){notice(error.message,true);$('calculation-state').textContent='Revisá los datos y las conexiones';}
-  finally{busy=false;document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML='<span aria-hidden="true">▷</span> Calcular';}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';}
 }
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
@@ -356,7 +356,7 @@ function bindEvents(){
   $('calculate-button').onclick=calculate;$('example-button').onclick=()=>{resetExample();closeMenus();};
   $('project-title').oninput=e=>{graph.title=e.target.value;persist();};
   $('model-select').onchange=e=>{graph.model=e.target.value;changed();renderCompounds();renderInspector();};
-  $('compound-button').onclick=()=>{renderCompounds();$('compounds-dialog').showModal();};
+  $('compound-button').onclick=()=>{closeMenus();renderCompounds();$('compounds-dialog').showModal();};
   $('compound-search').oninput=renderCompounds;
   $('compounds-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-add-compound]'),remove=e.target.closest('[data-remove-compound]');if(add)updateCompound(add.dataset.addCompound,false);if(remove)updateCompound(remove.dataset.removeCompound,true);});
   $('about-button').onclick=()=>$('about-dialog').showModal();
@@ -398,6 +398,7 @@ function bindProjectEvents(){
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('.app-menu'))closeMenus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const active=menus.find(menu=>menu.open);closeMenus();active?.querySelector('summary').focus();}});
   window.addEventListener('resize',closeMenus);
+  $('open-project-toolbar').onclick=()=>$('open-button').click();$('save-project-toolbar').onclick=()=>$('save-button').click();
   $('new-project-button').onclick=newProject;$('new-project-toolbar').onclick=newProject;
   $('cancel-project').onclick=()=>$('new-project-dialog').close();$('cancel-project-bottom').onclick=()=>$('new-project-dialog').close();
   $('new-component-search').oninput=renderNewProject;$('new-project-model').onchange=renderNewProject;
@@ -430,10 +431,17 @@ function publishWorkspace(physical=true){
   if(!workspaceChannel||applyingWorkspace||!hasProject)return;
   workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical});
 }
+function toolIcon(name){
+  const paths={new:'M6 3h8l4 4v14H6z M14 3v5h5 M9 14h6 M12 11v6',open:'M3 7h7l2 3h9l-3 10H3z M3 7V4h7l2 3h6v3',save:'M4 3h14l3 3v15H3V3z M7 3v6h10V3 M7 21v-8h10v8',library:'M4 5h3v15H4z M10 5h3v15h-3z M16 5l3-1 4 15-3 1z',focus:'M9 3H3v6 M15 3h6v6 M21 15v6h-6 M9 21H3v-6',panels:'M3 4h18v16H3z M8 4v16 M16 4v16',popout:'M14 3h7v7 M21 3l-11 11 M10 5H4v15h15v-6',fullscreen:'M8 3H3v5 M16 3h5v5 M21 16v5h-5 M8 21H3v-5',fit:'M3 3h6 M3 3v6 M15 3h6v6 M21 15v6h-6 M9 21H3v-6 M8 8h8v8H8z',run:'M7 4l14 8-14 8z'};
+  return `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[name]}"/></svg>`;
+}
 function bindDiagramWindow(){
   const focus=$('diagram-focus');
-  const setFocus=enabled=>{document.body.classList.toggle('diagram-focus',enabled);focus.textContent=enabled?'Volver a paneles':'Solo diagrama';focus.setAttribute('aria-pressed',String(enabled));};
+  for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Separar diagrama'],['fit-button','fit','Ajustar diagrama'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
+  $('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';
+  const setFocus=enabled=>{document.body.classList.toggle('diagram-focus',enabled);focus.innerHTML=toolIcon(enabled?'panels':'focus');focus.setAttribute('aria-label',enabled?'Volver a paneles':'Solo diagrama');focus.title=enabled?'Volver a paneles':'Solo diagrama';focus.setAttribute('aria-pressed',String(enabled));};
   $('diagram-library').onclick=()=>{const visible=document.body.classList.toggle('diagram-library');$('diagram-library').setAttribute('aria-pressed',String(visible));};
+  $('view-focus').onclick=()=>focus.click();$('view-library').onclick=()=>{setFocus(true);$('diagram-library').click();};$('view-popout').onclick=()=>$('diagram-popout').click();$('view-fullscreen').onclick=()=>$('diagram-fullscreen').click();
   focus.onclick=()=>setFocus(!document.body.classList.contains('diagram-focus'));
   $('diagram-fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{setFocus(true);await document.documentElement.requestFullscreen();}}catch{notice('El navegador no permitió pantalla completa. Podés usar Solo diagrama.');}};
   if(typeof BroadcastChannel==='undefined'){$('diagram-popout').disabled=true;return;}
