@@ -56,3 +56,15 @@ test('soltar el extremo sobre el otro no colapsa la corriente en un punto',()=>{
  const run=editor();const actual=run(`const n=nodeById('c1'),original=streamGeometry(n);finishEndpointDrag({node:n.id,side:'out',original,preview:{...original.a}});const g=streamGeometry(n);return Math.hypot(g.b.x-g.a.x,g.b.y-g.a.y);`);
  assert.ok(actual>=23.99);
 });
+test('una corriente vertical libre termina con segmento vertical, sin tramo cero horizontal',()=>{
+ const run=editor();const g=run(`graph.edges=[];const n=nodeById('c1');n.endX=n.x;n.endY=n.y+250;return streamGeometry(n);`);assert.match(g.d,/ V350$/);assert.doesNotMatch(g.d,/undefined|NaN/);
+});
+test('la energía entra al conector inferior del calentador apuntando hacia arriba',()=>{
+ const run=editor();const g=run(`graph.nodes=[{id:'q',name:'Calor',type:'EnergyStream',x:80,y:350},{id:'h',name:'Calentador',type:'Heater',x:300,y:100}];graph.edges=[{from:'q',to:'h',fromPort:'out',toPort:'energy-in'}];return streamGeometry(nodeById('q'));`);assert.match(g.d,/ V200$/);assert.ok(g.bend.axis==='y');
+});
+test('la energía sale hacia abajo del conector inferior del enfriador',()=>{
+ const run=editor();const g=run(`graph.nodes=[{id:'c',name:'Enfriador',type:'Cooler',x:300,y:100},{id:'q',name:'Calor',type:'EnergyStream',x:340,y:350,endX:360,endY:450}];graph.edges=[{from:'c',to:'q',fromPort:'energy-out',toPort:'in'}];return streamGeometry(nodeById('q'));`);assert.match(g.d,/^M360 200 V/);assert.match(g.d,/ V450$/);
+});
+test('orientar una corriente libre no modifica conexiones ni agrega objetos',()=>{
+ const run=editor();const actual=run(`graph.edges=[];const n=nodeById('c1');orientStream(n,'up');const g=streamGeometry(n);return {g,count:graph.nodes.length,edges:graph.edges.length};`);assert.equal(actual.count,4);assert.equal(actual.edges,0);assert.ok(actual.g.b.y<actual.g.a.y);assert.match(actual.g.d,/ V/);
+});

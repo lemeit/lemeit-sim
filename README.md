@@ -117,3 +117,5 @@ Menús con navegación por teclado, configuración de presentación, comprobaci�
 de conexión y diagnóstico del último cálculo. Resultados redimensionables, ocultables
 y separables en otra vista sincronizada. Exportación local CSV y Excel .xlsx de
 resultados vigentes. Ver [guía de trabajo](docs/workflow.md).
+
+[Servicios y arranque/apagado](docs/operacion-local.md) · [Propuesta de acceso sin correo para alumnos](docs/acceso-propuesto.md).

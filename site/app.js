@@ -16,6 +16,7 @@ let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=nu
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let lastCalculation=null,connectionCheck=null,activity=[],resultDigits=3;
+let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 let workspaceChannel=null,applyingWorkspace=false,workspaceId=new URLSearchParams(location.search).get('workspace')||crypto.randomUUID();
 const emptyProject=()=>({version:1,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -66,16 +67,38 @@ function basePortList(n){
 function symbolScale(n){return isStream(n)?1:(n.scale??1);}
 function portList(n){const ports=basePortList(n);return isStream(n)?ports:ports.map(p=>({...p,x:p.x*symbolScale(n),y:p.y*symbolScale(n)}));}
 function point(n,side,index=0){const p=portList(n).find(p=>p.side===side&&p.index===index);return p?{x:n.x+p.x,y:n.y+p.y,medium:p.medium}:null;}
+function normalForPort(n,side){return side.startsWith('energy')?{x:0,y:1}:side.endsWith('in')?{x:-1,y:0}:{x:1,y:0};}
 function streamGeometry(n){
   const source=graph.edges.find(e=>e.to===n.id),target=graph.edges.find(e=>e.from===n.id);
   const a=source?point(nodeById(source.from),source.fromPort||'out',source.fromIndex||0):{x:n.startX??n.x,y:n.startY??(n.y+TYPES[n.type].h/2)};
   const b=target?point(nodeById(target.to),target.toPort||'in',target.toIndex||0):{x:n.endX??(n.x+TYPES[n.type].w),y:n.endY??(n.y+TYPES[n.type].h/2)};
   const g={a:{x:a.x,y:a.y},b:{x:b.x,y:b.y}};
   if(endpointDrag?.node===n.id&&endpointDrag.moved)g[endpointDrag.side==='in'?'a':'b']={x:endpointDrag.preview.x,y:endpointDrag.preview.y};
-  const mid=n.routeX??(g.a.x+g.b.x)/2;g.mid=mid;
-  g.d=`M${g.a.x} ${g.a.y} H${mid} V${g.b.y} H${g.b.x}`;
-  g.label={x:(g.a.x+mid)/2,y:g.a.y-16};return g;
+  const directions={right:{x:1,y:0},left:{x:-1,y:0},up:{x:0,y:-1},down:{x:0,y:1}};
+  let travel=directions[n.orientation];
+  if(!travel){if(target&&(target.toPort||'in').startsWith('energy')){const v=normalForPort(nodeById(target.to),target.toPort);travel={x:-v.x,y:-v.y};}else if(source&&(source.fromPort||'out').startsWith('energy'))travel=normalForPort(nodeById(source.from),source.fromPort);else{const dx=g.b.x-g.a.x,dy=g.b.y-g.a.y;travel=Math.abs(dy)>Math.abs(dx)?{x:0,y:Math.sign(dy)||1}:{x:Math.sign(dx)||1,y:0};}}
+  const startNormal=source?normalForPort(nodeById(source.from),source.fromPort||'out'):travel;
+  const endNormal=target?normalForPort(nodeById(target.to),target.toPort||'in'):{x:-travel.x,y:-travel.y};
+  const stub=28,A={x:g.a.x+startNormal.x*stub,y:g.a.y+startNormal.y*stub},B={x:g.b.x+endNormal.x*stub,y:g.b.y+endNormal.y*stub};
+  let points;
+  if(travel.y!==0){const mid=n.routeY??(A.y+B.y)/2;g.mid=mid;g.bend={x:(A.x+B.x)/2,y:mid,axis:'y'};points=[g.a,A,{x:A.x,y:mid},{x:B.x,y:mid},B,g.b];}
+  else{const mid=n.routeX??(A.x+B.x)/2;g.mid=mid;g.bend={x:mid,y:(A.y+B.y)/2,axis:'x'};points=[g.a,A,{x:mid,y:A.y},{x:mid,y:B.y},B,g.b];}
+  const clean=[];
+  for(const p of points){if(clean.length&&p.x===clean.at(-1).x&&p.y===clean.at(-1).y)continue;while(clean.length>1){const prev=clean.at(-2),last=clean.at(-1),aligned=(prev.x===last.x&&last.x===p.x)||(prev.y===last.y&&last.y===p.y),forward=(last.x-prev.x)*(p.x-last.x)+(last.y-prev.y)*(p.y-last.y)>=0;if(!aligned||!forward)break;clean.pop();}clean.push(p);}
+  g.d=`M${clean[0].x} ${clean[0].y}`+clean.slice(1).map((p,i)=>p.x===clean[i].x?` V${p.y}`:` H${p.x}`).join('');
+  let longest={length:-1};for(let i=1;i<clean.length;i++){const a=clean[i-1],b=clean[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
+  g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};return g;
 }
+function orientStream(n,orientation){
+  if(orientation==='auto'){delete n.orientation;return;}
+  const v={right:{x:1,y:0},left:{x:-1,y:0},up:{x:0,y:-1},down:{x:0,y:1}}[orientation];if(!v)return;
+  const source=graph.edges.some(e=>e.to===n.id),target=graph.edges.some(e=>e.from===n.id);if(source&&target)return;
+  const g=streamGeometry(n),length=Math.max(100,Math.hypot(g.b.x-g.a.x,g.b.y-g.a.y));n.orientation=orientation;
+  if(target){n.startX=Math.max(0,Math.min(4000,g.b.x-v.x*length));n.startY=Math.max(0,Math.min(4000,g.b.y-v.y*length));}else{n.endX=Math.max(0,Math.min(4000,g.a.x+v.x*length));n.endY=Math.max(0,Math.min(4000,g.a.y+v.y*length));}
+  delete n.routeX;delete n.routeY;
+}
+function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
+async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
 function equipmentSymbol(type){
   if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
   if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
@@ -97,7 +120,7 @@ function renderDiagram(){
     html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node ${isStream(n)?'stream-node':'equipment-node'} ${selection?.node===n.id?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
     if(g){
       html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line ${n.type==='EnergyStream'?'energy':''}" d="${g.d}" marker-end="url(#arrow-${n.type==='EnergyStream'?'energy':'material'})"/><text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${equipmentSymbol(n.type)}</g><text text-anchor="middle" class="equipment-label" x="${t.w*scale/2}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${t.w*scale/2}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${equipmentSymbol(n.type)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
     const readingX=g?g.label.x:t.w*scale/2,readingY=g?g.label.y+32:t.h*scale+52;
     if(r)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(r.temperature_K-273.15,2)} °C · ${fmt(r.mass_flow_kg_s)} kg/s</text>`;
     else if(feed)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${fmt(n.temperature_C,1)} °C · ${fmt(n.mass_flow)} kg/s</text>`;
@@ -106,7 +129,7 @@ function renderDiagram(){
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${isReactor(n)&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
       html+=`<g data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
-    if(selection?.node===n.id){if(g)html+=`<circle class="bend-handle" data-bend="${n.id}" cx="${g.mid}" cy="${(g.a.y+g.b.y)/2}" r="7"><title>Arrastrar para acomodar el recorrido</title></circle>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
+    if(selection?.node===n.id){if(g)html+=`<circle class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" cx="${g.bend.x}" cy="${g.bend.y}" r="7"><title>Arrastrar para acomodar el recorrido</title></circle>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';
   });
   svg.innerHTML=html;$('object-count').textContent=`${graph.nodes.length} objetos`;
@@ -128,6 +151,7 @@ function renderInspector(){
   const n=nodeById(selection?.node);if(!n){container.innerHTML='<div class="empty-inspector"><span>⌁</span>Seleccioná un objeto del diagrama.<br>Acá vas a definir sus condiciones y consultar sus resultados.</div>';return;}
   const t=TYPES[n.type],r=result?.streams[n.id];
   let html=`<p class="inspector-type">${esc(t.label.toUpperCase())}</p><h3 class="inspector-title">${esc(n.name)}</h3>${field('name','Nombre','',n.name,{text:true})}`;
+  if(isStream(n)&&!(graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)))html+=selectField('orientation','Dirección del extremo libre',[['auto','Automática'],['right','→ Derecha'],['left','← Izquierda'],['up','↑ Arriba'],['down','↓ Abajo']],n.orientation||'auto');
   if(!isStream(n))html+=`<p class="inspector-section">DISEÑO</p><label class="field"><span class="field-label">Tamaño del símbolo · %</span><input data-field="scale" type="number" min="50" max="300" step="10" value="${Math.round(symbolScale(n)*100)}"></label><p class="mini">Tamaño gráfico; no modifica las dimensiones físicas del equipo.</p>`;
   if(isFeed(n)){
     html+='<p class="inspector-description">Condiciones de alimentación. La composición se expresa en fracciones másicas.</p>';
@@ -151,7 +175,7 @@ function renderInspector(){
     html+='<p class="inspector-section">ESTEQUIOMETRÍA MOLAR</p><p class="mini">Reactivos negativos, productos positivos; 0 para inertes.</p>';
     for(const c of graph.compounds)html+=field(`stoich:${c}`,c,'mol/mol',n.stoichiometry?.[c]??0);
   }
-  if(n.type==='EnergyStream')html+='<p class="inspector-description">Representa la transferencia de energía de un calentador o enfriador. La potencia neta se consulta en el balance del equipo.</p>';
+  if(n.type==='EnergyStream')html+='<p class="inspector-description">Representa calor transferido, sin caudal de materia. En los calentadores y enfriadores actuales se especifica la temperatura de salida: DWSIM calcula la potencia térmica, que se consulta en el balance del equipo. Las corrientes de energía también pueden representar trabajo en otros equipos.</p>';
   if(r)html+=`<p class="inspector-section">RESULTADOS DE DWSIM</p><div class="inspector-readings"><div class="reading-row">Temperatura <b>${fmt(r.temperature_K-273.15)} °C</b></div><div class="reading-row">Presión <b>${fmt(r.pressure_Pa/1000)} kPa</b></div><div class="reading-row">Caudal <b>${fmt(r.mass_flow_kg_s)} kg/s</b></div></div>`;
   html+='<button class="delete-button" id="delete-selected">Eliminar objeto y sus conexiones</button>';container.innerHTML=html;
 }
@@ -260,7 +284,7 @@ function loadGraph(data){
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
   const ids=new Set();
-  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const k of ['startX','startY','endX','endY','routeX'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
+  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
   graph=structuredClone(data);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
@@ -277,8 +301,8 @@ function updateDiagramGeometry(){
     const el=svg.querySelector(`[data-node="${n.id}"]`);if(!el)continue;
     const t=TYPES[n.type],s=symbolScale(n),g=isStream(n)?streamGeometry(n):null;
     el.setAttribute('transform',`translate(${g?0:n.x} ${g?0:n.y})`);
-    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const label=el.querySelector('.stream-label');label.setAttribute('x',g.label.x);label.setAttribute('y',g.label.y);const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('cx',g.mid);bend.setAttribute('cy',(g.a.y+g.b.y)/2);}}
-    else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);for(const [selector,y] of [['.equipment-label',20],['.node-kind',35]]){const label=el.querySelector(selector);label.setAttribute('x',t.w*s/2);label.setAttribute('y',t.h*s+y);}const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
+    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const label=el.querySelector('.stream-label');label.setAttribute('x',g.label.x);label.setAttribute('y',g.label.y);const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('cx',g.bend.x);bend.setAttribute('cy',g.bend.y);bend.dataset.axis=g.bend.axis;}}
+    else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);for(const [selector,y] of [['.equipment-label',20],['.node-kind',35]]){const label=el.querySelector(selector);label.setAttribute('x',equipmentLabelX(n));label.setAttribute('y',t.h*s+y);}const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
     const reading=el.querySelector('.node-reading');if(reading){reading.setAttribute('x',g?g.label.x:t.w*s/2);reading.setAttribute('y',g?g.label.y+32:t.h*s+52);}
     for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
   }
@@ -289,7 +313,7 @@ function moveNode(n,start,p){
   const dx=p.x-start.start.x,dy=p.y-start.start.y;
   n.x=Math.max(15,Math.min(2700,start.x+dx));n.y=Math.max(15,Math.min(1800,start.y+dy));
   for(const [key,value] of Object.entries(start.endpoints||{}))n[key]=Math.max(0,Math.min(4000,value+(key.endsWith('X')?n.x-start.x:n.y-start.y)));
-  if(isStream(n)&&start.routeX!==undefined)n.routeX=Math.max(0,Math.min(4000,start.routeX+n.x-start.x));
+  if(isStream(n)&&start.routeX!==undefined)n.routeX=Math.max(0,Math.min(4000,start.routeX+n.x-start.x));if(isStream(n)&&start.routeY!==undefined)n.routeY=Math.max(0,Math.min(4000,start.routeY+n.y-start.y));
 }
 function endpointCandidate(drag){
   const n=nodeById(drag.node),medium=n.type==='EnergyStream'?'energy':'material',out=drag.side==='out',m=$('diagram').getScreenCTM();
@@ -308,15 +332,15 @@ function bindEvents(){
     if(busy||e.button!==0)return;
     e.preventDefault();
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
-    const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend};svg.setPointerCapture(e.pointerId);return;}
+    const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,axis:bend.dataset.axis};svg.setPointerCapture(e.pointerId);return;}
     const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
-    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
+    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
     const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();
   });
   svg.addEventListener('pointermove',e=>{
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
-    if(bending){nodeById(bending.node).routeX=Math.max(0,Math.min(4000,svgPoint(e).x));queueDiagramMotion();return;}
+    if(bending){const p=svgPoint(e);nodeById(bending.node)[bending.axis==='y'?'routeY':'routeX']=Math.max(0,Math.min(4000,bending.axis==='y'?p.y:p.x));queueDiagramMotion();return;}
     if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;queueDiagramMotion();return;}
     if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;queueDiagramMotion();return;}
     if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p);dragging.moved=true;queueDiagramMotion();
@@ -332,7 +356,7 @@ function bindEvents(){
     if(busy)return;
     const port=e.target.closest('[data-port]');if(port&&(e.key==='Enter'||e.key===' ')){e.preventDefault();connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');if(node&&['Enter',' '].includes(e.key)){e.preventDefault();selection={node:node.dataset.node};renderDiagram();renderInspector();}
-    if(node&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const n=nodeById(node.dataset.node);moveNode(n,{start:{x:0,y:0},x:n.x,y:n.y,routeX:n.routeX,endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]]))},{x:({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0),y:({'ArrowUp':-10,'ArrowDown':10}[e.key]||0)});changed({physical:false});svg.querySelector(`[data-node="${n.id}"]`)?.focus();}
+    if(node&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const n=nodeById(node.dataset.node);moveNode(n,{start:{x:0,y:0},x:n.x,y:n.y,routeX:n.routeX,routeY:n.routeY,endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]]))},{x:({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0),y:({'ArrowUp':-10,'ArrowDown':10}[e.key]||0)});changed({physical:false});svg.querySelector(`[data-node="${n.id}"]`)?.focus();}
     const edge=e.target.closest('[data-edge]');if(edge&&e.key==='Enter'){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();}
   });
   document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||e.target.closest('dialog'))return;if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;renderDiagram();}if(e.key==='Delete'){e.preventDefault();removeSelected();}});
@@ -341,6 +365,7 @@ function bindEvents(){
   $('inspector').addEventListener('input',e=>{
     if(busy)return;const key=e.target.dataset.field,n=nodeById(selection?.node);
     if(!key||!n||e.target.value===''||e.target.tagName==='SELECT')return;
+    if(key==='orientation'){orientStream(n,e.target.value);changed({physical:false});renderInspector();return;}
     if(key==='scale'){const value=Number(e.target.value);if(Number.isFinite(value)&&value>=50&&value<=300){n.scale=value/100;changed({physical:false});}return;}
     if(key==='name'){const value=e.target.value.trim();if(value&&!graph.nodes.some(other=>other!==n&&other.name===value)){n.name=value;changed({physical:false});if(result)renderResults();}return;}
     const value=Number(e.target.value);if(!Number.isFinite(value))return;
@@ -349,6 +374,7 @@ function bindEvents(){
   });
   $('inspector').addEventListener('change',e=>{
     if(busy)return;const key=e.target.dataset.field,n=nodeById(selection?.node);if(!key||!n)return;
+    if(key==='orientation'){orientStream(n,e.target.value);changed({physical:false});renderInspector();return;}
     if(key==='scale'){const value=Number(e.target.value);if(Number.isFinite(value)&&value>=50&&value<=300){n.scale=value/100;changed({physical:false});}else notice('El tamaño gráfico debe estar entre 50 y 300 %.',true);renderInspector();return;}
     if(['base_compound','phase','reactor-type'].includes(key)){if(key==='reactor-type')n.type=e.target.value;else n[key]=e.target.value;changed();renderInspector();return;}
     if(key==='name'){const value=e.target.value.trim();if(!value||graph.nodes.some(other=>other!==n&&other.name===value)){notice('Usá un nombre único y no vacío.',true);renderInspector();return;}n.name=value;changed({physical:false});if(result)renderResults();}
@@ -365,15 +391,16 @@ function bindEvents(){
   const changeZoom=(next,anchor)=>{const before=anchor?svgPoint(anchor):{x:viewX+500/zoom,y:viewY+260/zoom};const old=zoom;zoom=Math.max(.2,Math.min(4,next));viewX=before.x-(before.x-viewX)*old/zoom;viewY=before.y-(before.y-viewY)*old/zoom;renderDiagram();};
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
-  $('fit-button').onclick=()=>{viewX=0;viewY=0;const maxX=Math.max(1000,...graph.nodes.map(n=>n.x+TYPES[n.type].w*symbolScale(n)+45)),maxY=Math.max(520,...graph.nodes.map(n=>n.y+TYPES[n.type].h*symbolScale(n)+55));zoom=Math.max(.3,Math.min(1000/maxX,520/maxY));renderDiagram();};
+  $('fit-button').onclick=()=>{viewX=0;viewY=0;const points=graph.nodes.flatMap(n=>{if(isStream(n)){const g=streamGeometry(n);return [g.a,g.b,g.bend];}return [{x:n.x+TYPES[n.type].w*symbolScale(n),y:n.y+TYPES[n.type].h*symbolScale(n)}];});const maxX=Math.max(1000,...points.map(p=>p.x+45)),maxY=Math.max(520,...points.map(p=>p.y+55));zoom=Math.max(.2,Math.min(1000/maxX,520/maxY));renderDiagram();};
   $('save-button').onclick=()=>{const blob=new Blob([JSON.stringify(graph,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='proceso-lemeit.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Proceso descargado. El archivo conserva el diagrama, los compuestos y las condiciones.');};
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>100000)throw new Error('El archivo supera los 100 kB.');const data=JSON.parse(await file.text());loadGraph(data);notice('Proceso abierto. Calculá para obtener resultados actualizados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
   $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
-  try{const response=await fetch('/api/catalog');const data=await response.json();if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';}
-  catch(error){engineOnline=false;$('engine-state').textContent='Motor sin conexión';$('engine-state').className='engine-state offline';try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
+  const initialCheckStarted=performance.now();let initialHttp=null;
+  try{const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Catálogo disponible',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
+  catch(error){const occupied=initialHttp===409;engineOnline=occupied;connectionCheck={time:new Date().toISOString(),ok:occupied,state:occupied?'busy':'offline',http:initialHttp,message:error.message,ms:Math.round(performance.now()-initialCheckStarted)};traceConnection('GET /api/catalog',connectionCheck);paintConnection();try{catalog=await(await fetch('catalog-cache.json')).json();notice(occupied?'El motor está ocupado. Podés editar y volver a intentar el cálculo.':'Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
   if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderCompounds();updateControls();
 }
@@ -502,22 +529,41 @@ function renderDiagnostics(){
   const issues=reviewGraph(),failed=lastCalculation&&!lastCalculation.ok;
   $('diagnostics-content').innerHTML=`<h3>Revisión del proyecto</h3>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>No se detectaron problemas básicos de conexiones o alimentación. Esta revisión no sustituye al solver.</p>'}<h3>Último cálculo</h3>${lastCalculation?`<p>${esc(lastCalculation.time)} · ${lastCalculation.ok?'Completado':'Fallido'}</p><pre class="diagnostic-message">${esc(lastCalculation.message)}</pre>`:'<p>Todavía no se ejecutó un cálculo en esta sesión.</p>'}${failed?'<h3>Sugerencias para revisar</h3><ul>'+failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')+'</ul><p class="mini">Son orientaciones basadas en el mensaje, no un diagnóstico confirmado de la causa.</p>':''}<h3>Actividad de esta sesión</h3>${activity.length?'<ol>'+activity.map(v=>`<li><time>${esc(v.time)}</time> · ${esc(v.message)}${v.detail?'<br>'+esc(v.detail):''}</li>`).join('')+'</ol>':'<p>Sin actividad registrada.</p>'}`;
 }
-function renderServerDetails(){
-  $('server-details').innerHTML=`<p><strong>${engineOnline?'Conexión disponible':'Sin conexión confirmada'}</strong></p><dl><dt>Comprobación manual</dt><dd>${connectionCheck?esc(connectionCheck.time):'Todavía no realizada'}</dd><dt>Respuesta de la API</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?.ok?`<dt>Tiempo de respuesta</dt><dd>${connectionCheck.ms} ms</dd><dt>Catálogo</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta sesión</dt><dd>${lastCalculation?esc(lastCalculation.ok?'Completado':'Fallido'):'Sin cálculos'}</dd></dl>`;
+function traceConnection(operation,entry){
+  connectionTrace.push({operation,...entry});connectionTrace=connectionTrace.slice(-40);
+  const consoleView=$('connection-console');if(consoleView){const atBottom=consoleView.scrollHeight-consoleView.scrollTop-consoleView.clientHeight<35;consoleView.innerHTML=connectionTrace.map(v=>`<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${esc(v.operation)} · ${v.http?'HTTP '+v.http:'sin respuesta HTTP'} · ${v.ms} ms<br><span>${esc(v.message)}</span></div>`).join('');if(atBottom)consoleView.scrollTop=consoleView.scrollHeight;}
 }
-async function checkEngine(){
-  $('server-refresh').disabled=true;const start=performance.now();
-  try{const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)}),data=await response.json();if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,message:'API del motor disponible',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};$('engine-state').textContent=`DWSIM conectado · ${fmt(connectionCheck.compounds,0)} compuestos`;$('engine-state').className='engine-state online';recordActivity('Comprobación de conexión: disponible');}
-  catch(error){engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,message:error.message};$('engine-state').textContent='Motor sin conexión';$('engine-state').className='engine-state offline';recordActivity('Comprobación de conexión fallida',error.message);}
-  finally{$('server-refresh').disabled=false;renderServerDetails();updateControls();}
+function paintConnection(){
+  const age=connectionCheck?Math.max(0,Math.round((Date.now()-Date.parse(connectionCheck.time))/1000)):null;
+  let state=connectionCheck?.state||(engineOnline?'online':'checking');if((state==='online'||state==='busy')&&age>75)state='stale';
+  const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
+  $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
+  $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
+  $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
+}
+function renderServerDetails(){
+  const state=connectionCheck?.state||(engineOnline?'online':'checking'),labels={online:'Servicio accesible',busy:'Servicio accesible · motor ocupado',offline:'No se pudo confirmar la conexión',checking:'Comprobando conexión'};
+  $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta vista</dt><dd>${lastCalculation?esc(lastCalculation.ok?'Completado':'Fallido'):'Sin cálculos'}</dd></dl>`;
+}
+async function checkEngine({silent=false}={}){
+  if(monitorRequest)return;monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
+  try{
+    const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});http=response.status;const data=await readCatalogResponse(response);
+    if(response.status===409){engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,state:'busy',http,message:'El servicio responde; DWSIM está resolviendo otra tarea.',ms:Math.round(performance.now()-start)};}
+    else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'API y catálogo disponibles; no se ejecutó una simulación.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
+    if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
+  }catch(error){engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
+  finally{monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}
 }
 function bindWorkspaceTools(){
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
-  $('server-status-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=checkEngine;
-  $('diagnostics-download').onclick=()=>downloadLocal('simprox-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,activity},null,2),'text/plain;charset=utf-8');
+  $('server-status-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('connection-monitor-button').onclick=()=>$('server-status-button').click();$('server-refresh').onclick=()=>checkEngine();
+  const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
+  monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
+  $('diagnostics-download').onclick=()=>downloadLocal('simprox-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
   try{const p=JSON.parse(localStorage.getItem('simprox-ui')||'{}');if(Number.isInteger(p.digits)&&p.digits>=0&&p.digits<=8)resultDigits=p.digits;document.body.classList.toggle('hide-canvas-hints',p.hints===false);}catch{}
   $('settings-button').onclick=()=>{$('settings-digits').value=resultDigits;$('settings-hints').checked=!document.body.classList.contains('hide-canvas-hints');$('settings-dialog').showModal();closeMenus();};
   const saveSettings=()=>{const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints}));}catch{}if(result)renderResults();};$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;

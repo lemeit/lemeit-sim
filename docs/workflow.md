@@ -113,3 +113,28 @@ Solo se exportan resultados vigentes:
 
 La exportación ocurre en el navegador, sin nuevos servicios. El formato de pantalla
 no redondea los valores exportados. Los resultados son de una simulación, no mediciones.
+
+## Ventanas compactas y monitor de conexión
+
+Las cabeceras internas usan 30 px y un cierre circular de 12 px dentro de un área
+interactiva de 24 px. El pie reúne estado y licencias, con la marca al margen derecho.
+Hacer clic en la conexión abre una consola de solo lectura: HTTP, latencia, fecha y
+últimas 40 comprobaciones. Se actualiza cada 30 s mientras la vista principal está
+visible; se puede desactivar y está desactivado por defecto en ventanas auxiliares.
+HTTP 409 se muestra como ocupado, no desconectado. Una señal de más de 75 s se marca
+sin actualizar. La luz pulsa suavemente con conexión reciente y respeta movimiento
+reducido. No comprueba una simulación ni da acceso a una terminal.
+
+## Orientación de corrientes y energía
+
+El inspector permite elegir arriba, abajo, izquierda, derecha o automático para
+un extremo libre. El recorrido respeta la dirección de entrada/salida de los puertos;
+el puerto inferior de energía del calentador recibe una flecha hacia arriba y el
+del enfriador la emite hacia abajo. Los codos se ajustan en el eje correspondiente.
+Ajustar incluye los extremos reales de las corrientes y no solo su posición inicial.
+
+En los equipos térmicos actuales, la energía representa calor sin transporte de
+materia. Se especifica la temperatura de salida y el motor calcula la potencia.
+Un intercambiador completo de dos fluidos, con cuatro puertos de materia, sigue
+pendiente; no debe confundirse con el calentador/enfriador de un solo lado.
+Referencia: https://dwsim.org/help/main/24-unit-operations.html

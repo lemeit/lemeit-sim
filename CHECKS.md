@@ -176,3 +176,25 @@ propias definiciones. En la vista previa 5915 se verificaron texto, cierre SVG
 blanco sobre rojo en ambos temas, área de 32 px y cierre del diálogo Nuevo con
 nombre vacío sin quedar bloqueado por validación. Sin errores de consola de esa
 sesión. No se modificó ni volvió a ejecutar el cálculo del motor en este ajuste.
+
+## Ventanas, monitor, orientación y operación online
+
+28 pruebas JS correctas (15 editor, 6 Worker, 3 exportación, 4 monitor). Se comprobaron
+corrientes verticales sin segmentos finales de longitud cero, entrada inferior al
+calentador, salida inferior del enfriador y orientación sin alterar topología.
+Monitor: 409 ocupado accesible, 503 desconectado, catálogo con latencia y señal antigua.
+
+Vista estática local 5914, sin iniciar un nuevo motor: se abrió un proyecto de
+calentamiento con corriente de energía y se verificó el path M460 390 V200.
+Cabecera medida 30 px y cierre interactivo 24 px. Consola mostró HTTP 404 correcto
+de la vista estática, latencia real y ausencia de un servicio de cálculo en esa URL.
+No se simuló un estado online artificial ni se midió carga de una clase.
+
+Se detectaron dos gateways 5911 desde copias distintas del código y un túnel en la
+PC. Se detuvo únicamente la vista de prueba 5915 iniciada por el agente. No se
+apagó el gateway público por iniciativa del agente. stop-online -WhatIf identificó
+los dos gateways y su túnel sin detenerlos. Sintaxis de los tres scripts verificada.
+El nuevo arranque busca servicios por EngineRoot/puerto para evitar duplicados y
+el apagado ya no depende únicamente de un PID registrado por la última copia.
+
+La autenticación queda como propuesta documentada: no se activó registro ni login.
