@@ -11,8 +11,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.3.0 — Identidad ΣIM y edición directa de corrientes**, implementada y fusionada
-en `main` mediante el [PR #14](https://github.com/lemeit/lemeit-sim/pull/14).
+**0.4.0 — Instalación PWA e iconos**, en desarrollo. Incorpora la identidad y
+edición directa de corrientes de la 0.3.0.
 La versión que recibe el navegador depende del último despliegue exitoso de
 Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
 separados, aunque Workers Builds automatiza el segundo.
@@ -133,6 +133,24 @@ El seguimiento consulta cada 30 segundos mientras la vista está activa. Se cons
 los últimos 40 eventos de esa vista y se pierden al recargar. No muestra CPU,
 procesos, terminal ni registros privados de la PC. El diagnóstico ofrece el error
 original y sugerencias orientativas, que no prueban su causa.
+
+## Instalar como aplicación · 0.4.0
+
+En Chrome y Edge compatibles, ΣIM puede ofrecer instalación desde el icono de la
+barra de direcciones o el menú del navegador. Ayuda → Instalar ΣIM aparece cuando
+el navegador habilita esa opción; si ya está instalada o el navegador no la ofrece,
+el botón permanece oculto. La presentación depende del navegador y del dispositivo.
+
+La instalación abre la web en una ventana propia y usa la sigma roja sobre carbón
+como icono. Incluye manifest, iconos PNG 192/512, variante maskable, icono Apple,
+favicon SVG y respaldos PNG/ICO. No instala DWSIM en el equipo del alumno.
+
+Se necesita conexión para abrir la interfaz y calcular. El service worker solo
+conserva una página explicativa sin conexión y su estilo; no guarda API, resultados
+ni versiones antiguas de los archivos de la aplicación. El guardado de proyectos
+JSON y la recuperación local del navegador siguen disponibles al recuperar conexión.
+La instalación definitiva debe comprobarse en un navegador compatible sobre el
+sitio HTTPS publicado; el navegador integrado de Codex puede no ofrecerla.
 
 ## Ejecución local
 

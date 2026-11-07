@@ -1095,3 +1095,5 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 .sim-shell .sim-brand{width:180px;flex-basis:180px;height:40px}
 .sim-brand>img{display:block;width:100%;height:100%;object-fit:contain}
 @media(max-width:760px){.sim-shell .sim-brand{width:150px;flex-basis:150px;height:36px}}
+
+#install-app-button[hidden]{display:none!important}

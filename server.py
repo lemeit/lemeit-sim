@@ -364,6 +364,7 @@ def simulate(engine, graph):
 
 
 class Handler(SimpleHTTPRequestHandler):
+    extensions_map = {**SimpleHTTPRequestHandler.extensions_map, '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon'}
     def setup(self):
         self.request.settimeout(15)
         super().setup()

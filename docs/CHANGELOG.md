@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.4.0 — 2026-11-07
+
+- Manifest PWA de ΣIM: nombre, iconos, inicio y ventana standalone.
+- Icono cuadrado con sigma roja sobre carbón; variantes SVG, PNG 16/32/180/192/512, ICO multiresolución y PNG adaptable a máscaras del sistema.
+- Ayuda ofrece Instalar ΣIM cuando el navegador emite la invitación de instalación.
+- Service worker para una página explicativa sin conexión. Interfaz por red, sin caché de API ni resultados; solo se guarda la página offline y su estilo.
+- Tipos MIME de manifest e ICO en el Worker y servidor local. El motor sigue siendo remoto y requiere conexión.
+
 ## 0.3.0 — 2026-11-07
 
 - SIMPROX pasa a llamarse ΣIM · Simulación de procesos. Dominio y repositorio sin cambios.

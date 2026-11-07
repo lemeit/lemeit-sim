@@ -242,3 +242,13 @@ comprobó ausencia del selector y se arrastró la punta hacia arriba. El path te
 con un segmento V ascendente. Luego se desplazó el codo horizontalmente, manteniendo
 la punta vertical. Logo SVG visible en la cabecera. No se ejecutaron cálculos del
 motor porque esta entrega solo modifica representación gráfica y marca.
+
+## PWA e iconos · 0.4.0
+
+41 pruebas JS aprobadas y 9 pruebas Python de validación correctas. Se verifican
+manifest, dimensiones PNG 192/512, propósito maskable, exclusión de API/POST del
+service worker y respuesta de navegación sin red hacia la página explicativa.
+Build y dry-run de Wrangler correctos (1465 KiB gzip). PNG cuadrados opacos con
+fondo carbón; ICO con resoluciones 16, 32, 48, 64, 128 y 256. El icono 192 se revisó
+visualmente. No se afirma instalación efectiva en el navegador del usuario: debe
+comprobarse en Chrome/Edge compatibles una vez desplegado sobre HTTPS.
