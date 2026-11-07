@@ -84,3 +84,28 @@ desde Entrada 1 a Entrada 3 del mezclador arrastrando el extremo con el mouse.
 La web confirmó Corriente conectada y DWSIM resolvió nuevamente el caso en 6 s.
 Se corrigió durante la prueba el orden de dibujo que tapaba los extremos con los
 puertos del equipo. El backend y sus ecuaciones no se modificaron.
+
+## Editor cómodo y vista separada: 7 de noviembre de 2026
+
+Pruebas: ocho del editor y seis del Worker pasaron; sintaxis JavaScript y build
+correctos. Se incorporaron comprobaciones de puertos escalados, extremos explícitos
+al mover corrientes y edición de codos sin cambiar objetos o topología.
+
+Vista previa local 127.0.0.1:5914, sin cálculo: alta de una corriente produjo cinco
+objetos (cuatro corrientes y un mezclador), con cero unidades térmicas imprevistas.
+Se verificó tamaño al 150 % mediante formulario y 177.88 % mediante tirador; ajuste
+manual del codo y reconexión al soltar a 8 px de un puerto compatible. El conteo se
+mantuvo en cuatro objetos tras eliminar la corriente de prueba.
+
+Dos vistas del mismo workspace sincronizaron altas, bajas, tamaño y conexiones.
+Se abrió la URL de la ventana independiente en una segunda pestaña del navegador
+de prueba: la presentación como ventana del sistema depende del navegador del usuario.
+El modo Solo diagrama se verificó visualmente. La solicitud de pantalla completa
+no se verificó en este navegador de prueba. No se midió una tasa de cuadros.
+
+La publicación de esta revisión fue rechazada por aprobación automática: requiere
+aprobación explícita para actualizar Cloudflare. No se volvió a intentar por otra vía.
+Los cambios permanecen locales/en PR hasta esa aprobación.
+
+Además se verificó el arrastre real desde la biblioteca al lienzo: creó una sola
+corriente y ninguna unidad térmica adicional. Se cerró el menú de ejemplos al cargar.

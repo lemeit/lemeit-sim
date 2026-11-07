@@ -45,3 +45,20 @@ Referencias:
 
 Pendiente: ajuste manual de tramos/codos, prevención de solapamientos y símbolos de
 los próximos equipos cuando sus modelos de cálculo estén implementados.
+
+## Revisión de interacción y símbolos
+
+Se adopta el estilo de símbolos de simulación de DWSIM para mezclador/divisor y
+unidades térmicas (rombo H/C), en lugar de presentar calentadores y enfriadores como
+intercambiadores completos de dos lados. Referencias contrastadas con el código de
+DWSIM.Drawing.SkiaSharp, Shapes/Mixer.vb y Shapes/Heater.vb, versión 10.2.15, y su
+[guía de operaciones](https://dwsim.org/help/main/24-unit-operations.html).
+Se conserva la atribución/licencia de DWSIM del proyecto. ISO 10628-2 sigue siendo
+referencia general; la conformidad símbolo por símbolo todavía no está validada.
+
+El movimiento actualiza atributos de los objetos existentes mediante animation frames,
+sin reconstruir el SVG completo durante cada desplazamiento. Los objetos nuevos
+solo se aceptan desde un clic de biblioteca o un arrastre interno identificado.
+Se bloquea el clic residual posterior al arrastre. La aparición original de varios
+equipos térmicos no pudo reproducirse en las comprobaciones realizadas; no se atribuye
+a una causa específica demostrada.
