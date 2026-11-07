@@ -167,3 +167,13 @@ como caudal másico/densidad. El conector original devuelve cero para algunas
 propiedades ausentes: se omiten fases sin fracción y densidades no positivas.
 Las unidades de resultados pueden cambiarse sin recalcular. Cambiar datos físicos
 invalida resultados anteriores. No se implementan aquí dinámica ni fase forzada.
+
+## Monitor de conexión y cálculos · 0.2.2
+
+La consola distingue CONEXIÓN (GET del catálogo) y CÁLCULO (POST de simulación).
+Los cálculos registran inicio y finalización o error, HTTP cuando existe respuesta
+y duración total medida desde el navegador, que incluye comunicación y cálculo.
+La disponibilidad del servicio y el último cálculo son estados independientes:
+un error de datos no demuestra que el motor esté desconectado. Las comprobaciones
+de catálogo no ejecutan corridas ni borran el estado del cálculo anterior.
+Se conservan los últimos 40 eventos de esta vista; se pierden al recargar.

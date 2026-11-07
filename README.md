@@ -9,11 +9,12 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.2.1 — Preparación del despliegue automático**, en desarrollo.
-Incluye las capacidades de corrientes y propiedades de la 0.2.0, ya fusionada en main.
-La última versión pública comprobada es **0.1.1**. La publicación de la versión nueva
-queda pendiente de fusionar esta configuración y conectar Workers Builds en Cloudflare.
-Ver [configuración paso a paso](docs/despliegue-automatico.md).
+**0.2.2 — Monitor de conexión y cálculos**, en desarrollo.
+La versión pública comprobada es **0.2.1**, publicada mediante Workers Builds.
+El monitor distingue consultas de disponibilidad y ejecuciones del cálculo;
+registra inicio, finalización o error, HTTP y duración de cada solicitud.
+Las consultas de catálogo no cambian el estado del último cálculo.
+Ver [despliegue automático](docs/despliegue-automatico.md).
 La versión del portal es independiente del motor DWSIM 10.2.15.
 Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 

@@ -280,14 +280,15 @@ async function calculate(){
   if(!hasProject||!engineOnline)return;
   if(busy)return;notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
-  const version=revision,payload=structuredClone(graph);
+  const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
+  lastCalculation={time:new Date().toISOString(),ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
-    const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await response.json();
+    const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
-    lastCalculation={time:new Date().toISOString(),ok:true,message:'Cálculo completado',elapsed_s:data.elapsed_s};recordActivity('Cálculo completado');result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
-  }catch(error){lastCalculation={time:new Date().toISOString(),ok:false,message:error.message};recordActivity('Cálculo fallido',error.message);notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
-  finally{busy=false;document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
+    lastCalculation={time:new Date().toISOString(),ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
+  }catch(error){lastCalculation={time:new Date().toISOString(),ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
+  finally{busy=false;renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
 }
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
@@ -433,7 +434,7 @@ async function init(){
   SimproxTheme.init();graph=emptyProject();
   $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   const initialCheckStarted=performance.now();let initialHttp=null;
-  try{const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Catálogo disponible',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
+  try{const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
   catch(error){const occupied=initialHttp===409;engineOnline=occupied;connectionCheck={time:new Date().toISOString(),ok:occupied,state:occupied?'busy':'offline',http:initialHttp,message:error.message,ms:Math.round(performance.now()-initialCheckStarted)};traceConnection('GET /api/catalog',connectionCheck);paintConnection();try{catalog=await(await fetch('catalog-cache.json')).json();notice(occupied?'El motor está ocupado. Podés editar y volver a intentar el cálculo.':'Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
   if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderCompounds();updateControls();
@@ -560,12 +561,19 @@ function failureHints(message){
   return hints;
 }
 function renderDiagnostics(){
-  const issues=reviewGraph(),failed=lastCalculation&&!lastCalculation.ok;
-  $('diagnostics-content').innerHTML=`<h3>Revisión del proyecto</h3>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>No se detectaron problemas básicos de conexiones o alimentación. Esta revisión no sustituye al solver.</p>'}<h3>Último cálculo</h3>${lastCalculation?`<p>${esc(lastCalculation.time)} · ${lastCalculation.ok?'Completado':'Fallido'}</p><pre class="diagnostic-message">${esc(lastCalculation.message)}</pre>`:'<p>Todavía no se ejecutó un cálculo en esta sesión.</p>'}${failed?'<h3>Sugerencias para revisar</h3><ul>'+failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')+'</ul><p class="mini">Son orientaciones basadas en el mensaje, no un diagnóstico confirmado de la causa.</p>':''}<h3>Actividad de esta sesión</h3>${activity.length?'<ol>'+activity.map(v=>`<li><time>${esc(v.time)}</time> · ${esc(v.message)}${v.detail?'<br>'+esc(v.detail):''}</li>`).join('')+'</ol>':'<p>Sin actividad registrada.</p>'}`;
+  const issues=reviewGraph(),failed=lastCalculation?.ok===false;
+  $('diagnostics-content').innerHTML=`<h3>Revisión del proyecto</h3>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>No se detectaron problemas básicos de conexiones o alimentación. Esta revisión no sustituye al solver.</p>'}<h3>Último cálculo</h3>${lastCalculation?`<p>${esc(lastCalculation.time)} · ${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}</p><pre class="diagnostic-message">${esc(lastCalculation.message)}</pre>`:'<p>Todavía no se ejecutó un cálculo en esta sesión.</p>'}${failed?'<h3>Sugerencias para revisar</h3><ul>'+failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')+'</ul><p class="mini">Son orientaciones basadas en el mensaje, no un diagnóstico confirmado de la causa.</p>':''}<h3>Actividad de esta sesión</h3>${activity.length?'<ol>'+activity.map(v=>`<li><time>${esc(v.time)}</time> · ${esc(v.message)}${v.detail?'<br>'+esc(v.detail):''}</li>`).join('')+'</ol>':'<p>Sin actividad registrada.</p>'}`;
 }
+function calculationLabel(entry){return entry?.state==='running'?'En curso':entry?.ok?'Completado':'Fallido';}
+function calculationDuration(entry){return Number.isFinite(entry?.duration_ms)?` · ${fmt(entry.duration_ms/1000,2)} s (solicitud completa)`:'';}
 function traceConnection(operation,entry){
-  connectionTrace.push({operation,...entry});connectionTrace=connectionTrace.slice(-40);
-  const consoleView=$('connection-console');if(consoleView){const atBottom=consoleView.scrollHeight-consoleView.scrollTop-consoleView.clientHeight<35;consoleView.innerHTML=connectionTrace.map(v=>`<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${esc(v.operation)} · ${v.http?'HTTP '+v.http:'sin respuesta HTTP'} · ${v.ms} ms<br><span>${esc(v.message)}</span></div>`).join('');if(atBottom)consoleView.scrollTop=consoleView.scrollHeight;}
+  connectionTrace.push({operation,...entry});connectionTrace=connectionTrace.slice(-40);renderConnectionTrace();
+}
+function renderConnectionTrace(){
+  const consoleView=$('connection-console');if(!consoleView)return;
+  const atBottom=consoleView.scrollHeight-consoleView.scrollTop-consoleView.clientHeight<35;
+  consoleView.innerHTML=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
+  if(atBottom)consoleView.scrollTop=consoleView.scrollHeight;
 }
 function paintConnection(){
   const age=connectionCheck?Math.max(0,Math.round((Date.now()-Date.parse(connectionCheck.time))/1000)):null;
@@ -576,15 +584,16 @@ function paintConnection(){
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
 }
 function renderServerDetails(){
+  renderConnectionTrace();
   const state=connectionCheck?.state||(engineOnline?'online':'checking'),labels={online:'Servicio accesible',busy:'Servicio accesible · motor ocupado',offline:'No se pudo confirmar la conexión',checking:'Comprobando conexión'};
-  $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta vista</dt><dd>${lastCalculation?esc(lastCalculation.ok?'Completado':'Fallido'):'Sin cálculos'}</dd></dl>`;
+  $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta sesión</dt><dd>${lastCalculation?esc(calculationLabel(lastCalculation)+calculationDuration(lastCalculation)):'Sin cálculos'}</dd></dl>`;
 }
 async function checkEngine({silent=false}={}){
   if(monitorRequest)return;monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
   try{
     const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});http=response.status;const data=await readCatalogResponse(response);
     if(response.status===409){engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,state:'busy',http,message:'El servicio responde; DWSIM está resolviendo otra tarea.',ms:Math.round(performance.now()-start)};}
-    else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'API y catálogo disponibles; no se ejecutó una simulación.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
+    else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
     if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
   }catch(error){engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
   finally{monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}
