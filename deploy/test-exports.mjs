@@ -1,0 +1,8 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import vm from 'node:vm';
+const ctx=vm.createContext({TextEncoder});vm.runInContext(readFileSync(new URL('../site/exports.js',import.meta.url),'utf8'),ctx);const api=vm.runInContext('SimproxFiles',ctx);
+test('CSV conserva números y protege texto que podría interpretarse como fórmula',()=>{const csv=api.csv([['Nombre','Caudal'],['=SUM(1;2)',-1.25],['A"B\nC',2]]);assert.ok(csv.startsWith('\ufeff'));assert.ok(csv.includes('"\'=SUM(1;2)";"-1.25"'));assert.ok(csv.includes('"A""B\nC"'));});
+test('tablas exportan valores del motor sin redondear y distinguen reacciones',()=>{const sheets=api.tables({title:'Prueba',nodes:[{id:'s',name:'Agua'},{id:'r',name:'Reactor'}]},{model:'IAPWS',engine:'DWSIM',elapsed_s:2,streams:{s:{temperature_K:300,pressure_Pa:101325,mass_flow_kg_s:1.23456789,phases:[{enthalpy_kJ_kg:100}]}},balances:[{id:'r',reactive:true,components:{Water:{in_kg_s:1,out_kg_s:2,residual_kg_s:-1}}}]});assert.equal(sheets[0].rows[1][1],1.23456789);assert.equal(sheets[0].rows[1][3],101.325);assert.equal(sheets[2].rows[1][4],-1);assert.match(sheets[2].rows[1][5],/generación/);});
+test('Excel es un paquete XLSX con varias hojas y texto literal seguro',()=>{const bytes=api.xlsx([{name:'Corrientes',rows:[['Agua & vapor','kg/s'],['=1+1',1.23456789]]},{name:'Balances',rows:[['Residuo',0]]}]);assert.equal(bytes[0],0x50);assert.equal(bytes[1],0x4b);mkdirSync(new URL('../.build/',import.meta.url),{recursive:true});writeFileSync(new URL('../.build/export-test.xlsx',import.meta.url),bytes);assert.ok(new TextDecoder().decode(bytes).includes('t="inlineStr"'));});

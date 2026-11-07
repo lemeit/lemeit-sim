@@ -68,3 +68,48 @@ y el extremo se ajusta a él. Los puertos ocupados siguen protegidos.
 La ventana separada abre con **Equipos y corrientes** visible. El botón **Biblioteca**
 permite ocultarla o recuperarla dentro de Solo diagrama. Conserva sus controles de
 arrastre, alta de objetos y ancho ajustable.
+
+## Menús y herramientas
+
+Los menús abren de a uno. Con un menú abierto, pasar por otro cambia el desplegable;
+el clic posterior mantiene abierto el que se acaba de seleccionar. Escape y un clic
+fuera cierran. Flechas izquierda/derecha cambian de menú; arriba/abajo recorren
+acciones. Ctrl+N, Ctrl+O y Ctrl+S actúan sobre el proyecto fuera de los diálogos.
+
+- Archivo: nuevo, abrir, recuperar, guardar, cerrar y exportar resultados.
+- Simulación: calcular, revisar conexiones/especificaciones, modelo y compuestos.
+- Ver: diagrama, biblioteca, ventana separada, pantalla completa y balances.
+- Ejemplos: acceso directo a los tres casos implementados.
+- Herramientas: configuración, estado del motor y diagnóstico/actividad.
+- Ayuda: alcance, documentación y licencias.
+
+Configuración permite variar los decimales de las tablas y ocultar las ayudas del
+lienzo. Las preferencias son locales; no modifican el cálculo ni las exportaciones.
+
+## Diagnóstico y estado
+
+Estado del motor comprueba manualmente /api/catalog, registra fecha y latencia,
+catálogo disponible y estado del último cálculo. No representa CPU/memoria,
+no inicia servicios y no da acceso a registros privados del servidor.
+
+Diagnóstico muestra una revisión básica, el mensaje original del último fallo y
+sugerencias por tipo de mensaje. Las sugerencias no prueban la causa del error.
+La actividad conserva hasta 30 entradas en memoria de esa vista; se pierde al
+recargar y no es una auditoría persistente del servidor. Descargar diagnóstico
+genera un archivo local con esos datos, sin incluir credenciales de conexión.
+
+## Exportaciones y panel de resultados
+
+El borde superior del panel permite cambiar su altura; también se puede enfocar
+con Tab y usar arriba/abajo. Home o doble clic restablece un tamaño de trabajo.
+× oculta el panel; Ver → Mostrar balances y resultados lo recupera.
+↗ abre otra vista sincronizada con resultados del mismo workspace. Mantener abierta
+la principal; no se recalcula por abrir la vista. Esta función no es multiusuario.
+
+Solo se exportan resultados vigentes:
+- CSV de corrientes o de balances: UTF-8 con BOM, separador punto y coma y punto decimal.
+- Excel .xlsx: hojas Corrientes, Balances, Componentes y Datos. Celdas numéricas con
+  los valores originales, unidades en encabezados, modelo y versión del motor.
+
+La exportación ocurre en el navegador, sin nuevos servicios. El formato de pantalla
+no redondea los valores exportados. Los resultados son de una simulación, no mediciones.
