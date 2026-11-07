@@ -188,3 +188,18 @@ arrastrarlo verticalmente elige el eje vertical. Esto no modifica las conexiones
 Al mover un extremo se reinicia el codo manual para adaptar el recorrido a la
 nueva disposición. Los proyectos antiguos conservan sus extremos; la orientación
 manual antigua deja de forzar la dirección de la flecha.
+
+## Instalar ΣIM · 0.4.0
+
+Abrir sim.lemeit.ar en un navegador compatible. Usar el icono de instalación de
+la barra de direcciones o la opción de instalar del menú del navegador. Si el
+navegador emite beforeinstallprompt, también aparece Ayuda → Instalar ΣIM.
+No se muestra un botón sin acción cuando el navegador no ofrece instalación.
+La instalación crea un acceso con la sigma roja y abre una ventana independiente;
+no instala el motor DWSIM ni permite calcular sin servidor. No requiere registro.
+La PWA conserva únicamente la página explicativa offline y su estilo. Las API y
+las solicitudes POST no se interceptan ni se guardan en esa caché. La interfaz
+sigue usando la red para evitar archivos de versiones anteriores. El guardado
+JSON y el almacenamiento local de proyectos conservan su funcionamiento habitual.
+
+Referencia: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable

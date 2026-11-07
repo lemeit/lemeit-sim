@@ -24,3 +24,11 @@ la preferencia simprox-theme y el archivo simprox-theme.css se conservan para
 no invalidar temas, pruebas ni proyectos existentes. No son nombres públicos.
 No se modifican dominio, Worker, túnel, motor, claves ni licencias anteriores.
 El pie conserva la atribución Lemeit y los enlaces de licencias.
+
+## Iconos y PWA · 0.4.0
+
+Favicon cuadrado: sigma angular roja #CF263B sobre carbón #101215. Se ajusta
+la altura de los trazos para tamaños pequeños. Respaldos icon-16.png e icon-32.png
+y favicon.ico multiresolución. Iconos de instalación 192/512 y Apple 180. La variante
+icon-maskable-512.png coloca la sigma dentro del círculo seguro central para
+soportar recortes del sistema sin perder sus extremos. Todos son opacos.

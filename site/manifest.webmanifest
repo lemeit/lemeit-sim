@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "ΣIM · Simulación de procesos",
+  "short_name": "ΣIM",
+  "description": "Simulación de procesos con motor DWSIM. Los cálculos requieren conexión al servidor.",
+  "lang": "es-AR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101215",
+  "theme_color": "#101215",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
