@@ -6,6 +6,19 @@ Sitio: https://sim.lemeit.ar · Diseño: https://design.lemeit.ar
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
+## Flujo de trabajo
+
+La aplicación abre sin proyecto activo y sin cargar una simulación de ejemplo.
+Archivo → Nuevo proyecto solicita nombre, componentes y modelo de propiedades;
+crea un diagrama vacío. Después se agregan corrientes y equipos desde la biblioteca,
+se conectan sus puertos y se especifican sus condiciones en el inspector.
+Archivo → Abrir proyecto importa JSON. La copia del último proyecto se recupera
+solo por una acción explícita, no al entrar. Los ejercicios están en el menú
+Ejemplos; nunca se abren por defecto. Ver [guía de trabajo](docs/workflow.md).
+
+Si el motor no responde, un catálogo de nombres/modelos tomado de DWSIM permite
+preparar archivos sin calcular. No contiene propiedades físicas ni resultados.
+
 ## Disponible
 
 Corrientes de materia y energía; mezclador, divisor de dos salidas, calentador y
@@ -55,6 +68,20 @@ HTTP en 5901 esté iniciado. Los cálculos se serializan y tienen 45 s de límit
 Las condiciones se envían al servidor para calcular. No se guardan ejercicios en
 la nube: Guardar descarga JSON; Abrir restaura el proceso. Existe guardado local
 automático en el navegador; borrar datos del sitio lo elimina.
+
+## Encender y detener el cálculo online
+
+La conexión publicada usa credenciales privadas ya configuradas en la PC del
+operador. No están en GitHub ni se descargan al navegador. Desde la carpeta local:
+
+```powershell
+.\start-online.ps1 -EngineRoot "C:\ruta\a\dwsim-server"
+.\stop-online.ps1 -EngineRoot "C:\ruta\a\dwsim-server"
+```
+
+No se instaló inicio automático de Windows: después de reiniciar la PC hay que
+volver a iniciar el servicio. Apagar el servicio no elimina el editor de Cloudflare.
+Los archivos origin-key.txt y tunnel-token.txt no deben publicarse ni compartirse.
 
 ## Desarrollar y comprobar
 

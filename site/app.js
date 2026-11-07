@@ -13,6 +13,8 @@ const TYPES = {
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
+let hasProject=false,engineOnline=false,draftCompounds=[];
+const emptyProject=()=>({version:1,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (value, digits=3) => Number.isFinite(value) ? (Math.abs(value)<.5*10**(-digits)?0:value).toLocaleString('es-AR',{maximumFractionDigits:digits}) : '—';
 const blankResults = $('results').innerHTML;
@@ -27,7 +29,17 @@ function notice(message,error=false){$('notice').hidden=!message;$('notice').tex
 function persist(){try{localStorage.setItem('lemeit-process-v1',JSON.stringify(graph));}catch{/* Guardar archivo sigue disponible. */}}
 function changed({physical=true}={}){
   if(physical){revision++;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent='Cambios pendientes de calcular';}
-  persist();renderDiagram();
+  if(hasProject)persist();renderDiagram();
+}
+function updateControls(){
+  $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;
+  $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
+  $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
+  document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
+  try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
+  const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
+  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><div><button class="outline-button" data-start="new">Nuevo proyecto</button><button class="quiet-button" data-start="open">Abrir proyecto…</button></div>';
+  document.body.classList.toggle('no-project',!hasProject);
 }
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
 function isStream(n){return n.type.endsWith('Stream');}
@@ -78,6 +90,7 @@ function renderDiagram(){
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Seleccioná un equipo o una corriente para editar sus propiedades.';
   $('connection-hint').classList.toggle('active',!!pending);
+  updateControls();
 }
 function field(key,label,unit,value,options={}){
   return `<label class="field"><span class="field-label"><span>${esc(label)}</span><span>${esc(unit)}</span></span><input data-field="${key}" type="${options.text?'text':'number'}" value="${esc(value??'')}" ${options.text?'maxlength="45"':'step="any" '+(options.min!==undefined?`min="${options.min}"`:'')} required></label>`;
@@ -119,7 +132,7 @@ function renderInspector(){
   html+='<button class="delete-button" id="delete-selected">Eliminar objeto y sus conexiones</button>';container.innerHTML=html;
 }
 function addNode(type,pos){
-  if(busy||!Object.hasOwn(TYPES,type))return;
+  if(busy||!hasProject||!Object.hasOwn(TYPES,type))return;
   if(graph.nodes.length>=30)return notice('Esta versión admite hasta 30 objetos.',true);
   const t=TYPES[type];let number=1;while(graph.nodes.some(n=>n.name===`${t.short} ${number}`))number++;
   const node={id:'n'+crypto.randomUUID().replaceAll('-','').slice(0,16),type,name:`${t.short} ${number}`,x:pos?.x??290+(graph.nodes.length%4)*45,y:pos?.y??90+(graph.nodes.length%5)*55};
@@ -155,6 +168,7 @@ function renderResults(){
   $('calculation-state').textContent='Proceso calculado · resultados vigentes';
 }
 async function calculate(){
+  if(!hasProject||!engineOnline)return;
   if(busy)return;notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph);
@@ -164,12 +178,12 @@ async function calculate(){
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
     result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
   }catch(error){notice(error.message,true);$('calculation-state').textContent='Revisá los datos y las conexiones';}
-  finally{busy=false;document.body.classList.remove('calculating');$('calculate-button').disabled=!catalog;$('calculate-button').innerHTML='<span aria-hidden="true">▷</span> Calcular proceso';}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML='<span aria-hidden="true">▷</span> Calcular';}
 }
 function renderCompounds(){
-  $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ');
+  $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
   $('compound-summary').title=graph.compounds.join(', ');
-  $('model-note').textContent=graph.model==='Steam Tables (IAPWS-IF97)'?'Agua pura · tablas IAPWS-IF97':'Revisá la adecuación del modelo a la mezcla';
+  $('model-note').textContent=!hasProject?'Sin proyecto':graph.model==='Steam Tables (IAPWS-IF97)'?'Agua pura · tablas IAPWS-IF97':'Revisá la adecuación del modelo a la mezcla';
   $('selected-compounds').innerHTML=graph.compounds.map(c=>`<button type="button" class="compound-chip" data-remove-compound="${esc(c)}">${esc(c)} ×</button>`).join('');
   const query=$('compound-search').value.toLowerCase();
   const matches=(catalog?.compounds||[]).filter(c=>!graph.compounds.includes(c)&&c.toLowerCase().includes(query));
@@ -193,10 +207,10 @@ function loadGraph(data){
   const ids=new Set();
   for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');}
-  graph=structuredClone(data);graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;$('project-title').value=graph.title;
+  graph=structuredClone(data);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
-async function resetExample(){if(busy)return;if(!confirm('¿Cargar el ejemplo? Los cambios actuales se reemplazarán. Podés guardarlos antes.'))return;try{const type=$('example-select').value;const data=type==='mix'?example():await (await fetch(`examples/${type}.json`)).json();loadGraph(data);notice('Ejemplo cargado. Son condiciones de un modelo, no datos experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
+async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const data=type==='mix'?example():await (await fetch(`examples/${type}.json`)).json();loadGraph(data);notice('Ejemplo cargado. Son condiciones de un modelo, no datos experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
 
 function bindEvents(){
   const svg=$('diagram');
@@ -247,10 +261,36 @@ function bindEvents(){
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>100000)throw new Error('El archivo supera los 100 kB.');const data=JSON.parse(await file.text());loadGraph(data);notice('Proceso abierto. Calculá para obtener resultados actualizados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
-  TexTheme.init();graph=example();
-  try{const saved=localStorage.getItem('lemeit-process-v1');if(saved)loadGraph(JSON.parse(saved));}catch{graph=example();notice('No se pudo recuperar la copia local. Se cargó el ejemplo.',true);}
-  $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();
-  try{const response=await fetch('/api/catalog');const data=await response.json();if(!response.ok)throw new Error(data.error);catalog=data;$('model-select').innerHTML=catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');$('model-select').value=graph.model;$('model-select').disabled=false;$('calculate-button').disabled=false;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';renderCompounds();}
-  catch(error){$('engine-state').textContent='Motor sin conexión';$('engine-state').className='engine-state offline';notice(error.message+' Recargá la página después de iniciar el motor.',true);}
+  TexTheme.init();graph=emptyProject();
+  $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();
+  try{const response=await fetch('/api/catalog');const data=await response.json();if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';}
+  catch(error){engineOnline=false;$('engine-state').textContent='Motor sin conexión';$('engine-state').className='engine-state offline';try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
+  if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  renderCompounds();updateControls();
+}
+function newProject(){
+  if(busy)return;if(!catalog)return notice('El catálogo todavía se está cargando. Volvé a intentar.',true);
+  draftCompounds=[];$('new-component-search').value='';$('new-project-error').textContent='';
+  $('new-project-model').innerHTML='<option value="">Seleccioná un modelo…</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+  renderNewProject();$('new-project-dialog').showModal();closeMenus();
+}
+function closeMenus(){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));}
+function renderNewProject(){
+  const query=$('new-component-search').value.toLowerCase();
+  $('new-selected-compounds').innerHTML=draftCompounds.map(c=>`<button type="button" class="compound-chip" data-new-remove="${esc(c)}">${esc(c)} ×</button>`).join('');
+  const matches=(catalog?.compounds||[]).filter(c=>!draftCompounds.includes(c)&&c.toLowerCase().includes(query));
+  $('new-component-list').innerHTML=matches.slice(0,35).map(c=>`<button type="button" class="compound-option" data-new-add="${esc(c)}">+ ${esc(c)}</button>`).join('');
+  $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
+}
+function bindProjectEvents(){
+  $('new-project-button').onclick=newProject;$('new-project-toolbar').onclick=newProject;
+  $('cancel-project').onclick=()=>$('new-project-dialog').close();$('cancel-project-bottom').onclick=()=>$('new-project-dialog').close();
+  $('new-component-search').oninput=renderNewProject;$('new-project-model').onchange=renderNewProject;
+  $('new-project-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-new-add]'),remove=e.target.closest('[data-new-remove]');if(add&&draftCompounds.length<8)draftCompounds.push(add.dataset.newAdd);if(remove)draftCompounds=draftCompounds.filter(c=>c!==remove.dataset.newRemove);renderNewProject();});
+  $('new-project-form').onsubmit=e=>{e.preventDefault();const model=$('new-project-model').value;if(!draftCompounds.length||!model)return;if(model==='Steam Tables (IAPWS-IF97)'&&(draftCompounds.length!==1||draftCompounds[0]!=='Water')){$('new-project-error').textContent='IAPWS-IF97 es para agua pura. Elegí otro modelo para esta mezcla.';return;}loadGraph({...emptyProject(),title:$('new-project-name').value.trim()||'Proceso sin título',compounds:[...draftCompounds],model});$('new-project-dialog').close();notice('');$('calculation-state').textContent='Proyecto nuevo · diagrama vacío';};
+  $('start-panel').onclick=e=>{const action=e.target.closest('[data-start]')?.dataset.start;if(action==='new')newProject();if(action==='open')$('file-input').click();};
+  $('recent-button').onclick=()=>{try{const saved=localStorage.getItem('lemeit-process-v1');if(saved)loadGraph(JSON.parse(saved));closeMenus();}catch(error){notice(error.message,true);}};
+  $('confirm-example').onclick=()=>{resetExample();closeMenus();};
+  document.querySelectorAll('.menu-panel>button').forEach(b=>b.addEventListener('click',()=>{if(b.id!=='example-button')closeMenus();}));
 }
 init();

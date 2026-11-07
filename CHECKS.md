@@ -32,3 +32,11 @@ No se ejecutaron Hugo/Quartz: sus fuentes no cambiaron.
   implementadas de operaciones pendientes. Prioridad: procesos básicos.
 - El túnel de cálculo no se creó: requiere la autorización específica solicitada
   por la revisión automática. La interfaz puede publicarse antes de conectarlo.
+
+## Entorno de proyectos
+
+Verificado en navegador: inicio con 0 objetos, asistente de proyecto con Water e
+IAPWS-IF97, creación de diagrama vacío y habilitación de la biblioteca, agregado
+de una corriente y apertura explícita de un ejemplo mediante confirmación propia.
+El inicio no recupera automáticamente ni el ejemplo ni el último proyecto.
+El pie y los iconos claro/oscuro provienen del sitio TeX solicitado.

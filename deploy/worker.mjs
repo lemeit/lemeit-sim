@@ -31,7 +31,8 @@ export async function handle(request, env, assets=ASSETS) {
     if(!env.ORIGIN_KEY||!env.ENGINE_URL)return error(503,'El motor todavía no está configurado.');
     try {
       const upstream=await fetch(env.ENGINE_URL+url.pathname,{method:request.method,
-        headers:{'Content-Type':'application/json','X-Origin-Key':env.ORIGIN_KEY,'Origin':url.origin},
+        headers:{'Content-Type':'application/json','X-Origin-Key':env.ORIGIN_KEY,'Origin':url.origin,
+          'User-Agent':request.headers.get('User-Agent')||'LemeitSim/0.2'},
         body,redirect:'error',signal:AbortSignal.timeout(55000)});
       if(!upstream.headers.get('Content-Type')?.includes('application/json'))return error(503,'El motor no está disponible. La PC de cálculo puede estar apagada o sin conexión.');
       return new Response(upstream.body,{status:upstream.status,headers:headers('application/json; charset=utf-8')});

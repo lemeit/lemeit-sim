@@ -65,8 +65,9 @@ class Engine:
                 packages = self.call('dwsim_thermo_list_property_packages', flowsheet_id=fid)['property_packages']
             finally:
                 self.call('dwsim_flowsheet_close', flowsheet_id=fid)
-            self.catalog = {'compounds': compounds['compounds'], 'models': [p for p in MODELS if p in packages],
-                            'engine': 'DWSIM 10.2.15', 'compound_count': compounds['count']}
+            names = [c for c in compounds['compounds'] if c.strip()]
+            self.catalog = {'compounds': names, 'models': [p for p in MODELS if p in packages],
+                            'engine': 'DWSIM 10.2.15', 'compound_count': len(names)}
         return self.catalog
 
 
