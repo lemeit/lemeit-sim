@@ -33,10 +33,10 @@ export async function handle(request, env, assets=ASSETS) {
       const upstream=await fetch(env.ENGINE_URL+url.pathname,{method:request.method,
         headers:{'Content-Type':'application/json','X-Origin-Key':env.ORIGIN_KEY,'Origin':url.origin,
           'User-Agent':request.headers.get('User-Agent')||'LemeitSim/0.2'},
-        body,redirect:'error',signal:AbortSignal.timeout(55000)});
-      if(!upstream.headers.get('Content-Type')?.includes('application/json'))return error(503,'El motor no está disponible. La PC de cálculo puede estar apagada o sin conexión.');
+        body,redirect:'manual',signal:AbortSignal.timeout(55000)});
+      if(!upstream.headers.get('Content-Type')?.includes('application/json'))return error(503,`El motor no está disponible. Respuesta de conexión: HTTP ${upstream.status}.`);
       return new Response(upstream.body,{status:upstream.status,headers:headers('application/json; charset=utf-8')});
-    }catch{return error(503,'El motor no está disponible. La PC de cálculo puede estar apagada o sin conexión.');}
+    }catch(cause){console.warn(JSON.stringify({event:'engine_connection_failed',reason:String(cause)}));return error(503,'El motor no está disponible. La PC de cálculo puede estar apagada o sin conexión.');}
   }
   if(!['GET','HEAD'].includes(request.method))return error(405,'Método no disponible.');
   const path=url.pathname==='/'?'/index.html':url.pathname;
