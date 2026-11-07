@@ -1,4 +1,4 @@
-/* SIMPROX: componentes del simulador sobre el sistema visual propio simprox-theme.css. */
+/* ΣIM: componentes del simulador sobre el sistema visual propio simprox-theme.css. */
 body{
   margin:0;
   font-family:var(--spx-font-sans);
@@ -941,7 +941,7 @@ footer.site-footer{font-family:var(--spx-font-mono)}.footer-wordmark{font-family
 #diagram{touch-action:none;user-select:none}
 .palette-symbol,.palette-item span{pointer-events:none}
 .node .resize-handle,.node .bend-handle{fill:var(--spx-surface);stroke:var(--spx-accent);stroke-width:2}
-.resize-handle{cursor:nwse-resize}.bend-handle{cursor:ew-resize}
+.resize-handle{cursor:nwse-resize}.bend-handle{cursor:move}
 .node .snap-target .port{opacity:1;fill:var(--spx-good);stroke:var(--spx-good);stroke-width:5}
 .node .snap-target .port-target{fill:var(--spx-good);opacity:.16}
 .equipment-symbol{vector-effect:non-scaling-stroke}
@@ -970,7 +970,7 @@ body.diagram-focus.diagram-library .equipment-panel .catalog-link{display:block}
 body.diagram-focus.diagram-library .diagram-panel{grid-column:2;min-width:0}
 @media(max-width:540px){body.diagram-focus.diagram-library .workspace{grid-template-columns:140px minmax(0,1fr)}}
 
-/* SIMPROX: cabecera de aplicación y barra única de herramientas. */
+/* ΣIM: cabecera de aplicación y barra única de herramientas. */
 .sim-shell{background:var(--spx-bg)}
 
 .sim-shell .app-header{height:42px;min-height:42px;padding:0 10px;gap:20px;background:#090c0e;color:#f5f5f3;border-bottom:1px solid #333;box-shadow:none}
@@ -1043,7 +1043,7 @@ body.results-window .results-resizer{display:none}
 
 .sim-shell .results-panel{display:flex;flex-direction:column;overflow:hidden}.results-panel .results-heading{flex:0 0 auto}#results{flex:1;min-height:0;overflow:auto}body.results-window #results-panel{display:flex}
 
-/* Ventanas SIMPROX: cabecera compacta y cierre discreto a la derecha. */
+/* Ventanas ΣIM: cabecera compacta y cierre discreto a la derecha. */
 dialog{padding:14px 16px 16px;border:1px solid var(--spx-border);border-radius:2px;box-shadow:0 16px 50px #0005;background:var(--spx-surface);color:var(--spx-text)}
 dialog::backdrop{background:#06090d99}
 .dialog-heading{position:sticky;top:-14px;z-index:2;display:flex;align-items:center;justify-content:space-between;min-height:34px;padding:4px 8px 4px 12px;margin:-14px -16px 14px;gap:12px;border:0;border-left:3px solid var(--spx-accent);border-bottom:1px solid var(--spx-border);border-radius:0;background:var(--spx-surface-2);color:var(--spx-text)}
@@ -1076,7 +1076,7 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 .monitor-auto{display:flex;align-items:center;gap:8px;font-size:11px;margin:12px 0}dialog .monitor-auto input{margin:0}
 @media(max-width:760px){.sim-shell footer.site-footer{align-items:flex-start;flex-wrap:wrap}.footer-service{gap:3px 10px;flex:1}.connection-monitor-button{flex-wrap:wrap;white-space:normal;gap:3px 8px}.footer-meta{white-space:normal;font-size:8px}.footer-projects{align-self:flex-end}.engine-metrics{font-size:8px}}
 
-.bend-handle[data-axis="y"]{cursor:ns-resize}
+.bend-handle[data-axis="y"]{cursor:move}
 /* Inspector de corrientes 0.2: controles compactos y resultados por fase. */
 .stream-tabs{display:flex;gap:2px;border-bottom:1px solid var(--spx-border);margin:12px 0}
 .stream-tabs button{flex:1;padding:7px 3px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--spx-text-dim);font-size:11px}
@@ -1089,3 +1089,9 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 .stream-composition th,.stream-composition td{padding:5px 3px;border-bottom:1px solid var(--spx-border);text-align:right;overflow-wrap:anywhere}
 .stream-composition th:first-child{text-align:left;max-width:100px}
 .inspector-readings .reading-row{gap:8px}.inspector-readings .reading-row b{text-align:right;overflow-wrap:anywhere}
+
+/* Marca ΣIM · Retro técnico. */
+.sim-shell .app-header{background:#101215;color:#F4F3EE}
+.sim-shell .sim-brand{width:180px;flex-basis:180px;height:40px}
+.sim-brand>img{display:block;width:100%;height:100%;object-fit:contain}
+@media(max-width:760px){.sim-shell .sim-brand{width:150px;flex-basis:150px;height:36px}}

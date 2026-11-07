@@ -177,3 +177,14 @@ La disponibilidad del servicio y el último cálculo son estados independientes:
 un error de datos no demuestra que el motor esté desconectado. Las comprobaciones
 de catálogo no ejecutan corridas ni borran el estado del cálculo anterior.
 Se conservan los últimos 40 eventos de esta vista; se pierden al recargar.
+
+## Edición directa de corrientes · 0.3.0
+
+No hay selector de dirección en Propiedades. La punta libre se orienta de acuerdo
+con su posición respecto del otro extremo; el tramo conectado sigue la orientación
+del puerto. Durante una desconexión, la vista previa ya trata ese extremo como libre.
+Arrastrar el control intermedio horizontalmente desplaza el codo horizontal;
+arrastrarlo verticalmente elige el eje vertical. Esto no modifica las conexiones.
+Al mover un extremo se reinicia el codo manual para adaptar el recorrido a la
+nueva disposición. Los proyectos antiguos conservan sus extremos; la orientación
+manual antigua deja de forzar la dirección de la flecha.

@@ -230,3 +230,15 @@ siguen administradas por Cloudflare. Fecha de compatibilidad preservada.
 error HTTP 400 con mensaje escapado, duración y conservación del estado online;
 otra comprueba que un GET de catálogo no borre un cálculo completado. Build con
 comprobación de versión correcto. No cambia el motor ni el backend.
+
+## ΣIM y edición directa · 0.3.0
+
+37 pruebas JS aprobadas. Las pruebas nuevas verifican orientación automática con
+un valor orientation heredado, vista previa de desconexión y cambio de eje del
+codo sin alterar topología. Continúan pasando las pruebas de puertos de energía,
+reconexión, extremos visibles y conservación de tamaño al desconectar.
+En navegador sobre vista estática 5918 (sin motor): se cargó un ejemplo, se
+comprobó ausencia del selector y se arrastró la punta hacia arriba. El path terminó
+con un segmento V ascendente. Luego se desplazó el codo horizontalmente, manteniendo
+la punta vertical. Logo SVG visible en la cabecera. No se ejecutaron cálculos del
+motor porque esta entrega solo modifica representación gráfica y marca.

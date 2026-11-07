@@ -65,6 +65,8 @@ test('la energía entra al conector inferior del calentador apuntando hacia arri
 test('la energía sale hacia abajo del conector inferior del enfriador',()=>{
  const run=editor();const g=run(`graph.nodes=[{id:'c',name:'Enfriador',type:'Cooler',x:300,y:100},{id:'q',name:'Calor',type:'EnergyStream',x:340,y:350,endX:360,endY:450}];graph.edges=[{from:'c',to:'q',fromPort:'energy-out',toPort:'in'}];return streamGeometry(nodeById('q'));`);assert.match(g.d,/^M360 200 V/);assert.match(g.d,/ V450$/);
 });
-test('orientar una corriente libre no modifica conexiones ni agrega objetos',()=>{
- const run=editor();const actual=run(`graph.edges=[];const n=nodeById('c1');orientStream(n,'up');const g=streamGeometry(n);return {g,count:graph.nodes.length,edges:graph.edges.length};`);assert.equal(actual.count,4);assert.equal(actual.edges,0);assert.ok(actual.g.b.y<actual.g.a.y);assert.match(actual.g.d,/ V/);
+test('el extremo libre se orienta hacia donde se arrastra, aunque el archivo tenga una dirección anterior',()=>{
+ const run=editor();const actual=run(`graph.edges=[];const n=nodeById('c1');n.orientation='right';n.endX=n.x;n.endY=20;return streamGeometry(n);`);assert.match(actual.d,/ V20$/);
 });
+test('la vista previa del extremo desconectado toma su nueva dirección',()=>{const run=editor();const g=run(`const n=nodeById('c1');endpointDrag={node:n.id,side:'out',moved:true,preview:{x:90,y:20}};return streamGeometry(n);`);assert.match(g.d,/ V20$/);});
+test('el codo puede cambiar de eje sin cambiar la topología',()=>{const run=editor();const actual=run(`const n=nodeById('c1'),before=JSON.stringify(graph.edges);setStreamBend(n,'y',70);const g=streamGeometry(n);return {g,unchanged:before===JSON.stringify(graph.edges)};`);assert.equal(actual.g.bend.axis,'y');assert.match(actual.g.d,/V70/);assert.equal(actual.unchanged,true);});

@@ -16,9 +16,9 @@ La aplicación y su integración se distribuyen bajo GPL-3.0-or-later.
 El servidor y la interfaz propios están en este repositorio; no se modificó el motor.
 Este proyecto es una integración pedagógica independiente y no una edición oficial de DWSIM.
 
-## Diseño SIMPROX y antecedentes
+## Diseño ΣIM y antecedentes
 
-SIMPROX UI es el sistema visual propio en desarrollo de este simulador: estética
+ΣIM UI (antes SIMPROX) es el sistema visual propio en desarrollo de este simulador: estética
 retro tecnológica inspirada en Robotech, con negro, blanco y rojo. Los tokens y
 el cambio de tema activos están en simprox-theme.css y theme-toggle.js; no cargan
 lemeit-theme.css ni importan tipografías de Google Fonts. Se usan fuentes locales.
@@ -41,3 +41,5 @@ La disponibilidad de otro modelo no implica que sea adecuado para cualquier mezc
 Los ejemplos son cálculos de modelos, no mediciones experimentales.
 
 Pie, marca tipográfica y control de tema: adaptación del sitio propio https://tex.lemeit.ar/ (lemeit/aboutme, apps/tex/site). No se reutiliza el logotipo TeX como identidad del simulador.
+
+Marca ΣIM: reconstrucción vectorial propia basada en la referencia del usuario, opción 02 Retro técnico. El logo activo es assets/sim-logo.svg; la bajada está convertida en curvas, sin incrustar archivos de fuente. La propuesta PNG anterior de SIMPROX queda solo como antecedente.
