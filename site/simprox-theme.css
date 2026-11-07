@@ -1,0 +1,23 @@
+/* SIMPROX UI v0.1 — sistema visual independiente en desarrollo.
+   Dirección: retro tecnológica, inspiración Robotech, negro/blanco/rojo.
+   Sin dependencia de lemeit-design. Tipografías locales del sistema. */
+:root {
+ --spx-bg:#f3f3f2; --spx-surface:#fff; --spx-surface-2:#ededed;
+ --spx-text:#202124; --spx-text-dim:#62666c; --spx-border:#d6d7d9;
+ --spx-accent:#c61c30; --spx-accent-dim:#fbe8eb;
+ --spx-good:#397137; --spx-moderate:#936100; --spx-bad:#b52236;
+ --spx-shadow:#0000001a; --spx-radius:3px; --spx-radius-sm:2px;
+ --spx-font-sans:"Segoe UI",Arial,Helvetica,sans-serif;
+ --spx-font-mono:Consolas,"Liberation Mono",ui-monospace,monospace;
+ --spx-titlebar:#090c0e; --spx-titlebar-text:#f5f5f3;
+ --spx-close-bg:#c61c30; --spx-close-hover:#a21023; --spx-close-fg:#fff;
+}
+:root[data-theme="dark"] {
+ --spx-bg:#151719; --spx-surface:#1b1e21; --spx-surface-2:#25292d;
+ --spx-text:#eef0f2; --spx-text-dim:#a6abb2; --spx-border:#363b42;
+ --spx-accent:#ff4a60; --spx-accent-dim:#392027;
+ --spx-good:#91bd7c; --spx-moderate:#dbb45c; --spx-bad:#ff7a89;
+ --spx-shadow:#00000066;
+}
+.simprox-root,.simprox-root body{background:var(--spx-bg);color:var(--spx-text);font-family:var(--spx-font-sans)}
+.simprox-root *{box-sizing:border-box}
