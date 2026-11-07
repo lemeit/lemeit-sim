@@ -34,3 +34,6 @@ servicio online de ese motor si ya existe, evitando duplicados por cambiar de co
 
 Una vista de desarrollo en otro puerto es otro servicio y debe detenerse por
 separado. No hay inicio automático de Windows configurado por estos scripts.
+
+## Motor dentro del repositorio
+Ubicación predeterminada: .local/runtime (privada y excluida de Git). Desde la raíz del repositorio ejecutar ./start-online.ps1 o ./stop-online.ps1 sin parámetros. Para una ubicación distinta sigue disponible -EngineRoot. El modo local se inicia con ./start-local.ps1. Los registros quedan en .local/runtime.
