@@ -3,7 +3,8 @@ const ASSETS = /* ASSETS */ {};
 const CSP = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
 
 function headers(type) {
-  return {'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
+  // Evitar que la inyección automática de analíticas contradiga la CSP del editor.
+  return {'Content-Type':type,'Cache-Control':'no-store, no-transform','X-Content-Type-Options':'nosniff',
     'Content-Security-Policy':CSP,'Referrer-Policy':'strict-origin-when-cross-origin'};
 }
 function error(status, message) {

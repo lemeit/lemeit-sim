@@ -331,7 +331,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def end_headers(self):
         self.send_header('X-Content-Type-Options', 'nosniff')
-        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Cache-Control', 'no-store, no-transform')
         self.send_header('Content-Security-Policy', "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
         super().end_headers()
 

@@ -23,3 +23,14 @@ activo, la aplicación avisa antes de reemplazarlo. No son resultados experiment
 La interfaz permanece disponible cuando el motor está desconectado. Se pueden
 crear y guardar diagramas con el catálogo de nombres guardado; no se inventan
 resultados ni se habilita Calcular hasta contar con el motor.
+
+## Manejo del lienzo y paneles
+
+Las corrientes de materia se representan con flechas; las de energía, con línea
+discontinua. Sus extremos conservan los puertos para conectar equipos.
+La rueda del mouse o el gesto de pinza del trackpad cambian el zoom alrededor del
+puntero. Los botones + y − acercan y alejan; Ajustar recupera la vista del proceso.
+Alt + arrastrar, o arrastrar con el botón central, desplaza el lienzo.
+En pantallas de más de 760 px, arrastrar el borde interior de los paneles laterales
+cambia su ancho. También se puede enfocar el separador con Tab y usar las flechas;
+un doble clic restaura el ancho original.

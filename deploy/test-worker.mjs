@@ -4,6 +4,8 @@ import {handle} from './worker.mjs';
 test('interfaz disponible sin motor',async()=>{
   const r=await handle(new Request('https://sim.lemeit.ar/'),{}, {'/index.html':{type:'text/html',data:btoa('Editor')}});
   assert.equal(r.status,200);assert.equal(await r.text(),'Editor');
+  assert.match(r.headers.get('Cache-Control'),/no-transform/);
+  assert.match(r.headers.get('Content-Security-Policy'),/script-src 'self';/);
 });
 test('un origen ajeno no puede calcular',async()=>{
   const r=await handle(new Request('https://sim.lemeit.ar/api/simulate',{method:'POST',headers:{Origin:'https://example.com'}}),{});

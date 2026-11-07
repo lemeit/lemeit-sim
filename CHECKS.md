@@ -58,3 +58,16 @@ El ajuste de conexión publicado se propone por rama/PR, sin fusionarlo automát
 
 Siguen pendientes las pruebas de carga de una clase y el siguiente bloque de equipos.
 La PC debe estar encendida para calcular; no se instaló inicio automático de Windows.
+
+## Interacción del editor: 6 de noviembre de 2026
+
+Corrientes dibujadas como flechas SVG con área de selección transparente y puertos,
+sin tarjetas de equipos. Zoom con rueda/pinza, botones, desplazamiento con Alt
+o botón central y separadores accesibles en paneles laterales.
+Verificación en la web publicada: tres corrientes del ejemplo sin rectángulos de
+equipo; botón de zoom a 120 %, rueda a 219 %, Ajustar a 100 %; panel de propiedades
+de 265 a 275 px con teclado y a 343 px arrastrando su borde. Sin errores de consola
+en esa sesión. El gesto físico de pinza y el desplazamiento con Alt quedan pendientes
+de comprobación manual. node --check site/app.js y las seis pruebas del Worker pasaron.
+Se conserva CSP script-src self y se agrega no-transform para evitar inyección
+automática de analíticas. La consola administrativa solo se planifica en la hoja de ruta.
