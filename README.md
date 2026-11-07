@@ -1,5 +1,7 @@
 # ΣIM
 
+<img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
+
 Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
 Marca: ΣIM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
 Sitio: https://sim.lemeit.ar · Identidad propia ΣIM, inspirada en tecnología retro: negro, blanco y rojo.
@@ -9,11 +11,16 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.3.0 — Identidad ΣIM y edición directa de corrientes**, en desarrollo.
-Σ griega mayúscula seguida de I y M latinas. Bajada: Simulación de procesos.
-Logo independiente SVG con letras trazadas, basado en la opción 02 Retro técnico.
-La versión 0.2.2 es la base fusionada en main; esta entrega espera su propio PR.
-Ver [identidad visual y archivos del logo](docs/brand-sim.md).
+**0.3.0 — Identidad ΣIM y edición directa de corrientes**, implementada y fusionada
+en `main` mediante el [PR #14](https://github.com/lemeit/lemeit-sim/pull/14).
+La versión que recibe el navegador depende del último despliegue exitoso de
+Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
+separados, aunque Workers Builds automatiza el segundo.
+
+Nombre exacto: **ΣIM**, sigma griega mayúscula seguida de **I** y **M** latinas.
+Bajada: **Simulación de procesos**. Reemplaza a SIMPROX; el dominio y el repositorio
+mantienen sus direcciones.
+
 La versión del portal es independiente del motor DWSIM 10.2.15.
 Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 
@@ -61,27 +68,92 @@ reactor se lee de DeltaQ del motor e incluye el calor de reacción.
   composiciones másicas/molares. Caudal volumétrico global derivado de masa/densidad.
 - Proyectos anteriores compatibles: TP, kg/s y base másica por defecto.
 
-### Edición, resultados y operación
+### Identidad visual · 0.3.0
 
-- Corrientes con extremos reconectables y recorrido ortogonal ajustable; orientación
-  automática al arrastrar extremos, codos movibles en ambos ejes y símbolos de equipos con tamaño gráfico ajustable.
+La opción elegida es **02 · Retro técnico**: letras angulares e inclinadas, estética
+tecnológica de los 80 inspirada en Robotech y consolas. Σ roja e IM en blanco cálido
+sobre carbón. La bajada se presenta pequeña, espaciada y en mayúsculas.
+
+| Elemento | Archivo o color |
+| --- | --- |
+| Logo independiente | [sim-logo.svg](site/assets/sim-logo.svg) |
+| Favicon sigma | [favicon.svg](site/assets/favicon.svg) |
+| Carbón | `#101215` |
+| Blanco cálido | `#F4F3EE` |
+| Rojo | `#CF263B` |
+
+El SVG es una reconstrucción vectorial de la referencia aprobada. El nombre y la
+bajada están convertidos en curvas: no dependen de fuentes instaladas ni contienen
+un PNG incrustado. Ver [guía de identidad](docs/brand-sim.md).
+Las claves y los identificadores técnicos del tema anterior se conservan para
+mantener compatibilidad; la marca visible es ΣIM.
+
+### Edición directa de corrientes · 0.3.0
+
+La orientación se resuelve en el lienzo, sin un selector de dirección en Propiedades.
+
+| Acción | Comportamiento |
+| --- | --- |
+| Arrastrar un extremo libre | La flecha se orienta según la posición de sus extremos. |
+| Acercarlo a un puerto compatible libre | El extremo se ajusta al puerto y respeta su orientación. |
+| Desconectar un extremo arrastrándolo | La vista previa toma la nueva dirección durante el movimiento. |
+| Arrastrar el control intermedio horizontal o verticalmente | Desplaza el codo en el eje elegido, sin cambiar las conexiones. |
+| Mover nuevamente un extremo | Reinicia el codo manual anterior para adaptar el recorrido. |
+| Abrir un proyecto antiguo | Conserva los extremos; la dirección manual heredada deja de forzar la flecha. |
+
+Se mantienen el recorrido ortogonal, la protección de puertos ocupados y la
+compatibilidad materia/energía. Los símbolos de equipos permiten ajustar su tamaño
+gráfico; no equivale a dimensionar físicamente un equipo.
+
+### Paneles, resultados y archivos
+
 - Paneles laterales y balances ajustables; diagrama y resultados separables en ventanas
   sincronizadas del mismo navegador. Mantener abierta la ventana principal.
 - Balances de materia y energía, exportación CSV y Excel, diagnóstico con mensaje
   original del motor y sugerencias orientativas.
-- Monitor de conexión con HTTP, latencia y antigüedad de la comprobación. Indica
-  disponibilidad del servicio; no mide CPU ni ejecuta un cálculo de prueba.
 - Ventanas minimalistas, modo claro/oscuro, guardado JSON y recuperación local.
+- Mover símbolos o codos y cambiar unidades de presentación conserva los resultados;
+  cambiar condiciones físicas o conexiones exige volver a calcular.
+
+### Monitor de conexión y cálculos · desde 0.2.2
+
+El monitor separa dos tipos de eventos:
+
+| Evento | Qué informa |
+| --- | --- |
+| **CONEXIÓN** · `GET /api/catalog` | Disponibilidad del servicio, HTTP, latencia y catálogo. No ejecuta una corrida. |
+| **CÁLCULO** · `POST /api/simulate` | Inicio, finalización o error, HTTP cuando hay respuesta y duración de la solicitud completa. |
+
+Una comprobación del catálogo no borra el estado del último cálculo. Una simulación
+rechazada por datos inválidos tampoco implica que el servicio esté desconectado.
+El último cálculo indica En curso, Completado o Fallido. La duración incluye
+comunicación y cálculo; no es una medición exclusiva del solver.
+
+El seguimiento consulta cada 30 segundos mientras la vista está activa. Se conservan
+los últimos 40 eventos de esa vista y se pierden al recargar. No muestra CPU,
+procesos, terminal ni registros privados de la PC. El diagnóstico ofrece el error
+original y sugerencias orientativas, que no prueban su causa.
 
 ## Ejecución local
 
-Requisitos: Python 3.11+, Node 18+ solo para verificar/preparar la interfaz, y una
+Requisitos: Python 3.11+, Node 22+ (recomendado 24 para desarrollo y despliegue), y una
 distribución de DWSIM MCP 10.2.15 para Windows x64. La carpeta del motor contiene
 server/dwsim-mcp.exe y sus dependencias. No se incluyen binarios del motor.
 No requiere paquetes Python de terceros ni la aplicación de escritorio.
 Ubicación predeterminada del motor: `.local/runtime`, dentro del repositorio local.
 Incluye DWSIM, configuración privada y registros, excluidos de Git.
 Puede usarse otra ubicación mediante `-EngineRoot "C:\ruta\al\motor"`.
+
+```text
+lemeit-sim/
+├── site/                 Interfaz y logo vectorial
+├── deploy/               Worker, build y verificaciones
+├── server.py             Intermediario con DWSIM
+├── start-local.ps1       Vista local en 5910
+├── start-online.ps1      Gateway en 5911 y túnel
+├── stop-online.ps1       Detiene gateway y túnel
+└── .local/runtime/       Motor, configuración y registros privados; fuera de Git
+```
 
 ```powershell
 .\start-local.ps1
@@ -126,10 +198,10 @@ Los archivos origin-key.txt y tunnel-token.txt no deben publicarse ni compartirs
 ## Desarrollar y comprobar
 
 ```powershell
-node --check site/app.js
-node --test deploy/test-*.mjs
-python -m unittest discover -s . -p "test_*.py" -v
-node deploy/build.mjs
+npm ci
+npm run build:verified
+python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+npm run deploy:check
 ```
 
 Para pruebas aisladas reales en PowerShell:
@@ -142,9 +214,16 @@ python -m unittest test_stream_properties test_server.IsolatedIntegrationTests -
 Las pruebas históricas EngineIntegrationTests requieren además el MCP HTTP 5901;
 las pruebas aisladas anteriores no lo necesitan.
 .build/ y los archivos de credenciales no se versionan. El Worker publicado se
-prepara desde los archivos de site/. Esta entrega agrega configuración para
-Workers Builds: al conectar el repositorio, cada actualización de main publica el Worker.
+prepara desde los archivos de site/. Workers Builds ya está conectado al repositorio:
+cada actualización de main inicia pruebas, compilación y publicación del Worker.
 GitHub Actions comprueba los PR; no realiza un segundo despliegue.
+Si el portal conserva una versión anterior, revisar el estado y los registros del
+build en Cloudflare. La primera conexión del repositorio no ejecutó un build por
+sí sola: ese primer despliegue se inició manualmente y terminó correctamente.
+
+El despliegue web no actualiza server.py en la PC. Si cambia el backend, hay que
+actualizar la copia local aprobada y reiniciar el servicio online. Esta entrega de
+marca y corrientes no modifica el motor ni las ecuaciones.
 Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
@@ -167,11 +246,15 @@ El pie de dos colores y el control de tema se adaptaron del sitio tex.lemeit.ar.
 No se incorporan componentes exclusivos de Patreon. Esta integración no es una
 edición oficial de DWSIM.
 
-## Herramientas de trabajo
+## Documentación y verificación
 
-Menús con navegación por teclado, configuración de presentación, comprobación manual
-de conexión y diagnóstico del último cálculo. Resultados redimensionables, ocultables
-y separables en otra vista sincronizada. Exportación local CSV y Excel .xlsx de
-resultados vigentes. Ver [guía de trabajo](docs/workflow.md).
+La entrega 0.3.0 pasó 37 pruebas JS, compilación y empaquetado de Wrangler sin
+publicar. Se verificaron en navegador la ausencia del selector, el arrastre de una
+punta hacia arriba, el movimiento horizontal del codo y Acerca de 0.3.0.
+Ver [detalle de comprobaciones](CHECKS.md). Estas verificaciones gráficas no
+sustituyen las pruebas de cálculo con DWSIM ni las futuras pruebas de carga.
+
+[Guía de trabajo](docs/workflow.md) · [Historial completo](docs/CHANGELOG.md) ·
+[Identidad y logo](docs/brand-sim.md) · [Despliegue automático](docs/despliegue-automatico.md).
 
 [Servicios y arranque/apagado](docs/operacion-local.md) · [Propuesta de acceso sin correo para alumnos](docs/acceso-propuesto.md).
