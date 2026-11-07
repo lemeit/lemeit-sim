@@ -109,3 +109,32 @@ Los cambios permanecen locales/en PR hasta esa aprobación.
 
 Además se verificó el arrastre real desde la biblioteca al lienzo: creó una sola
 corriente y ninguna unidad térmica adicional. Se cerró el menú de ejemplos al cargar.
+
+## Extremos estables y biblioteca heredada
+
+Se corrigió la copia de coordenadas DOMPoint: las propiedades x/y pueden ser
+accesores del prototipo y desaparecer al usar object spread. svgPoint devuelve
+ahora un objeto plano y la geometría copia x/y explícitamente. Se conservan ambos
+extremos al desconectar; soltar sobre el extremo opuesto mantiene una longitud
+mínima visible en lugar de colapsar el símbolo.
+
+Pasaron 17 pruebas: las 14 anteriores y tres regresiones para coordenadas tipo
+DOMPoint, extremo fijo tras mover el equipo y desconexión sobre el otro extremo.
+En la vista previa local se desconectó la punta derecha: quedó un path válido y
+377 px de ancho, con cuatro objetos. No se observó error de consola en esa sesión.
+La ventana separada mostró la biblioteca al abrir; agregar una corriente desde
+ella se reflejó en la principal (cinco objetos), y eliminarla volvió a cuatro.
+No se ejecutó un cálculo nuevo: estos cambios corresponden al editor.
+
+## SIMPROX y barra compacta: 7 de noviembre de 2026
+
+Cabecera 42 px y barra única 34 px medidos en la vista previa local; cero project-bar
+adicionales. El nombre del proyecto se integra a la barra, y modelo/compuestos al
+menú Simulación. Se incorpora la opción A del PNG del usuario, con clipping SVG;
+el wordmark aún no es un SVG independiente. Nuevo favicon vectorial del emblema.
+
+Se verificaron carga de ejemplo, menú de modelo, diálogo de componentes, temas
+claro/oscuro, acceso a las herramientas y vista separada con biblioteca. Menú móvil
+comprobado dentro del ancho de la ventana tras corregir la posición de Simulación.
+No se cambió el motor. Las 17 pruebas existentes y sintaxis JavaScript pasaron.
+El build queda preparado, sin publicación ni fusión automáticas.
