@@ -223,3 +223,10 @@ Wrangler correcto: 2491 KiB sin comprimir, 1416 KiB gzip. No se realizó desplie
 se conectó Workers Builds. El flujo GitHub Actions está preparado, pendiente de su
 primera ejecución remota al subir el PR. ORIGIN_KEY no se leyó ni copió; las rutas
 siguen administradas por Cloudflare. Fecha de compatibilidad preservada.
+
+## Aclaraciones del monitor · 0.2.2
+
+35 pruebas JS aprobadas. Nuevas pruebas ejercitan calculate: inicio/finalización,
+error HTTP 400 con mensaje escapado, duración y conservación del estado online;
+otra comprueba que un GET de catálogo no borre un cálculo completado. Build con
+comprobación de versión correcto. No cambia el motor ni el backend.
