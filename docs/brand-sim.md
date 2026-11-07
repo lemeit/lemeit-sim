@@ -32,3 +32,10 @@ la altura de los trazos para tamaños pequeños. Respaldos icon-16.png e icon-32
 y favicon.ico multiresolución. Iconos de instalación 192/512 y Apple 180. La variante
 icon-maskable-512.png coloca la sigma dentro del círculo seguro central para
 soportar recortes del sistema sin perder sus extremos. Todos son opacos.
+
+## Cabecera · 0.4.1
+
+Usar sim-wordmark.svg (solo ΣIM) en la cabecera y el catálogo. Se conserva el
+trazado original, ampliado en la barra de la misma altura. El logo completo con
+bajada en sim-logo.svg se usa en Acerca de, README y presentaciones. El favicon
+y los iconos de instalación mantienen la sigma sola.

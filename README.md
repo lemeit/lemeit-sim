@@ -11,7 +11,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.4.0 — Instalación PWA e iconos**, en desarrollo. Incorpora la identidad y
+**0.4.1 — Cabecera más legible**, en desarrollo. La barra superior muestra solo
+ΣIM, ampliado y sin la bajada pequeña. El logo completo se conserva en Acerca de
+y documentación. La configuración PWA procede de la 0.4.0. Incorpora la identidad y
 edición directa de corrientes de la 0.3.0.
 La versión que recibe el navegador depende del último despliegue exitoso de
 Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
@@ -76,6 +78,7 @@ sobre carbón. La bajada se presenta pequeña, espaciada y en mayúsculas.
 
 | Elemento | Archivo o color |
 | --- | --- |
+| Marca de cabecera sin bajada | [sim-wordmark.svg](site/assets/sim-wordmark.svg) |
 | Logo independiente | [sim-logo.svg](site/assets/sim-logo.svg) |
 | Favicon sigma | [favicon.svg](site/assets/favicon.svg) |
 | Carbón | `#101215` |
