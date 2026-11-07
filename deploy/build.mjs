@@ -1,3 +1,4 @@
+import {checkRelease} from './check-release.mjs';
 import {readFile,readdir,mkdir,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
@@ -10,6 +11,7 @@ async function collect(dir,prefix=''){
     else out[key]={type:mime[path.extname(entry.name)]||'application/octet-stream',data:(await readFile(file)).toString('base64')};
   }return out;
 }
+await checkRelease();
 const assets=await collect(path.join(root,'site'));
 const source=(await readFile(path.join(root,'deploy/worker.mjs'),'utf8')).replace('/* ASSETS */ {}',JSON.stringify(assets));
 await mkdir(path.join(root,'.build'),{recursive:true});

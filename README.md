@@ -1,11 +1,24 @@
 # SIMPROX
 
-Simulador pedagógico de procesos, con interfaz web en español y motor DWSIM.
+Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
 Marca: SIMPROX · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
-Sitio: https://sim.lemeit.ar · Diseño: https://design.lemeit.ar
+Sitio: https://sim.lemeit.ar · Identidad propia SIMPROX, inspirada en tecnología retro: negro, blanco y rojo.
 
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
+
+## Versión y estado
+
+**0.2.1 — Preparación del despliegue automático**, en desarrollo.
+Incluye las capacidades de corrientes y propiedades de la 0.2.0, ya fusionada en main.
+La última versión pública comprobada es **0.1.1**. La publicación de la versión nueva
+queda pendiente de fusionar esta configuración y conectar Workers Builds en Cloudflare.
+Ver [configuración paso a paso](docs/despliegue-automatico.md).
+La versión del portal es independiente del motor DWSIM 10.2.15.
+Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
+
+[Historial de versiones](docs/CHANGELOG.md) · [Guía de uso](docs/workflow.md) ·
+[Verificaciones realizadas](CHECKS.md) · [Operación local](docs/operacion-local.md).
 
 ## Flujo de trabajo
 
@@ -37,15 +50,41 @@ Los balances por especie de un reactor muestran consumo o generación: no se exi
 que una especie se conserve cuando participa en una reacción. La potencia del
 reactor se lee de DeltaQ del motor e incluye el calor de reacción.
 
+### Corrientes y propiedades · 0.2.0
+
+- Inspector con Condiciones, Composición y Resultados; entradas solo en alimentaciones.
+- Especificaciones TP, PH, PS, PV y TV. PS con IAPWS-IF97 está bloqueado por una
+  discrepancia verificada del motor; PS se validó con NRTL.
+- Unidades seleccionables, caudal másico o molar y composición másica o molar.
+  Las masas molares proceden de la base real de DWSIM.
+- Resultados globales y por fase: fracción de vapor, entalpía, entropía, densidad y
+  composiciones másicas/molares. Caudal volumétrico global derivado de masa/densidad.
+- Proyectos anteriores compatibles: TP, kg/s y base másica por defecto.
+
+### Edición, resultados y operación
+
+- Corrientes con extremos reconectables y recorrido ortogonal ajustable; orientación
+  horizontal/vertical y símbolos de equipos con tamaño gráfico ajustable.
+- Paneles laterales y balances ajustables; diagrama y resultados separables en ventanas
+  sincronizadas del mismo navegador. Mantener abierta la ventana principal.
+- Balances de materia y energía, exportación CSV y Excel, diagnóstico con mensaje
+  original del motor y sugerencias orientativas.
+- Monitor de conexión con HTTP, latencia y antigüedad de la comprobación. Indica
+  disponibilidad del servicio; no mide CPU ni ejecuta un cálculo de prueba.
+- Ventanas minimalistas, modo claro/oscuro, guardado JSON y recuperación local.
+
 ## Ejecución local
 
 Requisitos: Python 3.11+, Node 18+ solo para verificar/preparar la interfaz, y una
 distribución de DWSIM MCP 10.2.15 para Windows x64. La carpeta del motor contiene
 server/dwsim-mcp.exe y sus dependencias. No se incluyen binarios del motor.
 No requiere paquetes Python de terceros ni la aplicación de escritorio.
+Ubicación predeterminada del motor: `.local/runtime`, dentro del repositorio local.
+Incluye DWSIM, configuración privada y registros, excluidos de Git.
+Puede usarse otra ubicación mediante `-EngineRoot "C:\ruta\al\motor"`.
 
 ```powershell
-.\start-local.ps1 -EngineRoot "C:\ruta\a\dwsim-server"
+.\start-local.ps1
 ```
 
 Abrir http://localhost:5910. Ctrl+C detiene la aplicación. Cada cálculo inicia su
@@ -76,8 +115,8 @@ La conexión publicada usa credenciales privadas ya configuradas en la PC del
 operador. No están en GitHub ni se descargan al navegador. Desde la carpeta local:
 
 ```powershell
-.\start-online.ps1 -EngineRoot "C:\ruta\a\dwsim-server"
-.\stop-online.ps1 -EngineRoot "C:\ruta\a\dwsim-server"
+.\start-online.ps1
+.\stop-online.ps1
 ```
 
 No se instaló inicio automático de Windows: después de reiniciar la PC hay que
@@ -88,16 +127,33 @@ Los archivos origin-key.txt y tunnel-token.txt no deben publicarse ni compartirs
 
 ```powershell
 node --check site/app.js
-node --test deploy/test-worker.mjs
+node --test deploy/test-*.mjs
 python -m unittest discover -s . -p "test_*.py" -v
 node deploy/build.mjs
 ```
 
-La integración con el motor real requiere DWSIM_HOME apuntando a su carpeta.
+Para pruebas aisladas reales en PowerShell:
+
+```powershell
+$env:DWSIM_HOME = (Resolve-Path .local/runtime).Path
+python -m unittest test_stream_properties test_server.IsolatedIntegrationTests -v
+```
+
+Las pruebas históricas EngineIntegrationTests requieren además el MCP HTTP 5901;
+las pruebas aisladas anteriores no lo necesitan.
 .build/ y los archivos de credenciales no se versionan. El Worker publicado se
-prepara desde los archivos de site/; no hay un despliegue automático al hacer push.
+prepara desde los archivos de site/. Esta entrega agrega configuración para
+Workers Builds: al conectar el repositorio, cada actualización de main publica el Worker.
+GitHub Actions comprueba los PR; no realiza un segundo despliegue.
+Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
+
+Pendientes: bombas, válvulas, separadores e intercambiador con dos fluidos.
+El calentador/enfriador actual representa un fluido con intercambio de calor.
+También quedan pendientes recirculaciones, análisis económico, 3D y pruebas de carga
+para una clase. No hay registro de usuarios ni acceso por código de clase implementado.
+La [propuesta de acceso](docs/acceso-propuesto.md) documenta esa etapa futura.
 
 Prioridad elegida: bombas, válvulas, intercambiadores y separadores. Se usarán los
 tutoriales oficiales de DWSIM como referencias para casos de validación y guías

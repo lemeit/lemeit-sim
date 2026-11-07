@@ -1,0 +1,18 @@
+{
+  "name": "simprox",
+  "version": "0.2.1",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test deploy/test-*.mjs",
+    "build": "node deploy/build.mjs",
+    "build:verified": "npm test && npm run build",
+    "deploy": "wrangler deploy",
+    "deploy:check": "wrangler deploy --dry-run --outdir .build/dry-run"
+  },
+  "devDependencies": {
+    "wrangler": "4.158.0"
+  }
+}
