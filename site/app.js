@@ -68,8 +68,8 @@ function streamGeometry(n){
   const source=graph.edges.find(e=>e.to===n.id),target=graph.edges.find(e=>e.from===n.id);
   const a=source?point(nodeById(source.from),source.fromPort||'out',source.fromIndex||0):{x:n.startX??n.x,y:n.startY??(n.y+TYPES[n.type].h/2)};
   const b=target?point(nodeById(target.to),target.toPort||'in',target.toIndex||0):{x:n.endX??(n.x+TYPES[n.type].w),y:n.endY??(n.y+TYPES[n.type].h/2)};
-  const g={a:{...a},b:{...b}};
-  if(endpointDrag?.node===n.id&&endpointDrag.moved)g[endpointDrag.side==='in'?'a':'b']={...endpointDrag.preview};
+  const g={a:{x:a.x,y:a.y},b:{x:b.x,y:b.y}};
+  if(endpointDrag?.node===n.id&&endpointDrag.moved)g[endpointDrag.side==='in'?'a':'b']={x:endpointDrag.preview.x,y:endpointDrag.preview.y};
   const mid=n.routeX??(g.a.x+g.b.x)/2;g.mid=mid;
   g.d=`M${g.a.x} ${g.a.y} H${mid} V${g.b.y} H${g.b.x}`;
   g.label={x:(g.a.x+mid)/2,y:g.a.y-16};return g;
@@ -176,6 +176,11 @@ function connect(owner,side,index){
 }
 function finishEndpointDrag(drag){
   const n=nodeById(drag.node),medium=n.type==='EnergyStream'?'energy':'material',out=drag.side==='out';
+  const original=drag.original||streamGeometry(n);
+  const fixed=out?original.a:original.b;
+  const preview={x:drag.preview.x,y:drag.preview.y};
+  if(!Number.isFinite(preview.x)||!Number.isFinite(preview.y)){notice('No se pudo determinar la posición del extremo.',true);renderDiagram();return;}
+  drag={...drag,preview};
   let nearest=null,distance=Infinity;
   for(const unit of graph.nodes.filter(n=>!isStream(n)))for(const p of portList(unit)){
     const q={x:unit.x+p.x,y:unit.y+p.y},d=Math.hypot(q.x-drag.preview.x,q.y-drag.preview.y);
@@ -191,6 +196,9 @@ function finishEndpointDrag(drag){
     graph.edges.push(out?{from:n.id,to:unit.id,fromPort:'out',fromIndex:0,toPort:p.side,toIndex:p.index}:{from:unit.id,to:n.id,fromPort:p.side,fromIndex:p.index,toPort:'in',toIndex:0});
     notice('Corriente conectada.');
   }else{
+    const minimum=24/zoom;
+    if(Math.hypot(drag.preview.x-fixed.x,drag.preview.y-fixed.y)<minimum){const other=out?original.b:original.a,dx=other.x-fixed.x,dy=other.y-fixed.y,length=Math.hypot(dx,dy);drag.preview={x:fixed.x+(length?dx/length:(out?1:-1))*minimum,y:fixed.y+(length?dy/length:0)*minimum};}
+    n.startX=original.a.x;n.startY=original.a.y;n.endX=original.b.x;n.endY=original.b.y;
     graph.edges=graph.edges.filter(e=>out?e.from!==n.id:e.to!==n.id);
     n[out?'endX':'startX']=Math.max(0,Math.min(4000,drag.preview.x));n[out?'endY':'startY']=Math.max(0,Math.min(4000,drag.preview.y));
     notice('Extremo libre. Arrastralo a un puerto para conectarlo.');
@@ -203,7 +211,7 @@ function removeSelected(){
   else if(selection?.edge!==undefined)graph.edges.splice(selection.edge,1);
   selection=null;pending=null;changed();renderInspector();
 }
-function svgPoint(e){const p=$('diagram').createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform($('diagram').getScreenCTM().inverse());}
+function svgPoint(e){const p=$('diagram').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const world=p.matrixTransform($('diagram').getScreenCTM().inverse());return {x:world.x,y:world.y};}
 function renderResults(){
   if(!result)return;
   const rows=Object.entries(result.streams).map(([id,r])=>`<tr><td>${esc(nodeById(id)?.name||r.name)}</td><td>${fmt(r.mass_flow_kg_s,5)}</td><td>${fmt(r.temperature_K-273.15,3)}</td><td>${fmt(r.pressure_Pa/1000,3)}</td><td>${fmt(r.phases[0].enthalpy_kJ_kg,3)}</td><td>${fmt(r.phases[0].density_kg_m3,3)}</td></tr>`).join('');
@@ -299,7 +307,7 @@ function bindEvents(){
     e.preventDefault();
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend};svg.setPointerCapture(e.pointerId);return;}
-    const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
+    const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
     if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
     const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();
@@ -425,6 +433,7 @@ function publishWorkspace(physical=true){
 function bindDiagramWindow(){
   const focus=$('diagram-focus');
   const setFocus=enabled=>{document.body.classList.toggle('diagram-focus',enabled);focus.textContent=enabled?'Volver a paneles':'Solo diagrama';focus.setAttribute('aria-pressed',String(enabled));};
+  $('diagram-library').onclick=()=>{const visible=document.body.classList.toggle('diagram-library');$('diagram-library').setAttribute('aria-pressed',String(visible));};
   focus.onclick=()=>setFocus(!document.body.classList.contains('diagram-focus'));
   $('diagram-fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{setFocus(true);await document.documentElement.requestFullscreen();}}catch{notice('El navegador no permitió pantalla completa. Podés usar Solo diagrama.');}};
   if(typeof BroadcastChannel==='undefined'){$('diagram-popout').disabled=true;return;}
@@ -438,6 +447,6 @@ function bindDiagramWindow(){
   $('diagram-add').innerHTML='<option value="">Agregar…</option>'+Object.entries(TYPES).map(([type,t])=>`<option value="${type}">${esc(t.label)}</option>`).join('');$('diagram-add').onchange=e=>{if(e.target.value)addNode(e.target.value,{x:viewX+300/zoom,y:viewY+180/zoom});e.target.value='';};
   const separateURL=new URL(location.href);separateURL.search='';separateURL.searchParams.set('diagram','1');separateURL.searchParams.set('workspace',workspaceId);$('diagram-popout').href=separateURL.href;
   $('diagram-popout').onclick=e=>{e.preventDefault();const opened=window.open(separateURL.href,'lemeit-diagram-'+workspaceId,'popup,width=1280,height=850,resizable=yes,scrollbars=yes');if(!opened)notice('Permití la ventana emergente para separar el diagrama.');};
-  if(new URLSearchParams(location.search).get('diagram')==='1'){setFocus(true);workspaceChannel.postMessage({type:'request'});}
+  if(new URLSearchParams(location.search).get('diagram')==='1'){setFocus(true);document.body.classList.add('diagram-library');$('diagram-library').setAttribute('aria-pressed','true');workspaceChannel.postMessage({type:'request'});}
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]'))setFocus(false);});
 }

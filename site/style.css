@@ -960,3 +960,12 @@ body.diagram-focus{height:100dvh;overflow:hidden}
 .diagram-toolbar{flex-wrap:wrap;gap:6px}.zoom-controls{flex-wrap:wrap;gap:3px}
 
 .zoom-controls #diagram-popout{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--lm-border);border-radius:4px;color:var(--lm-text);text-decoration:none;min-height:25px;background:var(--lm-surface);cursor:pointer}
+
+#diagram-library{display:none;width:auto;padding:0 8px;font-size:10px}
+body.diagram-focus #diagram-library{display:inline-flex;align-items:center}
+body.diagram-focus.diagram-library .workspace{display:grid;grid-template-columns:var(--equipment-width,186px) minmax(0,1fr)}
+body.diagram-focus.diagram-library .equipment-panel{display:block;grid-column:auto;overflow-y:auto;min-height:0}
+body.diagram-focus.diagram-library .equipment-panel #palette{display:block}
+body.diagram-focus.diagram-library .equipment-panel .catalog-link{display:block}
+body.diagram-focus.diagram-library .diagram-panel{grid-column:2;min-width:0}
+@media(max-width:540px){body.diagram-focus.diagram-library .workspace{grid-template-columns:140px minmax(0,1fr)}}

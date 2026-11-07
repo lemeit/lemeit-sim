@@ -20,7 +20,7 @@ test('arrastrar un extremo libre conserva la corriente y desconecta solo ese ext
 });
 test('un extremo se reconecta al puerto libre y conserva el otro extremo',()=>{
  const run=editor();const actual=run(`finishEndpointDrag({node:'c1',side:'out',preview:{x:435,y:240}});return {edges:graph.edges,ends:streamGeometry(nodeById('c1'))};`);
- assert.equal(actual.edges.length,3);assert.equal(actual.edges.find(e=>e.from==='c1').toIndex,2);assert.deepEqual(actual.ends.b,{x:435,y:240,medium:'material'});
+ assert.equal(actual.edges.length,3);assert.equal(actual.edges.find(e=>e.from==='c1').toIndex,2);assert.deepEqual(actual.ends.b,{x:435,y:240});
 });
 test('un puerto ocupado o del sentido incorrecto no destruye la conexión previa',()=>{
  for(const preview of [{x:435,y:265},{x:555,y:240}]){
@@ -42,4 +42,17 @@ test('el movimiento de una corriente libre respeta ambos extremos explícitos',(
 test('acomodar el recorrido no agrega objetos ni cambia la conexión',()=>{
  const run=editor();const actual=run(`const before=JSON.stringify(graph.edges);nodeById('c1').routeX=300;return {path:streamGeometry(nodeById('c1')).d,edges:before===JSON.stringify(graph.edges),nodes:graph.nodes.length};`);
  assert.match(actual.path,/H300/);assert.equal(actual.edges,true);assert.equal(actual.nodes,4);
+});
+
+test('el extremo permanece dibujable con coordenadas de acceso como DOMPoint',()=>{
+ const run=editor();const actual=run(`const preview=Object.create({get x(){return 300;},get y(){return 400;}});endpointDrag={node:'c1',side:'out',moved:true,preview};return streamGeometry(nodeById('c1'));`);
+ assert.deepEqual(actual.b,{x:300,y:400});assert.doesNotMatch(actual.d,/undefined|NaN/);
+});
+test('desconectar conserva el extremo fijo real aunque la posición histórica sea distinta',()=>{
+ const run=editor();const actual=run(`const n=nodeById('c3');nodeById('m1').x=500;const original=streamGeometry(n);finishEndpointDrag({node:n.id,side:'out',original,preview:{x:900,y:400}});return streamGeometry(n);`);
+ assert.deepEqual(actual.a,{x:620,y:240});assert.deepEqual(actual.b,{x:900,y:400});
+});
+test('soltar el extremo sobre el otro no colapsa la corriente en un punto',()=>{
+ const run=editor();const actual=run(`const n=nodeById('c1'),original=streamGeometry(n);finishEndpointDrag({node:n.id,side:'out',original,preview:{...original.a}});const g=streamGeometry(n);return Math.hypot(g.b.x-g.a.x,g.b.y-g.a.y);`);
+ assert.ok(actual>=23.99);
 });

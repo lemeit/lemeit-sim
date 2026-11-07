@@ -109,3 +109,19 @@ Los cambios permanecen locales/en PR hasta esa aprobación.
 
 Además se verificó el arrastre real desde la biblioteca al lienzo: creó una sola
 corriente y ninguna unidad térmica adicional. Se cerró el menú de ejemplos al cargar.
+
+## Extremos estables y biblioteca heredada
+
+Se corrigió la copia de coordenadas DOMPoint: las propiedades x/y pueden ser
+accesores del prototipo y desaparecer al usar object spread. svgPoint devuelve
+ahora un objeto plano y la geometría copia x/y explícitamente. Se conservan ambos
+extremos al desconectar; soltar sobre el extremo opuesto mantiene una longitud
+mínima visible en lugar de colapsar el símbolo.
+
+Pasaron 17 pruebas: las 14 anteriores y tres regresiones para coordenadas tipo
+DOMPoint, extremo fijo tras mover el equipo y desconexión sobre el otro extremo.
+En la vista previa local se desconectó la punta derecha: quedó un path válido y
+377 px de ancho, con cuatro objetos. No se observó error de consola en esa sesión.
+La ventana separada mostró la biblioteca al abrir; agregar una corriente desde
+ella se reflejó en la principal (cinco objetos), y eliminarla volvió a cuatro.
+No se ejecutó un cálculo nuevo: estos cambios corresponden al editor.

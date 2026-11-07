@@ -64,3 +64,7 @@ se cambian sus resultados termodinámicos.
 Seleccioná una corriente y arrastrá el círculo central para desplazar su codo.
 Al arrastrar un extremo cerca de un puerto compatible y libre, el puerto se resalta
 y el extremo se ajusta a él. Los puertos ocupados siguen protegidos.
+
+La ventana separada abre con **Equipos y corrientes** visible. El botón **Biblioteca**
+permite ocultarla o recuperarla dentro de Solo diagrama. Conserva sus controles de
+arrastre, alta de objetos y ancho ajustable.
