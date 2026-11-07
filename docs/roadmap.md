@@ -22,7 +22,26 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Para reactores, Q procede de DeltaQ del motor (kW) leído de su estado XML;
   incorpora calor de reacción. No se estima solamente con diferencias de entalpía sensible.
 
-## Siguiente bloque elegido: procesos básicos
+## Próxima etapa: versión de administración
+
+Antes de preparar la versión para alumnos, incorporar un panel de administración:
+
+- Estado del motor y de la conexión: detenido, iniciando, disponible, calculando o con error.
+- Controles para iniciar y detener el servidor, con confirmación de su estado real.
+- Consola de actividad con fecha y hora, cálculos en curso, resultados y errores comprensibles.
+- Seguimiento de disponibilidad y fallos, con indicación de la última comprobación.
+- Registros sin tokens, secretos ni datos sensibles; controles reservados al administrador.
+
+El botón de inicio necesitará un componente local que permanezca disponible: una
+página web por sí sola no puede encender un proceso de una PC cuando todos sus
+servicios están detenidos. Definir ese mecanismo al implementar esta etapa.
+Esta planificación no activa vigilancia automática ni configura el inicio con Windows.
+
+Una vez estabilizado el funcionamiento, preparar la versión para alumnos, centrada
+en crear proyectos, configurar componentes y modelos, construir diagramas y analizar
+resultados, con mensajes claros cuando el motor no esté disponible.
+
+## Siguiente bloque de equipos elegido: procesos básicos
 
 1. Bombas y válvulas: presión absoluta, caída/aumento de presión, eficiencia,
    potencia y condiciones que permiten usar cada equipo.
