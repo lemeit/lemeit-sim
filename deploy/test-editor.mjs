@@ -1,0 +1,32 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const source=readFileSync(new URL('../site/app.js',import.meta.url),'utf8').replace(/^init\(\);$/m,'');
+function editor(){
+ const context=vm.createContext({document:{getElementById:id=>({innerHTML:'',getScreenCTM:()=>({a:1,b:0})})},console});
+ vm.runInContext(source,context);
+ vm.runInContext(`graph=example();changed=()=>{};renderInspector=()=>{};renderDiagram=()=>{};notice=()=>{};`,context);
+ return code=>JSON.parse(vm.runInContext(`JSON.stringify((()=>{${code}})())`,context));
+}
+test('una corriente conectada termina en el puerto del equipo y sigue su movimiento',()=>{
+ const run=editor();const actual=run(`const n=nodeById('c1');const before=streamGeometry(n);nodeById('m1').x+=100;const after=streamGeometry(n);return {before:before.b,after:after.b,a:after.a};`);
+ assert.equal(actual.after.x-actual.before.x,100);assert.equal(actual.after.y,actual.before.y);assert.deepEqual(actual.a,{x:90,y:135});
+});
+test('arrastrar un extremo libre conserva la corriente y desconecta solo ese extremo',()=>{
+ const run=editor();const actual=run(`finishEndpointDrag({node:'c1',side:'out',preview:{x:300,y:400}});return {edges:graph.edges.length,ends:streamGeometry(nodeById('c1')),count:graph.nodes.length};`);
+ assert.equal(actual.edges,2);assert.equal(actual.count,4);assert.deepEqual(actual.ends.b,{x:300,y:400});
+});
+test('un extremo se reconecta al puerto libre y conserva el otro extremo',()=>{
+ const run=editor();const actual=run(`finishEndpointDrag({node:'c1',side:'out',preview:{x:435,y:240}});return {edges:graph.edges,ends:streamGeometry(nodeById('c1'))};`);
+ assert.equal(actual.edges.length,3);assert.equal(actual.edges.find(e=>e.from==='c1').toIndex,2);assert.deepEqual(actual.ends.b,{x:435,y:240,medium:'material'});
+});
+test('un puerto ocupado o del sentido incorrecto no destruye la conexión previa',()=>{
+ for(const preview of [{x:435,y:265},{x:555,y:240}]){
+ const run=editor();const actual=run(`const before=JSON.stringify(graph.edges);finishEndpointDrag({node:'c1',side:'out',preview:${JSON.stringify(preview)}});return before===JSON.stringify(graph.edges);`);assert.equal(actual,true);
+ }
+});
+test('la salida libre puede conectarse desde el extremo inicial al equipo',()=>{
+ const run=editor();const actual=run(`graph.edges=graph.edges.filter(e=>e.to!=='c3');finishEndpointDrag({node:'c3',side:'in',preview:{x:555,y:240}});return graph.edges.find(e=>e.to==='c3');`);
+ assert.equal(actual.from,'m1');assert.equal(actual.to,'c3');
+});
