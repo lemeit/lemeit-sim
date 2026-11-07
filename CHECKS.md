@@ -163,3 +163,16 @@ Publicación y fusión quedan pendientes de aprobación del usuario.
 
 También se verificó altura por arrastre de 200 a 245 px y configuración de tablas
 a dos decimales (50,02 °C), restaurando luego tres decimales.
+
+## Identidad propia y cierres de ventanas
+
+Acerca de presenta SIMPROX como simulador de procesos y expresa su finalidad
+pedagógica y sin finalidad comercial. Se preservan las licencias de componentes.
+La interfaz deja de cargar Lemeit Design: usa simprox-theme.css, tokens --spx-*,
+fuentes locales y preferencia simprox-theme. Se conservan atribuciones históricas.
+
+Veinte pruebas y build correctos. Tokens utilizados contrastados contra sus
+propias definiciones. En la vista previa 5915 se verificaron texto, cierre SVG
+blanco sobre rojo en ambos temas, área de 32 px y cierre del diálogo Nuevo con
+nombre vacío sin quedar bloqueado por validación. Sin errores de consola de esa
+sesión. No se modificó ni volvió a ejecutar el cálculo del motor en este ajuste.

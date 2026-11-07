@@ -1,2 +1,2 @@
 'use strict';
-TexTheme.init();
+SimproxTheme.init();

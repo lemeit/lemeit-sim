@@ -24,3 +24,17 @@ conservan sus nombres actuales.
 El cambio no amplía las capacidades del motor ni los campos de una corriente.
 La siguiente prioridad es la ventana de corriente: condiciones, composición y
 resultados, con unidades y especificaciones consistentes con DWSIM.
+
+## Sistema visual independiente
+
+SIMPROX UI v0.1 es una línea propia inspirada en la estética retro tecnológica de
+Robotech. No es la versión de Lemeit Design: la hoja activa simprox-theme.css define
+sus tokens --spx-*, tipografías locales y temas. Los componentes de la aplicación
+se apoyan en esos tokens. La preferencia de tema se guarda como simprox-theme;
+se acepta la preferencia anterior solo como transición, sin volver a escribirla.
+
+Las ventanas usan cabecera oscura, acento rojo y cierre SVG blanco sobre rojo con
+área de 32 × 32 px, foco visible y acceso por teclado. El cierre no depende de la
+validación del formulario. La cabecera queda visible al desplazar su contenido.
+Las bibliotecas y temas de otros portales se podrán extraer después de estabilizar
+esta línea visual; no se modificaron esos portales ni el paquete lemeit-design.

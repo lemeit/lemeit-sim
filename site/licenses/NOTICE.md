@@ -13,19 +13,25 @@ Se conserva la licencia GPL en DWSIM-GPL-3.txt. Estos símbolos proceden de la
 distribución abierta; no se incorporaron recursos de Patreon/Plus.
 
 La aplicación y su integración se distribuyen bajo GPL-3.0-or-later.
-El servidor y el editor propios están en apps/procesos/; no se modificó el motor.
+El servidor y la interfaz propios están en este repositorio; no se modificó el motor.
 Este proyecto es una integración pedagógica independiente y no una edición oficial de DWSIM.
 
-## Lemeit Design
+## Diseño SIMPROX y antecedentes
 
-Estilos y utilidades originales: https://github.com/lemeit/lemeit-design
-Copias locales: vendor/lemeit-theme.css y vendor/lemeit-common.js.
-Licencia MIT, declarada en el README original conservado como LEMEIT-README.md.
-Los tokens y el cambio de tema se utilizan sin modificaciones.
-El CSS de la aplicación se agrega en style.css.
+SIMPROX UI es el sistema visual propio en desarrollo de este simulador: estética
+retro tecnológica inspirada en Robotech, con negro, blanco y rojo. Los tokens y
+el cambio de tema activos están en simprox-theme.css y theme-toggle.js; no cargan
+lemeit-theme.css ni importan tipografías de Google Fonts. Se usan fuentes locales.
 
-La tipografía JetBrains Mono se solicita mediante el CSS original a Google Fonts;
-si no hay conexión se utiliza la pila local de tipografías monoespaciadas.
+La versión inicial se apoyó en Lemeit Design:
+https://github.com/lemeit/lemeit-design. Se conservan las copias históricas
+vendor/lemeit-theme.css y vendor/lemeit-common.js, su licencia MIT y el README
+original LEMEIT-README.md como atribución y trazabilidad. Ya no son la hoja de
+estilos activa del simulador. El pie y el icono de tema proceden de la adaptación
+anterior del sitio propio tex.lemeit.ar; se conserva su atribución.
+
+La finalidad pedagógica y sin finalidad comercial describe el propósito de este
+proyecto; no cambia las licencias de distribución de DWSIM ni de los componentes.
 
 ## Datos y modelos
 
