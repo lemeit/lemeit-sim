@@ -1,5 +1,5 @@
 [CmdletBinding(SupportsShouldProcess=$true)]
-param([Parameter(Mandatory=$true)][string]$EngineRoot)
+param([string]$EngineRoot = (Join-Path $PSScriptRoot '.local/runtime'))
 $ErrorActionPreference = 'Stop'
 $runtime = (Resolve-Path -LiteralPath $EngineRoot).Path
 . (Join-Path $PSScriptRoot 'online-processes.ps1')

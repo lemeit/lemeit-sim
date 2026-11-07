@@ -1064,13 +1064,13 @@ dialog{padding:14px 16px 16px;border:1px solid var(--spx-border);border-radius:8
 .dialog-heading{min-height:30px;height:30px;padding:4px 36px;margin:-14px -16px 14px;border:0;border-bottom:1px solid var(--spx-border);border-radius:8px 8px 0 0;background:var(--spx-surface-2);color:var(--spx-text);top:-14px;gap:6px}
 .dialog-heading h2{font-size:12px;line-height:20px;font-weight:600;letter-spacing:0;text-align:center;flex:1}
 .dialog-heading .dialog-close{position:absolute;left:5px;top:3px;width:24px;height:24px;min-width:24px;min-height:24px;flex:0 0 24px;padding:0;border:0;background:transparent;color:#fff;border-radius:5px}
-.dialog-heading .dialog-close::before{content:'';position:absolute;width:12px;height:12px;left:6px;top:6px;border-radius:50%;background:#d3243b;border:1px solid #ab172b}
-.dialog-heading .dialog-close svg{position:relative;width:8px;height:8px;z-index:1;opacity:.9}
+.dialog-heading .dialog-close::before{content:'';position:absolute;box-sizing:border-box;width:12px;height:12px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#d3243b;border:1px solid #ab172b}
+.dialog-heading .dialog-close svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;z-index:1;opacity:.9}
 .dialog-heading .dialog-close:hover{background:transparent;border:0}.dialog-heading .dialog-close:hover::before{background:#a41025}
 .dialog-heading .dialog-close:focus-visible{outline:2px solid var(--spx-accent);outline-offset:1px}
 .results-tools #results-close{position:relative;width:24px;height:24px;padding:0;border:0;background:transparent;color:#fff}
 .results-tools #results-close::before{content:'';position:absolute;inset:6px;border-radius:50%;background:#d3243b}
-.results-tools #results-close svg{position:relative;width:8px;height:8px}
+.results-tools #results-close svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:8px;height:8px}
 .results-tools #results-close:hover{background:transparent}.results-tools #results-close:hover::before{background:#a41025}
 /* Franja de estado: conexión y referencias agrupadas; marca en el margen. */
 .sim-shell footer.site-footer{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-height:27px;padding:4px 10px;border-top:1px solid var(--spx-border);background:var(--spx-surface-2);font-size:9px}
