@@ -9,9 +9,11 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.2.0 — Corrientes y propiedades**, disponible en la rama de desarrollo y la
-instalación local. La versión publicada sigue en **0.1.1** hasta fusionar y publicar
-el [PR #11](https://github.com/lemeit/lemeit-sim/pull/11).
+**0.2.1 — Preparación del despliegue automático**, en desarrollo.
+Incluye las capacidades de corrientes y propiedades de la 0.2.0, ya fusionada en main.
+La última versión pública comprobada es **0.1.1**. La publicación de la versión nueva
+queda pendiente de fusionar esta configuración y conectar Workers Builds en Cloudflare.
+Ver [configuración paso a paso](docs/despliegue-automatico.md).
 La versión del portal es independiente del motor DWSIM 10.2.15.
 Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 
@@ -140,7 +142,10 @@ python -m unittest test_stream_properties test_server.IsolatedIntegrationTests -
 Las pruebas históricas EngineIntegrationTests requieren además el MCP HTTP 5901;
 las pruebas aisladas anteriores no lo necesitan.
 .build/ y los archivos de credenciales no se versionan. El Worker publicado se
-prepara desde los archivos de site/; no hay un despliegue automático al hacer push.
+prepara desde los archivos de site/. Esta entrega agrega configuración para
+Workers Builds: al conectar el repositorio, cada actualización de main publica el Worker.
+GitHub Actions comprueba los PR; no realiza un segundo despliegue.
+Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
 

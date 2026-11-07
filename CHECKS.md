@@ -214,3 +214,12 @@ La autenticación queda como propuesta documentada: no se activó registro ni lo
   resultado de alimentación 49.9969 °C y mezcla adiabática con corriente a 80 °C.
   Proyecto recuperado desde almacenamiento local y recalculado.
 - El servidor de pruebas usa procesos DWSIM aislados; no requiere iniciar MCP 5901.
+
+## Preparación de despliegue automático · 0.2.1
+
+Wrangler 4.158.0 fijado con package-lock.json. npm run build:verified pasó 32 pruebas
+JS y generó el Worker. Nueve pruebas de validación Python aprobadas. Dry-run real de
+Wrangler correcto: 2491 KiB sin comprimir, 1416 KiB gzip. No se realizó despliegue ni
+se conectó Workers Builds. El flujo GitHub Actions está preparado, pendiente de su
+primera ejecución remota al subir el PR. ORIGIN_KEY no se leyó ni copió; las rutas
+siguen administradas por Cloudflare. Fecha de compatibilidad preservada.

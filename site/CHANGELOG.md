@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.2.1 — 2026-11-07
+
+- Configuración reproducible de Wrangler para publicar el Worker existente desde Workers Builds al actualizar main; pendiente de conectar GitHub en Cloudflare.
+- GitHub Actions verifica PR y main: pruebas, versión, validación del servidor y preparación de despliegue sin publicar.
+- Se preservan las variables del panel y el secreto ORIGIN_KEY existente; no se incorporan claves al repositorio.
+- Se incorpora la actualización del README y el control de versión que quedaron fuera de la fusión anterior.
+- No modifica el motor ni automatiza la actualización de server.py en la PC.
+
 ## 0.2.0 — 2026-11-07
 
 - Inspector de corrientes con Condiciones, Composición y Resultados.
