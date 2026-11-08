@@ -11,7 +11,8 @@
     "mass_flow_kg_s": 1e-08,
     "enthalpy_kJ_kg": 0.0001,
     "density_kg_m3": 0.001,
-    "mass_fraction": 1e-08
+    "mass_fraction": 1e-08,
+    "vapor_fraction": 1e-07
   },
   "cases": {
     "mix": {
@@ -23,7 +24,8 @@
         "mass_flow_kg_s": 0.0,
         "enthalpy_kJ_kg": 0.0,
         "density_kg_m3": 0.0,
-        "mass_fraction": 0.0
+        "mass_fraction": 0.0,
+        "vapor_fraction": 0.0
       },
       "streams": {
         "Entrada 2": {
@@ -32,6 +34,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 334.99159894686136,
           "density_kg_m3": 971.8028995563232,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -42,6 +45,7 @@
           "mass_flow_kg_s": 2.0,
           "enthalpy_kJ_kg": 209.5023285343626,
           "density_kg_m3": 988.0378098246235,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -52,6 +56,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 84.0130581525964,
           "density_kg_m3": 998.2060924679474,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -69,7 +74,8 @@
         "mass_flow_kg_s": 0.0,
         "enthalpy_kJ_kg": 0.0,
         "density_kg_m3": 0.0,
-        "mass_fraction": 0.0
+        "mass_fraction": 0.0,
+        "vapor_fraction": 0.0
       },
       "streams": {
         "Salida 1": {
@@ -78,6 +84,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 251.2227374889226,
           "density_kg_m3": 983.2106104706116,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -88,6 +95,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 84.0130581525964,
           "density_kg_m3": 998.2060924679474,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -105,7 +113,8 @@
         "mass_flow_kg_s": 0.0,
         "enthalpy_kJ_kg": 0.0,
         "density_kg_m3": 0.0,
-        "mass_fraction": 0.0
+        "mass_fraction": 0.0,
+        "vapor_fraction": 0.0
       },
       "streams": {
         "Salida 1": {
@@ -114,6 +123,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 125.83371487056942,
           "density_kg_m3": 995.6520542416914,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -124,6 +134,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 334.99159894686136,
           "density_kg_m3": 971.8028995563232,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -141,7 +152,8 @@
         "mass_flow_kg_s": 0.0,
         "enthalpy_kJ_kg": 0.0,
         "density_kg_m3": 0.0,
-        "mass_fraction": 0.0
+        "mass_fraction": 0.0,
+        "vapor_fraction": 0.0
       },
       "streams": {
         "Salida 2": {
@@ -150,6 +162,7 @@
           "mass_flow_kg_s": 0.30000000000000004,
           "enthalpy_kJ_kg": 84.01305835193484,
           "density_kg_m3": 998.2060924581235,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -160,6 +173,7 @@
           "mass_flow_kg_s": 0.7,
           "enthalpy_kJ_kg": 84.01305835193484,
           "density_kg_m3": 998.2060924581235,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -170,6 +184,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 84.0130581525964,
           "density_kg_m3": 998.2060924679474,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 1.0
           }
@@ -187,7 +202,8 @@
         "mass_flow_kg_s": 0.0,
         "enthalpy_kJ_kg": 0.0,
         "density_kg_m3": 0.0,
-        "mass_fraction": 0.0
+        "mass_fraction": 0.0,
+        "vapor_fraction": 0.0
       },
       "streams": {
         "Entrada 2": {
@@ -196,6 +212,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": 203.69651981626671,
           "density_kg_m3": 43.243818367871185,
+          "vapor_fraction": 0.023747420023900415,
           "composition": {
             "Water": 0.3,
             "Ethanol": 0.7
@@ -207,6 +224,7 @@
           "mass_flow_kg_s": 2.0,
           "enthalpy_kJ_kg": 92.30801822493332,
           "density_kg_m3": 883.8744805166674,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 0.55,
             "Ethanol": 0.44999999999999996
@@ -218,6 +236,7 @@
           "mass_flow_kg_s": 1.0,
           "enthalpy_kJ_kg": -19.08048339649296,
           "density_kg_m3": 965.7922168825763,
+          "vapor_fraction": 0.0,
           "composition": {
             "Water": 0.7999999999999999,
             "Ethanol": 0.19999999999999998

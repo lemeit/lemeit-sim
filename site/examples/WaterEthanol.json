@@ -73,5 +73,5 @@
     }
   ],
   "title": "05 · Mezcla agua–etanol con NRTL",
-  "learning": "Mezclá 1 kg/s de agua–etanol 80/20 % másico a 20 °C con 1 kg/s 30/70 % másico a 80 °C. Usá NRTL y comprobá el balance por componente; el modelo incluye mezcla no ideal."
+  "learning": "Mezclá 1 kg/s de agua–etanol 80/20 % másico a 20 °C con 1 kg/s 30/70 % másico a 80 °C. Usá NRTL y comprobá el balance por componente; el modelo incluye mezcla no ideal. La entrada a 80 °C está parcialmente vaporizada: observá sus fases y cómo se condensan al mezclar."
 }

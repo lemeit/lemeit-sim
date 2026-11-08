@@ -53,10 +53,10 @@ Mezclá 1 kg/s de agua–etanol 80/20 % másico a 20 °C con 1 kg/s 30/70 % más
 ## Qué se comparó
 
 En todas las corrientes: temperatura, presión, caudal másico, entalpía, densidad y
-fracciones másicas globales. También potencia térmica por balance de entalpía.
+fracciones másicas globales y fracción molar de vapor. También potencia térmica por balance de entalpía.
 Diferencia máxima observada: 0 en los números serializados comparados de los cinco casos.
 Tolerancias absolutas: 1e-4 K, 0.1 Pa, 1e-8 kg/s, 1e-4 kJ/kg, 1e-3 kg/m³,
-1e-8 kg/kg y 1e-4 kW para calor. No se comprobó todo el catálogo ni todo el rango de operación.
+1e-8 kg/kg, 1e-7 mol/mol de vapor y 1e-4 kW para calor. No se comprobó todo el catálogo ni todo el rango de operación.
 
 Se conservaron los residuos reales del solver en el [informe JSON](validation/examples-0.5.0.json).
 Los valores |Q| menores que 1e-5 kW se presentan como cero en la tabla, no se cambian en el informe.
@@ -78,3 +78,11 @@ python tools/validate_examples.py --engine-root .local/runtime --output .local/v
 El script no cambia los proyectos fuente ni los archivos del usuario; guarda referencias
 en la carpeta de salida y rechaza sobrescribir una referencia existente. El informe resultante
 incluye todas las propiedades comparadas y sus diferencias. No requiere MCP HTTP 5901.
+
+### Fases en agua–etanol
+
+A 80 °C y 101.325 kPa la entrada 30/70 % másico presenta fracción molar de vapor
+0.023747420 (aproximadamente 2.375 %). La salida a 51.671926 °C es líquida. El balance
+de entalpía incorpora tanto el comportamiento de mezcla no ideal como el cambio
+de fase; no debe atribuirse la temperatura final únicamente al calor de mezcla.
+La fracción de vapor también se comparó entre ambas rutas de cálculo.

@@ -40,7 +40,7 @@ permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
 | Calentamiento | Calor requerido para 1 kg/s de 20 a 60 °C | +167.209679 kW |
 | Enfriamiento | Calor retirado de 1 kg/s de 80 a 30 °C | −209.157884 kW |
 | División | Distribución 70/30 de 1 kg/s | 0.7 y 0.3 kg/s |
-| Agua–etanol · NRTL | Balance por componente y mezcla no ideal | 2 kg/s a 51.671926 °C; 55/45 % másico |
+| Agua–etanol · NRTL | Balance por componente, mezcla no ideal y fases | 2 kg/s a 51.671926 °C; 55/45 % másico |
 
 Los cinco casos se recalcularon con el motor de ΣIM y la API oficial del DWSIM
 Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
