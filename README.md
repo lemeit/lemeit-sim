@@ -11,8 +11,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.4.1 — Cabecera más legible**, en desarrollo. La barra superior muestra solo
-ΣIM, ampliado y sin la bajada pequeña. El logo completo se conserva en Acerca de
+**0.4.2 — Marca discreta y descripción**, en desarrollo. La barra superior muestra
+ΣIM en tamaño compacto y «Simulación de procesos» al lado. El logo completo se conserva en Acerca de
 y documentación. La configuración PWA procede de la 0.4.0. Incorpora la identidad y
 edición directa de corrientes de la 0.3.0.
 La versión que recibe el navegador depende del último despliegue exitoso de
