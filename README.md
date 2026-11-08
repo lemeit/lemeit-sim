@@ -11,10 +11,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.4.2 — Marca discreta y descripción**, en desarrollo. La barra superior muestra
-ΣIM en tamaño compacto y «Simulación de procesos» al lado. El logo completo se conserva en Acerca de
-y documentación. La configuración PWA procede de la 0.4.0. Incorpora la identidad y
-edición directa de corrientes de la 0.3.0.
+**0.5.0 — Cinco ejemplos básicos validados**, en desarrollo. Incluye mezclado,
+calentamiento, enfriamiento, división de agua y mezcla agua–etanol con NRTL.
+[Guía de casos y comparación](docs/ejemplos-validados.md) · [Guía web](site/ejemplos.html).
 La versión que recibe el navegador depende del último despliegue exitoso de
 Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
 separados, aunque Workers Builds automatiza el segundo.
@@ -28,6 +27,29 @@ Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 
 [Historial de versiones](docs/CHANGELOG.md) · [Guía de uso](docs/workflow.md) ·
 [Verificaciones realizadas](CHECKS.md) · [Operación local](docs/operacion-local.md).
+
+## Biblioteca de ejemplos · 0.5.0
+
+Desde Ejemplos se abre cada caso con sus condiciones y una consigna breve. Son
+modelos calculados, no mediciones experimentales. La [guía](docs/ejemplos-validados.md)
+permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
+
+| Caso | Qué permite estudiar | Referencia calculada |
+| --- | --- | --- |
+| Mezcla de agua | Conservación de masa y entalpía; 1 kg/s a 20 °C + 1 kg/s a 80 °C | 2 kg/s a 50.021387 °C |
+| Calentamiento | Calor requerido para 1 kg/s de 20 a 60 °C | +167.209679 kW |
+| Enfriamiento | Calor retirado de 1 kg/s de 80 a 30 °C | −209.157884 kW |
+| División | Distribución 70/30 de 1 kg/s | 0.7 y 0.3 kg/s |
+| Agua–etanol · NRTL | Balance por componente, mezcla no ideal y fases | 2 kg/s a 51.671926 °C; 55/45 % másico |
+
+Los cinco casos se recalcularon con el motor de ΣIM y la API oficial del DWSIM
+Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
+de las tolerancias documentadas; el [informe](docs/validation/examples-0.5.0.json)
+conserva los valores sin redondear. Mezclado de agua y calentamiento se ejecutaron
+también en la interfaz de escritorio. No se afirma validación experimental ni
+comparación con un modelo físico independiente: ambas rutas usan DWSIM.
+
+Para repetir la comparación, ver [procedimiento y requisitos](docs/ejemplos-validados.md#repetir-la-comparación).
 
 ## Flujo de trabajo
 

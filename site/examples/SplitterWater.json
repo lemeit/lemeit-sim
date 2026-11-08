@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "nodes": [
+    {
+      "id": "a",
+      "type": "MaterialStream",
+      "name": "Entrada 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 90,
+      "y": 110
+    },
+    {
+      "id": "u",
+      "name": "Divisor",
+      "type": "Splitter",
+      "outlet_C": 30,
+      "split": 0.7,
+      "x": 440,
+      "y": 180
+    },
+    {
+      "id": "b",
+      "type": "MaterialStream",
+      "name": "Salida 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 700,
+      "y": 190
+    },
+    {
+      "id": "c",
+      "type": "MaterialStream",
+      "name": "Salida 2",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 700,
+      "y": 340
+    }
+  ],
+  "edges": [
+    {
+      "from": "a",
+      "to": "u"
+    },
+    {
+      "from": "u",
+      "to": "b"
+    },
+    {
+      "from": "u",
+      "to": "c",
+      "fromIndex": 1
+    }
+  ],
+  "title": "04 · División de una corriente",
+  "learning": "Dividí 1 kg/s de agua: 70 % hacia la salida 1 y 30 % hacia la salida 2. Compará composición, temperatura y caudales."
+}
