@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.4.1 — 2026-11-07
+
+- Cabecera del simulador y catálogo con marca ΣIM sin bajada, ampliada dentro de la misma barra.
+- Nuevo sim-wordmark.svg con el mismo trazado de letras; logo completo conservado en Acerca de y documentación.
+
 ## 0.4.0 — 2026-11-07
 
 - Manifest PWA de ΣIM: nombre, iconos, inicio y ventana standalone.
