@@ -252,3 +252,24 @@ Build y dry-run de Wrangler correctos (1465 KiB gzip). PNG cuadrados opacos con
 fondo carbón; ICO con resoluciones 16, 32, 48, 64, 128 y 256. El icono 192 se revisó
 visualmente. No se afirma instalación efectiva en el navegador del usuario: debe
 comprobarse en Chrome/Edge compatibles una vez desplegado sobre HTTPS.
+
+## Ejemplos básicos · 0.5.0
+
+Se ejecutaron cinco casos con el motor MCP de ΣIM y con la API Automation3 de las
+bibliotecas instaladas de DWSIM Open Source 10.2.15.0. Procesos separados por caso,
+archivos nativos exportados de las mismas entradas. Una segunda corrida con las
+propiedades y caudales de salida borrados también pasó las cinco comparaciones.
+Diferencia numérica observada: 0 en los valores serializados de temperatura,
+presión, caudal, entalpía, densidad y composición global de todas las corrientes.
+También se comparó la potencia térmica por balance de entalpía, tolerancia 1e-4 kW.
+Los residuos reales quedan en docs/validation/examples-0.5.0.json.
+
+En la interfaz de escritorio se abrió y recalculó mix.dwxml (Solve complete) y
+HeaterWater.dwxml (The flowsheet was calculated successfully; 167.21 kW visibles).
+La apertura reemplazó la vista actual de DWSIM; no se sobrescribieron archivos
+existentes del usuario. La segunda carga demoró; no se forzó el cierre del proceso.
+Los otros tres casos se comprobaron por API, no por la interfaz gráfica.
+
+41 pruebas JS aprobadas; nuevas pruebas Python validan fixtures, coherencia de
+entradas JSON/DWXML y rechazo de diferencias en el comparador. Los dos programas
+comparten DWSIM: no se presenta como validación experimental independiente.

@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "compounds": [
+    "Water",
+    "Ethanol"
+  ],
+  "model": "NRTL",
+  "nodes": [
+    {
+      "id": "a",
+      "type": "MaterialStream",
+      "name": "Entrada 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 0.8,
+        "Ethanol": 0.2
+      },
+      "x": 90,
+      "y": 110
+    },
+    {
+      "id": "u",
+      "name": "Mezclador",
+      "type": "Mixer",
+      "outlet_C": 30,
+      "split": 0.7,
+      "x": 440,
+      "y": 180
+    },
+    {
+      "id": "b",
+      "type": "MaterialStream",
+      "name": "Salida 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 700,
+      "y": 190
+    },
+    {
+      "id": "c",
+      "type": "MaterialStream",
+      "name": "Entrada 2",
+      "temperature_C": 80,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 0.3,
+        "Ethanol": 0.7
+      },
+      "x": 90,
+      "y": 330
+    }
+  ],
+  "edges": [
+    {
+      "from": "a",
+      "to": "u"
+    },
+    {
+      "from": "u",
+      "to": "b"
+    },
+    {
+      "from": "c",
+      "to": "u",
+      "toIndex": 1
+    }
+  ],
+  "title": "05 · Mezcla agua–etanol con NRTL",
+  "learning": "Mezclá 1 kg/s de agua–etanol 80/20 % másico a 20 °C con 1 kg/s 30/70 % másico a 80 °C. Usá NRTL y comprobá el balance por componente; el modelo incluye mezcla no ideal."
+}

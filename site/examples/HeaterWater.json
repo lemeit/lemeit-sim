@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "nodes": [
+    {
+      "id": "a",
+      "type": "MaterialStream",
+      "name": "Entrada 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 90,
+      "y": 110
+    },
+    {
+      "id": "u",
+      "name": "Calentador",
+      "type": "Heater",
+      "outlet_C": 60,
+      "split": 0.7,
+      "x": 440,
+      "y": 180
+    },
+    {
+      "id": "b",
+      "type": "MaterialStream",
+      "name": "Salida 1",
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 700,
+      "y": 190
+    },
+    {
+      "id": "q",
+      "name": "Calor",
+      "type": "EnergyStream",
+      "x": 435,
+      "y": 390
+    }
+  ],
+  "edges": [
+    {
+      "from": "a",
+      "to": "u"
+    },
+    {
+      "from": "u",
+      "to": "b"
+    },
+    {
+      "from": "q",
+      "to": "u",
+      "toPort": "energy-in"
+    }
+  ],
+  "title": "02 · Calentamiento de agua",
+  "learning": "Calentá 1 kg/s de agua de 20 a 60 °C y consultá la potencia térmica. Se especifica temperatura de salida; DWSIM calcula el calor."
+}
