@@ -39,3 +39,8 @@ Usar sim-wordmark.svg (solo ΣIM) en la cabecera y el catálogo. Se conserva el
 trazado original, ampliado en la barra de la misma altura. El logo completo con
 bajada en sim-logo.svg se usa en Acerca de, README y presentaciones. El favicon
 y los iconos de instalación mantienen la sigma sola.
+
+## Ajuste de cabecera · 0.4.2
+
+Marca de 86 × 24 px con la descripción Simulación de procesos al lado, en texto
+legible de 10 px. Barra de 42 px sin cambios. En móvil: marca de 76 × 21 px.

@@ -1092,8 +1092,9 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 
 /* Marca ΣIM · Retro técnico. */
 .sim-shell .app-header{background:#101215;color:#F4F3EE}
-.sim-shell .sim-brand{width:160px;flex-basis:160px;height:40px}
-.sim-brand>img{display:block;width:100%;height:100%;object-fit:contain}
-@media(max-width:760px){.sim-shell .sim-brand{width:150px;flex-basis:150px;height:36px}}
+.sim-shell .sim-brand{width:auto;flex:0 0 auto;height:40px;display:flex;align-items:center;gap:10px}
+.sim-brand>img{display:block;width:86px;height:24px;object-fit:contain;flex:none}
+.sim-shell .sim-brand .brand-description{display:block;max-width:94px;font:10px/1.35 var(--spx-font-sans);letter-spacing:.15px;color:#c1c2bf}
+@media(max-width:760px){.sim-shell .sim-brand{width:auto;flex-basis:auto;height:34px}.sim-brand>img{width:76px;height:21px}}
 
 #install-app-button[hidden]{display:none!important}

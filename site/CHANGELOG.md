@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.4.2 — 2026-11-08
+
+- Marca de cabecera reducida a 86 × 24 px, con descripción legible al lado. Barra de 42 px conservada.
+
 ## 0.4.1 — 2026-11-07
 
 - Cabecera del simulador y catálogo con marca ΣIM sin bajada, ampliada dentro de la misma barra.
