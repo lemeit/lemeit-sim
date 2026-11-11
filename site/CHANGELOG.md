@@ -6,6 +6,15 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.6.0 — 2026-11-11
+
+- Selección manual del motor de cálculo desde el editor: PC remota Windows (predeterminado) o notebook Debian online.
+- Comprobación de disponibilidad del motor elegido antes de calcular, sin conmutación automática ni transferencia de credenciales al navegador.
+- Worker con destinos y secretos independientes para cada motor; se conserva el funcionamiento previo de Windows.
+- Backend Linux compatible con DWSIM MCP 10.2.15 mediante HTTP local autenticado, sin exponer el puerto MCP a Internet.
+- Prueba local en Debian: mezcla de agua con 2 kg/s y temperatura de salida 50,02138676 °C, consistente con el ejemplo de referencia.
+- Se documentan instalación, restricciones de memoria, túnel privado y pruebas de la integración. La disponibilidad online de Debian depende de que la notebook y el túnel permanezcan encendidos.
+
 ## 0.5.0 — 2026-11-08
 
 - Cinco ejemplos básicos en el menú: mezcla de agua, calentamiento, enfriamiento, división y mezcla agua–etanol con NRTL.
