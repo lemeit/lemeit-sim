@@ -2,8 +2,10 @@
 import os
 import json
 import unittest
+import tempfile
+from unittest.mock import patch
 from pathlib import Path
-from server import Engine, IsolatedEngine, InputError, simulate, validate_graph
+from server import Engine, IsolatedEngine, RemoteMcpEngine, InputError, simulate, validate_graph
 
 MODEL = 'Steam Tables (IAPWS-IF97)'
 CATALOG = {'models': [MODEL, 'NRTL'], 'compounds': ['Water', 'Ethanol']}
@@ -60,6 +62,24 @@ class ValidationTests(unittest.TestCase):
         graph['nodes'][1]['type'] = 'PythonScript'
         with self.assertRaisesRegex(InputError, 'no admitido'): validate_graph(graph, CATALOG)
 
+
+
+class RemoteMcpTests(unittest.TestCase):
+    def test_token_and_rpc_for_debian(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            token_path = Path(tmp) / 'mcp-token'
+            token_path.write_text('test-private-token', encoding='utf-8')
+            engine = RemoteMcpEngine(token_path)
+            class FakeResponse:
+                def __enter__(self): return self
+                def __exit__(self, *args): pass
+                def read(self): return b'{"jsonrpc":"2.0","id":1,"result":{"tools":[]}}'
+            with patch('server.urllib.request.urlopen', return_value=FakeResponse()) as fetch:
+                result = engine.rpc('tools/list')
+                self.assertEqual(result, {'tools': []})
+                request = fetch.call_args.args[0]
+                self.assertEqual(request.full_url, 'http://127.0.0.1:5901/mcp')
+                self.assertEqual(request.get_header('X-mcp-token'), 'test-private-token')
 
 @unittest.skipUnless(os.environ.get('DWSIM_HOME'), 'Definir DWSIM_HOME para integración real')
 class EngineIntegrationTests(unittest.TestCase):
