@@ -16,6 +16,8 @@ export async function handle(request, env, assets=ASSETS) {
     const catalog=url.pathname==='/api/catalog'&&request.method==='GET';
     const calculate=url.pathname==='/api/simulate'&&request.method==='POST';
     if(!catalog&&!calculate)return error(404,'Operación no disponible.');
+    const engineId=request.headers.get('X-SIM-Engine')||'windows';
+    if(!['windows','debian'].includes(engineId))return error(400,'Motor de cálculo no reconocido.');
     const origin=request.headers.get('Origin');
     if(origin&&origin!==url.origin)return error(403,'Origen no autorizado.');
     if(request.headers.get('Sec-Fetch-Site')==='cross-site')return error(403,'Origen no autorizado.');
@@ -29,15 +31,17 @@ export async function handle(request, env, assets=ASSETS) {
       while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>100000){await reader.cancel();return error(413,'El proceso supera los 100 kB.');}chunks.push(value);}
       body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
     }
-    if(!env.ORIGIN_KEY||!env.ENGINE_URL)return error(503,'El motor todavía no está configurado.');
+    const endpoint=engineId==='debian'?env.DEBIAN_ENGINE_URL:env.ENGINE_URL;
+    const key=engineId==='debian'?env.DEBIAN_ORIGIN_KEY:env.ORIGIN_KEY;
+    if(!endpoint||!key)return error(503,`El motor ${engineId==='debian'?'Debian':'Windows'} no está configurado.`);
     try {
-      const upstream=await fetch(env.ENGINE_URL+url.pathname,{method:request.method,
-        headers:{'Content-Type':'application/json','X-Origin-Key':env.ORIGIN_KEY,'Origin':url.origin,
+      const upstream=await fetch(endpoint+url.pathname,{method:request.method,
+        headers:{'Content-Type':'application/json','X-Origin-Key':key,'Origin':url.origin,
           'User-Agent':request.headers.get('User-Agent')||'LemeitSim/0.2'},
         body,redirect:'manual',signal:AbortSignal.timeout(55000)});
       if(!upstream.headers.get('Content-Type')?.includes('application/json'))return error(503,`El motor no está disponible. Respuesta de conexión: HTTP ${upstream.status}.`);
       return new Response(upstream.body,{status:upstream.status,headers:headers('application/json; charset=utf-8')});
-    }catch(cause){console.warn(JSON.stringify({event:'engine_connection_failed',reason:String(cause)}));return error(503,'El motor no está disponible. La PC de cálculo puede estar apagada o sin conexión.');}
+    }catch(cause){console.warn(JSON.stringify({event:'engine_connection_failed',reason:String(cause)}));return error(503,`El motor ${engineId==='debian'?'Debian':'Windows'} no está disponible. Comprobá su conexión; no se intentará calcular en otro motor.`);}
   }
   if(!['GET','HEAD'].includes(request.method))return error(405,'Método no disponible.');
   const path=url.pathname==='/'?'/index.html':url.pathname;
