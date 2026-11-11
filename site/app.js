@@ -42,6 +42,7 @@ function updateControls(){
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
+  $('engine-select').disabled=busy;
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
@@ -285,8 +286,8 @@ function renderResults(){
 async function calculate(){
   if(!hasProject||!engineOnline)return;
   if(busy)return;
-  await checkEngine(); // Verificación inmediata del motor elegido antes de enviar el cálculo.
-  if(!engineOnline)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
+  const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
+  if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
   notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
@@ -597,8 +598,7 @@ function renderServerDetails(){
   $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta sesión</dt><dd>${lastCalculation?esc(calculationLabel(lastCalculation)+calculationDuration(lastCalculation)):'Sin cálculos'}</dd></dl>`;
 }
 async function checkEngine({silent=false}={}){
-  if(monitorRequest)return;
-  const generation=engineCheckGeneration,engine=selectedEngine;
+  const generation=++engineCheckGeneration,engine=selectedEngine;
   monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
   try{
     const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(15000)});http=response.status;
@@ -607,7 +607,8 @@ async function checkEngine({silent=false}={}){
     else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
     if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
   }catch(error){if(generation!==engineCheckGeneration)return;engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
-  finally{monitorRequest=false;$('server-refresh').disabled=false;if(generation===engineCheckGeneration){traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}}
+  finally{if(generation===engineCheckGeneration){monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}}
+  return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
