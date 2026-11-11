@@ -71,6 +71,34 @@ class Engine:
         return self.catalog
 
 
+class RemoteMcpEngine(Engine):
+    """Conecta al servicio MCP HTTP de Debian sin iniciar otro proceso."""
+    def __init__(self, token_file, url='http://127.0.0.1:5901/mcp'):
+        super().__init__(Path(token_file).parent)
+        self.token_file = Path(token_file)
+        self.url = url
+        self.token = self.token_file.read_text(encoding='utf-8').strip()
+        if not self.token:
+            raise RuntimeError('El token local del motor está vacío.')
+
+    def rpc(self, method, params=None):
+        data = json.dumps({'jsonrpc': '2.0', 'id': 1,
+                           'method': method, 'params': params or {}}).encode()
+        request = urllib.request.Request(
+            self.url, data=data,
+            headers={'Content-Type': 'application/json', 'X-MCP-Token': self.token})
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                payload = json.load(response)
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(f'DWSIM MCP HTTP rechazó la consulta ({exc.code}).') from exc
+        except (OSError, TimeoutError) as exc:
+            raise RuntimeError('DWSIM MCP local no responde.') from exc
+        if 'error' in payload:
+            raise InputError(payload['error'].get('message', 'Error de DWSIM MCP'))
+        return payload['result']
+
+
 class IsolatedEngine(Engine):
     """Un proceso de DWSIM por trabajo, sin puerto HTTP y con límite total real."""
     def __enter__(self):
@@ -421,9 +449,12 @@ class Handler(SimpleHTTPRequestHandler):
             if self.server.public_origin and (sum(now-t < 60 for t in self.server.jobs) >= 12 or sum(now-t < 3600 for t in self.server.jobs) >= 120):
                 return self.json_response(429, {'error': 'El piloto alcanzó su límite de cálculos. Esperá unos minutos y volvé a intentar.'})
             self.server.jobs.append(now)
-            with IsolatedEngine(self.server.engine.root) as worker:
-                worker.catalog = catalog
-                data = simulate(worker, graph)
+            if self.server.shared_mcp:
+                data = simulate(self.server.engine, graph)
+            else:
+                with IsolatedEngine(self.server.engine.root) as worker:
+                    worker.catalog = catalog
+                    data = simulate(worker, graph)
             self.json_response(200, data)
         except InputError as exc: self.json_response(422, {'error': str(exc)})
         except Exception as exc: self.json_response(503, {'error': str(exc)})
@@ -432,19 +463,29 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--engine-root', required=True, help='Carpeta que contiene local-token.txt de DWSIM')
+    parser.add_argument('--engine-root', help='Carpeta del motor Windows con local-token.txt')
+    parser.add_argument('--mcp-token-file', help='Token privado para el servicio MCP HTTP de Debian')
+    parser.add_argument('--mcp-url', default='http://127.0.0.1:5901/mcp', help='URL del MCP HTTP local de Debian')
     parser.add_argument('--port', type=int, default=5910)
     parser.add_argument('--public-origin', default=None, help='Origen HTTPS autorizado, por ejemplo https://sim.lemeit.ar')
     parser.add_argument('--origin-key-file', default=None, help='Archivo privado para autenticar al Worker de Cloudflare')
     args = parser.parse_args()
+    if bool(args.engine_root) == bool(args.mcp_token_file):
+        parser.error('Indicá --engine-root (Windows) o --mcp-token-file (Debian), pero no ambos.')
+    if args.mcp_token_file and args.mcp_url != 'http://127.0.0.1:5901/mcp':
+        parser.error('En esta etapa Debian solo admite MCP en 127.0.0.1:5901.')
     if args.public_origin and not re.fullmatch(r'https://[a-z0-9.-]+', args.public_origin):
         parser.error('--public-origin debe ser un origen HTTPS sin ruta ni puerto.')
     server = BoundedServer(('127.0.0.1', args.port), partial(Handler, directory=str(ROOT / 'site')))
-    server.engine = Engine(args.engine_root)
+    server.shared_mcp = bool(args.mcp_token_file)
+    server.engine = RemoteMcpEngine(args.mcp_token_file, args.mcp_url) if server.shared_mcp else Engine(args.engine_root)
     server.public_origin = args.public_origin
     server.origin_key = Path(args.origin_key_file).read_text(encoding='utf-8').strip() if args.origin_key_file else None
     if args.public_origin and not server.origin_key: parser.error('La publicación requiere --origin-key-file.')
-    with IsolatedEngine(args.engine_root) as bootstrap:
-        server.engine.catalog = bootstrap.get_catalog()
+    if server.shared_mcp:
+        server.engine.get_catalog()
+    else:
+        with IsolatedEngine(args.engine_root) as bootstrap:
+            server.engine.catalog = bootstrap.get_catalog()
     print(f'Simulador local: http://localhost:{args.port}', flush=True)
     server.serve_forever()
