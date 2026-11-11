@@ -29,3 +29,27 @@ test('proxy compatible con Workers, sin reenviar secretos al navegador',async t=
   assert.equal(response.headers.get('X-Origin-Key'),null);
   assert.equal((await response.json()).compound_count,2);
 });
+
+test('motor Debian seleccionado usa solo su destino y su propia clave',async t=>{
+  t.mock.method(globalThis,'fetch',async (url,options)=>{
+    assert.equal(url,'https://debian.example/api/catalog');
+    assert.equal(options.headers['X-Origin-Key'],'debian-secret');
+    return Response.json({compound_count:2});
+  });
+  const response=await handle(new Request('https://sim.lemeit.ar/api/catalog',{headers:{'X-SIM-Engine':'debian'}}),{
+    ENGINE_URL:'https://windows.example',ORIGIN_KEY:'windows-secret',
+    DEBIAN_ENGINE_URL:'https://debian.example',DEBIAN_ORIGIN_KEY:'debian-secret'
+  });
+  assert.equal(response.status,200);
+});
+test('si Debian no está configurado no usa Windows como respaldo',async t=>{
+  t.mock.method(globalThis,'fetch',async()=>{throw Error('No debería llamar al origen');});
+  const response=await handle(new Request('https://sim.lemeit.ar/api/catalog',{headers:{'X-SIM-Engine':'debian'}}),{
+    ENGINE_URL:'https://windows.example',ORIGIN_KEY:'windows-secret'
+  });
+  assert.equal(response.status,503);
+});
+test('rechaza motores no autorizados',async()=>{
+  const response=await handle(new Request('https://sim.lemeit.ar/api/catalog',{headers:{'X-SIM-Engine':'https://external.example'}}),{});
+  assert.equal(response.status,400);
+});
