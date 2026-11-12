@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -14,7 +14,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.7.0 — Biblioteca de ocho ejemplos**, publicada el 12/11/2026. Incluye balance multicomponente
+**0.7.1 — Arranque automático Windows**, en desarrollo; la versión pública anterior es 0.7.0.
+Se agrega el inicio del gateway y túnel al entrar a la sesión Windows, con controles
+para habilitarlo y deshabilitarlo. La biblioteca de ocho ejemplos continúa disponible. Incluye balance multicomponente
 con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
 ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
 y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).
@@ -275,8 +277,23 @@ operador. No están en GitHub ni se descargan al navegador. Desde la carpeta loc
 .\stop-online.ps1
 ```
 
-No se instaló inicio automático de Windows: después de reiniciar la PC hay que
-volver a iniciar el servicio. Apagar el servicio no elimina el editor de Cloudflare.
+El arranque automático es opcional y se habilita para el usuario actual:
+
+```powershell
+.\enable-autostart.ps1
+# Desactivar para futuros inicios de sesión, sin apagar el servicio actual:
+.\disable-autostart.ps1
+```
+
+Usa un acceso directo en Inicio del usuario y PowerShell de Windows sin ventana.
+Se ejecuta **al iniciar sesión**, no antes de entrar a Windows. Espera 15 segundos,
+reutiliza servicios existentes y comprueba la API local con reintentos limitados.
+El lanzador privado y `startup.log` quedan en `.local/runtime`. No guarda
+contraseñas ni cambia la política de ejecución. Si movés el repositorio, volvé a
+habilitarlo para actualizar las rutas. `stop-online.ps1` apaga ahora pero no
+cancela el inicio del próximo ingreso; para eso usar `disable-autostart.ps1`.
+El instalador se ejecuta una vez en cada PC Windows; el despliegue web no lo activa.
+ Apagar el servicio no elimina el editor de Cloudflare.
 Los archivos origin-key.txt y tunnel-token.txt no deben publicarse ni compartirse.
 
 ## Desarrollar y comprobar

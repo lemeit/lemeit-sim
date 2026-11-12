@@ -282,3 +282,13 @@ motores. Guías de operación, selección manual y despliegue corregidas para
 eliminar instrucciones pendientes o antiguas. Se distinguen instalación
 configurada, servicio disponible y pruebas realmente realizadas. No se modifica
 el portal, su versión, los motores, los túneles ni sus credenciales.
+
+## Arranque Windows · 0.7.1 · 12 de noviembre de 2026
+
+- Acceso de Inicio instalado para el usuario actual, sin elevar privilegios ni guardar contraseñas.
+- Se ejecutó el lanzador con PowerShell de Windows; terminó con código 0 y catálogo local HTTP 200.
+- Se ejecutó nuevamente usando destino y argumentos del acceso instalado: mismos PID de gateway/túnel, sin duplicados.
+- Deshabilitación y reinstalación comprobadas; el inicio automático quedó habilitado.
+- Portal público: Windows seleccionado, servicio disponible HTTP 200. Debian no se tocó.
+- 55 pruebas JS y build correctos; Acerca de 0.7.1 comprobado tras recargar la vista local.
+- No se reinició ni cerró la sesión del usuario: la prueba definitiva del evento de inicio de sesión queda para su próximo ingreso.

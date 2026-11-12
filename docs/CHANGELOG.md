@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.7.1 — 2026-11-12
+
+- Inicio automático Windows opcional al iniciar sesión: enable-autostart.ps1 y disable-autostart.ps1, sin contraseñas ni cambios de política de ejecución.
+- Lanzador privado con espera inicial, reintentos limitados, registro startup.log y reutilización de gateway y túnel existentes.
+- README, guías y Acerca de actualizados. No cambia Debian, los modelos de cálculo ni la selección manual de motor.
+
 ## 0.7.0 — 2026-11-12
 
 - Ejemplo 06: balance ternario agua–etanol–acetona con cuatro alimentaciones, dos mezcladores y un divisor, más problema inverso resuelto por sistema matricial 2×2.
