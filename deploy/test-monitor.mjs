@@ -24,3 +24,29 @@ function calculation(response){
 test('una comprobación de catálogo no borra un cálculo completado',async()=>{const {context,elements}=monitor({status:200,ok:true,json:async()=>({compounds:[],models:[]})});vm.runInContext("lastCalculation={ok:true,state:'completed',duration_ms:1500};",context);await vm.runInContext('checkEngine({silent:true})',context);assert.match(elements.get('server-details').innerHTML,/Completado/);assert.match(elements.get('server-details').innerHTML,/1,5 s/);assert.doesNotMatch(elements.get('server-details').innerHTML,/no se ejecutó una simulación/);});
 test('un cálculo registra inicio y finalización con duración separada del catálogo',async()=>{const {context,elements}=calculation({status:200,ok:true,json:async()=>({elapsed_s:1})});await vm.runInContext('calculate()',context);const events=JSON.parse(vm.runInContext('JSON.stringify(connectionTrace)',context));assert.equal(events.length,3);assert.equal(events[0].operation,'GET /api/catalog');assert.equal(events[1].state,'running');assert.equal(events[2].http,200);assert.ok(Number.isFinite(events[2].ms));assert.match(elements.get('connection-console').innerHTML,/CÁLCULO/);assert.match(elements.get('connection-console').innerHTML,/Cálculo completado/);assert.match(elements.get('server-details').innerHTML,/Completado/);});
 test('un cálculo fallido conserva HTTP y mensaje sin afirmar que la conexión cayó',async()=>{const {context,elements}=calculation({status:400,ok:false,json:async()=>({error:'Composición inválida <detalle>'})});await vm.runInContext('calculate()',context);assert.equal(vm.runInContext('lastCalculation.ok',context),false);assert.equal(vm.runInContext('engineOnline',context),true);assert.match(elements.get('connection-console').innerHTML,/HTTP 400/);assert.match(elements.get('connection-console').innerHTML,/&lt;detalle&gt;/);assert.match(elements.get('server-details').innerHTML,/Fallido/);});
+
+test('el monitor identifica el motor activo y conserva el estado de cálculo',async()=>{
+  const {context,elements}=monitor({status:200,ok:true,json:async()=>({compound_count:2,compounds:['Water','Ethanol'],models:['NRTL']})});
+  vm.runInContext("selectedEngine='debian';",context);
+  await vm.runInContext('checkEngine({silent:true})',context);
+  assert.match(elements.get('server-details').innerHTML,/Notebook · Debian/);
+  assert.match(elements.get('server-details').innerHTML,/Servicio accesible/);
+  assert.match(elements.get('server-details').innerHTML,/No se cambia de motor automáticamente/);
+  assert.ok(elements.get('connection-console').innerHTML.includes('Debian · GET /api/catalog'));
+});
+test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
+  const {context,elements}=monitor({status:503,ok:false,json:async()=>({error:'Servicio no disponible'})});
+  await vm.runInContext('checkEngine({silent:true})',context);
+  assert.match(elements.get('server-details').innerHTML,/Sin conexión verificada/);
+  assert.match(elements.get('server-details').innerHTML,/puede estar apagada/);
+  assert.match(elements.get('connection-console').innerHTML,/Windows/);
+});
+test('el monitor incluye un encabezado ASCII sin alterar la barra inferior',()=>{
+  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
+  const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
+  const footer=html.split('<footer class="site-footer">')[1]?.split('</footer>')[0]||'';
+  assert.match(dialog,/class="monitor-brand"/);
+  assert.match(dialog,/<pre aria-hidden="true">/);
+  assert.ok(dialog.includes('ΣIM / MONITOR DWSIM'));
+  assert.doesNotMatch(footer,/monitor-brand/);
+});

@@ -291,13 +291,13 @@ async function calculate(){
   notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
-  lastCalculation={time:new Date().toISOString(),ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
+  lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
-    lastCalculation={time:new Date().toISOString(),ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
-  }catch(error){lastCalculation={time:new Date().toISOString(),ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
+    lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
+  }catch(error){lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
   finally{busy=false;renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
 }
 function renderCompounds(){
@@ -576,12 +576,12 @@ function renderDiagnostics(){
 function calculationLabel(entry){return entry?.state==='running'?'En curso':entry?.ok?'Completado':'Fallido';}
 function calculationDuration(entry){return Number.isFinite(entry?.duration_ms)?` · ${fmt(entry.duration_ms/1000,2)} s (solicitud completa)`:'';}
 function traceConnection(operation,entry){
-  connectionTrace.push({operation,...entry});connectionTrace=connectionTrace.slice(-40);renderConnectionTrace();
+  connectionTrace.push({operation,engine:selectedEngine,...entry});connectionTrace=connectionTrace.slice(-40);renderConnectionTrace();
 }
 function renderConnectionTrace(){
   const consoleView=$('connection-console');if(!consoleView)return;
   const atBottom=consoleView.scrollHeight-consoleView.scrollTop-consoleView.clientHeight<35;
-  consoleView.innerHTML=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
+  consoleView.innerHTML=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.engine==='debian'?'Debian':'Windows')} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
   if(atBottom)consoleView.scrollTop=consoleView.scrollHeight;
 }
 function paintConnection(){
@@ -594,8 +594,16 @@ function paintConnection(){
 }
 function renderServerDetails(){
   renderConnectionTrace();
-  const state=connectionCheck?.state||(engineOnline?'online':'checking'),labels={online:'Servicio accesible',busy:'Servicio accesible · motor ocupado',offline:'No se pudo confirmar la conexión',checking:'Comprobando conexión'};
-  $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta sesión</dt><dd>${lastCalculation?esc(calculationLabel(lastCalculation)+calculationDuration(lastCalculation)):'Sin cálculos'}</dd></dl>`;
+  const engineName=selectedEngine==='debian'?'Notebook · Debian':'PC remota · Windows';
+  const state=connectionCheck?.state||(engineOnline?'online':'checking');
+  const labels={online:'Servicio accesible',busy:'Motor ocupado',offline:'Sin conexión verificada',checking:'Comprobando conexión'};
+  const status=labels[state]||state;
+  const meaning=state==='online'?'El servidor seleccionado respondió a la consulta del catálogo. No equivale a ejecutar una simulación.':state==='busy'?'El servidor respondió, pero está ocupado con otra tarea.':state==='offline'?'No se pudo confirmar el servicio seleccionado. La PC puede estar apagada, el túnel desconectado o el servicio detenido.':'Todavía no hay una comprobación vigente de este motor.';
+  const checked=connectionCheck?new Date(connectionCheck.time).toLocaleString('es-AR'):'Todavía no realizada';
+  const elapsed=connectionCheck?`${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms`:'Sin respuesta';
+  const catalogInfo=connectionCheck?.compounds?`<dt>Catálogo</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:'';
+  const latest=lastCalculation?`${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}${lastCalculation.engine?' · '+(lastCalculation.engine==='debian'?'Debian':'Windows'):''}`:'Sin cálculos';
+  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
 }
 async function checkEngine({silent=false}={}){
   const generation=++engineCheckGeneration,engine=selectedEngine;
