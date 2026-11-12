@@ -1158,3 +1158,10 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-dialog .monitor-brand-copy a{color:#e1e3df;text-decoration:underline;text-underline-offset:2px}
 #server-dialog .monitor-brand-copy a:hover{color:white}
 @media(max-width:540px){#server-dialog .monitor-brand{align-items:flex-start;flex-direction:column;gap:9px}#server-dialog .monitor-brand-copy small{font-size:9px}}
+
+/* Marca técnica ΣIM: sigma real + lettering monoespaciado IM. */
+#server-dialog .monitor-ascii{display:flex;align-items:center;gap:2px;flex:0 0 auto;white-space:nowrap}
+#server-dialog .monitor-sigma{display:block;font-family:Georgia,serif;font-size:69px;font-weight:700;line-height:1;color:#CF263B;letter-spacing:-6px}
+#server-dialog .monitor-ascii pre{font:700 11px/1.20 monospace;letter-spacing:-.6px;margin:0;white-space:pre;color:#F4F3EE}
+#server-dialog .monitor-brand-copy .monitor-brand-subtitle{font:9px/1.5 var(--spx-font-mono),monospace;letter-spacing:.7px;color:#a6adad}
+@media(max-width:540px){#server-dialog .monitor-sigma{font-size:55px}#server-dialog .monitor-ascii pre{font-size:9px}}
