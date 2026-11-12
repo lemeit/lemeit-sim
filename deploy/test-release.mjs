@@ -14,3 +14,15 @@ test('el selector de motores se ubica solo en el footer, sin ocupar la barra de 
   assert.equal((html.match(/id="engine-select"/g)||[]).length,1);
   assert.match(footer,/id="connection-monitor-button"/);
 });
+
+test('footer compacto con enlaces accesibles y sin salto de línea',()=>{
+  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../site/style.css',import.meta.url),'utf8');
+  const footer=html.match(/<footer class="site-footer">([\\s\\S]*?)<\\/footer>/)?.[1]||'';
+  assert.match(footer,/id="connection-monitor-button"/);
+  assert.match(footer,/id="engine-select"/);
+  assert.match(footer,/<details class="footer-info">/);
+  assert.match(footer,/Componentes y licencias/);
+  assert.match(css,/\.site-footer \.footer-service\{[^}]*flex-wrap:nowrap/);
+  assert.match(css,/\.sim-shell footer\.site-footer\{[^}]*flex-wrap:nowrap/);
+});
