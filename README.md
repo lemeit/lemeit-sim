@@ -11,8 +11,11 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.5.0 — Cinco ejemplos básicos validados**, en desarrollo. Incluye mezclado,
-calentamiento, enfriamiento, división de agua y mezcla agua–etanol con NRTL.
+**0.7.0 — Biblioteca de ocho ejemplos**, en desarrollo. Incluye balance multicomponente
+con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
+ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
+y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).
+Se conserva la selección manual Windows/Debian; no hay conmutación automática.
 [Guía de casos y comparación](docs/ejemplos-validados.md) · [Guía web](site/ejemplos.html).
 La versión que recibe el navegador depende del último despliegue exitoso de
 Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos

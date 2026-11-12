@@ -1,0 +1,313 @@
+{
+  "portal_version": "0.7.0",
+  "date": "2026-11-12",
+  "engine": "Windows · DWSIM MCP 10.2.15",
+  "scope": "Ejecución real mediante server.simulate e IsolatedEngine del runtime Windows. No se utilizó Debian. Sin comparación independiente con la API de escritorio ni mediciones experimentales.",
+  "cases": {
+    "MulticomponentBalance": {
+      "input_sha256": "708d21318381c33217912e76cc1e9ae9ccd5f61fe94a70de65a5856500ad4ae1",
+      "streams": {
+        "f1": {
+          "name": "F1 · Base acuosa",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 1.0,
+          "mass_fractions": {
+            "Water": 0.7,
+            "Ethanol": 0.20000000000000004,
+            "Acetone": 0.10000000000000002
+          }
+        },
+        "f2": {
+          "name": "F2 · Rica en etanol",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 0.6,
+          "mass_fractions": {
+            "Water": 0.14999999999999997,
+            "Ethanol": 0.7,
+            "Acetone": 0.15
+          }
+        },
+        "f3": {
+          "name": "F3 · Rica en acetona",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 0.4,
+          "mass_fractions": {
+            "Water": 0.10000000000000002,
+            "Ethanol": 0.20000000000000004,
+            "Acetone": 0.7000000000000001
+          }
+        },
+        "s1": {
+          "name": "S1 · Mezcla inicial",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 2.0,
+          "mass_fractions": {
+            "Water": 0.415,
+            "Ethanol": 0.35,
+            "Acetone": 0.23500000000000004
+          }
+        },
+        "p1": {
+          "name": "P1 · Producto A",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 1.2,
+          "mass_fractions": {
+            "Water": 0.415,
+            "Ethanol": 0.35,
+            "Acetone": 0.23500000000000004
+          }
+        },
+        "s2": {
+          "name": "S2 · Ramal 40 %",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 0.8,
+          "mass_fractions": {
+            "Water": 0.415,
+            "Ethanol": 0.35,
+            "Acetone": 0.23500000000000004
+          }
+        },
+        "f4": {
+          "name": "F4 · Ajuste final",
+          "temperature_K": 298.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 0.5,
+          "mass_fractions": {
+            "Water": 0.1,
+            "Ethanol": 0.3,
+            "Acetone": 0.6
+          }
+        },
+        "p2": {
+          "name": "P2 · Producto B",
+          "temperature_K": 298.15003571985943,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 1.3,
+          "mass_fractions": {
+            "Water": 0.29384615384615387,
+            "Ethanol": 0.33076923076923076,
+            "Acetone": 0.3753846153846155
+          }
+        }
+      },
+      "balances": [
+        {
+          "id": "m1",
+          "name": "M1 · Mezcla ternaria",
+          "mass_in": 2.0,
+          "mass_out": 2.0,
+          "mass_residual": 0.0,
+          "heat_to_fluid_kW": -0.00015676906006431568,
+          "components": {
+            "Water": {
+              "in_kg_s": 0.83,
+              "out_kg_s": 0.83,
+              "residual_kg_s": 0.0
+            },
+            "Ethanol": {
+              "in_kg_s": 0.7,
+              "out_kg_s": 0.7,
+              "residual_kg_s": 0.0
+            },
+            "Acetone": {
+              "in_kg_s": 0.47000000000000003,
+              "out_kg_s": 0.4700000000000001,
+              "residual_kg_s": -5.551115123125783e-17
+            }
+          },
+          "reactive": false
+        },
+        {
+          "id": "d1",
+          "name": "D1 · Divisor 60/40",
+          "mass_in": 2.0,
+          "mass_out": 2.0,
+          "mass_residual": 0.0,
+          "heat_to_fluid_kW": 0.0,
+          "components": {
+            "Water": {
+              "in_kg_s": 0.83,
+              "out_kg_s": 0.83,
+              "residual_kg_s": 0.0
+            },
+            "Ethanol": {
+              "in_kg_s": 0.7,
+              "out_kg_s": 0.7,
+              "residual_kg_s": 0.0
+            },
+            "Acetone": {
+              "in_kg_s": 0.4700000000000001,
+              "out_kg_s": 0.4700000000000001,
+              "residual_kg_s": 0.0
+            }
+          },
+          "reactive": false
+        },
+        {
+          "id": "m2",
+          "name": "M2 · Mezcla final",
+          "mass_in": 1.3,
+          "mass_out": 1.3,
+          "mass_residual": 0.0,
+          "heat_to_fluid_kW": -1.042138875195775e-10,
+          "components": {
+            "Water": {
+              "in_kg_s": 0.382,
+              "out_kg_s": 0.38200000000000006,
+              "residual_kg_s": -5.551115123125783e-17
+            },
+            "Ethanol": {
+              "in_kg_s": 0.42999999999999994,
+              "out_kg_s": 0.43,
+              "residual_kg_s": -5.551115123125783e-17
+            },
+            "Acetone": {
+              "in_kg_s": 0.48800000000000004,
+              "out_kg_s": 0.48800000000000016,
+              "residual_kg_s": -1.1102230246251565e-16
+            }
+          },
+          "reactive": false
+        }
+      ]
+    },
+    "ConversionReactor": {
+      "input_sha256": "108cc5077d1c19b3a779cd1c40043b7d63822e145c6ede7d1883f8451bb0344b",
+      "streams": {
+        "feed": {
+          "name": "Alimentación",
+          "temperature_K": 773.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 1.0,
+          "mass_fractions": {
+            "Hydrogen": 0.11190000000000001,
+            "Oxygen": 0.8881,
+            "Water": 0.0
+          }
+        },
+        "vapor": {
+          "name": "Producto vapor",
+          "temperature_K": 773.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": 1.0000000000000002,
+          "mass_fractions": {
+            "Hydrogen": 0.05595,
+            "Oxygen": 0.4440426007500447,
+            "Water": 0.5000073992499553
+          }
+        },
+        "liquid": {
+          "name": "Producto líquido",
+          "temperature_K": 773.15,
+          "pressure_Pa": 101325.0,
+          "mass_flow_kg_s": -2.220446049250313e-16,
+          "mass_fractions": {
+            "Hydrogen": 0.05595,
+            "Oxygen": 0.4440426007500447,
+            "Water": 0.5000073992499553
+          }
+        }
+      },
+      "balances": [
+        {
+          "id": "reactor",
+          "name": "Reactor",
+          "mass_in": 1.0,
+          "mass_out": 1.0,
+          "mass_residual": 0.0,
+          "heat_to_fluid_kW": -6836.902073575027,
+          "components": {
+            "Hydrogen": {
+              "in_kg_s": 0.11190000000000001,
+              "out_kg_s": 0.05595,
+              "residual_kg_s": 0.055950000000000014
+            },
+            "Oxygen": {
+              "in_kg_s": 0.8881,
+              "out_kg_s": 0.4440426007500447,
+              "residual_kg_s": 0.4440573992499553
+            },
+            "Water": {
+              "in_kg_s": 0.0,
+              "out_kg_s": 0.5000073992499553,
+              "residual_kg_s": -0.5000073992499553
+            }
+          },
+          "reactive": true
+        }
+      ]
+    },
+    "EquilibriumReactor": {
+      "input_sha256": "9b068a511394ed530e993767ff43dacb55bb64febbcff46eef927714540ccfb2",
+      "streams": {
+        "feed": {
+          "name": "Alimentación",
+          "temperature_K": 773.15,
+          "pressure_Pa": 20000000.0,
+          "mass_flow_kg_s": 1.0,
+          "mass_fractions": {
+            "Nitrogen": 0.8224,
+            "Hydrogen": 0.17759999999999998,
+            "Ammonia": 0.0
+          }
+        },
+        "vapor": {
+          "name": "Producto vapor",
+          "temperature_K": 773.15,
+          "pressure_Pa": 20000000.0,
+          "mass_flow_kg_s": 1.0,
+          "mass_fractions": {
+            "Nitrogen": 0.5660537234693599,
+            "Hydrogen": 0.12225898477879299,
+            "Ammonia": 0.311687291751847
+          }
+        },
+        "liquid": {
+          "name": "Producto líquido",
+          "temperature_K": 773.15,
+          "pressure_Pa": 20000000.0,
+          "mass_flow_kg_s": 0.0,
+          "mass_fractions": {
+            "Nitrogen": 0.5660537234693599,
+            "Hydrogen": 0.12225898477879299,
+            "Ammonia": 0.311687291751847
+          }
+        }
+      },
+      "balances": [
+        {
+          "id": "reactor",
+          "name": "Reactor",
+          "mass_in": 1.0,
+          "mass_out": 1.0,
+          "mass_residual": 0.0,
+          "heat_to_fluid_kW": -999.7362159025234,
+          "components": {
+            "Nitrogen": {
+              "in_kg_s": 0.8224,
+              "out_kg_s": 0.5660537234693599,
+              "residual_kg_s": 0.2563462765306401
+            },
+            "Hydrogen": {
+              "in_kg_s": 0.17759999999999998,
+              "out_kg_s": 0.12225898477879299,
+              "residual_kg_s": 0.05534101522120699
+            },
+            "Ammonia": {
+              "in_kg_s": 0.0,
+              "out_kg_s": 0.311687291751847,
+              "residual_kg_s": -0.311687291751847
+            }
+          },
+          "reactive": true
+        }
+      ]
+    }
+  }
+}

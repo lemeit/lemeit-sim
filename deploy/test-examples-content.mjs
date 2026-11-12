@@ -84,5 +84,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   const guide=read('ejemplos.html');
   assert.match(guide,/casos 01–05 tienen resultados numéricos previamente contrastados/);
   assert.match(guide,/referencias de materia verificadas analíticamente/i);
-  assert.match(guide,/sin resultados numéricos de referencia verificados/);
+  assert.match(guide,/motor Windows/);
+  assert.match(guide,/sin comparación independiente con la API de escritorio/i);
+  assert.match(guide,/Debian no se probó/);
 });
