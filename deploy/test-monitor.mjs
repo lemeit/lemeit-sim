@@ -41,18 +41,24 @@ test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
   assert.match(elements.get('server-details').innerHTML,/puede estar apagada/);
   assert.match(elements.get('connection-console').innerHTML,/Windows/);
 });
-test('el monitor incluye un encabezado ASCII sin alterar la barra inferior',()=>{
+test('la identidad ΣIM inicia el log desplazable y los créditos figuran en Acerca de',async()=>{
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
   const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
-  const footer=html.split('<footer class="site-footer">')[1]?.split('</footer>')[0]||'';
-  assert.match(dialog,/class="monitor-brand"/);
-  assert.match(dialog,/class="monitor-sigma">Σ<\/strong>/);
-  assert.match(dialog,/<pre>██/);
-  assert.ok(dialog.includes('ΣIM · Simulación de procesos'));
-  assert.ok(dialog.includes('MONITOR DE CONEXIÓN · DWSIM'));
-  assert.ok(dialog.includes('Desarrollado por Ing. Luciano Lamaita'));
-  assert.ok(dialog.includes('https://dwsim.org/'));
-  assert.ok(dialog.includes('licenses/DWSIM-GPL-3.txt'));
-  assert.ok(dialog.includes('licenses/NOTICE.md'));
-  assert.doesNotMatch(footer,/monitor-brand/);
+  const about=html.split('<dialog id="about-dialog">')[1]?.split('</dialog>')[0]||'';
+  assert.doesNotMatch(dialog,/class="monitor-brand"/);
+  assert.match(dialog,/id="connection-console"/);
+  assert.match(about,/Desarrollado por/);
+  assert.match(about,/Ing. Luciano Lamaita/);
+  assert.match(about,/https:\/\/dwsim.org\//);
+  assert.match(about,/licenses\/DWSIM-GPL-3.txt/);
+  assert.match(about,/licenses\/NOTICE.md/);
+  const {context,elements}=monitor({status:200,ok:true,json:async()=>({compound_count:2,compounds:['Water','Ethanol'],models:['NRTL']})});
+  await vm.runInContext('checkEngine({silent:true})',context);
+  const log=elements.get('connection-console').innerHTML;
+  assert.match(log,/class="console-boot"/);
+  assert.match(log,/class="boot-sigma">Σ/);
+  assert.match(log,/ΣIM · Simulación de procesos/);
+  assert.match(log,/Ing. Luciano Lamaita/);
+  assert.ok(log.indexOf('console-boot')<log.indexOf('trace-online'));
+  assert.match(log,/CONEXIÓN/);
 });
