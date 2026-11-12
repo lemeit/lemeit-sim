@@ -32,7 +32,7 @@ test('el monitor identifica el motor activo y conserva el estado de cálculo',as
   assert.match(elements.get('server-details').innerHTML,/Notebook · Debian/);
   assert.match(elements.get('server-details').innerHTML,/Servicio accesible/);
   assert.match(elements.get('server-details').innerHTML,/No se cambia de motor automáticamente/);
-  assert.match(elements.get('connection-console').innerHTML,/Debian · GET \\/api\\/catalog/);
+  assert.ok(elements.get('connection-console').innerHTML.includes('Debian · GET /api/catalog'));
 });
 test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
   const {context,elements}=monitor({status:503,ok:false,json:async()=>({error:'Servicio no disponible'})});
@@ -43,10 +43,10 @@ test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
 });
 test('el monitor incluye un encabezado ASCII sin alterar la barra inferior',()=>{
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
-  const dialog=html.match(/<dialog id="server-dialog">([\\s\\S]*?)<\\/dialog>/)?.[1]||'';
-  const footer=html.match(/<footer class="site-footer">([\\s\\S]*?)<\\/footer>/)?.[1]||'';
+  const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
+  const footer=html.split('<footer class="site-footer">')[1]?.split('</footer>')[0]||'';
   assert.match(dialog,/class="monitor-brand"/);
   assert.match(dialog,/<pre aria-hidden="true">/);
-  assert.match(dialog,/ΣIM \\/ MONITOR DWSIM/);
+  assert.ok(dialog.includes('ΣIM / MONITOR DWSIM'));
   assert.doesNotMatch(footer,/monitor-brand/);
 });
