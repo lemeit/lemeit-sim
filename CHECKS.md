@@ -309,3 +309,12 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Temperatura decimal: 20,5 → 21,5 → 20,5, conservando selector de unidades y sin desbordamiento horizontal.
 - Configuración: límites 0/8 respetados; flecha de teclado 0 → 1; valor restaurado a 3. Nombres accesibles conservados y sin errores en consola.
 - Acerca de 0.7.3 revisado tras recargar; capturas de claro y oscuro. No se modificaron motores ni ecuaciones.
+
+## Ejercicios integrados · 0.8.0 · 12 de noviembre de 2026
+
+- Casos 09 y 10, 15 objetos y 15 conexiones cada uno, ejecutados con IsolatedEngine del runtime Windows. No se utilizó Debian.
+- Informe docs/validation/examples-0.8.0-windows.json y verificador tools/validate_integrated_examples.py: materia por especie y cierre energético del 09; masa total, átomos N/H y producción de NH3 del 10. Las tolerancias y límites quedan en el informe.
+- Ambos casos completaron el cálculo desde la interfaz local (3,59 s y 3,64 s en esa vista); caso 10 final recalculado con bypass separado gráficamente.
+- Menú e índice de guía 01–10; todos los ejercicios tienen resoluciones numeradas. Conteos de pasos: 4,4,4,4,4,6,4,4,8,10. Enlaces locales y anclas comprobados.
+- Vista ajustada al abrir ejemplos; Acerca de 0.8.0 revisado tras recargar. Capturas de guía y diagrama del caso 10.
+- 60 pruebas JS, build:verified y deploy:check correctos. Sin validación experimental ni comparación separada con Automation3 para los casos nuevos; no se prueban cargas de clase.

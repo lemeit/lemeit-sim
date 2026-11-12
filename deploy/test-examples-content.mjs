@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read = path => readFileSync(new URL('../site/' + path,import.meta.url),'utf8');
-const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor'];
+const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass'];
 const close = (a,b,tol=1e-9) => assert.ok(Math.abs(a-b)<tol,`Se esperaba ${b} pero se obtuvo ${a}`);
 
-test('menú, selector y guía incluyen los ocho ejemplos en orden',()=>{
+test('menú, selector y guía incluyen los diez ejemplos en orden',()=>{
   const index=read('index.html'),guide=read('ejemplos.html');
   const positions=projects.map(id=>{
     assert.ok(index.includes(`<option value="${id}">`),`Falta la opción ${id}`);
@@ -15,7 +15,7 @@ test('menú, selector y guía incluyen los ocho ejemplos en orden',()=>{
     return index.indexOf(`data-example="${id}"`);
   });
   assert.deepEqual(positions,[...positions].sort((a,b)=>a-b));
-  for(let i=5;i<8;i++)assert.ok(guide.includes(`id="${projects[i]}"`));
+  for(let i=5;i<projects.length;i++)assert.ok(guide.includes(`id="${projects[i]}"`));
 });
 
 test('caso 06 utiliza operaciones admitidas y conexiones únicas',()=>{
@@ -87,4 +87,14 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   assert.match(guide,/motor Windows/);
   assert.match(guide,/sin comparación independiente con la API de escritorio/i);
   assert.match(guide,/Debian no se probó/);
+});
+
+test('cada ejercicio 01–10 conserva una resolución numerada paso a paso',()=>{
+ const guide=read('ejemplos.html');
+ for(const id of projects){
+  const section=guide.split(`<section id="${id}">`)[1]?.split('</section>')[0];
+  assert.ok(section?.includes('Resolución paso a paso'),id);
+  assert.ok((section.match(/<ol>/g)||[]).length>=1,id);
+  assert.ok((section.match(/<li>/g)||[]).length>=4,id);
+ }
 });

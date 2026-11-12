@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.7.3](https://img.shields.io/badge/portal-0.7.3-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.8.0](https://img.shields.io/badge/portal-0.8.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,10 +16,13 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.7.3 — Controles numéricos y menús**, en desarrollo; versión pública anterior 0.7.2.
-Flechas propias para aumentar/disminuir valores, botón Editar compuestos destacado
-y estados de menú coherentes en claro y oscuro. Se conservan teclado, pasos y
-límites de los campos, cabeceras fijas, motores y ocho ejemplos. Incluye balance multicomponente
+**0.8.0 — Procesos integrados y diez ejemplos**, en desarrollo; versión pública anterior 0.7.3.
+Nuevos casos 09 de red térmica ternaria y 10 de amoníaco con bypass, con resoluciones
+paso a paso en la [guía del portal](site/ejemplos.html), JSON descargables e
+[informe real Windows](docs/validation/examples-0.8.0-windows.json).
+[Procedimiento de validación y repetición](docs/ejemplos-integrados.md). Se comprueban
+materia/energía del 09 y masa/átomos del 10; no son mediciones experimentales.
+Se conservan los motores, el inicio automático y la selección manual. Incluye balance multicomponente
 con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
 ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
 y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).
@@ -39,7 +42,7 @@ Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 [Historial de versiones](docs/CHANGELOG.md) · [Guía de uso](docs/workflow.md) ·
 [Verificaciones realizadas](CHECKS.md) · [Operación local](docs/operacion-local.md).
 
-## Biblioteca de ocho ejemplos
+## Biblioteca de diez ejemplos
 
 Desde Ejemplos se abre cada caso con sus condiciones y una consigna breve. Son
 modelos calculados, no mediciones experimentales. La [guía](docs/ejemplos-validados.md)
@@ -55,6 +58,8 @@ permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
 | 06 · Balance multicomponente · NRTL | Dos mezcladores, divisor y sistema matricial 2×2 | S1: 2 kg/s; P1: 1,2 kg/s; P2: 1,3 kg/s |
 | 07 · Reactor de conversión | Formación de agua con conversión del 50 % | Agua: 0,500007399250 kg/kg; Q: −6836,902074 kW |
 | 08 · Reactor de equilibrio | Síntesis de amoníaco | Amoníaco: 0,311687291752 kg/kg; Q: −999,736216 kW |
+| 09 · Red térmica ternaria | Mezcla, reparto 65/35, calentamiento, enfriamiento y recombinación | 2 kg/s a 51,158773 °C; Q neto +150,936145 kW |
+| 10 · Amoníaco con bypass | Equilibrio químico, acondicionamiento térmico y dilución | NH₃: 0,339948981 kg/s; P1: 69,240653 °C |
 
 Los casos 01–05 se recalcularon con el motor de ΣIM y la API oficial del DWSIM
 Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
