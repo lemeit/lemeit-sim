@@ -1109,3 +1109,25 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
   .site-footer .footer-engine-label{margin-left:0}
   .site-footer .footer-engine-select{max-width:170px}
 }
+
+
+/* Barra inferior de una sola línea: el monitor y el selector siempre permanecen visibles. */
+.sim-shell footer.site-footer{flex-wrap:nowrap;align-items:center;gap:10px;min-height:30px;padding:3px 10px}
+.site-footer .footer-service{display:flex;align-items:center;flex-wrap:nowrap;flex:1 1 auto;gap:9px;min-width:0;white-space:nowrap}
+.site-footer .connection-monitor-button{flex-wrap:nowrap;white-space:nowrap;min-width:0}
+.site-footer .footer-engine-label{margin-left:2px;flex-shrink:0}
+.site-footer .footer-engine-select{min-height:22px;padding-top:1px;padding-bottom:1px;flex-shrink:0}
+.site-footer .footer-projects{flex-shrink:0}
+.site-footer .footer-info{position:relative;flex-shrink:0;color:var(--spx-text-dim);font-size:9px}
+.site-footer .footer-info summary{cursor:pointer;list-style:none;padding:3px 5px;border:1px solid transparent;border-radius:3px}
+.site-footer .footer-info summary::-webkit-details-marker{display:none}
+.site-footer .footer-info summary:hover,.site-footer .footer-info[open] summary{border-color:var(--spx-border);color:var(--spx-text)}
+.site-footer .footer-info nav{position:absolute;bottom:calc(100% + 7px);left:0;z-index:90;min-width:180px;display:flex;flex-direction:column;gap:2px;padding:7px;border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface);box-shadow:0 6px 24px #0003}
+.site-footer .footer-info nav a{display:block;padding:6px;color:var(--spx-text);text-decoration:none;white-space:nowrap}
+.site-footer .footer-info nav a:hover{background:var(--spx-surface-2)}
+@media(max-width:760px){
+  .sim-shell footer.site-footer{flex-wrap:nowrap;align-items:center;gap:5px}
+  .site-footer .footer-service{flex-wrap:nowrap;gap:5px;overflow-x:auto;scrollbar-width:thin}
+  .site-footer .connection-monitor-button{flex-wrap:nowrap;white-space:nowrap}
+  .site-footer .footer-projects{display:none}
+}
