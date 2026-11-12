@@ -1,5 +1,9 @@
 # Cinco ejemplos validados · ΣIM 0.5.0
 
+Los casos 06–08 se ejecutaron posteriormente con el motor Windows en 0.7.0.
+Ver [informe y alcance](validacion-windows-0.7.0.md); la comparación separada
+con la API de escritorio descrita aquí corresponde a los casos 01–05.
+
 Resultados de modelos, no mediciones experimentales. Se comparó el motor de ΣIM
 con la API Automation3 de DWSIM Open Source 10.2.15.0 instalado en la PC.
 Ambos comparten la familia de modelos DWSIM: esto comprueba la integración, no
