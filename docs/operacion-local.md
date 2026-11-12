@@ -22,7 +22,27 @@ cd C:\GitHub\lemeit-sim
 ```
 
 El arranque reutiliza gateway y túnel del mismo runtime para evitar duplicados.
-No se instaló inicio automático de Windows. No hace falta abrir DWSIM de escritorio.
+No hace falta abrir DWSIM de escritorio.
+
+## Inicio automático opcional · 0.7.1
+
+Ejecutar `.\enable-autostart.ps1` una vez desde el repositorio. Instala el acceso
+`Lemeit-SIM-Windows.lnk` en Inicio del usuario actual. Al iniciar sesión espera
+15 segundos e inicia o reutiliza gateway y túnel sin abrir ventanas; comprueba
+el catálogo local y reintenta hasta cuatro veces si el gateway no responde.
+Usa PowerShell incluido en Windows y la ruta de Python detectada al instalar.
+No configura un servicio antes del inicio de sesión ni requiere guardar contraseñas.
+La política de ejecución existente permanece intacta.
+
+El lanzador se copia a `.local/runtime/start-at-login.ps1` para conservarlo al
+cambiar de rama. Sigue necesitando `server.py` y `start-online.ps1` en el repositorio.
+Los intentos quedan en `.local/runtime/startup.log`. La comprobación local no
+confirma la conexión pública: revisar también el monitor del portal.
+
+Para desactivar: `.\disable-autostart.ps1`. Esto elimina únicamente ese acceso
+directo; para detener lo que ya está corriendo, ejecutar `.\stop-online.ps1`.
+Si se mueve el repositorio o cambia Python, repetir `enable-autostart.ps1`.
+No afecta Debian ni la vista de desarrollo 5910.
 
 | Servicio | Puerto | Cómo se administra |
 | --- | --- | --- |

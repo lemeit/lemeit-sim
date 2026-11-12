@@ -30,7 +30,9 @@ cd C:\GitHub\lemeit-sim
 
 Runtime predeterminado: `.local/runtime`, excluido de Git. El gateway usa
 `127.0.0.1:5911`; no requiere MCP HTTP 5901 ni abrir la aplicación DWSIM de escritorio.
-No hay inicio automático de Windows configurado por estos scripts.
+Desde 0.7.1 se ofrece inicio automático Windows opcional con `enable-autostart.ps1`
+y `disable-autostart.ps1`; se ejecuta al entrar a la sesión del usuario. Ver
+[operación local](operacion-local.md).
 Para una vista local independiente: `.\start-local.ps1`, puerto 5910, Ctrl+C para salir.
 
 ## Debian
