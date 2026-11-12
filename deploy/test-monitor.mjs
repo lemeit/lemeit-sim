@@ -64,3 +64,11 @@ test('banner ASCII inicia el historial y Acerca de no repite información',async
   assert.ok(log.indexOf('console-boot')<log.indexOf('trace-online'));
   assert.match(log,/CONEXIÓN/);
 });
+
+test('ayuda del monitor aparece una sola vez y cierra su desplegable',()=>{
+  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
+  const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
+  assert.equal((dialog.match(/<details class="monitor-help">/g)||[]).length,1);
+  assert.equal((dialog.match(/<summary>Cómo interpretar el monitor<\/summary>/g)||[]).length,1);
+  assert.match(dialog,/<\/p><\/details><button id="server-refresh"/);
+});
