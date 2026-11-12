@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "title": "09 · Red térmica de mezcla ternaria",
+  "compounds": [
+    "Water",
+    "Ethanol",
+    "Acetone"
+  ],
+  "model": "NRTL",
+  "nodes": [
+    {
+      "id": "f1",
+      "type": "MaterialStream",
+      "name": "F1 · Base acuosa",
+      "x": 30,
+      "y": 230,
+      "temperature_C": 20,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1.2,
+      "composition": {
+        "Water": 0.7,
+        "Ethanol": 0.2,
+        "Acetone": 0.1
+      }
+    },
+    {
+      "id": "f2",
+      "type": "MaterialStream",
+      "name": "F2 · Mezcla orgánica",
+      "x": 30,
+      "y": 450,
+      "temperature_C": 45,
+      "pressure_kPa": 101.325,
+      "mass_flow": 0.8,
+      "composition": {
+        "Water": 0.2,
+        "Ethanol": 0.5,
+        "Acetone": 0.3
+      }
+    },
+    {
+      "id": "m1",
+      "type": "Mixer",
+      "name": "M1 · Mezcla inicial",
+      "x": 230,
+      "y": 330
+    },
+    {
+      "id": "s1",
+      "type": "MaterialStream",
+      "name": "S1 · Mezcla ternaria",
+      "x": 375,
+      "y": 345
+    },
+    {
+      "id": "d1",
+      "type": "Splitter",
+      "name": "D1 · Reparto 65-35",
+      "x": 530,
+      "y": 330,
+      "split": 0.65
+    },
+    {
+      "id": "hotin",
+      "type": "MaterialStream",
+      "name": "S2 · Ramal caliente",
+      "x": 670,
+      "y": 240
+    },
+    {
+      "id": "coldin",
+      "type": "MaterialStream",
+      "name": "S3 · Ramal frío",
+      "x": 670,
+      "y": 485
+    },
+    {
+      "id": "h1",
+      "type": "Heater",
+      "name": "H1 · Calentamiento a 70 C",
+      "x": 845,
+      "y": 215,
+      "outlet_C": 70
+    },
+    {
+      "id": "c1",
+      "type": "Cooler",
+      "name": "E1 · Enfriamiento a 15 C",
+      "x": 845,
+      "y": 460,
+      "outlet_C": 15
+    },
+    {
+      "id": "hotout",
+      "type": "MaterialStream",
+      "name": "S4 · Salida caliente",
+      "x": 990,
+      "y": 240
+    },
+    {
+      "id": "coldout",
+      "type": "MaterialStream",
+      "name": "S5 · Salida fría",
+      "x": 990,
+      "y": 485
+    },
+    {
+      "id": "m2",
+      "type": "Mixer",
+      "name": "M2 · Recombinación",
+      "x": 1180,
+      "y": 330
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "P1 · Producto final",
+      "x": 1335,
+      "y": 345
+    },
+    {
+      "id": "qh",
+      "type": "EnergyStream",
+      "name": "QH · Calor suministrado",
+      "x": 845,
+      "y": 385
+    },
+    {
+      "id": "qc",
+      "type": "EnergyStream",
+      "name": "QC · Calor retirado",
+      "x": 830,
+      "y": 625
+    }
+  ],
+  "edges": [
+    {
+      "from": "f1",
+      "to": "m1"
+    },
+    {
+      "from": "f2",
+      "to": "m1",
+      "toIndex": 1
+    },
+    {
+      "from": "m1",
+      "to": "s1"
+    },
+    {
+      "from": "s1",
+      "to": "d1"
+    },
+    {
+      "from": "d1",
+      "to": "hotin"
+    },
+    {
+      "from": "d1",
+      "to": "coldin",
+      "fromIndex": 1
+    },
+    {
+      "from": "hotin",
+      "to": "h1"
+    },
+    {
+      "from": "coldin",
+      "to": "c1"
+    },
+    {
+      "from": "h1",
+      "to": "hotout"
+    },
+    {
+      "from": "c1",
+      "to": "coldout"
+    },
+    {
+      "from": "hotout",
+      "to": "m2"
+    },
+    {
+      "from": "coldout",
+      "to": "m2",
+      "toIndex": 1
+    },
+    {
+      "from": "m2",
+      "to": "product"
+    },
+    {
+      "from": "qh",
+      "to": "h1",
+      "toPort": "energy-in"
+    },
+    {
+      "from": "c1",
+      "to": "qc",
+      "fromPort": "energy-out"
+    }
+  ],
+  "learning": "09 · Resolvé los balances de materia de la mezcla agua–etanol–acetona; dividí 65/35, calentá un ramal a 70 °C y enfriá el otro a 15 °C; recombiná adiabáticamente. Calculá las potencias térmicas y compará el balance global con la suma por equipos. No promedies temperaturas ni supongas que todas las corrientes son líquidas. Guía paso a paso: ejemplos.html#ThermalNetwork."
+}

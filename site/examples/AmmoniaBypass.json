@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "title": "10 · Síntesis de amoníaco con bypass",
+  "compounds": [
+    "Nitrogen",
+    "Hydrogen",
+    "Ammonia"
+  ],
+  "model": "Peng-Robinson (PR)",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "F1 · Gas comprimido",
+      "x": 30,
+      "y": 290,
+      "temperature_C": 40,
+      "pressure_kPa": 20000,
+      "mass_flow": 1,
+      "composition": {
+        "Nitrogen": 0.8224,
+        "Hydrogen": 0.1776,
+        "Ammonia": 0
+      }
+    },
+    {
+      "id": "d1",
+      "type": "Splitter",
+      "name": "D1 · Reacción 80-20",
+      "x": 230,
+      "y": 270,
+      "split": 0.8
+    },
+    {
+      "id": "rfeed",
+      "type": "MaterialStream",
+      "name": "S1 · Hacia reactor",
+      "x": 380,
+      "y": 230
+    },
+    {
+      "id": "bypass",
+      "type": "MaterialStream",
+      "name": "B1 · Bypass sin reacción",
+      "x": 580,
+      "y": 580,
+      "routeAxis": "y",
+      "routeY": 580
+    },
+    {
+      "id": "h1",
+      "type": "Heater",
+      "name": "H1 · Precalentador",
+      "x": 570,
+      "y": 205,
+      "outlet_C": 450
+    },
+    {
+      "id": "hot",
+      "type": "MaterialStream",
+      "name": "S2 · Gas a 450 C",
+      "x": 715,
+      "y": 230
+    },
+    {
+      "id": "reactor",
+      "type": "EquilibriumReactor",
+      "name": "R1 · Equilibrio a 450 C",
+      "x": 900,
+      "y": 205,
+      "outlet_C": 450,
+      "phase": "Vapor",
+      "base_compound": "Nitrogen",
+      "stoichiometry": {
+        "Nitrogen": -1,
+        "Hydrogen": -3,
+        "Ammonia": 2
+      }
+    },
+    {
+      "id": "vapor",
+      "type": "MaterialStream",
+      "name": "S3 · Vapor del reactor",
+      "x": 1070,
+      "y": 185
+    },
+    {
+      "id": "liquid",
+      "type": "MaterialStream",
+      "name": "L1 · Líquido del reactor",
+      "x": 900,
+      "y": 425
+    },
+    {
+      "id": "c1",
+      "type": "Cooler",
+      "name": "E1 · Enfriador a 80 C",
+      "x": 1260,
+      "y": 160,
+      "outlet_C": 80
+    },
+    {
+      "id": "cooled",
+      "type": "MaterialStream",
+      "name": "S4 · Producto enfriado",
+      "x": 1410,
+      "y": 185
+    },
+    {
+      "id": "m1",
+      "type": "Mixer",
+      "name": "M1 · Mezcla con bypass",
+      "x": 1590,
+      "y": 280
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "P1 · Producto mezclado",
+      "x": 1740,
+      "y": 295
+    },
+    {
+      "id": "qh",
+      "type": "EnergyStream",
+      "name": "QH · Precalentamiento",
+      "x": 570,
+      "y": 350
+    },
+    {
+      "id": "qc",
+      "type": "EnergyStream",
+      "name": "QC · Enfriamiento",
+      "x": 1260,
+      "y": 350
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "d1"
+    },
+    {
+      "from": "d1",
+      "to": "rfeed"
+    },
+    {
+      "from": "d1",
+      "to": "bypass",
+      "fromIndex": 1
+    },
+    {
+      "from": "rfeed",
+      "to": "h1"
+    },
+    {
+      "from": "h1",
+      "to": "hot"
+    },
+    {
+      "from": "hot",
+      "to": "reactor"
+    },
+    {
+      "from": "reactor",
+      "to": "vapor"
+    },
+    {
+      "from": "reactor",
+      "to": "liquid",
+      "fromIndex": 1
+    },
+    {
+      "from": "vapor",
+      "to": "c1"
+    },
+    {
+      "from": "c1",
+      "to": "cooled"
+    },
+    {
+      "from": "cooled",
+      "to": "m1"
+    },
+    {
+      "from": "bypass",
+      "to": "m1",
+      "toIndex": 1
+    },
+    {
+      "from": "m1",
+      "to": "product"
+    },
+    {
+      "from": "qh",
+      "to": "h1",
+      "toPort": "energy-in"
+    },
+    {
+      "from": "c1",
+      "to": "qc",
+      "fromPort": "energy-out"
+    }
+  ],
+  "learning": "10 · Alimentación ya comprimida a 20 000 kPa absolutos: 80 % pasa por precalentamiento, equilibrio N2 + 3 H2 ⇌ 2 NH3 a 450 °C y enfriamiento a 80 °C; 20 % evita la reacción y se mezcla al final. Comprobá masa total y átomos N/H; las especies no se conservan en el reactor. Determiná conversión, producción de NH3 y cargas térmicas con el motor. No es un lazo industrial: no hay compresor, recirculación, separación final ni recuperación de calor. Guía paso a paso: ejemplos.html#AmmoniaBypass."
+}

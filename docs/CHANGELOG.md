@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.8.0 — 2026-11-12
+
+- Ejemplo 09: red térmica NRTL agua–etanol–acetona con mezcla, división 65/35, calentamiento, enfriamiento y recombinación.
+- Ejemplo 10: amoníaco PR con bypass 20 %, precalentamiento, reactor de equilibrio y enfriamiento.
+- Menú y guía numerados 01–10; resoluciones paso a paso para los diez ejercicios, con actividades y descargas para ambos casos integrados.
+- Informe Windows y verificador reproducible: cierres de materia/energía del 09 y conservación de átomos del 10. Sin prueba Debian ni validación experimental.
+- Ajuste de vista al abrir ejemplos; sin cambios en motor o ecuaciones.
+
 ## 0.7.3 — 2026-11-12
 
 - Controles propios de incremento/decremento en todos los campos numéricos, también en el inspector dinámico, conservando edición nativa y límites/pasos.
