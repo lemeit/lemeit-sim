@@ -46,8 +46,10 @@ test('el monitor incluye un encabezado ASCII sin alterar la barra inferior',()=>
   const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
   const footer=html.split('<footer class="site-footer">')[1]?.split('</footer>')[0]||'';
   assert.match(dialog,/class="monitor-brand"/);
-  assert.match(dialog,/<pre aria-hidden="true">/);
-  assert.ok(dialog.includes('ΣIM / MONITOR DWSIM'));
+  assert.match(dialog,/class="monitor-sigma">Σ<\/strong>/);
+  assert.match(dialog,/<pre>██/);
+  assert.ok(dialog.includes('ΣIM · Simulación de procesos'));
+  assert.ok(dialog.includes('MONITOR DE CONEXIÓN · DWSIM'));
   assert.ok(dialog.includes('Desarrollado por Ing. Luciano Lamaita'));
   assert.ok(dialog.includes('https://dwsim.org/'));
   assert.ok(dialog.includes('licenses/DWSIM-GPL-3.txt'));
