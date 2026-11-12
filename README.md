@@ -1,9 +1,11 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.7.2](https://img.shields.io/badge/portal-0.7.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
+
+[![Documentación de proyectos](https://img.shields.io/badge/docs-wiki.lemeit.ar-F4F3EE?style=flat-square&labelColor=101215)](https://wiki.lemeit.ar/sim/)
 
 Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
 Marca: ΣIM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
@@ -362,3 +364,14 @@ Ver [resultados y límites](docs/validacion-windows-0.7.0.md) y el
 [Servicios y arranque/apagado](docs/operacion-local.md) · [Propuesta de acceso sin correo para alumnos](docs/acceso-propuesto.md).
 
 [Selección Windows / Debian](docs/seleccion-manual-motores.md).
+
+
+## Accesos del proyecto
+
+- [ΣIM](https://sim.lemeit.ar/): aplicación y versión visible en Ayuda → Acerca de.
+- [Ejemplos](https://sim.lemeit.ar/ejemplos.html) y [catálogo](https://sim.lemeit.ar/catalogo.html).
+- [Ficha en Profe Lamaita](https://profe.lemeit.ar/projects/sim/).
+- [Wiki de proyectos](https://wiki.lemeit.ar/sim/).
+- [Portal Lemeit](https://lemeit.ar/#sim).
+
+La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣIM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Esta revisión agrega referencias documentales; no cambia la versión funcional 0.7.2 ni los motores.
