@@ -1190,3 +1190,10 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #about-dialog .about-credits{padding:11px 12px;background:var(--spx-surface-2);border-left:2px solid var(--spx-accent);font-size:11px;line-height:1.65}
 #about-dialog .about-credits a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 @media(max-width:540px){#server-dialog #server-details dl{grid-template-columns:1fr 1.2fr;gap:6px 8px;font-size:10px}}
+
+/* Rótulo clásico de terminal, sin bloques Unicode ni color obligatorio. */
+#server-dialog .console-boot pre{align-items:center;gap:9px}
+#server-dialog .console-boot .boot-sigma{font:normal 53px/1 Georgia,serif;color:#F4F3EE}
+#server-dialog .console-boot .boot-im{font:normal 10px/1.15 monospace;letter-spacing:0;color:#F4F3EE}
+#server-dialog .console-boot .boot-title{font-size:11px;font-weight:500;color:#c6cdcb}
+@media(max-width:540px){#server-dialog .console-boot .boot-sigma{font-size:44px}#server-dialog .console-boot .boot-im{font-size:8px}}
