@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.3-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -14,9 +14,10 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.7.2 — Ventanas y tipografía**, en desarrollo; versión pública anterior 0.7.1.
-Cabeceras fijas, desplazamiento interno y texto/listas/botones coherentes en todas
-las ventanas. Se mantienen el inicio automático Windows y los ocho ejemplos. Incluye balance multicomponente
+**0.7.3 — Controles numéricos y menús**, en desarrollo; versión pública anterior 0.7.2.
+Flechas propias para aumentar/disminuir valores, botón Editar compuestos destacado
+y estados de menú coherentes en claro y oscuro. Se conservan teclado, pasos y
+límites de los campos, cabeceras fijas, motores y ocho ejemplos. Incluye balance multicomponente
 con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
 ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
 y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).

@@ -300,3 +300,12 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Revisión visual en modo claro y oscuro. Diagnóstico usa botones propios y texto con la familia de la interfaz; listas de Acerca de unificadas a 12 px.
 - 55 pruebas JS, compilación, validación de versión e historial y dry-run correctos.
 - Sin cambios en motor, ecuaciones, túneles o inicio automático Windows.
+
+## Controles y menús · 0.7.3 · 12 de noviembre de 2026
+
+- Se revisaron los seis menús (Archivo, Simulación, Ver, Ejemplos, Herramientas y Ayuda) en claro y oscuro: abiertos, dentro de la pantalla y con acciones accesibles.
+- Editar compuestos abre su ventana y se distingue como botón con borde/fondo. Se corrigieron etiquetas, notas y foco del menú Simulación.
+- Los controles numéricos del inspector dinámico se regeneran sin duplicados. Tamaño gráfico: 100 → 110; límite superior 300 respetado; decremento funcional.
+- Temperatura decimal: 20,5 → 21,5 → 20,5, conservando selector de unidades y sin desbordamiento horizontal.
+- Configuración: límites 0/8 respetados; flecha de teclado 0 → 1; valor restaurado a 3. Nombres accesibles conservados y sin errores en consola.
+- Acerca de 0.7.3 revisado tras recargar; capturas de claro y oscuro. No se modificaron motores ni ecuaciones.
