@@ -586,7 +586,7 @@ function renderConnectionTrace(){
 \  ___| |_   _| |  \/  |
  \ \      | |   | |\/| |
  / /__   _| |_  | |  | |
-/_____| |_____| |_|  |_|`
+/_____| |_____| |_|  |_|`;
   const banner=`<div class="console-boot" aria-label="ΣIM · Simulación de procesos"><pre class="boot-classic boot-logo" aria-hidden="true">${esc(asciiLogo)}</pre><div class="boot-title">Simulación de procesos</div><div>Desarrollado por Ing. Luciano Lamaita</div><div>Motor de cálculo: DWSIM 10.2.15 · Daniel Wagner Oliveira de Medeiros y colaboradores</div><div>GNU GPL v3 · Créditos y licencias en «Acerca de»</div><div class="boot-ready">----------------------------------------------------</div></div>`;
   const events=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.engine==='debian'?'Debian':'Windows')} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
   consoleView.innerHTML=banner+events;
