@@ -1131,3 +1131,17 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
   .site-footer .connection-monitor-button{flex-wrap:nowrap;white-space:nowrap}
   .site-footer .footer-projects{display:none}
 }
+
+
+/* Monitor DWSIM: estado legible, sin presentar una consulta de catálogo como cálculo. */
+#server-details .monitor-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px;border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface-2)}
+#server-details .monitor-summary>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+#server-details .monitor-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--spx-text-dim)}
+#server-details .monitor-summary strong{font-size:14px;font-weight:600}
+#server-details .monitor-status{font-size:11px;white-space:nowrap;font-weight:600;padding:5px 8px;border:1px solid var(--spx-border);border-radius:3px}
+#server-details .monitor-status-online{color:var(--spx-good)}
+#server-details .monitor-status-busy{color:var(--spx-moderate)}
+#server-details .monitor-status-offline{color:var(--spx-bad)}
+#server-details .monitor-explanation{font-size:11px;line-height:1.6;color:var(--spx-text-dim);margin:10px 2px 16px}
+#server-details dl{grid-template-columns:minmax(120px,1fr) minmax(0,2fr)}
+@media(max-width:540px){#server-details .monitor-summary{align-items:flex-start;flex-direction:column}#server-details .monitor-status{white-space:normal}}
