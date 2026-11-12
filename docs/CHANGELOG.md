@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.7.3 — 2026-11-12
+
+- Controles propios de incremento/decremento en todos los campos numéricos, también en el inspector dinámico, conservando edición nativa y límites/pasos.
+- Botón Editar compuestos con borde y fondo; etiquetas, notas, foco y opciones deshabilitadas coherentes en menús.
+- Sin cambios en el motor, modelos, túneles o inicio automático.
+
 ## 0.7.2 — 2026-11-12
 
 - Cabeceras fijas en las ocho ventanas; solo el contenido se desplaza y la barra queda debajo del cierre.
