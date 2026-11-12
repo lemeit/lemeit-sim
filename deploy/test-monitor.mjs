@@ -57,7 +57,10 @@ test('la identidad ΣIM inicia el log desplazable y los créditos figuran en Ace
   const log=elements.get('connection-console').innerHTML;
   assert.match(log,/class="console-boot"/);
   assert.match(log,/class="boot-sigma">Σ/);
-  assert.match(log,/ΣIM · Simulación de procesos/);
+  assert.match(log,/class="boot-title">Simulación de procesos/);
+  assert.match(log,/\|___\| \|_\|/);
+  assert.doesNotMatch(log,/<div class="boot-title">ΣIM/);
+  assert.doesNotMatch(log,/██/);
   assert.match(log,/Ing. Luciano Lamaita/);
   assert.ok(log.indexOf('console-boot')<log.indexOf('trace-online'));
   assert.match(log,/CONEXIÓN/);
