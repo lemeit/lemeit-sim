@@ -1,6 +1,9 @@
-# ΣIM
-
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
+
+[![Portal 0.7.0](https://img.shields.io/badge/portal-0.7.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
+[![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
+[![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
 
 Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
 Marca: ΣIM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
@@ -11,7 +14,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.7.0 — Biblioteca de ocho ejemplos**, en desarrollo. Incluye balance multicomponente
+**0.7.0 — Biblioteca de ocho ejemplos**, publicada el 12/11/2026. Incluye balance multicomponente
 con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
 ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
 y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).
@@ -31,7 +34,7 @@ Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
 [Historial de versiones](docs/CHANGELOG.md) · [Guía de uso](docs/workflow.md) ·
 [Verificaciones realizadas](CHECKS.md) · [Operación local](docs/operacion-local.md).
 
-## Biblioteca de ejemplos · 0.5.0
+## Biblioteca de ocho ejemplos
 
 Desde Ejemplos se abre cada caso con sus condiciones y una consigna breve. Son
 modelos calculados, no mediciones experimentales. La [guía](docs/ejemplos-validados.md)
@@ -44,15 +47,22 @@ permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
 | Enfriamiento | Calor retirado de 1 kg/s de 80 a 30 °C | −209.157884 kW |
 | División | Distribución 70/30 de 1 kg/s | 0.7 y 0.3 kg/s |
 | Agua–etanol · NRTL | Balance por componente, mezcla no ideal y fases | 2 kg/s a 51.671926 °C; 55/45 % másico |
+| 06 · Balance multicomponente · NRTL | Dos mezcladores, divisor y sistema matricial 2×2 | S1: 2 kg/s; P1: 1,2 kg/s; P2: 1,3 kg/s |
+| 07 · Reactor de conversión | Formación de agua con conversión del 50 % | Agua: 0,500007399250 kg/kg; Q: −6836,902074 kW |
+| 08 · Reactor de equilibrio | Síntesis de amoníaco | Amoníaco: 0,311687291752 kg/kg; Q: −999,736216 kW |
 
-Los cinco casos se recalcularon con el motor de ΣIM y la API oficial del DWSIM
+Los casos 01–05 se recalcularon con el motor de ΣIM y la API oficial del DWSIM
 Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
 de las tolerancias documentadas; el [informe](docs/validation/examples-0.5.0.json)
 conserva los valores sin redondear. Mezclado de agua y calentamiento se ejecutaron
 también en la interfaz de escritorio. No se afirma validación experimental ni
 comparación con un modelo físico independiente: ambas rutas usan DWSIM.
 
-Para repetir la comparación, ver [procedimiento y requisitos](docs/ejemplos-validados.md#repetir-la-comparación).
+Los casos 06–08 se calcularon con Windows el 12/11/2026, sin comparación separada
+con la API de escritorio. El 06 coincide con los balances analíticos; los reactores
+se documentan con sus resultados reales. Ver [alcance e informe](docs/validacion-windows-0.7.0.md).
+
+Para repetir la comparación de 01–05, ver [procedimiento y requisitos](docs/ejemplos-validados.md#repetir-la-comparación).
 
 ## Flujo de trabajo
 
@@ -180,7 +190,32 @@ JSON y la recuperación local del navegador siguen disponibles al recuperar cone
 La instalación definitiva debe comprobarse en un navegador compatible sobre el
 sitio HTTPS publicado; el navegador integrado de Codex puede no ofrecerla.
 
-## Ejecución local
+## Dos motores de cálculo · selección manual
+
+El portal tiene dos destinos configurados. Se eligen en **Motor**, en el footer:
+
+| Motor | Destino del Worker | Integración | Disponibilidad |
+| --- | --- | --- | --- |
+| Windows · predeterminado | `https://engine-sim.lemeit.ar` | Gateway Python y proceso DWSIM aislado por cálculo | PC, gateway y túnel encendidos |
+| Debian · notebook | `https://sim-debian.lemeit.ar` | Gateway Python y DWSIM MCP HTTP local autenticado | Notebook, MCP, gateway y túnel encendidos |
+
+No hay conmutación automática: si el elegido falla, la aplicación muestra el error
+sin enviar el proyecto al otro motor. El navegador indica el destino con
+`X-SIM-Engine: windows|debian`; las URL y credenciales se resuelven en el Worker.
+Windows usa `ENGINE_URL` y el secreto `ORIGIN_KEY`; Debian usa `DEBIAN_ENGINE_URL`
+y su propio secreto `DEBIAN_ORIGIN_KEY`. Ninguna clave se entrega al navegador.
+
+La configuración del segundo destino ya está incorporada. Eso no significa que
+la notebook esté encendida ni que ambos motores estén disponibles permanentemente.
+En la sesión de validación del 12/11/2026 Debian estaba apagada: las pruebas de los
+casos 06–08 se realizaron exclusivamente en Windows. El historial 0.6.0 registra
+una prueba local previa de mezcla de agua en Debian; no equivale a validar todos
+los ejemplos online en ambos motores.
+
+[Configuración y operación de ambos motores](docs/seleccion-manual-motores.md).
+La instalación PWA no instala ninguno de estos motores en la PC del alumno.
+
+## Ejecución local en Windows
 
 Requisitos: Python 3.11+, Node 22+ (recomendado 24 para desarrollo y despliegue), y una
 distribución de DWSIM MCP 10.2.15 para Windows x64. La carpeta del motor contiene
@@ -214,12 +249,12 @@ HTTP en 5901 esté iniciado. Los cálculos se serializan y tienen 45 s de límit
 - Cloudflare Worker sirve la interfaz estática y mantiene disponible el editor.
 - El Worker solo admite /api/catalog y /api/simulate, limita cuerpos a 100 kB y
   autentica al origen mediante un secreto de servidor, que nunca llega al navegador.
-- Cloudflare Tunnel conecta el intermediario en 127.0.0.1:5911 con el Worker.
+- Cada motor tiene un destino y un túnel independientes; el gateway Windows escucha en 127.0.0.1:5911.
 - El origen requiere Host interno y secreto para las solicitudes del túnel;
   el motor MCP no se publica. La publicación del túnel requiere autorización explícita.
-- El servidor limita conexiones, crea un proceso DWSIM por cálculo y aplica un
+- El servidor limita conexiones; Windows crea un proceso DWSIM por cálculo y Debian usa MCP HTTP local. Aplica un
   límite global del piloto de 12 cálculos/minuto y 120/hora, sin activar planes pagos.
-- Si la PC está apagada o sin conexión, el editor sigue accesible; el cálculo
+- Si el equipo del motor seleccionado está apagado o sin conexión, el editor sigue accesible; el cálculo
   devuelve una explicación de indisponibilidad. No se prometen disponibilidad 24/7
   ni capacidad para una clase completa hasta realizar pruebas de carga.
 
@@ -227,7 +262,10 @@ Las condiciones se envían al servidor para calcular. No se guardan ejercicios e
 la nube: Guardar descarga JSON; Abrir restaura el proceso. Existe guardado local
 automático en el navegador; borrar datos del sitio lo elimina.
 
-## Encender y detener el cálculo online
+## Encender y detener el cálculo online en Windows
+
+Para Debian, consultar su [guía específica](docs/seleccion-manual-motores.md).
+Los scripts PowerShell siguientes administran únicamente Windows.
 
 La conexión publicada usa credenciales privadas ya configuradas en la PC del
 operador. No están en GitHub ni se descargan al navegador. Desde la carpeta local:
@@ -268,8 +306,8 @@ build en Cloudflare. La primera conexión del repositorio no ejecutó un build p
 sí sola: ese primer despliegue se inició manualmente y terminó correctamente.
 
 El despliegue web no actualiza server.py en la PC. Si cambia el backend, hay que
-actualizar la copia local aprobada y reiniciar el servicio online. Esta entrega de
-marca y corrientes no modifica el motor ni las ecuaciones.
+actualizar la copia local aprobada y reiniciar el servicio online. La publicación del frontend tampoco actualiza la copia del backend en Debian;
+ambas instalaciones se administran por separado.
 Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
@@ -294,13 +332,16 @@ edición oficial de DWSIM.
 
 ## Documentación y verificación
 
-La entrega 0.3.0 pasó 37 pruebas JS, compilación y empaquetado de Wrangler sin
-publicar. Se verificaron en navegador la ausencia del selector, el arrastre de una
-punta hacia arriba, el movimiento horizontal del codo y Acerca de 0.3.0.
-Ver [detalle de comprobaciones](CHECKS.md). Estas verificaciones gráficas no
-sustituyen las pruebas de cálculo con DWSIM ni las futuras pruebas de carga.
+La entrega 0.7.0 pasó 55 pruebas JS, tres comprobaciones Python de ejemplos,
+compilación y preparación del despliegue. Se ejecutaron los casos 06–08 con el
+motor Windows; el 06 también desde la interfaz local. Acerca de se comprobó tras
+recargar y se verificó la versión publicada. Debian no se probó en esa sesión.
+Ver [resultados y límites](docs/validacion-windows-0.7.0.md) y el
+[registro histórico](CHECKS.md). Quedan pendientes pruebas de carga para una clase.
 
 [Guía de trabajo](docs/workflow.md) · [Historial completo](docs/CHANGELOG.md) ·
 [Identidad y logo](docs/brand-sim.md) · [Despliegue automático](docs/despliegue-automatico.md).
 
 [Servicios y arranque/apagado](docs/operacion-local.md) · [Propuesta de acceso sin correo para alumnos](docs/acceso-propuesto.md).
+
+[Selección Windows / Debian](docs/seleccion-manual-motores.md).

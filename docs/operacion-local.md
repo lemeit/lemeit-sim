@@ -1,45 +1,50 @@
-# Servicios locales de SIMPROX
+# Operación local de ΣIM · Windows
 
-EngineRoot es la carpeta que contiene server/dwsim-mcp.exe, archivos del motor y
-configuración privada. No es el repositorio de SIMPROX. El código puede estar en
-C:\GitHub\lemeit-sim y el motor en otra carpeta; no implica dos instalaciones del motor.
+La configuración Debian se documenta [por separado](seleccion-manual-motores.md).
+Los scripts de esta página solo administran Windows.
 
-## Tres servicios diferentes
+## Ubicación del motor
 
-1. MCP HTTP (5901), administrado por los scripts del paquete dwsim-server.
-   verify-server.py lo consulta; stop-server.ps1 detiene solo ese proceso.
-2. Gateway de la web (5911), server.py de SIMPROX. Inicia un proceso DWSIM aislado
-   por cálculo; no utiliza el MCP HTTP persistente de 5901.
-3. Túnel Cloudflare, que conecta la web publicada con el gateway de esta PC.
+Runtime predeterminado: `C:\GitHub\lemeit-sim\.local\runtime`. Contiene
+`server/dwsim-mcp.exe`, dependencias, credenciales y registros. Está excluido de Git.
+Puede elegirse otra carpeta con `-EngineRoot`; el código y los binarios no tienen
+que estar en repositorios distintos.
 
-La interfaz publicada sigue abriendo aunque el motor y el túnel estén detenidos.
-El indicador muestra la API accesible, no la existencia de un DWSIM permanente.
-
-## Arranque y apagado de la web
-
-Desde el repositorio actualizado:
+## Arranque y apagado
 
 ```powershell
-$motor = "C:\ruta\a\dwsim-server"
-.\start-online.ps1 -EngineRoot $motor
-.\stop-online.ps1 -EngineRoot $motor -WhatIf
-.\stop-online.ps1 -EngineRoot $motor
+cd C:\GitHub\lemeit-sim
+.\start-online.ps1
+# Comprobar qué se detendría, sin apagar:
+.\stop-online.ps1 -WhatIf
+# Apagar:
+.\stop-online.ps1
 ```
 
-WhatIf solo muestra qué procesos se detendrían. El apagado busca todos los gateways
-5911 que usan ese EngineRoot y el túnel con su token-file, incluso si fueron
-arrancados desde otra copia del código. Solo termina trabajos DWSIM hijos de esos
-gateways. No detiene el MCP 5901 ni otras vistas locales. El arranque reutiliza el
-servicio online de ese motor si ya existe, evitando duplicados por cambiar de copia.
+El arranque reutiliza gateway y túnel del mismo runtime para evitar duplicados.
+No se instaló inicio automático de Windows. No hace falta abrir DWSIM de escritorio.
 
-Una vista de desarrollo en otro puerto es otro servicio y debe detenerse por
-separado. No hay inicio automático de Windows configurado por estos scripts.
+| Servicio | Puerto | Cómo se administra |
+| --- | --- | --- |
+| Gateway online y túnel Windows | 5911 | `start-online.ps1` / `stop-online.ps1` |
+| Vista local de desarrollo | 5910 | `start-local.ps1` / Ctrl+C en su consola |
+| MCP HTTP opcional | 5901 | Scripts del paquete MCP, independiente del gateway Windows |
 
-## Motor dentro del repositorio
-Ubicación predeterminada: .local/runtime (privada y excluida de Git). Desde la raíz del repositorio ejecutar ./start-online.ps1 o ./stop-online.ps1 sin parámetros. Para una ubicación distinta sigue disponible -EngineRoot. El modo local se inicia con ./start-local.ps1. Los registros quedan en .local/runtime.
+El gateway Windows inicia un proceso DWSIM aislado por cálculo. No necesita MCP
+HTTP 5901. `verify-server.py` comprueba ese MCP opcional; no arranca el gateway.
+Por eso `stop-server.ps1` no apaga el servicio online de ΣIM.
 
-## Actualizar a 0.2.0
-Esta entrega cambia server.py además de la interfaz. Tras actualizar el código,
-reiniciar el servicio local para cargar el backend nuevo. Al publicar, detener
-y volver a iniciar el servicio online desde el repositorio; el motor binario y
-las claves no cambian. No hace falta iniciar MCP 5901.
+El apagado online detecta gateways del mismo runtime y su túnel aunque se hayan
+iniciado desde otra copia del código. No detiene vistas locales independientes,
+el MCP opcional ni el motor Debian.
+
+## Estado y registros
+
+En el portal seleccionar Windows y abrir el monitor de conexión. HTTP 200 del
+catálogo significa API accesible; una corrida tiene su propio evento de cálculo.
+Los registros privados del gateway y del túnel quedan en `.local/runtime`.
+No publicar registros sin revisar ni compartir archivos de claves.
+
+La interfaz publicada permanece accesible aunque la PC esté apagada. Para calcular
+se necesita gateway y túnel activos. El despliegue web no actualiza automáticamente
+el backend de la PC: después de actualizar `server.py`, reiniciar su servicio.
