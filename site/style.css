@@ -1145,3 +1145,9 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-details .monitor-explanation{font-size:11px;line-height:1.6;color:var(--spx-text-dim);margin:10px 2px 16px}
 #server-details dl{grid-template-columns:minmax(120px,1fr) minmax(0,2fr)}
 @media(max-width:540px){#server-details .monitor-summary{align-items:flex-start;flex-direction:column}#server-details .monitor-status{white-space:normal}}
+
+/* Identidad monoespaciada del monitor: no modifica el footer global. */
+#server-dialog .monitor-brand{display:flex;align-items:center;gap:18px;min-width:0;padding:10px 13px;margin:0 0 12px;border:1px solid var(--spx-border);border-radius:4px;background:#101215;color:#F4F3EE}
+#server-dialog .monitor-brand pre{font:600 12px/1.22 var(--spx-font-mono),monospace;letter-spacing:0;margin:0;white-space:pre;color:#F4F3EE}
+#server-dialog .monitor-brand span{font:10px/1.5 var(--spx-font-mono),monospace;letter-spacing:1.1px;color:#c5c8c6}
+@media(max-width:540px){#server-dialog .monitor-brand{gap:12px}#server-dialog .monitor-brand pre{font-size:9px}#server-dialog .monitor-brand span{font-size:8px;letter-spacing:.3px}}
