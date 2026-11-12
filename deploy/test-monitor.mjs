@@ -41,14 +41,14 @@ test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
   assert.match(elements.get('server-details').innerHTML,/puede estar apagada/);
   assert.match(elements.get('connection-console').innerHTML,/Windows/);
 });
-test('la identidad ΣIM inicia el log desplazable y los créditos figuran en Acerca de',async()=>{
+test('banner ASCII inicia el historial y Acerca de no repite información',async()=>{
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
   const dialog=html.split('<dialog id="server-dialog">')[1]?.split('</dialog>')[0]||'';
   const about=html.split('<dialog id="about-dialog">')[1]?.split('</dialog>')[0]||'';
   assert.doesNotMatch(dialog,/class="monitor-brand"/);
   assert.match(dialog,/id="connection-console"/);
-  assert.match(about,/Desarrollado por/);
-  assert.match(about,/Ing. Luciano Lamaita/);
+  assert.equal((about.match(/Ing. Luciano Lamaita/g)||[]).length,1);
+  assert.equal((about.match(/DWSIM 10.2.15/g)||[]).length,1);
   assert.match(about,/https:\/\/dwsim.org\//);
   assert.match(about,/licenses\/DWSIM-GPL-3.txt/);
   assert.match(about,/licenses\/NOTICE.md/);
@@ -56,11 +56,10 @@ test('la identidad ΣIM inicia el log desplazable y los créditos figuran en Ace
   await vm.runInContext('checkEngine({silent:true})',context);
   const log=elements.get('connection-console').innerHTML;
   assert.match(log,/class="console-boot"/);
-  assert.match(log,/class="boot-sigma">Σ/);
+  assert.match(log,/class="boot-classic boot-logo"/);
+  assert.match(log,/_____ /);
   assert.match(log,/class="boot-title">Simulación de procesos/);
-  assert.match(log,/\|___\| \|_\|/);
   assert.doesNotMatch(log,/<div class="boot-title">ΣIM/);
-  assert.doesNotMatch(log,/██/);
   assert.match(log,/Ing. Luciano Lamaita/);
   assert.ok(log.indexOf('console-boot')<log.indexOf('trace-online'));
   assert.match(log,/CONEXIÓN/);
