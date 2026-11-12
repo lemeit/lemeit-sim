@@ -48,5 +48,9 @@ test('el monitor incluye un encabezado ASCII sin alterar la barra inferior',()=>
   assert.match(dialog,/class="monitor-brand"/);
   assert.match(dialog,/<pre aria-hidden="true">/);
   assert.ok(dialog.includes('ΣIM / MONITOR DWSIM'));
+  assert.ok(dialog.includes('Desarrollado por Ing. Luciano Lamaita'));
+  assert.ok(dialog.includes('https://dwsim.org/'));
+  assert.ok(dialog.includes('licenses/DWSIM-GPL-3.txt'));
+  assert.ok(dialog.includes('licenses/NOTICE.md'));
   assert.doesNotMatch(footer,/monitor-brand/);
 });
