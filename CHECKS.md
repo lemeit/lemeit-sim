@@ -292,3 +292,11 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Portal público: Windows seleccionado, servicio disponible HTTP 200. Debian no se tocó.
 - 55 pruebas JS y build correctos; Acerca de 0.7.1 comprobado tras recargar la vista local.
 - No se reinició ni cerró la sesión del usuario: la prueba definitiva del evento de inicio de sesión queda para su próximo ingreso.
+
+## Ventanas · 0.7.2 · 12 de noviembre de 2026
+
+- Las ocho ventanas separan cabecera y contenido desplazable; apertura/cierre de Acerca de, Diagnóstico y Nuevo proyecto comprobados en navegador.
+- Acerca de 0.7.2 revisado tras recargar. Al desplazar con PageDown, el contenido avanzó 139 px mientras la cabecera mantuvo su posición; el cierre quedó por encima del área desplazable.
+- Revisión visual en modo claro y oscuro. Diagnóstico usa botones propios y texto con la familia de la interfaz; listas de Acerca de unificadas a 12 px.
+- 55 pruebas JS, compilación, validación de versión e historial y dry-run correctos.
+- Sin cambios en motor, ecuaciones, túneles o inicio automático Windows.

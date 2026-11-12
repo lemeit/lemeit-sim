@@ -1207,3 +1207,54 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-dialog .console-boot pre.boot-logo{color:#E88B5A;font:600 12px/1.16 monospace;letter-spacing:0;white-space:pre;overflow-x:auto;max-width:100%;text-shadow:0 0 9px #e88b5a22}
 #server-dialog .console-boot .boot-title{font-weight:500;color:#c6cdcb}
 @media(max-width:540px){#server-dialog .console-boot pre.boot-logo{font-size:9px}}
+
+/* Ventanas 0.7.2: cabecera fuera del área desplazable. */
+.sim-shell dialog {
+  padding:0;
+  max-height:85dvh;
+  overflow:hidden;
+  font:12px/1.55 var(--spx-font-sans);
+}
+.sim-shell dialog > form {
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  max-height:calc(85dvh - 2px);
+  margin:0;
+}
+.sim-shell dialog .dialog-heading {
+  position:static;
+  flex:0 0 auto;
+  margin:0;
+  min-height:34px;
+}
+.sim-shell dialog .dialog-body {
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding:14px 16px 16px;
+  overflow-wrap:anywhere;
+}
+.sim-shell dialog :is(p,ul,ol,li,label,button,input,select,textarea) {
+  font-family:var(--spx-font-sans);
+}
+.sim-shell dialog :is(p,ul,ol,li) {font-size:12px;line-height:1.55}
+.sim-shell dialog h3 {font-size:12px;line-height:1.5;font-weight:600}
+.sim-shell dialog :is(ul,ol) {padding-left:22px}
+.sim-shell #diagnostics-content time {font-size:11px}
+.sim-shell dialog .diagnostic-message {font:inherit;margin:10px 0;white-space:pre-wrap}
+.sim-shell dialog .dialog-actions > button:not(.calculate-button),
+.sim-shell dialog .outline-button {
+  border:1px solid var(--spx-border);
+  border-radius:2px;
+  background:var(--spx-surface-2);
+  color:var(--spx-text);
+  padding:5px 10px;
+  font:12px/1.4 var(--spx-font-sans);
+  min-height:28px;
+}
+.sim-shell dialog .dialog-actions > button:not(.calculate-button):hover,
+.sim-shell dialog .outline-button:hover {background:var(--spx-accent-dim)}
+.sim-shell dialog .dialog-body:focus-visible {outline:2px solid var(--spx-accent);outline-offset:-2px}
