@@ -1098,3 +1098,14 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 @media(max-width:760px){.sim-shell .sim-brand{width:auto;flex-basis:auto;height:34px}.sim-brand>img{width:76px;height:21px}}
 
 #install-app-button[hidden]{display:none!important}
+
+
+/* ΣIM 0.6.0: selección de motor compacta junto al monitor del footer. */
+.site-footer .footer-engine-label{font:inherit;color:var(--spx-text-dim);white-space:nowrap;margin-left:8px}
+.site-footer .footer-engine-select{font:inherit;color:var(--spx-text);background:var(--spx-surface);border:1px solid var(--spx-border);border-radius:3px;padding:3px 19px 3px 6px;min-height:24px;max-width:175px;cursor:pointer}
+.site-footer .footer-engine-select:focus-visible{outline:2px solid var(--spx-accent);outline-offset:2px}
+.site-footer .footer-engine-select:disabled{opacity:.5;cursor:wait}
+@media(max-width:760px){
+  .site-footer .footer-engine-label{margin-left:0}
+  .site-footer .footer-engine-select{max-width:170px}
+}

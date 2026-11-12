@@ -15,6 +15,7 @@ const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, paletteDragType=null, suppressPaletteUntil=0;
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
+let selectedEngine='windows',engineCheckGeneration=0; // Selección explícita; no se realiza failover.
 let lastCalculation=null,connectionCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 let workspaceChannel=null,applyingWorkspace=false,workspaceId=new URLSearchParams(location.search).get('workspace')||crypto.randomUUID();
@@ -41,6 +42,7 @@ function updateControls(){
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
+  $('engine-select').disabled=busy;
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
@@ -93,6 +95,16 @@ function streamGeometry(n){
 }
 function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=Math.max(0,Math.min(4000,value));}
 function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
+const engineHeaders=()=>({'X-SIM-Engine':selectedEngine});
+async function selectCalculationEngine(id){
+  if(busy||!['windows','debian'].includes(id))return;
+  selectedEngine=id;engineCheckGeneration++;engineOnline=false;connectionCheck=null;
+  const element=$('engine-select');element.value=id;
+  result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
+  $('calculation-state').textContent='Comprobá el motor elegido antes de calcular';
+  updateControls();paintConnection();
+  await checkEngine();
+}
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
 function equipmentSymbol(type){
   if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
@@ -273,12 +285,15 @@ function renderResults(){
 }
 async function calculate(){
   if(!hasProject||!engineOnline)return;
-  if(busy)return;notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
+  if(busy)return;
+  const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
+  if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
+  notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
   lastCalculation={time:new Date().toISOString(),ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
-    const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
+    const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
     lastCalculation={time:new Date().toISOString(),ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
@@ -426,8 +441,9 @@ function bindEvents(){
 async function init(){
   SimproxTheme.init();graph=emptyProject();
   $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
+  $('engine-select').value=selectedEngine;
   const initialCheckStarted=performance.now();let initialHttp=null;
-  try{const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
+  try{const response=await fetch('/api/catalog',{headers:engineHeaders(),signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
   catch(error){const occupied=initialHttp===409;engineOnline=occupied;connectionCheck={time:new Date().toISOString(),ok:occupied,state:occupied?'busy':'offline',http:initialHttp,message:error.message,ms:Math.round(performance.now()-initialCheckStarted)};traceConnection('GET /api/catalog',connectionCheck);paintConnection();try{catalog=await(await fetch('catalog-cache.json')).json();notice(occupied?'El motor está ocupado. Podés editar y volver a intentar el cálculo.':'Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
   if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderCompounds();updateControls();
@@ -582,20 +598,24 @@ function renderServerDetails(){
   $('server-details').innerHTML=`<p><strong>${esc(labels[state]||state)}</strong></p><dl><dt>Última comprobación</dt><dd>${connectionCheck?esc(new Date(connectionCheck.time).toLocaleString('es-AR')):'Todavía no realizada'}</dd><dt>Respuesta</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${connectionCheck?`<dt>HTTP y latencia</dt><dd>${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms</dd>`:''}${connectionCheck?.compounds?`<dt>Catálogo disponible</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:''}<dt>Último cálculo de esta sesión</dt><dd>${lastCalculation?esc(calculationLabel(lastCalculation)+calculationDuration(lastCalculation)):'Sin cálculos'}</dd></dl>`;
 }
 async function checkEngine({silent=false}={}){
-  if(monitorRequest)return;monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
+  const generation=++engineCheckGeneration,engine=selectedEngine;
+  monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
   try{
-    const response=await fetch('/api/catalog',{signal:AbortSignal.timeout(15000)});http=response.status;const data=await readCatalogResponse(response);
+    const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(15000)});http=response.status;
+    if(generation!==engineCheckGeneration)return;const data=await readCatalogResponse(response);
     if(response.status===409){engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,state:'busy',http,message:'El servicio responde; DWSIM está resolviendo otra tarea.',ms:Math.round(performance.now()-start)};}
     else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
     if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
-  }catch(error){engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
-  finally{monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}
+  }catch(error){if(generation!==engineCheckGeneration)return;engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
+  finally{if(generation===engineCheckGeneration){monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}}
+  return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
+  $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('server-status-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('connection-monitor-button').onclick=()=>$('server-status-button').click();$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
   monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);

@@ -7,7 +7,8 @@
   "workers_dev": false,
   "keep_vars": true,
   "vars": {
-    "ENGINE_URL": "https://engine-sim.lemeit.ar"
+    "ENGINE_URL": "https://engine-sim.lemeit.ar",
+    "DEBIAN_ENGINE_URL": "https://sim-debian.lemeit.ar"
   },
   "observability": {
     "enabled": true,
