@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.7.2 — 2026-11-12
+
+- Cabeceras fijas en las ocho ventanas; solo el contenido se desplaza y la barra queda debajo del cierre.
+- Tamaños de texto, listas y botones coherentes; los mensajes de diagnóstico usan la tipografía de la interfaz.
+- Contenedor desplazable accesible con teclado y margen reservado para su barra.
+- Sin cambios en cálculos, motores, túneles o arranque automático.
+
 ## 0.7.1 — 2026-11-12
 
 - Inicio automático Windows opcional al iniciar sesión: enable-autostart.ps1 y disable-autostart.ps1, sin contraseñas ni cambios de política de ejecución.
