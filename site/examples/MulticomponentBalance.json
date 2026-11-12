@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "title": "06 · Balance multicomponente con dos mezcladores y divisor",
+  "compounds": [
+    "Water",
+    "Ethanol",
+    "Acetone"
+  ],
+  "model": "NRTL",
+  "nodes": [
+    {
+      "id": "f1",
+      "type": "MaterialStream",
+      "name": "F1 · Base acuosa",
+      "x": 35,
+      "y": 35,
+      "temperature_C": 25,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 0.7,
+        "Ethanol": 0.2,
+        "Acetone": 0.1
+      }
+    },
+    {
+      "id": "f2",
+      "type": "MaterialStream",
+      "name": "F2 · Rica en etanol",
+      "x": 35,
+      "y": 175,
+      "temperature_C": 25,
+      "pressure_kPa": 101.325,
+      "mass_flow": 0.6,
+      "composition": {
+        "Water": 0.15,
+        "Ethanol": 0.7,
+        "Acetone": 0.15
+      }
+    },
+    {
+      "id": "f3",
+      "type": "MaterialStream",
+      "name": "F3 · Rica en acetona",
+      "x": 35,
+      "y": 335,
+      "temperature_C": 25,
+      "pressure_kPa": 101.325,
+      "mass_flow": 0.4,
+      "composition": {
+        "Water": 0.1,
+        "Ethanol": 0.2,
+        "Acetone": 0.7
+      }
+    },
+    {
+      "id": "m1",
+      "type": "Mixer",
+      "name": "M1 · Mezcla ternaria",
+      "x": 275,
+      "y": 175
+    },
+    {
+      "id": "s1",
+      "type": "MaterialStream",
+      "name": "S1 · Mezcla inicial",
+      "x": 442,
+      "y": 197
+    },
+    {
+      "id": "d1",
+      "type": "Splitter",
+      "name": "D1 · Divisor 60/40",
+      "x": 560,
+      "y": 169,
+      "split": 0.6
+    },
+    {
+      "id": "p1",
+      "type": "MaterialStream",
+      "name": "P1 · Producto A",
+      "x": 817,
+      "y": 75
+    },
+    {
+      "id": "s2",
+      "type": "MaterialStream",
+      "name": "S2 · Ramal 40 %",
+      "x": 700,
+      "y": 303
+    },
+    {
+      "id": "f4",
+      "type": "MaterialStream",
+      "name": "F4 · Ajuste final",
+      "x": 500,
+      "y": 427,
+      "temperature_C": 25,
+      "pressure_kPa": 101.325,
+      "mass_flow": 0.5,
+      "composition": {
+        "Water": 0.1,
+        "Ethanol": 0.3,
+        "Acetone": 0.6
+      }
+    },
+    {
+      "id": "m2",
+      "type": "Mixer",
+      "name": "M2 · Mezcla final",
+      "x": 768,
+      "y": 325
+    },
+    {
+      "id": "p2",
+      "type": "MaterialStream",
+      "name": "P2 · Producto B",
+      "x": 950,
+      "y": 345
+    }
+  ],
+  "edges": [
+    {
+      "from": "f1",
+      "to": "m1",
+      "toIndex": 0
+    },
+    {
+      "from": "f2",
+      "to": "m1",
+      "toIndex": 1
+    },
+    {
+      "from": "f3",
+      "to": "m1",
+      "toIndex": 2
+    },
+    {
+      "from": "m1",
+      "to": "s1"
+    },
+    {
+      "from": "s1",
+      "to": "d1"
+    },
+    {
+      "from": "d1",
+      "to": "p1",
+      "fromIndex": 0
+    },
+    {
+      "from": "d1",
+      "to": "s2",
+      "fromIndex": 1
+    },
+    {
+      "from": "s2",
+      "to": "m2",
+      "toIndex": 0
+    },
+    {
+      "from": "f4",
+      "to": "m2",
+      "toIndex": 1
+    },
+    {
+      "from": "m2",
+      "to": "p2"
+    }
+  ],
+  "learning": "Problema inverso: con F1 = 1 kg/s y composición objetivo S1 (agua 41,5 %, etanol 35 %, acetona 23,5 %), calculá mediante una matriz 2×2 las alimentaciones F2 y F3. Los valores 0,6 y 0,4 kg/s aparecen cargados como solución para verificar en DWSIM. D1 envía 60 % a P1; el 40 % restante se mezcla con F4 = 0,5 kg/s para obtener P2. Compará balances por componente, no solo caudal total. Condiciones de entrada: 25 °C, 101,325 kPa; NRTL."
+}
