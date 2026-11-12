@@ -1,10 +1,10 @@
-# Despliegue automático de SIMPROX
+# Despliegue automático de ΣIM
 
-## Cuándo conectar Cloudflare
+## Estado actual
 
-Primero fusionar el PR que incorpora package.json, package-lock.json y wrangler.jsonc.
-Después conectar el repositorio al Worker existente. No crear otro Worker ni un
-proyecto Pages. La conexión inicial puede disparar el primer despliegue de main.
+Workers Builds ya está conectado al repositorio y publica al actualizar `main`.
+No hace falta volver a conectar ni crear otro Worker o proyecto Pages.
+La tabla siguiente documenta la configuración existente.
 
 ## Configuración en el panel
 
@@ -32,9 +32,9 @@ Builds que ofrezca el panel. No copiar la clave del motor a GitHub ni al build.
 ## Variables y dominio existentes
 
 wrangler.jsonc apunta a lemeit-sim en la cuenta existente y conserva la fecha de
-compatibilidad 2026-11-06. ENGINE_URL está declarada en la configuración pública.
-keep_vars preserva las variables adicionales del panel. ORIGIN_KEY permanece como
-secreto de ejecución en Settings → Variables & Secrets: los despliegues normales
+compatibilidad 2026-11-06. `ENGINE_URL` y `DEBIAN_ENGINE_URL` están declaradas en la configuración pública.
+keep_vars preserva las variables adicionales del panel. `ORIGIN_KEY` y `DEBIAN_ORIGIN_KEY` permanecen como
+secretos de ejecución en Settings → Variables & Secrets: los despliegues normales
 de Wrangler conservan los secretos existentes. No agregar su valor a ningún archivo.
 
 No se declaran rutas nuevas y workers_dev=false mantiene los dominios administrados
@@ -49,13 +49,13 @@ Tunnel ni el puerto MCP. No se crean servicios pagos mediante esta configuració
    fallidos, configurar aparte una regla de rama que exija el job verificar.
 4. Workers Builds ejecuta pruebas JS y build; solo publica si ambos pasan.
 5. En Builds comprobar Success y el commit desplegado. Recargar sim.lemeit.ar y
-   revisar Ayuda → Acerca de. El primer despliegue de esta configuración debe mostrar 0.2.1.
+   revisar Ayuda → Acerca de. La entrega publicada el 12/11/2026 es 0.7.0; comparar siempre con la versión del commit desplegado.
 6. Si hay un fallo, abrir el registro del build; no volver a copiar secretos.
 
 GitHub Actions no despliega: solo hay un publicador (Cloudflare), evitando dos
 procesos que sobrescriban la misma versión. Los PR no publican en producción.
 
-## Backend de la PC
+## Backends Windows y Debian
 
 La web se publica automáticamente; server.py y DWSIM siguen en la PC. Si una entrega
 modifica server.py, actualizar el repositorio local y reiniciar el servicio:
@@ -67,11 +67,12 @@ cd C:\GitHub\lemeit-sim
 .\start-online.ps1
 ```
 
-La 0.2.0 cambió server.py: para el primer despliegue automático hay que tener esa
-actualización en el gateway. Una API pública con catálogo disponible no prueba que
-el gateway ya cargó el backend nuevo. Al actualizar, verificar también un cálculo.
-El binario DWSIM y las claves no cambian en esta entrega. No se automatiza inicio
-al encender Windows ni ejecución remota de comandos en la PC.
+Una API con catálogo disponible no prueba que el gateway haya cargado el backend
+nuevo: verificar también un cálculo. Debian tiene su propia instalación y túnel;
+actualizar y reiniciar allí según su configuración existente, sin ejecutar los
+scripts Windows para administrarlo. El despliegue del Worker conserva los dos
+destinos y sus secretos; no enciende equipos ni instala DWSIM.
+Ver [selección manual y operación](seleccion-manual-motores.md).
 
 ## Verificación local sin publicar
 

@@ -273,3 +273,12 @@ Los otros tres casos se comprobaron por API, no por la interfaz gráfica.
 41 pruebas JS aprobadas; nuevas pruebas Python validan fixtures, coherencia de
 entradas JSON/DWXML y rechazo de diferencias en el comparador. Los dos programas
 comparten DWSIM: no se presenta como validación experimental independiente.
+
+## Revisión documental · 12 de noviembre de 2026
+
+README reorganizado con logo sin título duplicado y badges de identidad. Se
+incorporan los ocho ejemplos, el estado publicado 0.7.0 y la arquitectura de dos
+motores. Guías de operación, selección manual y despliegue corregidas para
+eliminar instrucciones pendientes o antiguas. Se distinguen instalación
+configurada, servicio disponible y pruebas realmente realizadas. No se modifica
+el portal, su versión, los motores, los túneles ni sus credenciales.
