@@ -1151,3 +1151,10 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-dialog .monitor-brand pre{font:600 12px/1.22 var(--spx-font-mono),monospace;letter-spacing:0;margin:0;white-space:pre;color:#F4F3EE}
 #server-dialog .monitor-brand span{font:10px/1.5 var(--spx-font-mono),monospace;letter-spacing:1.1px;color:#c5c8c6}
 @media(max-width:540px){#server-dialog .monitor-brand{gap:12px}#server-dialog .monitor-brand pre{font-size:9px}#server-dialog .monitor-brand span{font-size:8px;letter-spacing:.3px}}
+
+#server-dialog .monitor-brand-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
+#server-dialog .monitor-brand-copy span{font:600 11px/1.4 var(--spx-font-mono),monospace;letter-spacing:1px;color:#F4F3EE}
+#server-dialog .monitor-brand-copy small{font:10px/1.5 var(--spx-font-sans),sans-serif;color:#c5c8c6}
+#server-dialog .monitor-brand-copy a{color:#e1e3df;text-decoration:underline;text-underline-offset:2px}
+#server-dialog .monitor-brand-copy a:hover{color:white}
+@media(max-width:540px){#server-dialog .monitor-brand{align-items:flex-start;flex-direction:column;gap:9px}#server-dialog .monitor-brand-copy small{font-size:9px}}
