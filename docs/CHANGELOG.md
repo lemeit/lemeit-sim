@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.7.0 — 2026-11-11
+
+- Ejemplo 06: balance ternario agua–etanol–acetona con cuatro alimentaciones, dos mezcladores y un divisor, más problema inverso resuelto por sistema matricial 2×2.
+- Menú Ejemplos consolidado y numerado del 01 al 08, con casos 07 y 08 de reactor de conversión y reactor de equilibrio previamente disponibles.
+- Guía ampliada: enunciados, configuraciones, archivos JSON, tablas de referencia analítica y actividades de comprobación de reactores.
+- Se diferencia explícitamente entre los cinco casos contrastados previamente con DWSIM y los casos 06–08 pendientes de validación termodinámica numérica equivalente. Sin cambios en los motores.
+
 ## 0.6.0 — 2026-11-11
 
 - Selección manual del motor de cálculo desde el editor: PC remota Windows (predeterminado) o notebook Debian online.
