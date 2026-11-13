@@ -330,3 +330,10 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Guía integrada: búsqueda, ejercicios 09/10, navegación anterior/siguiente y regreso al simulador conservando proyecto y resultados. Pestañas de calculadora accesibles con teclado.
 - Ayuda → Acerca de revisado después de recargar: versión 0.9.0.
 - CSTR/PFR: auditoría y etapas documentadas; no se habilitaron reacciones cinéticas ni perfiles. Sin cambios en motor Windows, Debian, túneles ni selección manual de motor.
+
+## ΣIM 0.9.1 · 12 de noviembre de 2026
+
+- 68 pruebas aprobadas y build:verified correcto.
+- Navegador tras recargar: Acerca de muestra 0.9.1; Ayuda contiene guía de uso, wiki DWSIM en inglés y Acerca de. La guía de ejercicios permanece en Ejemplos.
+- Revisados los campos de selección y numéricos de la calculadora: foco interior y etiquetas separadas. La guía de uso se abre correctamente y ofrece regreso al simulador.
+- Sin cambios en cálculos, motores ni túneles. No publicado.

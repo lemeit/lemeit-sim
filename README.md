@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.9.0](https://img.shields.io/badge/portal-0.9.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.9.1](https://img.shields.io/badge/portal-0.9.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.9.0 — Guía y herramientas de unidades**, en desarrollo; versión pública anterior 0.8.0.
+**0.9.1 — Ayuda y legibilidad de campos**, en desarrollo; versión pública anterior 0.9.0.
+
+Ayuda reúne la guía de uso y la wiki de DWSIM (en inglés). La guía de ejercicios está en Ejemplos. El foco de los campos de la calculadora se mantiene dentro de sus bordes, separado de las etiquetas.
 Guía 01–10 con índice, búsqueda, ejercicios plegables, anterior/siguiente y regreso
 al simulador. Presets SI, ingeniería y anglosajón; calculadora de magnitudes,
 fracciones, caudales y presiones parciales con masas molares reales de DWSIM.

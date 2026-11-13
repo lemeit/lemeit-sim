@@ -1,6 +1,6 @@
 {
   "name": "lemeit-sim",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "engines": {
     "node": ">=22"
