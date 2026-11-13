@@ -8,7 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.9.1 — 2026-11-12
 
-- Ayuda centrada en la guía de uso y la wiki de DWSIM en inglés; planificación y adaptación quedan en la documentación del repositorio.
+- Ayuda centrada en la guía de uso y la tutoriales de DWSIM en inglés; planificación y adaptación quedan en la documentación del repositorio.
 - Guía de ejercicios accesible desde Ejemplos, sin duplicación en el menú Ayuda.
 - Campos de la calculadora con etiquetas separadas y foco interior, sin recuadros que invadan el texto adyacente.
 

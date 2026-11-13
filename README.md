@@ -18,7 +18,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 **0.9.1 — Ayuda y legibilidad de campos**, en desarrollo; versión pública anterior 0.9.0.
 
-Ayuda reúne la guía de uso y la wiki de DWSIM (en inglés). La guía de ejercicios está en Ejemplos. El foco de los campos de la calculadora se mantiene dentro de sus bordes, separado de las etiquetas.
+Ayuda reúne la guía de uso y la tutoriales de DWSIM (en inglés). La guía de ejercicios está en Ejemplos. El foco de los campos de la calculadora se mantiene dentro de sus bordes, separado de las etiquetas.
 Guía 01–10 con índice, búsqueda, ejercicios plegables, anterior/siguiente y regreso
 al simulador. Presets SI, ingeniería y anglosajón; calculadora de magnitudes,
 fracciones, caudales y presiones parciales con masas molares reales de DWSIM.
