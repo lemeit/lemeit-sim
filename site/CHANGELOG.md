@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.9.0 — 2026-11-12
+
+- Guía 01–10 navegable: índice lateral, búsqueda, ejercicios plegables, anterior/siguiente y regreso al mismo proyecto mediante guía integrada, sin abandonar el simulador.
+- Presets SI, ingeniería y anglosajón en entradas y resultados; las condiciones canónicas no se reinterpretan. CSV/Excel conservan sus unidades explícitas.
+- Calculadora de unidades, presión absoluta/manométrica con referencia explícita, fracciones másicas/molares, caudales y presiones parciales. Concentración ideal opcional y distinguida de DWSIM.
+- Catálogo de masas molares exportado del runtime real; cambio de base de composición/caudal y formato porcentaje en corrientes.
+- Ayuda con adaptación por etapas: auditoría de cinética iniciada; CSTR/PFR, perfiles y transitorios todavía no habilitados. Sin cambios en motores, túneles o ecuaciones termodinámicas.
+
 ## 0.8.0 — 2026-11-12
 
 - Ejemplo 09: red térmica NRTL agua–etanol–acetona con mezcla, división 65/35, calentamiento, enfriamiento y recombinación.

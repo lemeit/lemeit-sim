@@ -1300,3 +1300,19 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 .sim-shell .menu-panel button:disabled:hover {background:transparent}
 .sim-shell .menu-panel select {color:var(--spx-text);background-color:var(--spx-surface-2);border:1px solid var(--spx-border);min-height:30px}
 .sim-shell .menu-panel :is(button,a,select):focus-visible {outline:2px solid var(--spx-accent);outline-offset:-2px}
+
+/* Herramientas y sistemas de unidades. */
+#units-dialog{width:min(820px,calc(100vw - 24px));max-width:calc(100vw - 24px)}
+#units-dialog section{margin:12px 0;padding:0;border:0}
+#units-dialog [hidden]{display:none!important}
+.converter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;align-items:end}
+.converter-grid .field{min-width:0}.converter-grid select{max-width:100%}
+.conversion-result{display:block;background:var(--spx-surface-2);border-left:3px solid var(--spx-accent);padding:12px;margin:14px 0;font:600 15px/1.5 var(--spx-font-sans);overflow-wrap:anywhere}
+.mixture-row{display:grid;grid-template-columns:minmax(160px,2fr) minmax(90px,1fr) minmax(90px,1fr) 30px;gap:8px;align-items:end}
+.mixture-row .field{min-width:0}.mixture-row>button{height:32px;margin-bottom:0;padding:0!important}
+#mixture-result{margin:12px 0;overflow-wrap:anywhere}#units-dialog .field>input,#units-dialog .field>select{width:100%;min-height:32px;padding:5px 8px;background:var(--spx-surface-2);color:var(--spx-text);border:1px solid var(--spx-border);border-radius:3px}
+#units-dialog .field{margin:10px 0 5px}#units-dialog .stream-tabs [aria-selected=true]{border-color:var(--spx-accent);color:var(--spx-accent);background:var(--spx-accent-dim)}
+@media(max-width:540px){.mixture-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px}.mixture-row .field:first-child{grid-column:1/-1}.converter-grid{grid-template-columns:1fr}#units-dialog .stream-tabs{flex-wrap:wrap}}
+
+#guide-dialog{width:min(1440px,96vw);max-width:96vw;height:92dvh;max-height:92dvh}#guide-dialog>form{height:100%;max-height:calc(92dvh - 2px)}#guide-dialog .dialog-body{padding:0;overflow:hidden;scrollbar-gutter:auto;display:flex}#guide-host{width:100%;height:100%;flex:1;min-height:0;overflow:hidden}#guide-dialog .guide-back{margin-left:auto;font-size:11px;padding:3px 8px;min-height:24px;white-space:nowrap}
+@media(max-width:540px){#guide-dialog .dialog-heading h2{font-size:10px}#guide-dialog .guide-back{font-size:10px;padding:3px 5px}}
