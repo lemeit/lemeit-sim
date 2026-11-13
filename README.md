@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.8.0](https://img.shields.io/badge/portal-0.8.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.9.0](https://img.shields.io/badge/portal-0.9.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,17 +16,14 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.8.0 — Procesos integrados y diez ejemplos**, en desarrollo; versión pública anterior 0.7.3.
-Nuevos casos 09 de red térmica ternaria y 10 de amoníaco con bypass, con resoluciones
-paso a paso en la [guía del portal](site/ejemplos.html), JSON descargables e
-[informe real Windows](docs/validation/examples-0.8.0-windows.json).
-[Procedimiento de validación y repetición](docs/ejemplos-integrados.md). Se comprueban
-materia/energía del 09 y masa/átomos del 10; no son mediciones experimentales.
-Se conservan los motores, el inicio automático y la selección manual. Incluye balance multicomponente
-con resolución matricial y reactores de conversión y equilibrio. El 12/11/2026 se
-ejecutaron los casos 06–08 con el motor Windows: cierre de materia correcto en el 06
-y cálculo completado en ambos reactores. [Resultados reales y alcance](docs/validacion-windows-0.7.0.md).
-Se conserva la selección manual Windows/Debian; no hay conmutación automática.
+**0.9.0 — Guía y herramientas de unidades**, en desarrollo; versión pública anterior 0.8.0.
+Guía 01–10 con índice, búsqueda, ejercicios plegables, anterior/siguiente y regreso
+al simulador. Presets SI, ingeniería y anglosajón; calculadora de magnitudes,
+fracciones, caudales y presiones parciales con masas molares reales de DWSIM.
+[Herramientas y criterios](docs/unidades-y-calculadora.md) ·
+[Adaptación por etapas](site/adaptacion.html).
+CSTR/PFR cinéticos y perfiles aún requieren adaptar y validar su acceso; el portal
+actual conserva conversión y equilibrio. No se modificaron los motores ni sus túneles.
 [Guía de casos y comparación](docs/ejemplos-validados.md) · [Guía web](site/ejemplos.html).
 La versión que recibe el navegador depende del último despliegue exitoso de
 Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
@@ -109,7 +106,8 @@ reactor se lee de DeltaQ del motor e incluye el calor de reacción.
 - Inspector con Condiciones, Composición y Resultados; entradas solo en alimentaciones.
 - Especificaciones TP, PH, PS, PV y TV. PS con IAPWS-IF97 está bloqueado por una
   discrepancia verificada del motor; PS se validó con NRTL.
-- Unidades seleccionables, caudal másico o molar y composición másica o molar.
+- Sistemas SI/ingeniería/anglosajón y unidades particulares, caudal másico o molar,
+  composición másica/molar y formato fracción/porcentaje. Las bases se convierten con masas molares de DWSIM.
   Las masas molares proceden de la base real de DWSIM.
 - Resultados globales y por fase: fracción de vapor, entalpía, entropía, densidad y
   composiciones másicas/molares. Caudal volumétrico global derivado de masa/densidad.
@@ -357,12 +355,13 @@ edición oficial de DWSIM.
 
 ## Documentación y verificación
 
-La entrega 0.7.0 pasó 55 pruebas JS, tres comprobaciones Python de ejemplos,
-compilación y preparación del despliegue. Se ejecutaron los casos 06–08 con el
-motor Windows; el 06 también desde la interfaz local. Acerca de se comprobó tras
-recargar y se verificó la versión publicada. Debian no se probó en esa sesión.
-Ver [resultados y límites](docs/validacion-windows-0.7.0.md) y el
-[registro histórico](CHECKS.md). Quedan pendientes pruebas de carga para una clase.
+La entrega 0.9.0 se comprueba con pruebas JS de regresión y de referencia física,
+compilación y preparación del despliegue. Se revisan en navegador la guía,
+calculadora, presets, cambio de base y conservación de resultados. El catálogo
+estático contiene 1601 masas molares reales y registra 19 no disponibles.
+Los casos anteriores mantienen sus informes: [0.7.0](docs/validacion-windows-0.7.0.md)
+y [0.8.0](docs/ejemplos-integrados.md). Ver [CHECKS](CHECKS.md) para las pruebas
+exactamente ejecutadas. No se afirma validación experimental ni prueba cinética.
 
 [Guía de trabajo](docs/workflow.md) · [Historial completo](docs/CHANGELOG.md) ·
 [Identidad y logo](docs/brand-sim.md) · [Despliegue automático](docs/despliegue-automatico.md).
@@ -381,3 +380,15 @@ Ver [resultados y límites](docs/validacion-windows-0.7.0.md) y el
 - [Portal Lemeit](https://lemeit.ar/#sim).
 
 La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣIM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Esta revisión agrega referencias documentales; no cambia la versión funcional 0.7.2 ni los motores.
+
+## Herramientas de unidades · 0.9.0
+
+En Herramientas → Configuración se elige el sistema de presentación. Los campos
+conservan la posibilidad de seleccionar unidades particulares. La presión del
+proceso es siempre absoluta; psi en una corriente significa psia.
+Herramientas → Calculadora funciona sin consultar el motor: usa un catálogo
+estático exportado de DWSIM para masas molares. Convierte dimensiones SI y
+anglosajonas, distingue temperatura de diferencia de temperatura, y permite
+fracciones másicas/molares, caudales y presiones parciales. La concentración por
+p/(RT) solo se muestra si se solicita una estimación de gas ideal.
+CSV/Excel mantienen las unidades canónicas que declaran sus cabeceras.

@@ -318,3 +318,15 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Menú e índice de guía 01–10; todos los ejercicios tienen resoluciones numeradas. Conteos de pasos: 4,4,4,4,4,6,4,4,8,10. Enlaces locales y anclas comprobados.
 - Vista ajustada al abrir ejemplos; Acerca de 0.8.0 revisado tras recargar. Capturas de guía y diagrama del caso 10.
 - 60 pruebas JS, build:verified y deploy:check correctos. Sin validación experimental ni comparación separada con Automation3 para los casos nuevos; no se prueban cargas de clase.
+
+## ΣIM 0.9.0 · 12 de noviembre de 2026
+
+- 68 pruebas JavaScript: conversiones SI/anglosajonas, temperatura absoluta y diferencias, presión manométrica explícita, fracciones másicas/molares, caudales y regresiones del portal.
+- Compilación verificada y preparación de despliegue sin publicación.
+- Exportación real de masas molares de DWSIM Windows: 1601 valores válidos de 1620 compuestos; 19 no disponibles identificados sin estimarlos.
+- Navegador: 32 °F = 273.15 K; 0 psig con atmósfera de 101325 Pa = 101325 Pa absolutos. Cambio de base y formato porcentual conservan la composición.
+- Ejemplo 05 calculado con el motor Windows: completado en 3.91 s, salida de 2 kg/s. Cambio de sistema de unidades conserva resultados físicos.
+- Presiones parciales de la fase vapor comprobadas: 35877.95852 + 65447.04148 = 101325 Pa. La calculadora de gas ideal identifica su hipótesis y no sustituye el equilibrio de fases.
+- Guía integrada: búsqueda, ejercicios 09/10, navegación anterior/siguiente y regreso al simulador conservando proyecto y resultados. Pestañas de calculadora accesibles con teclado.
+- Ayuda → Acerca de revisado después de recargar: versión 0.9.0.
+- CSTR/PFR: auditoría y etapas documentadas; no se habilitaron reacciones cinéticas ni perfiles. Sin cambios en motor Windows, Debian, túneles ni selección manual de motor.

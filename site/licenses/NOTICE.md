@@ -43,3 +43,10 @@ Los ejemplos son cálculos de modelos, no mediciones experimentales.
 Pie, marca tipográfica y control de tema: adaptación del sitio propio https://tex.lemeit.ar/ (lemeit/aboutme, apps/tex/site). No se reutiliza el logotipo TeX como identidad del simulador.
 
 Marca ΣIM: reconstrucción vectorial propia basada en la referencia del usuario, opción 02 Retro técnico. El logo activo es assets/sim-logo.svg; la bajada está convertida en curvas, sin incrustar archivos de fuente. La propuesta PNG anterior de SIMPROX queda solo como antecedente.
+
+### Masas molares para la calculadora
+
+`compound-masses.json` contiene masas molares reales exportadas mediante la API
+DWSIM MCP 10.2.15 desde ConstantProperties.Molar_Weight. No son estimaciones ni
+una base de constantes cinéticas. Se conservan las atribuciones y la licencia de
+DWSIM indicadas arriba; las propiedades no disponibles no se completan artificialmente.
