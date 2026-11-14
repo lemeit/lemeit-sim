@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.10.0 — 2026-11-14
+
+- Separador flash adiabático vapor–líquido con tipo MCP `Vessel`, 1 entrada y 2 salidas, disponible en biblioteca e inspector y como Ejemplo 11 (agua–etanol, NRTL).
+- Ejecución real en Debian DWSIM MCP 10.2.15: vapor 0,638235345 kg/s (etanol 0,660959414 fracción másica), líquido 0,361757524 kg/s (etanol 0,216002777). Calor calentador 1055,824177 kW.
+- Cierre real en equipo: residuo masa 7,1311×10⁻⁶ kg/s y máximo residual componente 1,1711×10⁻⁵ kg/s. Se mantiene evidencia y tolerancia de aceptación del caso de 2×10⁻⁵ kg/s, sin presentarlo como conservación exacta.
+- Requiere actualización del gateway Debian, no solo del Worker. Windows pendiente de validar; se mantiene selección manual sin conmutación automática.
+
 ## 0.9.2 — 2026-11-14
 
 - Regresión real Windows–Debian de los diez ejemplos 01–10: 10/10 aprobados en Debian DWSIM MCP 10.2.15, HTTP 200, tolerancias explícitas, informe recibido el 14/11.
