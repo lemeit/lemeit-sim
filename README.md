@@ -16,7 +16,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.9.2 — Regresión Windows–Debian de los diez ejemplos**, verificada el 14/11/2026.\n\nLos diez ejemplos se ejecutaron en Debian con DWSIM 10.2.15 y se contrastaron con las referencias Windows usando tolerancias explícitas. Se comprobó conservación elemental en los reactores 07, 08 y 10. [Informe](docs/validacion-debian-0.9.2.md). No constituye validación experimental ni garantiza disponibilidad continua de los motores.
+**0.9.2 — Regresión Windows–Debian de los diez ejemplos**, verificada el 14/11/2026.
+
+Los diez ejemplos se ejecutaron en Debian con DWSIM 10.2.15 y se contrastaron con las referencias Windows usando tolerancias explícitas. Se comprobó conservación elemental en los reactores 07, 08 y 10. [Informe](docs/validacion-debian-0.9.2.md). No constituye validación experimental ni garantiza disponibilidad continua de los motores.
 
 Ayuda reúne la guía de uso y la tutoriales de DWSIM (en inglés). La guía de ejercicios está en Ejemplos. El foco de los campos de la calculadora se mantiene dentro de sus bordes, separado de las etiquetas.
 Guía 01–10 con índice, búsqueda, ejercicios plegables, anterior/siguiente y regreso
