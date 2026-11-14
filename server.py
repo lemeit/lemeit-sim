@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -169,7 +169,7 @@ def ports(kind):
         return {'in': ('material', 1), 'out': ('material', 1)}
     if kind == 'EnergyStream':
         return {'in': ('energy', 1), 'out': ('energy', 1)}
-    result = {'in': ('material', 3 if kind == 'Mixer' else 1), 'out': ('material', 2 if kind == 'Splitter' or kind in REACTORS else 1)}
+    result = {'in': ('material', 3 if kind == 'Mixer' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator') or kind in REACTORS else 1)}
     if kind == 'Heater': result['energy-in'] = ('energy', 1)
     if kind == 'Cooler': result['energy-out'] = ('energy', 1)
     return result
@@ -254,6 +254,8 @@ def validate_graph(graph, catalog):
             ins = [e for e in incoming if e.get('toPort', 'in') == 'in']
             outs = [e for e in outgoing if e.get('fromPort', 'out') == 'out']
             if not ins or not outs: raise InputError(f'{name}: faltan corrientes de materia de entrada o salida.')
+            if kind == 'Separator' and (len(ins) != 1 or len(outs) != 2):
+                raise InputError(f'{name}: conectá una entrada, salida de vapor (1) y salida de líquido (2).')
             if kind == 'Splitter':
                 if len(outs) != 2: raise InputError(f'{name}: conectá las dos salidas del divisor.')
                 number(node.get('split'), name + ': fracción de salida 1', .000001, .999999)
