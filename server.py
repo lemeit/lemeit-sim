@@ -321,7 +321,7 @@ def simulate(engine, graph):
                     prop, key, mode = ('PROP_MS_7', 'enthalpy_kJ_kg', 'Pressure_and_Enthalpy') if spec == 'PH' else ('PROP_MS_8', 'entropy_kJ_kgK', 'Pressure_and_Entropy')
                     call('dwsim_unitop_set', name=node['name'], properties={'SpecType': mode, prop: node[key]})
             elif kind == 'EnergyStream': call('dwsim_stream_add_energy', name=node['name'])
-            else: call('dwsim_unitop_add', type=kind, name=node['name'])
+            else: call('dwsim_unitop_add', type='Vessel' if kind == 'Separator' else kind, name=node['name'])
         for edge in graph['edges']:
             a, b = by_id[edge['from']], by_id[edge['to']]
             if a['type'].endswith('Stream'):
