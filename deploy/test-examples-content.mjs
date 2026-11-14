@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read = path => readFileSync(new URL('../site/' + path,import.meta.url),'utf8');
-const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass'];
+const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum'];
 const close = (a,b,tol=1e-9) => assert.ok(Math.abs(a-b)<tol,`Se esperaba ${b} pero se obtuvo ${a}`);
 
-test('menú, selector y guía incluyen los diez ejemplos en orden',()=>{
+test('menú, selector y guía incluyen los once ejemplos en orden',()=>{
   const index=read('index.html'),guide=read('ejemplos.html');
   const positions=projects.map(id=>{
     assert.ok(index.includes(`<option value="${id}">`),`Falta la opción ${id}`);
@@ -89,7 +89,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   assert.match(guide,/diez casos en Debian/);
 });
 
-test('cada ejercicio 01–10 conserva una resolución numerada paso a paso',()=>{
+test('cada ejercicio 01–11 conserva una resolución numerada paso a paso',()=>{
  const guide=read('ejemplos.html');
  for(const id of projects){
   const section=guide.split(`<section id="${id}">`)[1]?.split('</section>')[0];
@@ -97,4 +97,16 @@ test('cada ejercicio 01–10 conserva una resolución numerada paso a paso',()=>
   assert.ok((section.match(/<ol>/g)||[]).length>=1,id);
   assert.ok((section.match(/<li>/g)||[]).length>=4,id);
  }
+});
+
+test('caso 11 flash NRTL conecta entrada, vapor y líquido y documenta residuo del motor',()=>{
+ const g=JSON.parse(read('examples/FlashDrum.json'));
+ const guide=read('ejemplos.html'),app=read('app.js');
+ assert.equal(g.model,'NRTL');
+ assert.deepEqual(g.compounds,['Water','Ethanol']);
+ assert.equal(g.nodes.find(n=>n.id==='flash').type,'Separator');
+ assert.deepEqual(g.edges.filter(e=>e.from==='flash').map(e=>e.fromIndex).sort(),[0,1]);
+ assert.match(guide,/7,131099×10⁻⁶/);
+ assert.match(guide,/1,171057×10⁻⁵/);
+ assert.match(app,/Separator: \{label:'Separador flash'/);
 });

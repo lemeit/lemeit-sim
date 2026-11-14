@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "title": "11 · Separación flash agua–etanol · NRTL",
+  "compounds": [
+    "Water",
+    "Ethanol"
+  ],
+  "model": "NRTL",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "F1 · Alimentación",
+      "temperature_C": 26.85,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 0.5,
+        "Ethanol": 0.5
+      },
+      "x": 90,
+      "y": 210
+    },
+    {
+      "id": "heater",
+      "type": "Heater",
+      "name": "H1 · Calentador",
+      "outlet_C": 86.85,
+      "x": 390,
+      "y": 195
+    },
+    {
+      "id": "two_phase",
+      "type": "MaterialStream",
+      "name": "S1 · Mezcla bifásica",
+      "x": 620,
+      "y": 205
+    },
+    {
+      "id": "flash",
+      "type": "Separator",
+      "name": "V1 · Separador flash",
+      "x": 930,
+      "y": 185
+    },
+    {
+      "id": "vapor",
+      "type": "MaterialStream",
+      "name": "P1 · Vapor",
+      "x": 1240,
+      "y": 110
+    },
+    {
+      "id": "liquid",
+      "type": "MaterialStream",
+      "name": "P2 · Líquido",
+      "x": 1240,
+      "y": 330
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "heater"
+    },
+    {
+      "from": "heater",
+      "to": "two_phase"
+    },
+    {
+      "from": "two_phase",
+      "to": "flash"
+    },
+    {
+      "from": "flash",
+      "to": "vapor",
+      "fromIndex": 0
+    },
+    {
+      "from": "flash",
+      "to": "liquid",
+      "fromIndex": 1
+    }
+  ],
+  "learning": "Calentá una alimentación de agua y etanol (50/50 % másico, 1 kg/s, 101,325 kPa) a 86,85 °C con NRTL, y separá vapor y líquido sin imponer fracciones de reparto. Compará las composiciones de ambas fases y verificá los balances. Valores pendientes de validar con el motor Debian 10.2.15."
+}
