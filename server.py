@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -172,6 +172,7 @@ def ports(kind):
     result = {'in': ('material', 3 if kind == 'Mixer' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator') or kind in REACTORS else 1)}
     if kind == 'Heater': result['energy-in'] = ('energy', 1)
     if kind == 'Cooler': result['energy-out'] = ('energy', 1)
+    # La bomba con presión prescrita calcula su trabajo; no requiere corriente de energía.
     return result
 
 
@@ -259,6 +260,14 @@ def validate_graph(graph, catalog):
             if kind == 'Splitter':
                 if len(outs) != 2: raise InputError(f'{name}: conectá las dos salidas del divisor.')
                 number(node.get('split'), name + ': fracción de salida 1', .000001, .999999)
+            if kind in ('Pump', 'Valve'):
+                if len(ins) != 1 or len(outs) != 1:
+                    raise InputError(f'{name}: conectá una entrada y una salida de materia.')
+                number(node.get('outlet_pressure_kPa'), name + ': presión absoluta de salida (kPa)', 0.001, 1000000)
+                if kind == 'Pump':
+                    number(node.get('efficiency_pct'), name + ': eficiencia (%)', 0.01, 100)
+                # La dirección de cambio de presión se comprueba en el resultado físico del motor,
+                # ya que las corrientes intermedias no especifican su presión en el JSON.
             if kind in ('Heater', 'Cooler'):
                 number(node.get('outlet_C'), name + ': temperatura objetivo (°C)', -273.14, 3000)
             if kind in REACTORS:
@@ -337,6 +346,10 @@ def simulate(engine, graph):
             if node['type'] in ('Heater', 'Cooler'):
                 props = {'CalcMode': 'OutletTemperature', 'OutletTemperature': node['outlet_C'] + 273.15}
             if node['type'] == 'Splitter': props = {'OperationMode': 'SplitRatios', 'SR1': node['split']}
+            if node['type'] == 'Pump':
+                props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] * 1000}
+            if node['type'] == 'Valve':
+                props = {'CalcMode': 'OutletPressure', 'PROP_VA_2': node['outlet_pressure_kPa'] * 1000}
             if node['type'] in REACTORS:
                 props = {'ReactionSetID':node['id'] + '-set', 'ReactorOperationMode':'OutletTemperature', 'OutletTemperature':node['outlet_C'] + 273.15}
             if props: call('dwsim_unitop_set', name=node['name'], properties=props)

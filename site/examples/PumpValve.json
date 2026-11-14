@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "title": "12 · Bombeo y expansión de agua",
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "F1 · Agua alimentación",
+      "temperature_C": 25,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 70,
+      "y": 200
+    },
+    {
+      "id": "pump",
+      "type": "Pump",
+      "name": "P1 · Bomba",
+      "outlet_pressure_kPa": 500,
+      "efficiency_pct": 75,
+      "x": 340,
+      "y": 185
+    },
+    {
+      "id": "high",
+      "type": "MaterialStream",
+      "name": "S1 · Descarga",
+      "x": 590,
+      "y": 205
+    },
+    {
+      "id": "valve",
+      "type": "Valve",
+      "name": "V1 · Válvula",
+      "outlet_pressure_kPa": 200,
+      "x": 900,
+      "y": 185
+    },
+    {
+      "id": "out",
+      "type": "MaterialStream",
+      "name": "S2 · Salida",
+      "x": 1190,
+      "y": 205
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "pump"
+    },
+    {
+      "from": "pump",
+      "to": "high"
+    },
+    {
+      "from": "high",
+      "to": "valve"
+    },
+    {
+      "from": "valve",
+      "to": "out"
+    }
+  ],
+  "learning": "Bombear 1 kg/s de agua a 25 °C desde 101,325 kPa a 500 kPa, con eficiencia de bomba de 75 %. Luego expandir por válvula a 200 kPa. Compará presiones, temperatura, entalpía y potencia, con balances. Pendiente de verificar con DWSIM MCP instalado."
+}
