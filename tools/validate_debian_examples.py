@@ -83,6 +83,7 @@ def compare(case, actual, baseline, errors):
             check(label + "/" + compound, value, expected, TOL["mass_fraction"], errors)
 
     balances = actual.get("balances", [])
+    check_atomic_balance(case, streams, errors)
     for balance in balances:
         check(f"{case}/{balance.get('id')}/residuo masa",
               balance.get("mass_residual"), 0.0, TOL["mass_residual_kg_s"], errors)
@@ -107,6 +108,66 @@ def compare(case, actual, baseline, errors):
         if ref_q is not None:
             check(f"{case}/Q", sum(b.get("heat_to_fluid_kW", 0) for b in balances),
                   ref_q, TOL["heat_to_fluid_kW"], errors)
+
+
+# Masas molares g/mol coherentes con el cálculo DWSIM de los casos 07, 08 y 10.
+# Control independiente de que la masa total cierre; sin modificar el motor.
+ATOMIC_MASSES = {
+    "Hydrogen": (2.01588, {"H": 2}),
+    "Oxygen": (31.9988, {"O": 2}),
+    "Water": (18.01528, {"H": 2, "O": 1}),
+    "Nitrogen": (28.0134, {"N": 2}),
+    "Ammonia": (17.03052, {"N": 1, "H": 3}),
+}
+REACTIVE_PORTS = {
+    "ConversionReactor": (["feed"], ["vapor", "liquid"]),
+    "EquilibriumReactor": (["feed"], ["vapor", "liquid"]),
+    "AmmoniaBypass": (["hot"], ["vapor", "liquid"]),
+}
+ATOMIC_TOL_MOL_S = 1e-5
+
+
+def check_atomic_balance(case, streams, errors):
+    """Balance H/O o N/H del reactor por mol de átomos por segundo."""
+    if case not in REACTIVE_PORTS:
+        return {}
+    ins, outs = REACTIVE_PORTS[case]
+    def totals(ids):
+        atom_flow = {}
+        for ident in ids:
+            stream = streams.get(ident)
+            if not stream:
+                errors.append(f"{case}: corriente reactiva ausente: {ident}")
+                continue
+            phases = stream.get("phases") or []
+            if not phases:
+                errors.append(f"{case}: fases ausentes en {ident}")
+                continue
+            mass_flow = stream.get("mass_flow_kg_s")
+            if not isinstance(mass_flow, (int, float)) or not math.isfinite(mass_flow):
+                errors.append(f"{case}: caudal no finito en {ident}")
+                continue
+            for compound, props in phases[0].get("compounds", {}).items():
+                if compound not in ATOMIC_MASSES:
+                    errors.append(f"{case}: fórmula no definida para {compound}")
+                    continue
+                mw, atoms = ATOMIC_MASSES[compound]
+                fraction = props.get("mass_fraction")
+                if not isinstance(fraction, (int, float)) or not math.isfinite(fraction):
+                    errors.append(f"{case}: fracción no finita para {compound}")
+                    continue
+                mol_s = 1000 * mass_flow * fraction / mw
+                for atom, count in atoms.items():
+                    atom_flow[atom] = atom_flow.get(atom, 0.0) + count * mol_s
+        return atom_flow
+    input_atoms, output_atoms = totals(ins), totals(outs)
+    residuals = {}
+    for atom in sorted(set(input_atoms) | set(output_atoms)):
+        residual = input_atoms.get(atom, 0.0) - output_atoms.get(atom, 0.0)
+        residuals[atom] = residual
+        check(f"{case}/átomos/{atom}", residual, 0.0, ATOMIC_TOL_MOL_S, errors)
+    return residuals
+
 
 def run_case(url, graph):
     payload = json.dumps(graph, ensure_ascii=False).encode("utf-8")
@@ -138,7 +199,7 @@ def main(argv=None):
         "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "method": "API local Debian /api/simulate; comparación con informes Windows versionados",
         "limitations": "No es validación experimental ni comparación independiente de DWSIM; no demuestra disponibilidad pública del túnel.",
-        "tolerances_absolute": TOL, "cases": {},
+        "tolerances_absolute": {**TOL, "atoms_mol_s": ATOMIC_TOL_MOL_S}, "cases": {},
     }
     failures = 0
     for name in args.cases:
