@@ -79,6 +79,23 @@ class ComparatorTests(unittest.TestCase):
         mod.compare(case, fixture(case, self.refs[case]), self.refs[case], errors)
         self.assertEqual(errors, [])
 
+    def test_detects_elemental_imbalance(self):
+        case = "AmmoniaBypass"
+        actual = fixture(case, self.refs[case])
+        actual["streams"]["vapor"]["phases"][0]["compounds"]["Ammonia"]["mass_fraction"] += 0.01
+        errors = []
+        mod.compare(case, actual, self.refs[case], errors)
+        self.assertTrue(any("/átomos/" in msg for msg in errors))
+
+    def test_reactive_atom_reference(self):
+        for case in mod.REACTIVE_PORTS:
+            with self.subTest(case=case):
+                errors = []
+                residuals = mod.check_atomic_balance(
+                    case, fixture(case, self.refs[case])["streams"], errors)
+                self.assertEqual(errors, [])
+                self.assertTrue(residuals)
+
     def test_detects_heat_regression(self):
         case = "AmmoniaBypass"
         actual = fixture(case, self.refs[case])

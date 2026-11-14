@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.9.2 — 2026-11-14
+
+- Regresión real Windows–Debian de los diez ejemplos 01–10: 10/10 aprobados en Debian DWSIM MCP 10.2.15, HTTP 200, tolerancias explícitas, informe recibido el 14/11.
+- Verificador reproducible para el gateway Debian local y pruebas unitarias; controles adicionales de conservación de átomos H/O y N/H en reactores 07, 08 y 10.
+- Informe resumido de referencia y huella SHA-256 del JSON completo, preservando distinción entre evidencia de ejecución y pruebas automatizadas.
+- Sin cambios en ecuaciones del motor, interfaz de cálculo, túneles, credenciales ni selección manual de Windows/Debian.
+
 ## 0.9.1 — 2026-11-12
 
 - Ayuda centrada en la guía de uso y la tutoriales de DWSIM en inglés; planificación y adaptación quedan en la documentación del repositorio.
