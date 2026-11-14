@@ -64,13 +64,13 @@ class SeparatorContractTests(unittest.TestCase):
                 self.calls.append((tool, kwargs))
                 if tool == "dwsim_flowsheet_create":
                     return {"flowsheet_id": "mock"}
-                if tool == "dwsim_unitop_add" and kwargs.get("type") == "Separator":
+                if tool == "dwsim_unitop_add" and kwargs.get("type") == "Vessel":
                     raise RuntimeError("SEPARATOR_MCP_PROBE")
                 return {}
         engine = StopAtSeparator()
         with self.assertRaisesRegex(RuntimeError, "SEPARATOR_MCP_PROBE"):
             simulate(engine, case())
-        self.assertTrue(any(t == "dwsim_unitop_add" and k.get("type") == "Separator" for t, k in engine.calls))
+        self.assertTrue(any(t == "dwsim_unitop_add" and k.get("type") == "Vessel" for t, k in engine.calls))
         self.assertEqual(engine.calls[-1][0], "dwsim_flowsheet_close")
 
 
