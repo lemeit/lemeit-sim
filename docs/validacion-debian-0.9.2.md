@@ -1,81 +1,39 @@
-# Validación Debian de los diez ejercicios · preparación 0.9.2
+# Validación cruzada Windows–Debian · ΣIM 0.9.2
 
-Esta etapa compara las respuestas del **gateway local de Debian** con las referencias
-Windows ya registradas, sin editar el motor DWSIM, cambiar túneles ni publicar.
-El código del portal sigue en **0.9.1** hasta terminar y aprobar las pruebas.
+## Resultado registrado: 14/11/2026
 
-## Estado conocido al 14/11/2026
+El informe original calculado en la notebook Debian indica **10 de 10 casos aprobados**, con HTTP 200 en todos, motor DWSIM MCP 10.2.15. Se compararon las propiedades disponibles de las corrientes, potencias y cierres contra informes Windows ya versionados.
 
-El usuario ejecutó directamente los casos 06–10 con DWSIM MCP 10.2.15 en Debian:
-todos devolvieron HTTP 200 y cerraron el balance de masa total. Se compararon
-composiciones, temperaturas y potencias principales con los informes Windows.
-La reacción de equilibrio del 08 mostró diferencias de ~5,6×10⁻⁸ en fracción
-másica de NH₃ y ~0,000182 kW en potencia de reacción.
+- Fecha UTC del informe: `2026-11-14T15:47:56.744774+00:00`.
+- SHA-256 del archivo JSON recibido, sin normalización: `a4e8afab02a743e4131cc463ddd4ef75d1a29afa7468d3c85682cf6d4fc6bdf9`.
+- Tolerancias de la corrida: temperatura 0,001 K; presión 1 Pa; caudal 1e-7 kg/s; entalpía 0,005 kJ/kg; densidad 0,05 kg/m³; fracción másica 1e-6; potencia 0,01 kW.
+- Residuos reactivos de H, O y N calculados de forma independiente a partir de las composiciones del archivo: máximo 2,84e-14 mol de átomos/s para los casos 07, 08 y 10. El comparador de 0.9.2 incorpora también este control con tolerancia 1e-5 mol/s.
 
-**Estos resultados fueron comunicados en el chat y NO están reproducidos en un
-archivo de evidencia firmado o ejecutado por CI.** No se atribuye validación
-de los casos 01–05 a Debian antes de ejecutar el verificador completo.
+| Caso | Duración Debian (s) | Estado |
+| --- | ---: | --- |
+| 01 · Mezcla agua | 4,76 | OK |
+| 02 · Calentamiento | 1,39 | OK |
+| 03 · Enfriamiento | 0,82 | OK |
+| 04 · División | 1,08 | OK |
+| 05 · Agua–etanol | 0,88 | OK |
+| 06 · Multicomponente | 0,91 | OK |
+| 07 · Conversión | 1,32 | OK |
+| 08 · Equilibrio | 1,16 | OK |
+| 09 · Red térmica | 1,80 | OK |
+| 10 · Amoníaco con bypass | 1,84 | OK |
 
-## Ejecutar en la notebook
+El archivo completo se preservó por el usuario fuera de Git; se identifica por su huella SHA-256. Este resumen no sustituye el informe detallado. Las referencias están en `docs/validation/examples-0.5.0.json`, `examples-0.7.0-windows.json` y `examples-0.8.0-windows.json`.
 
-Con Debian encendida y sus servicios DWSIM MCP (5901) y gateway (5910)
-efectivamente activos:
+## Repetición
 
 ```bash
 cd ~/lemeit-sim
-git fetch origin
-git switch --track origin/feature/validacion-debian-092
-
 python3 -m unittest test_validate_debian_examples -v
 python3 tools/validate_debian_examples.py
 ```
 
-Si la rama ya existe localmente, usar `git switch feature/validacion-debian-092`
-y `git pull --ff-only`. No hacer `git reset --hard` ni sobrescribir cambios.
+Se requiere DWSIM MCP en 127.0.0.1:5901 y el gateway local en 127.0.0.1:5910. El nuevo informe se guarda en `.local/validation/debian-0.9.2.json` (excluido de Git). No utiliza ni modifica la computadora Windows.
 
-El verificador ejecuta los diez JSON secuencialmente sobre
-`http://127.0.0.1:5910/api/simulate`. No usa Cloudflare ni requiere Windows.
-Devuelve código distinto de cero si hay errores o diferencias mayores a las
-tolerancias y guarda los **resultados completos**, errores y versiones en
-`.local/validation/debian-0.9.2.json`.
+## Alcance y límites
 
-El archivo de salida se deja en `.local`, excluida de Git, para revisión
-antes de seleccionar qué evidencia publicar: no copiar tokens ni claves.
-
-Para repetir solo los cinco casos básicos:
-
-```bash
-python3 tools/validate_debian_examples.py --cases mix HeaterWater CoolerWater SplitterWater WaterEthanol
-```
-
-## Referencias y campos
-
-| Casos | Archivo Windows | Contraste |
-| --- | --- | --- |
-| 01–05 | `docs/validation/examples-0.5.0.json` | Temperatura, presión, caudal, entalpía, densidad, composición y potencia térmica |
-| 06–08 | `docs/validation/examples-0.7.0-windows.json` | Temperatura, presión, caudal, composición, balance por especie (equipos no reactivos) y potencia |
-| 09–10 | `docs/validation/examples-0.8.0-windows.json` | Mismos campos y potencias de todos los equipos |
-
-Los valores de referencia no se modifican. Las tolerancias absolutas están
-declaradas en `tools/validate_debian_examples.py` y en cada informe nuevo.
-El tiempo de corrida se registra, pero no se usa como condición de aprobación.
-
-## Límites de esta etapa
-
-- Ambos motores usan DWSIM: comparar las salidas **no constituye validación experimental**
-  ni garantiza que los modelos termodinámicos sean correctos para un caso industrial.
-- El verificador comprueba cierre de masa total y por especie en equipos no reactivos.
-  En reactores compara resultados y potencia, **sin tratar el cambio de especies como
-  un error de masa por componente**. La conservación elemental debe agregarse como
-  prueba específica antes de considerar validación química independiente de la
-  referencia Windows.
-- El archivo de referencia 0.5.0 contiene resultados de Automation3 y del motor
-  Windows; los casos posteriores usan el motor Windows.
-- El estado HTTP 200 de catálogo solo muestra disponibilidad de esa API; esta
-  regresión exige una respuesta de simulación por caso.
-- El verificador no determina si el túnel público de Debian está disponible.
-- No se ha ejecutado desde este entorno de chat en la notebook: se requiere correrlo
-  allí y revisar el informe para cerrar la etapa 0.9.2.
-
-Siguiente etapa después de aprobar: control elemental de reacciones, registrar
-reproducción Debian en el repositorio y preparar separador flash como 0.10.0.
+Se comprobaron respuestas numéricas con el mismo motor DWSIM sobre sistemas operativos distintos. Esto **no es validación experimental** ni comprobación independiente del modelo físico, y tampoco prueba que el túnel Debian esté disponible permanentemente. El verificador no sustituye ensayos de concurrencia con múltiples alumnos. La comparación del informe recibido se efectuó antes de añadir el control atómico automático; los residuos atómicos informados se calcularon posteriormente a partir de esos mismos datos.
