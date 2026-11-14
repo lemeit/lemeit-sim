@@ -7,6 +7,8 @@ const TYPES = {
   Mixer: {label:'Mezclador',short:'Mezclador',icon:'mixer',prefix:'M',w:120,h:100},
   Splitter: {label:'Divisor',short:'Divisor',icon:'splitter',prefix:'D',w:120,h:100},
   Separator: {label:'Separador flash',short:'Flash',icon:'separator',prefix:'V',w:130,h:110},
+  Pump: {label:'Bomba',short:'Bomba',icon:'pump',prefix:'P',w:120,h:100},
+  Valve: {label:'Válvula',short:'Válvula',icon:'valve',prefix:'V',w:120,h:100},
   Heater: {label:'Calentador',short:'Calentador',icon:'heater',prefix:'H',w:120,h:100},
   Cooler: {label:'Enfriador',short:'Enfriador',icon:'cooler',prefix:'E',w:120,h:100},
   ConversionReactor: {label:'Reactor de conversión',short:'Conversión',icon:'reactor_conversion',prefix:'R',w:130,h:110},
@@ -113,6 +115,8 @@ function equipmentSymbol(type){
   if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
   if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
   if(type==='Separator')return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130 M35 55 H95"/><text class="symbol-sign" x="65" y="62" text-anchor="middle">V/L</text>';
+  if(type==='Pump')return '<circle cx="60" cy="50" r="40"/><path d="M0 50 H20 M100 50 H120 M40 72 L82 50 L40 28 Z"/>';
+  if(type==='Valve')return '<path d="M0 50 H20 M20 25 L60 50 L20 75 Z M100 25 L60 50 L100 75 Z M100 50 H120"/>';
   if(type==='Heater'||type==='Cooler')return `<path d="M0 50 L60 5 L120 50 L60 95 Z M60 95 V100"/><text class="symbol-sign" x="60" y="57" text-anchor="middle">${type==='Heater'?'H':'C'}</text>`;
   return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
 }
@@ -203,6 +207,8 @@ function renderInspector(){
   if(!isStream(n))html+=`<p class="inspector-section">DISEÑO</p><label class="field"><span class="field-label">Tamaño del símbolo · %</span><input data-field="scale" type="number" min="50" max="300" step="10" value="${Math.round(symbolScale(n)*100)}"></label><p class="mini">Tamaño gráfico; no modifica las dimensiones físicas del equipo.</p>`;
   if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
+  if(n.type==='Pump')html+=`<p class="inspector-description">Bomba de líquido con presión absoluta de salida y eficiencia. El motor calcula potencia y temperatura. No usar para alimentar con vapor.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia','%',n.efficiency_pct,{min:0.01})}`;
+  if(n.type==='Valve')html+=`<p class="inspector-description">Válvula de expansión por estrangulamiento: presión absoluta de salida. La presión debe ser menor que la de entrada; DWSIM calcula temperatura y fases.</p>${field('outlet_pressure_kPa','Presión de salida','kPa abs',n.outlet_pressure_kPa,{min:0.001})}`;
   if(n.type==='Separator')html+='<p class="inspector-description">Separación de equilibrio vapor–líquido, sin reparto fijo. Puerto 1: vapor. Puerto 2: líquido. En la primera versión opera adiabáticamente con la alimentación ya acondicionada.</p>';
   if(n.type==='Splitter')html+=`<p class="inspector-description">Dos salidas con la misma composición. La fracción restante sale por el puerto 2.</p>${field('split','Fracción hacia salida 1','kg/kg',n.split,{min:0.000001})}<p class="mini">Salida 2: ${fmt(1-n.split,4)}</p>`;
   if(n.type==='Mixer')html+='<p class="inspector-description">Mezcla adiabática, sin trabajo de eje. Admite hasta 3 entradas; la presión de salida es la menor de las entradas.</p><p class="mini">Σ ṁ<sub>e</sub> = ṁ<sub>s</sub><br>Σ (ṁ · h)<sub>e</sub> = (ṁ · h)<sub>s</sub></p>';
@@ -229,6 +235,8 @@ function addNode(type,pos){
   if(type==='MaterialStream')Object.assign(node,{temperature_C:25,pressure_kPa:101.325,mass_flow:1,composition:Object.fromEntries(graph.compounds.map((c,i)=>[c,i===0?1:0]))});
   if(type==='Heater'||type==='Cooler')node.outlet_C=type==='Heater'?70:25;
   if(type==='Splitter')node.split=.5;
+  if(type==='Pump')Object.assign(node,{outlet_pressure_kPa:500,efficiency_pct:75});
+  if(type==='Valve')node.outlet_pressure_kPa=200;
   if(isReactor(node))Object.assign(node,{outlet_C:500,conversion:50,phase:'Vapor',base_compound:graph.compounds[0],stoichiometry:Object.fromEntries(graph.compounds.map(c=>[c,0]))});
   graph.nodes.push(node);selection={node:node.id};pending=null;changed();renderInspector();notice('');
 }
