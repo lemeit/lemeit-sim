@@ -1,5 +1,6 @@
 """Pruebas locales del comparador (no ejecutan DWSIM)."""
 import importlib.util
+import copy
 import json
 import unittest
 from pathlib import Path
@@ -30,7 +31,7 @@ def fixture(case, ref):
                 },
             }],
         }
-    balances = ref.get("balances")
+    balances = copy.deepcopy(ref.get("balances"))
     if balances is None:
         balances = [{
             "id": "unit", "mass_residual": 0.,
