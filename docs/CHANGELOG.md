@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.11.0 — 2026-11-14
+
+- Bomba y válvula agregadas al editor con símbolos, configuración y ejemplo 12; el gateway usa tipos MCP `Pump` y `Valve`.
+- Corrige las unidades de presión prescrita en el adaptador DWSIM MCP 10.2.15: 500 kPa se envían como 5 bar y 200 kPa como 2 bar. Prueba de regresión para evitar repetir el error.
+- Ejemplo 12, agua a 25 °C, 1 kg/s, IAPWS-IF97: siete controles de la ejecución real en Debian aprobados; ambas operaciones calculadas, bomba eleva la presión a 500 kPa y válvula la reduce a 200 kPa, con conservación de caudal y entalpía aproximadamente constante en la válvula.
+- Catálogo y roadmap sincronizados. La validación en Windows sigue pendiente. Los valores detallados de energía/potencia no se publican hasta revisar el informe completo generado por DWSIM.
+
 ## 0.10.0 — 2026-11-14
 
 - Separador flash adiabático vapor–líquido con tipo MCP `Vessel`, 1 entrada y 2 salidas, disponible en biblioteca e inspector y como Ejemplo 11 (agua–etanol, NRTL).

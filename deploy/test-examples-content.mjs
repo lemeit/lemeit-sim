@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read = path => readFileSync(new URL('../site/' + path,import.meta.url),'utf8');
-const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum'];
+const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum','PumpValve'];
 const close = (a,b,tol=1e-9) => assert.ok(Math.abs(a-b)<tol,`Se esperaba ${b} pero se obtuvo ${a}`);
 
-test('menú, selector y guía incluyen los once ejemplos en orden',()=>{
+test('menú, selector y guía incluyen los doce ejemplos en orden',()=>{
   const index=read('index.html'),guide=read('ejemplos.html');
   const positions=projects.map(id=>{
     assert.ok(index.includes(`<option value="${id}">`),`Falta la opción ${id}`);
@@ -89,7 +89,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   assert.match(guide,/diez casos en Debian/);
 });
 
-test('cada ejercicio 01–11 conserva una resolución numerada paso a paso',()=>{
+test('cada ejercicio 01–12 conserva una resolución numerada paso a paso',()=>{
  const guide=read('ejemplos.html');
  for(const id of projects){
   const section=guide.split(`<section id="${id}">`)[1]?.split('</section>')[0];
@@ -109,4 +109,18 @@ test('caso 11 flash NRTL conecta entrada, vapor y líquido y documenta residuo d
  assert.match(guide,/7,131099×10⁻⁶/);
  assert.match(guide,/1,171057×10⁻⁵/);
  assert.match(app,/Separator: \{label:'Separador flash'/);
+});
+
+test('caso 12 bomba y válvula, catálogo y referencias didácticas consistentes',()=>{
+ const graph=JSON.parse(read('examples/PumpValve.json'));
+ const guide=read('ejemplos.html');
+ const catalog=read('catalogo.html');
+ assert.equal(graph.model,'Steam Tables (IAPWS-IF97)');
+ assert.equal(graph.nodes.find(n=>n.type==='Pump').outlet_pressure_kPa,500);
+ assert.equal(graph.nodes.find(n=>n.type==='Pump').efficiency_pct,75);
+ assert.equal(graph.nodes.find(n=>n.type==='Valve').outlet_pressure_kPa,200);
+ assert.match(guide,/id="PumpValve"/);
+ assert.match(guide,/Entalpía de válvula/);
+ assert.ok(catalog.includes('<td>Pump</td><td>Disponible · 0.11.0'));
+ assert.ok(catalog.includes('<td>Valve</td><td>Disponible · 0.11.0'));
 });

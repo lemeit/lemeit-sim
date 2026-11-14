@@ -347,9 +347,11 @@ def simulate(engine, graph):
                 props = {'CalcMode': 'OutletTemperature', 'OutletTemperature': node['outlet_C'] + 273.15}
             if node['type'] == 'Splitter': props = {'OperationMode': 'SplitRatios', 'SR1': node['split']}
             if node['type'] == 'Pump':
-                props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] * 1000}
+                # MCP 10.2.15 interpreta PROP_PU_5 en bar, no en Pa: 500 kPa -> 5 bar.
+                props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] / 100}
             if node['type'] == 'Valve':
-                props = {'CalcMode': 'OutletPressure', 'PROP_VA_2': node['outlet_pressure_kPa'] * 1000}
+                # Misma convención de presión en el adaptador MCP; verificar con prueba real.
+                props = {'CalcMode': 'OutletPressure', 'PROP_VA_2': node['outlet_pressure_kPa'] / 100}
             if node['type'] in REACTORS:
                 props = {'ReactionSetID':node['id'] + '-set', 'ReactorOperationMode':'OutletTemperature', 'OutletTemperature':node['outlet_C'] + 273.15}
             if props: call('dwsim_unitop_set', name=node['name'], properties=props)

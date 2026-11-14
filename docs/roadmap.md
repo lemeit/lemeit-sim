@@ -1,7 +1,7 @@
 # Hoja de ruta de Lemeit Sim
 
-Estado al 6 de noviembre de 2026. Este editor no es todavía una réplica completa de DWSIM.
-El alcance operativo se muestra en el catálogo de la propia aplicación.
+Estado al 14 de noviembre de 2026. Este editor no es todavía una réplica completa de DWSIM.
+El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
 ## Referencias y trazabilidad
 
@@ -11,7 +11,7 @@ es propia: no se presenta como traducción oficial ni se copia íntegramente un 
 Cada adaptación registrará enlace, versión del motor, parámetros y diferencias de interfaz.
 Los resultados de modelos se distinguen de mediciones experimentales.
 
-## Primera publicación: disponible
+## Disponible y validado en motor real · hasta 0.11.0
 
 - Corrientes, mezclador, divisor de dos salidas, calentador y enfriador.
 - Reactores de conversión y equilibrio: una reacción por reactor, temperatura de
@@ -21,17 +21,22 @@ Los resultados de modelos se distinguen de mediciones experimentales.
   generarse o consumirse: su diferencia no se rotula como error de conservación.
 - Para reactores, Q procede de DeltaQ del motor (kW) leído de su estado XML;
   incorpora calor de reacción. No se estima solamente con diferencias de entalpía sensible.
+- 0.9.2: diez ejemplos 01–10 contrastados Windows–Debian con verificaciones de masa y conservación elemental en reactores.
+- 0.10.0: separador de fases vapor–líquido (`Vessel` en MCP), ejemplo 11 NRTL agua–etanol probado en Debian, con residuos numéricos y tolerancias registrados en [el informe](flash-0.10.0.md).
 
-## Prioridad actual: edición de corrientes próxima a DWSIM
+## Entregado en 0.11.0 — Bomba y válvula
 
-Después de compactar la interfaz e incorporar SIMPROX, completar la ventana de
-corrientes antes de nuevas expansiones visuales o 3D:
+- Los PR #41 y #42 incorporan `Pump` y `Valve`, símbolos, campos de presión y eficiencia, pruebas de contrato y cálculo real en Debian.
+- El Ejemplo 12 propone agua a 25 °C, 1 kg/s: bomba de 101,325 a 500 kPa (eficiencia 75 %) y válvula de 500 a 200 kPa.
+- Primer ensayo real Debian: error de unidades. Corregida conversión kPa → bar para el adaptador MCP (500 kPa → 5 bar; 200 kPa → 2 bar). Segundo ensayo real: las siete verificaciones de presión, caudal, entalpía y estado calculado devolvieron `OK`.
+- Se verificaron presión de bomba y válvula, caudal, entalpía aproximadamente constante de la válvula y cálculo de ambos equipos. El informe detallado de ejecución permanece local en Debian: `/tmp/sim-pump-valve12-debian.json`. La potencia de bomba no fue aportada numéricamente al chat; no se publica un valor no respaldado.
+- Catálogo y guía del ejemplo 12 actualizados para la versión 0.11.0. Validación independiente en Windows aún pendiente.
 
-- Condiciones, composición y resultados en secciones claras.
-- Unidades seleccionables y caudales expresados por masa o moles de forma consistente.
-- Mostrar propiedades de mezcla y por fase disponibles en el motor.
-- Ampliar las especificaciones de estado que admita la API instalada, verificando cada
-  una con DWSIM. No habilitar campos incompatibles simultáneamente ni inventar datos.
+## Mejoras continuas de corrientes
+
+- Condiciones, composición y resultados agrupados claramente; conservar entradas canónicas al cambiar unidades.
+- Caudales por masa o por moles, fracciones y propiedades por fase.
+- Agregar nuevas especificaciones solo tras verificarlas con la API instalada; evitar campos incompatibles o propiedades inventadas.
 
 ## Próxima etapa: versión de administración
 
@@ -52,18 +57,11 @@ Una vez estabilizado el funcionamiento, preparar la versión para alumnos, centr
 en crear proyectos, configurar componentes y modelos, construir diagramas y analizar
 resultados, con mensajes claros cuando el motor no esté disponible.
 
-## Siguiente bloque de equipos elegido: procesos básicos
+## Siguiente equipo principal · 0.12.0
 
-1. Bombas y válvulas: presión absoluta, caída/aumento de presión, eficiencia,
-   potencia y condiciones que permiten usar cada equipo.
-2. Separador de fases: introducir vapor/líquido y composiciones diferentes en las salidas.
-   Referencia: [Simple Flash Drum](https://dwsim.org/tutorials/en/beginner/04-simple-flash-drum.html).
-3. Intercambiador: dos corrientes, cuatro puertos de materia, balances por lado,
-   configuración térmica y límites de especificación.
-   Referencia: [Heat Exchanger Design](https://dwsim.org/tutorials/en/intermediate/02-heat-exchanger-design.html).
-
-La adaptación del separador debe verificar el ejemplo con el motor instalado;
-no copiar números orientativos del tutorial como si fueran resultados obtenidos aquí.
+- Intercambiador de calor de dos corrientes: cuatro puertos de materia, balances por lado y definición térmica sin sobreespecificar.
+- Referencia: [Heat Exchanger Design](https://dwsim.org/tutorials/en/intermediate/02-heat-exchanger-design.html).
+- Verificar nombres de propiedades y modos del MCP instalado, después probar con simulaciones reales antes de habilitar la operación pública.
 
 ## Desarrollo posterior
 
@@ -84,6 +82,6 @@ Objetivo → caso físico → datos y fuentes → modelo y supuestos → configu
 Lemeit Sim → resultados realmente ejecutados → balances y tolerancias → preguntas
 para explorar → límites y errores frecuentes → tutorial de origen y cambios de adaptación.
 
-Una función se marca disponible al completar sus puertos, formulario, validación,
+Una función se marca disponible al completar puertos, formulario, validación,
 conversión de unidades, cálculo real, errores y un ejemplo verificado. Dibujar su icono
-no equivale a implementar el equipo.
+no equivale a validar el equipo. **Cada PR que cambia una capacidad debe revisar tanto `site/catalogo.html` como este `docs/roadmap.md`**, documentando el estado real, el ejemplo y la evidencia de pruebas.
