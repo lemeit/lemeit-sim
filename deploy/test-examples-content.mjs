@@ -121,6 +121,6 @@ test('caso 12 bomba y válvula, catálogo y referencias didácticas consistentes
  assert.equal(graph.nodes.find(n=>n.type==='Valve').outlet_pressure_kPa,200);
  assert.match(guide,/id="PumpValve"/);
  assert.match(guide,/Entalpía de válvula/);
- assert.match(catalog,/<td>Pump<\\/td><td>Disponible · 0\\.11\\.0/);
- assert.match(catalog,/<td>Valve<\\/td><td>Disponible · 0\\.11\\.0/);
+ assert.ok(catalog.includes('<td>Pump</td><td>Disponible · 0.11.0'));
+ assert.ok(catalog.includes('<td>Valve</td><td>Disponible · 0.11.0'));
 });
