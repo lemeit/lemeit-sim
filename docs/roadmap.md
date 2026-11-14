@@ -11,7 +11,7 @@ es propia: no se presenta como traducción oficial ni se copia íntegramente un 
 Cada adaptación registrará enlace, versión del motor, parámetros y diferencias de interfaz.
 Los resultados de modelos se distinguen de mediciones experimentales.
 
-## Disponible y validado en motor real · hasta 0.10.0
+## Disponible y validado en motor real · hasta 0.11.0
 
 - Corrientes, mezclador, divisor de dos salidas, calentador y enfriador.
 - Reactores de conversión y equilibrio: una reacción por reactor, temperatura de
@@ -24,13 +24,13 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - 0.9.2: diez ejemplos 01–10 contrastados Windows–Debian con verificaciones de masa y conservación elemental en reactores.
 - 0.10.0: separador de fases vapor–líquido (`Vessel` en MCP), ejemplo 11 NRTL agua–etanol probado en Debian, con residuos numéricos y tolerancias registrados en [el informe](flash-0.10.0.md).
 
-## En desarrollo · 0.11.0 — Bomba y válvula
+## Entregado en 0.11.0 — Bomba y válvula
 
-- El PR #41 agregó tipos `Pump` y `Valve`, símbolos y campos de presión y eficiencia; su fusión **no equivale a validación numérica**.
+- Los PR #41 y #42 incorporan `Pump` y `Valve`, símbolos, campos de presión y eficiencia, pruebas de contrato y cálculo real en Debian.
 - El Ejemplo 12 propone agua a 25 °C, 1 kg/s: bomba de 101,325 a 500 kPa (eficiencia 75 %) y válvula de 500 a 200 kPa.
-- Primer ensayo real Debian: error de presión en bomba, porque el adaptador MCP interpretó `500000` como bar; se corrige la conversión a `5` bar para 500 kPa y a `2` bar para 200 kPa. **Pendiente de repetir el cálculo real**; no se publican resultados sin ejecutarlo.
-- Confirmar presión y temperatura de salida, caudal, entalpía aproximadamente constante en válvula, potencia de bomba, balances y manejo de error.
-- Actualizar el [catálogo](https://sim.lemeit.ar/catalogo.html), guía y pruebas en el mismo PR de publicación; pasar CI antes de fusionar y desplegar la versión 0.11.0.
+- Primer ensayo real Debian: error de unidades. Corregida conversión kPa → bar para el adaptador MCP (500 kPa → 5 bar; 200 kPa → 2 bar). Segundo ensayo real: las siete verificaciones de presión, caudal, entalpía y estado calculado devolvieron `OK`.
+- Se verificaron presión de bomba y válvula, caudal, entalpía aproximadamente constante de la válvula y cálculo de ambos equipos. El informe detallado de ejecución permanece local en Debian: `/tmp/sim-pump-valve12-debian.json`. La potencia de bomba no fue aportada numéricamente al chat; no se publica un valor no respaldado.
+- Catálogo y guía del ejemplo 12 actualizados para la versión 0.11.0. Validación independiente en Windows aún pendiente.
 
 ## Mejoras continuas de corrientes
 
