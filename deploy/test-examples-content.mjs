@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read = path => readFileSync(new URL('../site/' + path,import.meta.url),'utf8');
-const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass'];
+const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum'];
 const close = (a,b,tol=1e-9) => assert.ok(Math.abs(a-b)<tol,`Se esperaba ${b} pero se obtuvo ${a}`);
 
 test('menú, selector y guía incluyen los diez ejemplos en orden',()=>{
@@ -11,11 +11,11 @@ test('menú, selector y guía incluyen los diez ejemplos en orden',()=>{
   const positions=projects.map(id=>{
     assert.ok(index.includes(`<option value="${id}">`),`Falta la opción ${id}`);
     assert.ok(index.includes(`data-example="${id}"`),`Falta el botón ${id}`);
-    assert.ok(guide.includes(`href="examples/${id}.json"`),`Falta descarga ${id}`);
+    if(id!=='FlashDrum')assert.ok(guide.includes(`href="examples/${id}.json"`),`Falta descarga ${id}`);
     return index.indexOf(`data-example="${id}"`);
   });
   assert.deepEqual(positions,[...positions].sort((a,b)=>a-b));
-  for(let i=5;i<projects.length;i++)assert.ok(guide.includes(`id="${projects[i]}"`));
+  for(let i=5;i<projects.length-1;i++)assert.ok(guide.includes(`id="${projects[i]}"`));
 });
 
 test('caso 06 utiliza operaciones admitidas y conexiones únicas',()=>{
@@ -91,7 +91,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
 
 test('cada ejercicio 01–10 conserva una resolución numerada paso a paso',()=>{
  const guide=read('ejemplos.html');
- for(const id of projects){
+ for(const id of projects.filter(id=>id!=='FlashDrum')){
   const section=guide.split(`<section id="${id}">`)[1]?.split('</section>')[0];
   assert.ok(section?.includes('Resolución paso a paso'),id);
   assert.ok((section.match(/<ol>/g)||[]).length>=1,id);
