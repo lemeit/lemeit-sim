@@ -23,7 +23,7 @@ test('el catálogo enumera equipos que aparecen en la biblioteca',()=>{
 test('el catálogo refleja equipos validados en Debian',()=>{
   assert.match(byEngine.get('Vessel').status,/Disponible.*0\.10\.0/);
   for(const name of ['Pump','Valve']){
-    assert.match(byEngine.get(name).status,/En desarrollo.*0\.11\.0/);
+    assert.match(byEngine.get(name).status,/Disponible.*0\.11\.0/);
     assert.doesNotMatch(byEngine.get(name).status,/En desarrollo/);
   }
 });
