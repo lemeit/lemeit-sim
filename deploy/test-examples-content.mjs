@@ -86,7 +86,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   assert.match(guide,/referencias de materia verificadas analíticamente/i);
   assert.match(guide,/motor Windows/);
   assert.match(guide,/sin comparación independiente con la API de escritorio/i);
-  assert.match(guide,/Debian no se probó/);
+  assert.match(guide,/diez casos en Debian/);
 });
 
 test('cada ejercicio 01–10 conserva una resolución numerada paso a paso',()=>{
