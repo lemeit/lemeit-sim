@@ -1,6 +1,6 @@
 # Hoja de ruta de Lemeit Sim
 
-Estado al 14 de noviembre de 2026. Este editor no es todavía una réplica completa de DWSIM.
+Estado al 15 de noviembre de 2026. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
 ## Referencias y trazabilidad
@@ -57,11 +57,22 @@ Una vez estabilizado el funcionamiento, preparar la versión para alumnos, centr
 en crear proyectos, configurar componentes y modelos, construir diagramas y analizar
 resultados, con mensajes claros cuando el motor no esté disponible.
 
-## Siguiente equipo principal · 0.12.0
+## En desarrollo · 0.12.0 — Intercambiador de calor
 
-- Intercambiador de calor de dos corrientes: cuatro puertos de materia, balances por lado y definición térmica sin sobreespecificar.
-- Referencia: [Heat Exchanger Design](https://dwsim.org/tutorials/en/intermediate/02-heat-exchanger-design.html).
-- Verificar nombres de propiedades y modos del MCP instalado, después probar con simulaciones reales antes de habilitar la operación pública.
+- Contrato del gateway con un equipo `HeatExchanger`, entradas 0 (caliente) y 1 (fría) y salidas 0 (caliente) y 1 (fría); cada corriente conserva identidad y composición.
+- Primer modo didáctico propuesto: potencia transferida conocida (`heat_duty_kW`), ambas temperaturas de salida calculadas por DWSIM; no se fija simultáneamente una temperatura de salida, U o superficie.
+- Ejemplo 13 propuesto: agua pura IAPWS-IF97, 1 kg/s a 80 °C (lado caliente) y 1 kg/s a 20 °C (lado frío), ambas alimentaciones a 300 kPa absolutos, 40 kW especificados.
+- Pruebas de contrato sin motor y sonda real `tools/probe_heat_exchanger_debian.py` para verificar conexiones, sentido de Q, balances de masa por lado, temperaturas, especificación de potencia y estado de cálculo.
+- **Por verificar:** la API MCP 10.2.15 acepta los parámetros `CalculationMode=CalcBothTemp` y `HeatDuty` y respeta las posiciones de los puertos. No se publicará como disponible hasta ejecutar el ejemplo real.
+- Catálogo en estado `En desarrollo` hasta completar la corrida, sus resultados y la guía.
+- Referencia: [Heat Exchanger Design](https://dwsim.org/tutorials/en/intermediate/02-heat-exchanger-design.html). DWSIM también admite modos por UA, área y rating que quedan fuera de esta primera adaptación.
+
+### Criterios de publicación
+
+1. Motor Debian devuelve las cuatro corrientes y equipo calculado sin error; masas conservadas por cada circuito.
+2. El fluido caliente cede calor y el frío lo recibe, sin inversión térmica; desbalance energético dentro de tolerancia documentada.
+3. Mostrar resultado real, límites y modos disponibles en el Ejemplo 13; sincronizar `site/catalogo.html`, `docs/roadmap.md`, Acerca de y CHANGELOG.
+4. Pruebas automatizadas aprobadas; solo entonces fusionar y desplegar la versión 0.12.0.
 
 ## Desarrollo posterior
 
