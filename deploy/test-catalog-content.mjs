@@ -28,8 +28,8 @@ test('el catálogo refleja equipos validados en Debian',()=>{
   }
 });
 
-test('intercambiador no se declara disponible antes de validar en motor real',()=>{
-  assert.match(byEngine.get('HeatExchanger').status,/En desarrollo.*0\.12\.0/);
+test('intercambiador declara validación Debian de 0.12.0',()=>{
+  assert.match(byEngine.get('HeatExchanger').status,/Disponible.*0\.12\.0/);
 });
 
 test('cada objeto aparece exactamente una vez en el catálogo',()=>{
