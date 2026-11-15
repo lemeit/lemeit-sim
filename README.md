@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.12.0](https://img.shields.io/badge/portal-0.12.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.13.0](https://img.shields.io/badge/portal-0.13.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.12.0 — Intercambiador de dos corrientes y Ejemplo 13**, 15/11/2026. En Debian DWSIM MCP 10.2.15 se verificó la transferencia de 40 kW entre dos corrientes de agua, con cierre térmico de 0,00000033 kW y conservación de masa por lado. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados. Windows pendiente.
+**0.13.0 — Monitor de versión y estado del gateway**, 15/11/2026. El portal consulta `/api/status` del motor seleccionado para distinguir el gateway cargado en memoria de los archivos actualizados. Se informa versión, arranque, uptime, ocupado/libre y tipos admitidos, sin claves ni controles remotos de servicio. Requiere reiniciar gateway Debian tras desplegar; pruebas automatizadas incluidas. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados.\n\n**0.12.0 — Intercambiador de dos corrientes y Ejemplo 13**, 15/11/2026. En Debian DWSIM MCP 10.2.15 se verificó la transferencia de 40 kW entre dos corrientes de agua, con cierre térmico de 0,00000033 kW y conservación de masa por lado. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados. Windows pendiente.
 
 **0.11.0 — Bomba y válvula con presión especificada y Ejemplo 12**, 14/11/2026. En Debian, la bomba y la válvula completaron siete verificaciones físicas sobre agua con IAPWS-IF97. Se corrigió la conversión de presión del adaptador MCP y se sincronizaron [catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md). Windows pendiente de validar.
 
