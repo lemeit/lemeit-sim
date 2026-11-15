@@ -11,7 +11,7 @@ es propia: no se presenta como traducción oficial ni se copia íntegramente un 
 Cada adaptación registrará enlace, versión del motor, parámetros y diferencias de interfaz.
 Los resultados de modelos se distinguen de mediciones experimentales.
 
-## Disponible y validado en motor real · hasta 0.11.0
+## Disponible y validado en motor real · hasta 0.12.0
 
 - Corrientes, mezclador, divisor de dos salidas, calentador y enfriador.
 - Reactores de conversión y equilibrio: una reacción por reactor, temperatura de
@@ -57,14 +57,14 @@ Una vez estabilizado el funcionamiento, preparar la versión para alumnos, centr
 en crear proyectos, configurar componentes y modelos, construir diagramas y analizar
 resultados, con mensajes claros cuando el motor no esté disponible.
 
-## En desarrollo · 0.12.0 — Intercambiador de calor
+## Entregado en 0.12.0 — Intercambiador de calor
 
 - Contrato del gateway con un equipo `HeatExchanger`, entradas 0 (caliente) y 1 (fría) y salidas 0 (caliente) y 1 (fría); cada corriente conserva identidad y composición.
-- Primer modo didáctico propuesto: potencia transferida conocida (`heat_duty_kW`), ambas temperaturas de salida calculadas por DWSIM; no se fija simultáneamente una temperatura de salida, U o superficie.
-- Ejemplo 13 propuesto: agua pura IAPWS-IF97, 1 kg/s a 80 °C (lado caliente) y 1 kg/s a 20 °C (lado frío), ambas alimentaciones a 300 kPa absolutos, 40 kW especificados.
+- Modo didáctico validado: potencia transferida conocida (`heat_duty_kW`), ambas temperaturas de salida calculadas por DWSIM; no se fija simultáneamente una temperatura de salida, U o superficie.
+- Ejemplo 13 validado en Debian: agua pura IAPWS-IF97, 1 kg/s a 80 °C (lado caliente) y 1 kg/s a 20 °C (lado frío), ambas alimentaciones a 300 kPa absolutos, 40 kW especificados.
 - Pruebas de contrato sin motor y sonda real `tools/probe_heat_exchanger_debian.py` para verificar conexiones, sentido de Q, balances de masa por lado, temperaturas, especificación de potencia y estado de cálculo.
-- **Por verificar:** la API MCP 10.2.15 acepta los parámetros `CalculationMode=CalcBothTemp` y `HeatDuty` y respeta las posiciones de los puertos. No se publicará como disponible hasta ejecutar el ejemplo real.
-- Catálogo en estado `En desarrollo` hasta completar la corrida, sus resultados y la guía.
+- **Comprobado con ejecución real Debian DWSIM MCP 10.2.15:** `CalculationMode=CalcBothTemp` y `HeatDuty` aceptados. El agua caliente baja de 80 a 70,456556 °C, la fría sube de 20 a 29,565765 °C; 40,00000037 kW cedidos y 40,00000004 kW recibidos, residuo térmico 0,00000033 kW. Los dos caudales permanecen en 1 kg/s y las presiones a 300 kPa. Los 9 controles físicos y 6 pruebas unitarias terminaron correctamente.
+- Catálogo actualizado como `Disponible` desde 0.12.0; Ejemplo 13 con resultados documentados. No incluye diseño por U/área ni ensayo en Windows.
 - Referencia: [Heat Exchanger Design](https://dwsim.org/tutorials/en/intermediate/02-heat-exchanger-design.html). DWSIM también admite modos por UA, área y rating que quedan fuera de esta primera adaptación.
 
 ### Criterios de publicación
