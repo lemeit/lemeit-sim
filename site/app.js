@@ -144,7 +144,7 @@ function renderDiagram(){
     else if(feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass')html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}</text>`;
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
-      const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
+      const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${n.type==='HeatExchanger'?(p.index===0?' · lado caliente':' · lado frío'):(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
       html+=`<g data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
     if(selection?.node===n.id){if(g)html+=`<circle class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" cx="${g.bend.x}" cy="${g.bend.y}" r="7"><title>Arrastrar para acomodar el recorrido</title></circle>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
@@ -588,7 +588,7 @@ function reviewGraph(){
   if(!graph.model)issues.push('Elegí un modelo de propiedades en Simulación.');
   for(const n of graph.nodes){
     if(isFeed(n)){issues.push(...SimproxStreams.issues(n,graph.compounds).map(issue=>`${n.name}: ${issue}`));if(n.flash_spec==='PS'&&graph.model==='Steam Tables (IAPWS-IF97)')issues.push(`${n.name}: PS no está habilitado con IAPWS-IF97; usá TP o PH.`);}
-    if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
+    if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if(n.type==='HeatExchanger'&&feeds.length<2)issues.push(`${n.name}: conectá las alimentaciones caliente y fría.`);if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
   }
   return [...new Set(issues)];
 }
