@@ -8,6 +8,7 @@ const TYPES = {
   Splitter: {label:'Divisor',short:'Divisor',icon:'splitter',prefix:'D',w:120,h:100},
   Separator: {label:'Separador flash',short:'Flash',icon:'separator',prefix:'V',w:130,h:110},
   Pump: {label:'Bomba',short:'Bomba',icon:'pump',prefix:'P',w:120,h:100},
+  HeatExchanger: {label:'Intercambiador',short:'Intercambiador',icon:'heat-exchanger',prefix:'HX',w:130,h:110},
   Valve: {label:'Válvula',short:'Válvula',icon:'valve',prefix:'V',w:120,h:100},
   Heater: {label:'Calentador',short:'Calentador',icon:'heater',prefix:'H',w:120,h:100},
   Cooler: {label:'Enfriador',short:'Enfriador',icon:'cooler',prefix:'E',w:120,h:100},
@@ -64,6 +65,7 @@ function basePortList(n){
   }
   if(n.type==='Mixer')return [{side:'in',index:0,x:0,y:25,medium:'material'},{side:'in',index:1,x:0,y:75,medium:'material'},{side:'in',index:2,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'}];
   if(n.type==='Splitter')return [{side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:25,medium:'material'},{side:'out',index:1,x:120,y:75,medium:'material'}];
+  if(n.type==='HeatExchanger')return [{side:'in',index:0,x:0,y:30,medium:'material'},{side:'in',index:1,x:0,y:80,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
   if(n.type==='Separator')return [{side:'in',index:0,x:0,y:55,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
   if(isReactor(n))return [{side:'in',index:0,x:0,y:55,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
   list.push({side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'});
@@ -115,6 +117,7 @@ function equipmentSymbol(type){
   if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
   if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
   if(type==='Separator')return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130 M35 55 H95"/><text class="symbol-sign" x="65" y="62" text-anchor="middle">V/L</text>';
+  if(type==='HeatExchanger')return '<rect x="20" y="10" width="90" height="90" rx="12"/><path d="M0 30 H35 L95 80 H130 M0 80 H35 L95 30 H130"/><text class="symbol-sign" x="65" y="58" text-anchor="middle">HX</text>';
   if(type==='Pump')return '<circle cx="60" cy="50" r="40"/><path d="M0 50 H20 M100 50 H120 M40 72 L82 50 L40 28 Z"/>';
   if(type==='Valve')return '<path d="M0 50 H20 M20 25 L60 50 L20 75 Z M100 25 L60 50 L100 75 Z M100 50 H120"/>';
   if(type==='Heater'||type==='Cooler')return `<path d="M0 50 L60 5 L120 50 L60 95 Z M60 95 V100"/><text class="symbol-sign" x="60" y="57" text-anchor="middle">${type==='Heater'?'H':'C'}</text>`;
@@ -141,7 +144,7 @@ function renderDiagram(){
     else if(feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass')html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}</text>`;
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
-      const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
+      const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${n.type==='HeatExchanger'?(p.index===0?' · lado caliente':' · lado frío'):(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
       html+=`<g data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
     if(selection?.node===n.id){if(g)html+=`<circle class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" cx="${g.bend.x}" cy="${g.bend.y}" r="7"><title>Arrastrar para acomodar el recorrido</title></circle>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
@@ -207,6 +210,7 @@ function renderInspector(){
   if(!isStream(n))html+=`<p class="inspector-section">DISEÑO</p><label class="field"><span class="field-label">Tamaño del símbolo · %</span><input data-field="scale" type="number" min="50" max="300" step="10" value="${Math.round(symbolScale(n)*100)}"></label><p class="mini">Tamaño gráfico; no modifica las dimensiones físicas del equipo.</p>`;
   if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
+  if(n.type==='HeatExchanger')html+=`<p class="inspector-description">Intercambiador de dos corrientes sin mezcla. Puerto 1: caliente, puerto 2: frío. Se especifica únicamente la potencia térmica transferida del caliente al frío (kW); DWSIM calcula ambas temperaturas de salida. El modelo inicial no incluye pérdidas externas ni caídas de presión.</p>${field('heat_duty_kW','Calor transferido','kW',n.heat_duty_kW,{min:0.000001})}`;
   if(n.type==='Pump')html+=`<p class="inspector-description">Bomba de líquido con presión absoluta de salida y eficiencia. El motor calcula potencia y temperatura. No usar para alimentar con vapor.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia','%',n.efficiency_pct,{min:0.01})}`;
   if(n.type==='Valve')html+=`<p class="inspector-description">Válvula de expansión por estrangulamiento: presión absoluta de salida. La presión debe ser menor que la de entrada; DWSIM calcula temperatura y fases.</p>${field('outlet_pressure_kPa','Presión de salida','kPa abs',n.outlet_pressure_kPa,{min:0.001})}`;
   if(n.type==='Separator')html+='<p class="inspector-description">Separación de equilibrio vapor–líquido, sin reparto fijo. Puerto 1: vapor. Puerto 2: líquido. En la primera versión opera adiabáticamente con la alimentación ya acondicionada.</p>';
@@ -235,6 +239,7 @@ function addNode(type,pos){
   if(type==='MaterialStream')Object.assign(node,{temperature_C:25,pressure_kPa:101.325,mass_flow:1,composition:Object.fromEntries(graph.compounds.map((c,i)=>[c,i===0?1:0]))});
   if(type==='Heater'||type==='Cooler')node.outlet_C=type==='Heater'?70:25;
   if(type==='Splitter')node.split=.5;
+  if(type==='HeatExchanger')node.heat_duty_kW=40;
   if(type==='Pump')Object.assign(node,{outlet_pressure_kPa:500,efficiency_pct:75});
   if(type==='Valve')node.outlet_pressure_kPa=200;
   if(isReactor(node))Object.assign(node,{outlet_C:500,conversion:50,phase:'Vapor',base_compound:graph.compounds[0],stoichiometry:Object.fromEntries(graph.compounds.map(c=>[c,0]))});
@@ -583,7 +588,7 @@ function reviewGraph(){
   if(!graph.model)issues.push('Elegí un modelo de propiedades en Simulación.');
   for(const n of graph.nodes){
     if(isFeed(n)){issues.push(...SimproxStreams.issues(n,graph.compounds).map(issue=>`${n.name}: ${issue}`));if(n.flash_spec==='PS'&&graph.model==='Steam Tables (IAPWS-IF97)')issues.push(`${n.name}: PS no está habilitado con IAPWS-IF97; usá TP o PH.`);}
-    if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if((n.type==='Splitter'||n.type==='Separator'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
+    if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if(n.type==='HeatExchanger'&&feeds.length<2)issues.push(`${n.name}: conectá las alimentaciones caliente y fría.`);if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
   }
   return [...new Set(issues)];
 }

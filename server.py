@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve', 'HeatExchanger'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -169,7 +169,7 @@ def ports(kind):
         return {'in': ('material', 1), 'out': ('material', 1)}
     if kind == 'EnergyStream':
         return {'in': ('energy', 1), 'out': ('energy', 1)}
-    result = {'in': ('material', 3 if kind == 'Mixer' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator') or kind in REACTORS else 1)}
+    result = {'in': ('material', 3 if kind == 'Mixer' else 2 if kind == 'HeatExchanger' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator', 'HeatExchanger') or kind in REACTORS else 1)}
     if kind == 'Heater': result['energy-in'] = ('energy', 1)
     if kind == 'Cooler': result['energy-out'] = ('energy', 1)
     # La bomba con presión prescrita calcula su trabajo; no requiere corriente de energía.
@@ -255,6 +255,12 @@ def validate_graph(graph, catalog):
             ins = [e for e in incoming if e.get('toPort', 'in') == 'in']
             outs = [e for e in outgoing if e.get('fromPort', 'out') == 'out']
             if not ins or not outs: raise InputError(f'{name}: faltan corrientes de materia de entrada o salida.')
+            if kind == 'HeatExchanger':
+                if len(ins) != 2 or len(outs) != 2 or {e.get('toIndex', 0) for e in ins} != {0, 1} or {e.get('fromIndex', 0) for e in outs} != {0, 1}:
+                    raise InputError(f'{name}: conectá dos alimentaciones (caliente y fría) y dos productos (caliente y frío) en puertos distintos.')
+                # Primer modo pedagógico: intercambiar una potencia conocida sin especificar
+                # temperaturas de salida, evitando sobreespecificación térmica.
+                number(node.get('heat_duty_kW'), name + ': calor intercambiado (kW)', 0.000001, 1000000)
             if kind == 'Separator' and (len(ins) != 1 or len(outs) != 2):
                 raise InputError(f'{name}: conectá una entrada, salida de vapor (1) y salida de líquido (2).')
             if kind == 'Splitter':
@@ -349,6 +355,10 @@ def simulate(engine, graph):
             if node['type'] == 'Pump':
                 # MCP 10.2.15 interpreta PROP_PU_5 en bar, no en Pa: 500 kPa -> 5 bar.
                 props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] / 100}
+            if node['type'] == 'HeatExchanger':
+                # Hipótesis MCP a verificar en Debian: CalcBothTemp (modo 2)
+                # y HeatDuty en kW (propiedad nativa del equipo DWSIM).
+                props = {'CalculationMode': 'CalcBothTemp', 'HeatDuty': node['heat_duty_kW']}
             if node['type'] == 'Valve':
                 # Misma convención de presión en el adaptador MCP; verificar con prueba real.
                 props = {'CalcMode': 'OutletPressure', 'PROP_VA_2': node['outlet_pressure_kPa'] / 100}

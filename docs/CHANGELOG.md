@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.12.0 — 2026-11-15
+
+- Nuevo `HeatExchanger` con dos alimentaciones y dos productos materiales (lados caliente y frío), editor visual e inspector de potencia transferida, Ejemplo 13.
+- DWSIM MCP 10.2.15 (Debian): agua caliente 80,000000 → 70,456556 °C y agua fría 20,000000 → 29,565765 °C, caudales 1 kg/s por lado y presiones 300 kPa absolutos.
+- Calor cedido por lado caliente 40,00000037 kW, absorbido por lado frío 40,00000004 kW, diferencia 0,00000033 kW. Se verificaron nueve condiciones físicas y seis pruebas unitarias. Sin comparación experimental ni validación Windows.
+- Primera modalidad por `HeatDuty` (kW) y `CalculationMode=CalcBothTemp` aceptada por el adaptador MCP real. No se habilita diseño por área/UA, pérdidas térmicas o caída de presión.
+- Catálogo, roadmap y guía didáctica actualizados. Para servir el nuevo equipo en el sitio, el gateway Debian debe reiniciarse con `server.py` actualizado; no basta con publicar el Worker.
+
 ## 0.11.0 — 2026-11-14
 
 - Bomba y válvula agregadas al editor con símbolos, configuración y ejemplo 12; el gateway usa tipos MCP `Pump` y `Valve`.

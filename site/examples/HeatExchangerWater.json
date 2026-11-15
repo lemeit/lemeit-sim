@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "title": "13 · Intercambio de calor entre dos corrientes de agua",
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "nodes": [
+    {
+      "id": "hot_feed",
+      "type": "MaterialStream",
+      "name": "F1 · Agua caliente",
+      "temperature_C": 80,
+      "pressure_kPa": 300,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 70,
+      "y": 85
+    },
+    {
+      "id": "cold_feed",
+      "type": "MaterialStream",
+      "name": "F2 · Agua fría",
+      "temperature_C": 20,
+      "pressure_kPa": 300,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      },
+      "x": 70,
+      "y": 325
+    },
+    {
+      "id": "hx",
+      "type": "HeatExchanger",
+      "name": "HX1 · Intercambiador",
+      "heat_duty_kW": 40,
+      "x": 475,
+      "y": 205
+    },
+    {
+      "id": "hot_out",
+      "type": "MaterialStream",
+      "name": "P1 · Salida caliente",
+      "x": 820,
+      "y": 90
+    },
+    {
+      "id": "cold_out",
+      "type": "MaterialStream",
+      "name": "P2 · Salida fría",
+      "x": 820,
+      "y": 325
+    }
+  ],
+  "edges": [
+    {
+      "from": "hot_feed",
+      "to": "hx",
+      "toIndex": 0
+    },
+    {
+      "from": "cold_feed",
+      "to": "hx",
+      "toIndex": 1
+    },
+    {
+      "from": "hx",
+      "to": "hot_out",
+      "fromIndex": 0
+    },
+    {
+      "from": "hx",
+      "to": "cold_out",
+      "fromIndex": 1
+    }
+  ],
+  "learning": "Prueba inicial no validada en motor: enfriar 1 kg/s de agua a 80 °C y calentar 1 kg/s de agua a 20 °C con intercambio térmico especificado de 40 kW entre lados; presión de alimentación de ambos lados 300 kPa. Comparar temperatura, masa y entalpía de ambos lados sin mezclar corrientes."
+}

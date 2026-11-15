@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read = path => readFileSync(new URL('../site/' + path,import.meta.url),'utf8');
-const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum','PumpValve'];
+const projects = ['mix','HeaterWater','CoolerWater','SplitterWater','WaterEthanol','MulticomponentBalance','ConversionReactor','EquilibriumReactor','ThermalNetwork','AmmoniaBypass','FlashDrum','PumpValve','HeatExchangerWater'];
 const close = (a,b,tol=1e-9) => assert.ok(Math.abs(a-b)<tol,`Se esperaba ${b} pero se obtuvo ${a}`);
 
-test('menú, selector y guía incluyen los doce ejemplos en orden',()=>{
+test('menú, selector y guía incluyen los trece ejemplos en orden',()=>{
   const index=read('index.html'),guide=read('ejemplos.html');
   const positions=projects.map(id=>{
     assert.ok(index.includes(`<option value="${id}">`),`Falta la opción ${id}`);
@@ -89,7 +89,7 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   assert.match(guide,/diez casos en Debian/);
 });
 
-test('cada ejercicio 01–12 conserva una resolución numerada paso a paso',()=>{
+test('cada ejercicio 01–13 conserva una resolución numerada paso a paso',()=>{
  const guide=read('ejemplos.html');
  for(const id of projects){
   const section=guide.split(`<section id="${id}">`)[1]?.split('</section>')[0];
@@ -123,4 +123,16 @@ test('caso 12 bomba y válvula, catálogo y referencias didácticas consistentes
  assert.match(guide,/Entalpía de válvula/);
  assert.ok(catalog.includes('<td>Pump</td><td>Disponible · 0.11.0'));
  assert.ok(catalog.includes('<td>Valve</td><td>Disponible · 0.11.0'));
+});
+
+test('caso 13 intercambiador con dos entradas, dos salidas y resultados térmicos Debian',()=>{
+ const graph=JSON.parse(read('examples/HeatExchangerWater.json'));
+ const guide=read('ejemplos.html'),catalog=read('catalogo.html');
+ const hx=graph.nodes.find(n=>n.type==='HeatExchanger');
+ assert.equal(hx.heat_duty_kW,40);
+ assert.deepEqual(graph.edges.filter(e=>e.to==='hx').map(e=>e.toIndex).sort(),[0,1]);
+ assert.deepEqual(graph.edges.filter(e=>e.from==='hx').map(e=>e.fromIndex).sort(),[0,1]);
+ assert.match(guide,/id="HeatExchangerWater"/);
+ assert.match(guide,/0,00000033 kW/);
+ assert.ok(catalog.includes('<td>HeatExchanger</td><td>Disponible · 0.12.0'));
 });
