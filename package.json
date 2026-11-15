@@ -9,6 +9,7 @@
     "test": "node --test deploy/test-*.mjs",
     "build": "node deploy/build.mjs",
     "build:verified": "npm test && npm run build",
+    "predeploy": "npm run build:verified",
     "deploy": "wrangler deploy",
     "deploy:check": "wrangler deploy --dry-run --outdir .build/dry-run"
   },
