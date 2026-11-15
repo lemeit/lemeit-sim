@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 GATEWAY_STARTED_AT = time.time()
+GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
 KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve', 'HeatExchanger'} | REACTORS
@@ -421,9 +422,8 @@ def simulate(engine, graph):
 
 def gateway_status():
     """Diagnóstico público limitado; nunca expone rutas locales, credenciales o procesos."""
-    package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
     return {
-        'gateway_version': package['version'],
+        'gateway_version': GATEWAY_VERSION,
         'started_at': __import__('datetime').datetime.fromtimestamp(
             GATEWAY_STARTED_AT, tz=__import__('datetime').timezone.utc
         ).isoformat().replace('+00:00', 'Z'),
