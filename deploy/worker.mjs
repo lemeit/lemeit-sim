@@ -14,8 +14,9 @@ export async function handle(request, env, assets=ASSETS) {
   const url=new URL(request.url);
   if(url.pathname.startsWith('/api/')) {
     const catalog=url.pathname==='/api/catalog'&&request.method==='GET';
+    const status=url.pathname==='/api/status'&&request.method==='GET';
     const calculate=url.pathname==='/api/simulate'&&request.method==='POST';
-    if(!catalog&&!calculate)return error(404,'Operación no disponible.');
+    if(!catalog&&!status&&!calculate)return error(404,'Operación no disponible.');
     const engineId=request.headers.get('X-SIM-Engine')||'windows';
     if(!['windows','debian'].includes(engineId))return error(400,'Motor de cálculo no reconocido.');
     const origin=request.headers.get('Origin');

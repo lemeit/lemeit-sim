@@ -16,6 +16,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+GATEWAY_STARTED_AT = time.time()
+GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
 KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve', 'HeatExchanger'} | REACTORS
@@ -418,6 +420,19 @@ def simulate(engine, graph):
         engine.call('dwsim_flowsheet_close', flowsheet_id=fid)
 
 
+def gateway_status():
+    """Diagnóstico público limitado; nunca expone rutas locales, credenciales o procesos."""
+    return {
+        'gateway_version': GATEWAY_VERSION,
+        'started_at': __import__('datetime').datetime.fromtimestamp(
+            GATEWAY_STARTED_AT, tz=__import__('datetime').timezone.utc
+        ).isoformat().replace('+00:00', 'Z'),
+        'uptime_s': max(0, int(time.time() - GATEWAY_STARTED_AT)),
+        'state': 'busy' if LOCK.locked() else 'ready',
+        'supported_equipment': sorted(KINDS),
+    }
+
+
 class Handler(SimpleHTTPRequestHandler):
     extensions_map = {**SimpleHTTPRequestHandler.extensions_map, '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon'}
     def setup(self):
@@ -447,6 +462,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if not self.valid_host(): return self.json_response(403, {'error': 'Acceso local únicamente.'})
+        if self.path == '/api/status': return self.json_response(200, gateway_status())
         if self.path == '/api/catalog':
             if not LOCK.acquire(blocking=False): return self.json_response(409, {'error': 'Motor ocupado. Volvé a intentar en unos segundos.'})
             try: self.json_response(200, self.server.engine.get_catalog())

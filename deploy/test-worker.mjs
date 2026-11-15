@@ -53,3 +53,31 @@ test('rechaza motores no autorizados',async()=>{
   const response=await handle(new Request('https://sim.lemeit.ar/api/catalog',{headers:{'X-SIM-Engine':'https://external.example'}}),{});
   assert.equal(response.status,400);
 });
+
+test('estado Debian consulta solo su gateway, sin exponer claves',async t=>{
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    assert.equal(url,'https://debian.example/api/status');
+    assert.equal(options.headers['X-Origin-Key'],'debian-secret');
+    assert.equal(options.redirect,'manual');
+    return Response.json({gateway_version:'0.13.0',started_at:'2026-11-15T21:00:00Z',uptime_s:120,state:'ready',supported_equipment:['Mixer','HeatExchanger']});
+  });
+  const response=await handle(new Request('https://sim.lemeit.ar/api/status',{headers:{'X-SIM-Engine':'debian'}}),{
+    ENGINE_URL:'https://windows.example',ORIGIN_KEY:'windows-secret',
+    DEBIAN_ENGINE_URL:'https://debian.example',DEBIAN_ORIGIN_KEY:'debian-secret'
+  });
+  assert.equal(response.status,200);
+  assert.equal(response.headers.get('X-Origin-Key'),null);
+  assert.equal((await response.json()).gateway_version,'0.13.0');
+});
+test('estado de gateway rechaza consultas POST y motores no admitidos',async()=>{
+  assert.equal((await handle(new Request('https://sim.lemeit.ar/api/status',{method:'POST'}),{})).status,404);
+  assert.equal((await handle(new Request('https://sim.lemeit.ar/api/status',{headers:{'X-SIM-Engine':'external'}}),{})).status,400);
+});
+test('estado inaccesible nunca cambia a Windows como respaldo',async t=>{
+  t.mock.method(globalThis,'fetch',async()=>{throw Error('connection refused');});
+  const response=await handle(new Request('https://sim.lemeit.ar/api/status',{headers:{'X-SIM-Engine':'debian'}}),{
+    DEBIAN_ENGINE_URL:'https://debian.example',DEBIAN_ORIGIN_KEY:'debian-secret',
+    ENGINE_URL:'https://windows.example',ORIGIN_KEY:'windows-secret'
+  });
+  assert.equal(response.status,503);
+});

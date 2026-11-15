@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.13.0 — 2026-11-15
+
+- Monitor del gateway de cálculo: versión del servidor fijada al arranque de Python, fecha/hora de inicio, tiempo activo, estado ocupado/disponible y operaciones compatibles.
+- Endpoint `GET /api/status` implementado con el mismo control de acceso del gateway y proxy Cloudflare limitado al motor seleccionado. No expone claves, rutas ni PID; tampoco permite ejecutar órdenes remotas.
+- Compatibilidad: si un gateway anterior no implementa el endpoint, el monitor indica «Versión no confirmada», sin deshabilitar los cálculos existentes.
+- Pruebas automatizadas Python de estado y Node del proxy, con prevención de failover. La verificación de producción requiere actualizar y reiniciar `lemeit-sim.service`; no se afirma su funcionamiento en producción hasta esa comprobación.
+- Catálogo, roadmap y Ayuda → Acerca de actualizados.
+
 ## 0.12.0 — 2026-11-15
 
 - Nuevo `HeatExchanger` con dos alimentaciones y dos productos materiales (lados caliente y frío), editor visual e inspector de potencia transferida, Ejemplo 13.
