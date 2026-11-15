@@ -38,12 +38,12 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Caudales por masa o por moles, fracciones y propiedades por fase.
 - Agregar nuevas especificaciones solo tras verificarlas con la API instalada; evitar campos incompatibles o propiedades inventadas.
 
-## En desarrollo · 0.13.0 — Diagnóstico de versiones del gateway
+## Entregado en 0.13.0 — Diagnóstico de versiones del gateway
 
 - Endpoint acotado `GET /api/status` en cada gateway, consultado por Cloudflare solo para el motor elegido (Windows o Debian), con el mismo control de origen que el catálogo.
 - Mostrar versión de gateway tomada al iniciar Python, instante de arranque, horas en ejecución, estado ocupado/libre y tipos de equipos que reconoce; sin rutas, tokens, claves ni administración remota.
 - Monitor de conexión: distingue catálogo operativo de información de versión. Un gateway anterior sin `/api/status` sigue pudiendo calcular, pero su versión se presenta como **no confirmada** y se recomienda actualizar/reiniciar.
-- Pruebas automáticas del contrato HTTP y datos de estado. Requiere reiniciar `lemeit-sim.service` en Debian tras actualizar `server.py` y comprobar la respuesta en el portal antes de considerarlo validado en producción.
+- Pruebas automatizadas del contrato HTTP y datos de estado. La publicación del Worker no reinicia el servicio: ejecutar `sudo systemctl restart lemeit-sim.service` tras actualizar `server.py` en Debian y verificar `GET /api/status`. Hasta comprobar la instalación concreta, la ejecución real en producción está pendiente.
 - No incorpora controles de inicio/apagado: requieren autenticación de administrador, autorización explícita y un proceso supervisor seguro.
 
 ## Próxima etapa: versión de administración
