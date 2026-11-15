@@ -11,7 +11,7 @@ const app=read('app.js');
 test('el catálogo enumera equipos que aparecen en la biblioteca',()=>{
   const types={
     Mixer:'Mixer',Splitter:'Splitter',Heater:'Heater',Cooler:'Cooler',
-    Separator:'Vessel',Pump:'Pump',Valve:'Valve',
+    Separator:'Vessel',Pump:'Pump',Valve:'Valve',HeatExchanger:'HeatExchanger',
     ConversionReactor:'ConversionReactor',EquilibriumReactor:'EquilibriumReactor'
   };
   for(const [type,engine] of Object.entries(types)){
@@ -26,6 +26,10 @@ test('el catálogo refleja equipos validados en Debian',()=>{
     assert.match(byEngine.get(name).status,/Disponible.*0\.11\.0/);
     assert.doesNotMatch(byEngine.get(name).status,/En desarrollo/);
   }
+});
+
+test('intercambiador no se declara disponible antes de validar en motor real',()=>{
+  assert.match(byEngine.get('HeatExchanger').status,/En desarrollo.*0\.12\.0/);
 });
 
 test('cada objeto aparece exactamente una vez en el catálogo',()=>{
