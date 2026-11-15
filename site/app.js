@@ -21,7 +21,7 @@ let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let unitSystem='engineering';
 let selectedEngine='windows',engineCheckGeneration=0; // Selección explícita; no se realiza failover.
-let lastCalculation=null,connectionCheck=null,activity=[],resultDigits=3;
+let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 let workspaceChannel=null,applyingWorkspace=false,workspaceId=new URLSearchParams(location.search).get('workspace')||crypto.randomUUID();
 const emptyProject=()=>({version:1,unit_system:unitSystem,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
@@ -105,7 +105,7 @@ function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.
 const engineHeaders=()=>({'X-SIM-Engine':selectedEngine});
 async function selectCalculationEngine(id){
   if(busy||!['windows','debian'].includes(id))return;
-  selectedEngine=id;engineCheckGeneration++;engineOnline=false;connectionCheck=null;
+  selectedEngine=id;engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   const element=$('engine-select');element.value=id;
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   $('calculation-state').textContent='Comprobá el motor elegido antes de calcular';
@@ -645,7 +645,23 @@ function renderServerDetails(){
   const elapsed=connectionCheck?`${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms`:'Sin respuesta';
   const catalogInfo=connectionCheck?.compounds?`<dt>Catálogo</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:'';
   const latest=lastCalculation?`${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}${lastCalculation.engine?' · '+(lastCalculation.engine==='debian'?'Debian':'Windows'):''}`:'Sin cálculos';
-  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
+  const gatewayInfo=gatewayCheck?.ok
+    ?`<dt>Versión del gateway</dt><dd>${esc(gatewayCheck.version)}</dd><dt>Inicio del proceso</dt><dd>${esc(gatewayCheck.startedAt)}</dd><dt>Tiempo activo</dt><dd>${esc(gatewayCheck.uptime)}</dd><dt>Estado del gateway</dt><dd>${esc(gatewayCheck.state)}</dd><dt>Equipos reconocidos</dt><dd>${esc(gatewayCheck.equipment)}</dd>`
+    :`<dt>Versión del gateway</dt><dd>No confirmada${gatewayCheck?.reason?' · '+esc(gatewayCheck.reason):''}</dd>`;
+  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
+}
+async function readGatewayStatus(engine,generation){
+  // Endpoint independiente: una respuesta 404 de un gateway antiguo no invalida el catálogo.
+  try{
+    const response=await fetch('/api/status',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(12000)});
+    if(generation!==engineCheckGeneration)return;
+    if(!response.ok)throw new Error(response.status===404?'El gateway necesita actualizarse y reiniciarse.':'HTTP '+response.status);
+    const data=await readCatalogResponse(response);
+    if(!/^\\d+\\.\\d+\\.\\d+$/.test(data.gateway_version)||!Array.isArray(data.supported_equipment)||!['ready','busy'].includes(data.state))throw new Error('Datos de estado incompletos.');
+    const date=Date.parse(data.started_at);
+    if(!Number.isFinite(date)||!Number.isFinite(data.uptime_s))throw new Error('Fecha de inicio inválida.');
+    gatewayCheck={ok:true,version:data.gateway_version,startedAt:new Date(date).toLocaleString('es-AR'),uptime:fmt(data.uptime_s/3600,1)+' h',state:data.state==='busy'?'Ocupado':'Disponible',equipment:data.supported_equipment.join(', ')};
+  }catch(error){if(generation!==engineCheckGeneration)return;gatewayCheck={ok:false,reason:error.message};}
 }
 async function checkEngine({silent=false}={}){
   const generation=++engineCheckGeneration,engine=selectedEngine;
@@ -656,7 +672,8 @@ async function checkEngine({silent=false}={}){
     if(response.status===409){engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,state:'busy',http,message:'El servicio responde; DWSIM está resolviendo otra tarea.',ms:Math.round(performance.now()-start)};}
     else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
     if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
-  }catch(error){if(generation!==engineCheckGeneration)return;engineOnline=false;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
+    if(connectionCheck.state==='online'||connectionCheck.state==='busy')await readGatewayStatus(engine,generation);
+  }catch(error){if(generation!==engineCheckGeneration)return;engineOnline=false;gatewayCheck=null;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
   finally{if(generation===engineCheckGeneration){monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}}
   return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
@@ -669,7 +686,7 @@ function bindWorkspaceTools(){
   $('server-status-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('connection-monitor-button').onclick=()=>$('server-status-button').click();$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
   monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
-  $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
+  $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
   try{const p=JSON.parse(localStorage.getItem('simprox-ui')||'{}');if(Object.hasOwn(SimproxStreams.systems,p.units)){unitSystem=p.units;SimproxStreams.setSystem(unitSystem);}if(Number.isInteger(p.digits)&&p.digits>=0&&p.digits<=8)resultDigits=p.digits;document.body.classList.toggle('hide-canvas-hints',p.hints===false);}catch{}
   $('settings-button').onclick=()=>{$('settings-unit-system').value=unitSystem;$('settings-digits').value=resultDigits;$('settings-hints').checked=!document.body.classList.contains('hide-canvas-hints');$('settings-dialog').showModal();closeMenus();};
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
