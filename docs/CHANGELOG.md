@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.1 — 2026-11-16
+
+- Unifica tipografía del pie en la fuente de interfaz; la identificación de sesión hereda el mismo color y fuente que sus controles vecinos. Conserva colores semánticos de conexión y la identidad de marca.
+- Acerca de usa una misma fuente, tamaño base y color para párrafos y listas. Sustituye la lista histórica acumulada por cuatro puntos de la entrega; el historial completo permanece enlazado.
+
 ## 0.17.0 — 2026-11-16
 
 - Integra rol, nombre de clase, contador del alumnado y salida en el pie existente del editor y del panel privado. Elimina la franja adicional sobre el área de trabajo y conserva identificación del administrador sin contador.
