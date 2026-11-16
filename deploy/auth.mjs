@@ -21,7 +21,7 @@ async function sessionFor(request,env){
   const result=await env.SIM_AUTH_DB.prepare('SELECT s.role,s.class_id,s.expires_at,c.active,c.expires_at AS class_expires FROM sessions s LEFT JOIN classes c ON c.id=s.class_id WHERE s.session_digest=?').bind(key).first();
   if(!result||result.expires_at<=now())return null;
   if(result.role==='student'&&(!result.active||result.class_expires<=now()))return null;
-  return {role:result.role,class_id:result.class_id,expires_at:result.expires_at};
+  return {role:result.role,class_id:result.class_id,expires_at:result.expires_at,session_digest:key};
 }
 async function actorKey(request,env,kind){
  const ip=request.headers.get('CF-Connecting-IP')||'unknown';
@@ -115,5 +115,19 @@ export async function authRoute(request,env){
   return json({classes:rows.results||[]});
  }
  return json({error:'Operación de acceso no disponible.'},404);
+}
+// Cuotas por sesión y ventana; fila actualizada atómicamente con RETURNING.
+export async function authorizeCalculation(env,session){
+ if(session.role==='admin')return {ok:true};
+ const window=Math.floor(now()/60);
+ try{
+  const row=await env.SIM_AUTH_DB.prepare(
+   'INSERT INTO calculation_usage(session_digest,window_start,requests) VALUES(?,?,1) ON CONFLICT(session_digest,window_start) DO UPDATE SET requests=requests+1 RETURNING requests'
+  ).bind(session.session_digest,window).first();
+  if(!row||row.requests>4)return {ok:false,response:json({error:'Límite de 4 cálculos por minuto por sesión. Probá en el próximo minuto.'},429)};
+  return {ok:true};
+ }catch{
+  return {ok:false,response:json({error:'No se pudo comprobar la cuota de cálculo.'},503)};
+ }
 }
 export {configured};
