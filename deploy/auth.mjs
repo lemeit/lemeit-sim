@@ -26,10 +26,10 @@ async function sessionFor(request,env){
   if(!configured(env))return null;
   const raw=cookie(request);if(!raw)return null;
   const key=await digest(env.SIM_SESSION_SECRET,'session:'+raw);
-  const result=await env.SIM_AUTH_DB.prepare('SELECT s.role,s.class_id,s.expires_at,c.active,c.expires_at AS class_expires FROM sessions s LEFT JOIN classes c ON c.id=s.class_id WHERE s.session_digest=?').bind(key).first();
+  const result=await env.SIM_AUTH_DB.prepare('SELECT s.role,s.class_id,s.expires_at,c.active,c.label AS class_name,c.expires_at AS class_expires FROM sessions s LEFT JOIN classes c ON c.id=s.class_id WHERE s.session_digest=?').bind(key).first();
   if(!result||result.expires_at<=now())return null;
   if(result.role==='student'&&(!result.active||result.class_expires<=now()))return null;
-  return {role:result.role,class_id:result.class_id,expires_at:result.expires_at,session_digest:key};
+  return {role:result.role,class_id:result.class_id,class_name:result.role==='student'?result.class_name:null,class_expires_at:result.role==='student'?result.class_expires:null,expires_at:result.role==='student'?Math.min(result.expires_at,result.class_expires):result.expires_at,session_digest:key};
 }
 async function actorKey(request,env,kind){
  const ip=request.headers.get('CF-Connecting-IP')||'unknown';
@@ -70,7 +70,7 @@ export async function authRoute(request,env){
  if(!configured(env))return json({error:'Acceso sin configurar. Contactá al administrador.'},503);
  const u=new URL(request.url),path=u.pathname;
  if(path==='/api/auth/me'&&request.method==='GET'){
-  const s=await sessionFor(request,env);return json({authenticated:!!s,role:s?.role||null,expires_at:s?.expires_at||null});
+  const s=await sessionFor(request,env);return json({authenticated:!!s,role:s?.role||null,class_name:s?.class_name||null,class_expires_at:s?.class_expires_at||null,expires_at:s?.expires_at||null,server_time:now()});
  }
  if(!sameOrigin(request))return json({error:'Origen o formato de solicitud no autorizado.'},403);
  if(path==='/api/auth/logout'&&request.method==='POST'){

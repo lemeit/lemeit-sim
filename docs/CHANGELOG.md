@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.15.0 — 2026-11-16
+
+- Franja debajo del menú con rol, nombre de clase y cuenta regresiva. El panel de administración muestra «Administrador · Sesión administrativa».
+- El servidor entrega nombre y vencimientos solo de la sesión vigente, sin códigos ni identificadores privados. El contador usa la hora del servidor y el menor vencimiento entre clase y sesión; si la clase dura más, informa su fecha de cierre.
+- Revalida al volver a la pestaña y cada minuto para detectar desactivaciones. Al terminar el acceso, avisa y ofrece volver a ingresar sin cerrar ni borrar el proyecto.
+- Se mantienen límites de sesión (4 horas de alumno, 8 de administrador), plazos de clase y controles de rol en servidor.
+
 ## 0.14.3 — 2026-11-16
 
 - Simplifica el texto de ingreso: «Ingresá un código de clase para utilizar el simulador» y «El acceso es temporal».

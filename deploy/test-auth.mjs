@@ -5,13 +5,13 @@ import assert from 'node:assert/strict';
 import {handle} from './worker.mjs';
 
 const future=()=>Math.floor(Date.now()/1000)+3600;
-const fakeDb=(role='student')=>({
+const fakeDb=(role='student',overrides={})=>({
   prepare(sql){
     return {
       bind(){
         return {
           async first(){
-            if(sql.includes('FROM sessions s'))return {role,class_id:role==='student'?'clase-1':null,expires_at:future(),active:1,class_expires:future()};
+            if(sql.includes('FROM sessions s'))return {role,class_id:role==='student'?'clase-1':null,expires_at:future(),active:1,class_name:'Física · Grupo A',class_expires:future(),...overrides};
             return null;
           },
           async run(){return {success:true}},
@@ -63,4 +63,23 @@ test('alumnado puede cargar monitor compartido pero no administrar clases',async
   const r=await handle(new Request('https://sim.lemeit.ar'+path,{method:'POST',headers:{...sessionHeaders,'Origin':'https://sim.lemeit.ar','Content-Type':'application/json'},body:'{}'}),env());
   assert.equal(r.status,403,path);
  }
+});
+
+
+test('sesión de alumno informa nombre y vence al terminar la clase aunque la sesión dure más',async()=>{
+ const until=future(),e=env();e.SIM_AUTH_DB=fakeDb('student',{class_expires:until,expires_at:until+7200});
+ const r=await handle(new Request('https://sim.lemeit.ar/api/auth/me',{headers:sessionHeaders}),e);
+ assert.equal(r.status,200);const data=await r.json();
+ assert.equal(data.class_name,'Física · Grupo A');assert.equal(data.expires_at,until);assert.equal(data.class_expires_at,until);
+ assert.ok(Math.abs(data.server_time-Date.now()/1000)<2);
+ assert.deepEqual(Object.keys(data).sort(),['authenticated','class_expires_at','class_name','expires_at','role','server_time']);
+});
+test('sesión administrativa no se asocia a una clase',async()=>{
+ const r=await handle(new Request('https://sim.lemeit.ar/api/auth/me',{headers:sessionHeaders}),env('admin'));
+ const data=await r.json();assert.equal(data.role,'admin');assert.equal(data.class_name,null);assert.equal(data.class_expires_at,null);
+});
+test('clase desactivada no expone identidad ni vencimientos de la sesión',async()=>{
+ const e=env();e.SIM_AUTH_DB=fakeDb('student',{active:0});
+ const r=await handle(new Request('https://sim.lemeit.ar/api/auth/me',{headers:sessionHeaders}),e);
+ const data=await r.json();assert.equal(data.authenticated,false);assert.equal(data.class_name,null);assert.equal(data.expires_at,null);
 });

@@ -4,7 +4,9 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="simprox-theme.css"><link rel="stylesheet" href="style.css">
 <script src="theme-toggle.js" defer></script><script src="engines-monitor.js" defer></script><script src="admin-classes.js" defer></script>
-</head><body><header class="app-header"><a class="brand" href="/"><img src="assets/sim-wordmark.svg" alt="ΣIM" width="130" height="34"></a><span class="edition">Administración · acceso a clases y motores</span><a href="/">Volver al editor</a></header>
+<script src="session-banner.js" defer></script></head><body><header class="app-header"><a class="brand" href="/"><img src="assets/sim-wordmark.svg" alt="ΣIM" width="130" height="34"></a><span class="edition">Administración · acceso a clases y motores</span><a href="/">Volver al editor</a></header>
+  <aside id="session-banner" class="session-banner" aria-label="Sesión actual" hidden><div class="session-identity"><strong id="session-role"></strong><span id="session-name"></span></div><div class="session-timing"><span id="session-countdown-label">Tiempo restante</span> <span id="session-countdown" role="timer" aria-live="off"></span><span id="session-note" class="session-note"></span><span id="session-status" role="status"></span><a id="session-login" href="/acceso.html" hidden>Volver a ingresar</a></div></aside>
+
 <main class="results-panel" style="max-width:1100px;margin:auto;padding:24px">
 <p class="eyebrow">MONITOR DE SERVICIOS</p>
 <h1>Estado de los motores de cálculo</h1>
