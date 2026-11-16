@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.14.0 — 2026-11-16
+
+- Panel de diagnóstico de solo lectura para Windows y Debian (`/admin.html`): disponibilidad, versión efectiva del gateway, hora de inicio, uptime y equipos reconocidos, con actualización manual o automática de 30 segundos e historial limitado a la sesión. Sin botones de encendido o apagado ni secretos.
+- Guía de recuperación local con scripts de Windows y `systemctl` en Debian. Un motor apagado se informa como no confirmado; no hay conmutación automática ni control remoto de procesos.
+- Prueba reproducible `tools/validate-hx13-windows.ps1` ejecutada contra el gateway Windows: **19 controles OK**. El Ejemplo 13 reproduce la referencia Debian con las cifras comunicadas: entrada/salida caliente 80,000000 / 70,456556 °C; entrada/salida fría 20,000000 / 29,565765 °C; 300 kPa y 1 kg/s por lado.
+- Transferencia de calor: 40,00000037 kW cedidos, 40,00000004 kW recibidos y 0,00000033 kW de residuo energético. Validación cruzada de este caso, no de todo el dominio del intercambiador.
+- Pruebas de estructura y seguridad del panel. Queda pendiente verificar el panel publicado; no se habilita administración remota de servicios.
+
 ## 0.13.0 — 2026-11-15
 
 - Monitor del gateway de cálculo: versión del servidor fijada al arranque de Python, fecha/hora de inicio, tiempo activo, estado ocupado/disponible y operaciones compatibles.

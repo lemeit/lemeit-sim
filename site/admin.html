@@ -1,0 +1,32 @@
+<!doctype html><html lang="es-AR" class="simprox-root" data-theme="light"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico de motores · ΣIM</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="simprox-theme.css"><link rel="stylesheet" href="style.css">
+<script src="theme-toggle.js" defer></script><script src="admin-monitor.js" defer></script>
+</head><body><header class="app-header"><a class="brand" href="/"><img src="assets/sim-wordmark.svg" alt="ΣIM" width="130" height="34"></a><span class="edition">Diagnóstico de motores · 0.14.0 en desarrollo</span><a href="/">Volver al editor</a></header>
+<main class="results-panel" style="max-width:1100px;margin:auto;padding:24px">
+<p class="eyebrow">MONITOR DE SERVICIOS</p>
+<h1>Estado de los motores de cálculo</h1>
+<p>Vista de diagnóstico de solo lectura. El estado del gateway no garantiza una simulación exitosa. Los datos corresponden a la última comprobación y no cambian de motor automáticamente. No hay contraseñas ni controles remotos de encendido o apagado.</p>
+<p><button id="refresh" type="button" class="outline-button">Comprobar ambos motores</button> <label><input id="automatic" type="checkbox" checked> Actualizar cada 30 segundos mientras esta página esté visible</label></p>
+<div id="motors" aria-live="polite" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+<section class="results-panel" id="windows"><h2>Windows</h2><p class="summary">Sin comprobación</p><dl></dl></section>
+<section class="results-panel" id="debian"><h2>Debian</h2><p class="summary">Sin comprobación</p><dl></dl></section>
+</div>
+<h2>Acciones de recuperación local</h2>
+<p>Estos comandos deben ejecutarse <strong>en el equipo correspondiente</strong>. El portal no ejecuta órdenes administrativas ni intenta encender computadoras apagadas.</p>
+<h3>Windows · PowerShell</h3><pre><code>cd C:\GitHub\lemeit-sim
+.\start-online.ps1
+# Si se actualizó server.py y hay un gateway anterior:
+.\stop-online.ps1
+.\start-online.ps1
+Invoke-RestMethod http://127.0.0.1:5911/api/status</code></pre>
+<h3>Debian · terminal</h3><pre><code>cd ~/lemeit-sim
+sudo systemctl status lemeit-sim.service --no-pager
+sudo systemctl restart lemeit-sim.service
+curl -s http://127.0.0.1:5910/api/status</code></pre>
+<p>Si Debian está apagada, el servidor no puede iniciarse mediante este panel; primero hay que encender la notebook. Reiniciar un gateway puede interrumpir un cálculo que esté en curso.</p>
+<h2>Últimas comprobaciones de esta página</h2><ol id="events" aria-live="polite"><li>Sin comprobaciones.</li></ol>
+<p><a href="catalogo.html">Catálogo de equipos</a> · <a href="https://github.com/lemeit/lemeit-sim/blob/main/docs/roadmap.md">Roadmap</a></p>
+</main></body></html>
