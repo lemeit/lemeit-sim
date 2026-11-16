@@ -17,6 +17,25 @@ function configured(env){
  if(invalid.length)console.warn(JSON.stringify({event:'auth_configuration_invalid',invalid}));
  return invalid.length===0;
 }
+// Códigos recuperables solo para administración, cifrados y ligados a su clase.
+async function classCodeKey(env){
+ const material=await crypto.subtle.digest('SHA-256',utf8.encode('sim-class-code:v1:'+env.SIM_SESSION_SECRET));
+ return crypto.subtle.importKey('raw',material,{name:'AES-GCM'},false,['encrypt','decrypt']);
+}
+async function encryptClassCode(env,id,code){
+ const iv=crypto.getRandomValues(new Uint8Array(12));
+ const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:utf8.encode(id)},await classCodeKey(env),utf8.encode(code));
+ return 'v1:'+hex(iv)+':'+hex(encrypted);
+}
+async function decryptClassCode(env,id,value){
+ if(typeof value!=='string')return null;
+ const parts=value.split(':');if(parts.length!==3||parts[0]!=='v1'||!/^[a-f0-9]{24}$/.test(parts[1])||!/^[a-f0-9]+$/.test(parts[2])||parts[2].length%2)return null;
+ const bytes=s=>Uint8Array.from(s.match(/../g)||[],x=>parseInt(x,16));
+ try{
+  const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(parts[1]),additionalData:utf8.encode(id)},await classCodeKey(env),bytes(parts[2]));
+  const code=new TextDecoder().decode(raw);return /^[A-HJ-NP-Z2-9]{12}$/.test(code)?code:null;
+ }catch{return null;}
+}
 function cookie(request){const m=(request.headers.get('Cookie')||'').match(/(?:^|;\s*)sim_session=([a-f0-9]{64})(?:;|$)/);return m?.[1]||null;}
 function randomSession(){return hex(crypto.getRandomValues(new Uint8Array(32)));}
 function randomClassCode(){const buf=crypto.getRandomValues(new Uint8Array(12));return [...buf].map(b=>chars[b%chars.length]).join('');}
@@ -111,7 +130,8 @@ export async function authRoute(request,env){
   const hours=Number(body.hours);
   if(!label||label.length>80||!Number.isInteger(hours)||hours<1||hours>720)return json({error:'Ingresá nombre de clase y duración de 1 a 720 horas.'},422);
   const id=crypto.randomUUID(),code=randomClassCode(),created=now(),expires=created+hours*3600;
-  await env.SIM_AUTH_DB.prepare('INSERT INTO classes(id,label,code_digest,active,created_at,expires_at) VALUES(?,?,?,1,?,?)').bind(id,label,await digest(env.SIM_SESSION_SECRET,'code:'+code),created,expires).run();
+  const encrypted=await encryptClassCode(env,id,code);
+  await env.SIM_AUTH_DB.prepare('INSERT INTO classes(id,label,code_digest,active,created_at,expires_at,code_encrypted) VALUES(?,?,?,1,?,?,?)').bind(id,label,await digest(env.SIM_SESSION_SECRET,'code:'+code),created,expires,encrypted).run();
   return json({id,label,code,expires_at:expires},201);
  }
  if(path==='/api/auth/disable-class'){
@@ -120,8 +140,13 @@ export async function authRoute(request,env){
   return json({ok:true});
  }
  if(path==='/api/auth/list-classes'){
-  const rows=await env.SIM_AUTH_DB.prepare('SELECT id,label,active,created_at,expires_at FROM classes ORDER BY created_at DESC LIMIT 100').all();
-  return json({classes:rows.results||[]});
+  const rows=await env.SIM_AUTH_DB.prepare('SELECT id,label,active,created_at,expires_at,code_encrypted FROM classes ORDER BY created_at DESC LIMIT 100').all();
+  const classes=await Promise.all((rows.results||[]).map(async row=>{
+   const {code_encrypted,...entry}=row;
+   const code=row.active===1&&row.expires_at>now()?await decryptClassCode(env,row.id,code_encrypted):null;
+   return {...entry,code};
+  }));
+  return json({classes});
  }
  return json({error:'Operación de acceso no disponible.'},404);
 }
