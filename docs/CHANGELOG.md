@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.0 — 2026-11-16
+
+- Integra rol, nombre de clase, contador del alumnado y salida en el pie existente del editor y del panel privado. Elimina la franja adicional sobre el área de trabajo y conserva identificación del administrador sin contador.
+- Los nuevos códigos activos quedan visibles y copiables en el listado privado. Se guardan cifrados con AES-GCM, además del HMAC de validación, y solo se descifran para el administrador mientras la clase siga activa y vigente. Los anteriores, guardados únicamente como HMAC, se identifican como no recuperables.
+- Migración aditiva `0003_recoverable_class_codes.sql`; no cambia códigos existentes ni invalida sus sesiones.
+
 ## 0.16.0 — 2026-11-16
 
 - Reorganiza ingreso y panel privado: selección clara de alumno/administrador, sesión existente visible, salida explícita y administración centrada en clases. Código recién creado en un bloque propio con copia y ocultación; listado con estado y vencimiento.

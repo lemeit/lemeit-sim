@@ -17,11 +17,17 @@ async function listClasses(){
   const {classes}=await classApi('list-classes');
   target.replaceChildren();
   for(const entry of classes){
-   const tr=document.createElement('tr'),label=document.createElement('td'),state=document.createElement('td'),expires=document.createElement('td'),action=document.createElement('td');
+   const tr=document.createElement('tr'),label=document.createElement('td'),codeCell=document.createElement('td'),state=document.createElement('td'),expires=document.createElement('td'),action=document.createElement('td');
    label.textContent=entry.label;
    const active=entry.active===1&&entry.expires_at>Date.now()/1000;
    const badge=document.createElement('span');badge.className='class-state '+(active?'active':'inactive');badge.textContent=active?'Activa':'Inactiva / vencida';state.append(badge);
    expires.textContent=classDate(entry.expires_at);
+   if(active&&entry.code){
+    const value=document.createElement('code'),copy=document.createElement('button');value.textContent=entry.code;copy.type='button';copy.textContent='Copiar';copy.setAttribute('aria-label','Copiar código de '+entry.label);
+    copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(entry.code);copy.textContent='Copiado';}catch{message.textContent='Seleccioná el código y copialo manualmente.';}});
+    codeCell.append(value,copy);
+   }else{codeCell.textContent=active?'Anterior · no recuperable':'—';codeCell.className='class-code-unavailable';if(active)codeCell.title='Este código fue creado antes del guardado cifrado. Creá uno nuevo para volver a compartirlo.';}
+
    if(active){
     const button=document.createElement('button');button.type='button';button.textContent='Desactivar';
     button.addEventListener('click',async()=>{
@@ -32,7 +38,7 @@ async function listClasses(){
     });
     action.append(button);
    }
-   tr.append(label,state,expires,action);target.append(tr);
+   tr.append(label,codeCell,state,expires,action);target.append(tr);
   }
   message.textContent=classes.length?classes.length+' clases · '+classes.filter(c=>c.active===1&&c.expires_at>Date.now()/1000).length+' activas':'Todavía no hay clases. Creá el primer código arriba.';
  }catch(error){message.textContent=error.message;}
@@ -44,7 +50,7 @@ $class('class-create-form').addEventListener('submit',async event=>{
  try{
   const data=await classApi('create-class',{label:$class('class-label').value,hours:Number($class('class-hours').value)});
   $class('class-code-value').textContent=data.code;
-  $class('class-code-detail').textContent=data.label+' · vence '+classDate(data.expires_at)+'. Copialo ahora: no se puede recuperar después.';
+  $class('class-code-detail').textContent=data.label+' · vence '+classDate(data.expires_at)+'. También podés copiarlo desde el listado mientras esté activo.';
   $class('class-copy').textContent='Copiar código';out.hidden=false;
   $class('class-label').value='';
   await listClasses();

@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.16.0](https://img.shields.io/badge/portal-0.16.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.17.0](https://img.shields.io/badge/portal-0.17.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -15,6 +15,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
+
+**0.17.0 — Sesión en el pie y códigos disponibles**, 16/11/2026. Nombre de clase, rol, contador del alumnado y salida se integran en el pie existente. Los nuevos códigos activos se guardan cifrados y pueden volver a consultarse/copiarse solo desde administración. Los códigos anteriores no son recuperables.
 
 **0.16.0 — Acceso y administración reorganizados**, 16/11/2026. Ingreso separado de alumno y administrador, indicación de sesión existente y salida explícita. Panel privado centrado en clases y códigos; monitor de motores de solo lectura, sin tarjetas recortadas. Los diálogos se cierran al hacer clic fuera. El administrador no muestra contador. Se mantienen controles de rol en servidor.
 
