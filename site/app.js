@@ -683,7 +683,7 @@ function bindWorkspaceTools(){
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
-  $('server-status-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('connection-monitor-button').onclick=()=>$('server-status-button').click();$('server-refresh').onclick=()=>checkEngine();
+  $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
   monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
   $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
