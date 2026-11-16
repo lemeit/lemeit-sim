@@ -678,11 +678,6 @@ async function checkEngine({silent=false}={}){
   return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
-  // Visibilidad del enlace: solo comodidad de UI; la autorización real vive en Worker.
-  fetch('/api/auth/me',{credentials:'same-origin'})
-    .then(r=>r.ok?r.json():null)
-    .then(data=>{const link=$('admin-nav-link');if(link)link.hidden=data?.role!=='admin';})
-    .catch(()=>{const link=$('admin-nav-link');if(link)link.hidden=true;});
   document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});

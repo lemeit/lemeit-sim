@@ -1327,3 +1327,14 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 
 /* El diseño de .field no debe volver visibles los campos de otro rol. */
 #access-form [hidden]{display:none!important}
+
+/* Identidad y vencimiento de la sesión, sin ocupar los menús del editor. */
+.session-banner{display:flex;flex:0 0 auto;align-items:center;justify-content:space-between;gap:6px 20px;padding:7px 18px;border-bottom:1px solid var(--spx-border);background:var(--spx-surface);color:var(--spx-text);font-size:12px;flex-wrap:wrap}
+.session-banner[hidden],.session-banner [hidden]{display:none!important}
+.session-identity,.session-timing{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+#session-name{overflow-wrap:anywhere}
+#session-role{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--spx-text-dim)}
+#session-countdown{font-family:var(--spx-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.session-note{font-size:10px;color:var(--spx-text-dim)}
+.session-banner[data-state="expired"] #session-status,.session-banner[data-state="ending"] #session-countdown{color:var(--spx-accent)}
+@media(max-width:600px){.session-banner{padding:7px 10px;gap:4px}.session-timing{width:100%}}

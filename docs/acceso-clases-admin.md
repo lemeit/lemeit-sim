@@ -75,3 +75,7 @@ o dispositivo de energía correctamente instalado).
 3. Probar en staging con base separada antes de desplegar al dominio público.
 4. Configurar secretos y base remota; verificar ambas máquinas separadamente.
 5. Publicar con `npm run deploy` solo después de pruebas end-to-end exitosas.
+
+## Identidad y tiempo restante
+
+El editor identifica al alumno y su clase; el panel privado identifica al administrador. La franja muestra el tiempo restante efectivo: el menor entre el plazo de clase y el vencimiento de la sesión (máximo 4 horas para alumnos, 8 para administradores). Si la clase dura más que la sesión, informa la fecha de cierre de clase y permite volver a ingresar para renovar acceso. El contador se sincroniza con la hora del servidor y revalida cada minuto y al volver a la pestaña. Al vencer o desactivarse, avisa sin descartar el proyecto; los cálculos siguen sujetos a autorización en servidor.
