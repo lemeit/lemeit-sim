@@ -35,7 +35,7 @@ globalThis.SimContextHelp = (() => {
     if (!guide) return '';
     return '<p class="inspector-wiki-help"><a href="' + guide.url +
       '" target="_blank" rel="noopener noreferrer" aria-label="Abrir capítulo de la wiki: ' +
-      guide.title + '">Aprender: ' + guide.title + ' ↗</a></p>';
+      guide.title + '">' + guide.title + ' ↗</a></p>';
   }
   return Object.freeze({ get, chapter, link });
 })();

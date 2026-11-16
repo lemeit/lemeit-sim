@@ -15,6 +15,8 @@ test('todos los objetos del editor disponen de vínculo al capítulo correspondi
     assert.ok(h, 'Falta ayuda para '+key);
     assert.match(h.url,/^https:\/\/wiki\.lemeit\.ar\/sim\/[a-z-]+\/$/);
     assert.match(help.link(key),/rel="noopener noreferrer"/);
+    assert.ok(help.link(key).includes('>'+h.title+' ↗</a>'));
+    assert.ok(!help.link(key).includes('Aprender:'));
   }
 });
 test('tipos desconocidos no generan enlaces ni HTML dinámico',()=>{

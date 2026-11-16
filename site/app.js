@@ -230,6 +230,7 @@ function renderInspector(){
   }
   if(n.type==='EnergyStream')html+='<p class="inspector-description">Representa calor transferido, sin caudal de materia. En los calentadores y enfriadores actuales se especifica la temperatura de salida: DWSIM calcula la potencia térmica, que se consulta en el balance del equipo. Las corrientes de energía también pueden representar trabajo en otros equipos.</p>';
   if(r&&n.type!=='MaterialStream')html+=`<p class="inspector-section">RESULTADOS DE DWSIM</p><div class="inspector-readings"><div class="reading-row">Temperatura <b>${fmt(r.temperature_K-273.15)} °C</b></div><div class="reading-row">Presión <b>${fmt(r.pressure_Pa/1000)} kPa</b></div><div class="reading-row">Caudal <b>${fmt(r.mass_flow_kg_s)} kg/s</b></div></div>`;
+  if(n.type==='HeatExchanger'&&SimGuidedHx.extract(graph,null))html+='<div class="guided-hx-entry"><p class="inspector-section">PRÁCTICA DEL EJEMPLO 13</p><p class="mini">Explorá el intercambio de calor, anticipá las temperaturas y comparalas con DWSIM.</p><button type="button" id="guided-hx-start" class="outline-button">Iniciar actividad guiada</button></div>';
   html+='<button class="delete-button" id="delete-selected">Eliminar objeto y sus conexiones</button>';container.innerHTML=html;
 }
 function addNode(type,pos){
@@ -362,7 +363,7 @@ function loadGraph(data){
   graph=structuredClone(data);if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
-async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
+async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
 
 function queueDiagramMotion(){
   if(paintFrame)return;

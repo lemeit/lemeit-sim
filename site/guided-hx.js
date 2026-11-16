@@ -40,7 +40,6 @@ globalThis.SimGuidedHx=(()=>{
   function mount({getProject,openExample}){
     const dialog=document.getElementById('guided-hx-dialog');
     const body=document.getElementById('guided-hx-body');
-    const open=document.getElementById('guided-hx-menu');
     const predictions={hot:'',cold:''};
     const fmt=value=>Number.isFinite(value)?value.toLocaleString('es-AR',{maximumFractionDigits:6}):'—';
     const escape=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -82,7 +81,7 @@ globalThis.SimGuidedHx=(()=>{
         document.getElementById(element).onchange=render;
       }
     }
-    open.onclick=()=>{render();dialog.showModal();};
+    document.getElementById('inspector').addEventListener('click',event=>{if(event.target.closest('#guided-hx-start')){render();dialog.showModal();}});
     document.getElementById('guided-hx-refresh').onclick=render;
     document.getElementById('guided-hx-close').onclick=()=>dialog.close();
     document.getElementById('guided-hx-back').onclick=()=>dialog.close();
