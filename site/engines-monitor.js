@@ -6,7 +6,7 @@ const dialog=document.getElementById('services-dialog');
 const active=()=>!document.hidden&&(!dialog||dialog.open);
 const names={windows:'Windows',debian:'Debian'};
 const byId=id=>document.getElementById(id);
-const portalVersion=document.documentElement.dataset.portalVersion||'';
+const portalVersion=document.documentElement?.dataset?.portalVersion||'';
 function olderVersion(gateway,portal){
   const parse=value=>/^\d+\.\d+\.\d+$/.test(value)?value.split('.').map(Number):null;
   const a=parse(gateway),b=parse(portal);if(!a||!b)return false;
