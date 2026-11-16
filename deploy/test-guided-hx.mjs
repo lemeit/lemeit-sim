@@ -50,6 +50,10 @@ test('interfaz carga el módulo antes de app.js y no ejecuta scripts inline',()=
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
   assert.ok(html.indexOf('guided-hx.js')>=0&&html.indexOf('guided-hx.js')<html.indexOf('app.js'));
   assert.ok(html.includes('id="guided-hx-dialog"'));
-  assert.ok(html.includes('id="guided-hx-menu"'));
+  assert.ok(!html.includes('id="guided-hx-menu"'));
+  const app=readFileSync(new URL('../site/app.js',import.meta.url),'utf8');
+  assert.ok(app.includes('id="guided-hx-start"'));
+  assert.ok(app.includes("if(type==='HeatExchangerWater'){selection={node:'hx'}"));
+  assert.ok(source.includes("closest('#guided-hx-start')"));
   assert.ok(!html.includes('onclick="this.closest(\'dialog\')'));
 });
