@@ -32,6 +32,12 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Se verificaron presión de bomba y válvula, caudal, entalpía aproximadamente constante de la válvula y cálculo de ambos equipos. El informe detallado de ejecución permanece local en Debian: `/tmp/sim-pump-valve12-debian.json`. La potencia de bomba no fue aportada numéricamente al chat; no se publica un valor no respaldado.
 - Catálogo y guía del ejemplo 12 actualizados para la versión 0.11.0. Validación independiente en Windows aún pendiente.
 
+## Mejora editorial de guía · 16/11/2026
+
+- Los 13 ejercicios mantienen un formato de ficha común: objetivo, datos y enunciado, resolución paso a paso, tabla de resultados, actividades, alcance de validación y descargas.
+- Se eliminó la tabla inicial exclusiva de 01–05 para integrar sus referencias dentro de las respectivas fichas. Se conservan valores y enlaces de referencia, sin volver a calcular ni atribuir validaciones nuevas.
+- El menú Herramientas separa **Motores y servicios** (ambos motores, panel de diagnóstico) de **Diagnóstico del proyecto** (conexiones y último cálculo). El monitor detallado del motor elegido continúa accesible desde el pie del editor.
+
 ## Mejoras continuas de corrientes
 
 - Condiciones, composición y resultados agrupados claramente; conservar entradas canónicas al cambiar unidades.
