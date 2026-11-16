@@ -1424,3 +1424,9 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .sim-shell #about-dialog .dialog-body :is(p,ul,ol,li),.sim-shell #about-dialog .about-credits{font:inherit;color:inherit;letter-spacing:normal}
 .sim-shell #about-dialog .dialog-body h3{font:600 13px/1.5 var(--spx-font-sans);color:inherit;margin:20px 0 10px}
 .sim-shell #about-dialog .dialog-body li{margin:6px 0}
+
+
+/* Ayuda contextual opcional: no sustituye las especificaciones del equipo. */
+.inspector-wiki-help{margin:8px 0 14px;font:500 11px/1.45 var(--spx-font-sans)}
+.inspector-wiki-help a{display:inline-block;color:var(--spx-text);text-decoration:underline;text-underline-offset:3px}
+.inspector-wiki-help a:hover,.inspector-wiki-help a:focus-visible{color:var(--spx-accent,#cf263b)}
