@@ -14,6 +14,7 @@
   if(!session||!clock||expired)return;
   const seconds=Math.max(0,Math.ceil(session.expires_at-clock.server-(performance.now()-clock.local)/1000));
   if(!seconds){end();return;}
+  if(session.role==='admin'){banner.dataset.state='active';return;}
   const h=Math.floor(seconds/3600),m=Math.floor(seconds%3600/60),s=seconds%60;
   el('session-countdown').textContent=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
   banner.dataset.state=seconds<=300?'ending':'active';
@@ -29,6 +30,9 @@
    if(!['student','admin'].includes(data.role)||!Number.isFinite(data.expires_at)||!Number.isFinite(data.server_time))throw Error('Estado de sesión incompleto.');
    session=data;clock={server:data.server_time+(performance.now()-start)/2000,local:performance.now()};expired=false;
    const admin=data.role==='admin';
+   el('session-countdown-label').hidden=admin;
+   el('session-countdown').hidden=admin;
+   if(admin)el('session-countdown').textContent='';
    el('session-role').textContent=admin?'Administrador':'Alumno';
    el('session-name').textContent=admin?'Sesión administrativa':(data.class_name||'Clase');
    el('session-countdown-label').textContent='Acceso restante';

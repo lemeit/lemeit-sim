@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.15.1 — 2026-11-16
+
+- Elimina la cuenta regresiva y su etiqueta de la vista del administrador, tanto en editor como en panel privado. Conserva «Administrador · Sesión administrativa».
+- El contador continúa visible para alumnos. No modifica duración de sesiones ni controles de rol en servidor.
+
 ## 0.15.0 — 2026-11-16
 
 - Franja debajo del menú con rol, nombre de clase y cuenta regresiva. El panel de administración muestra «Administrador · Sesión administrativa».
