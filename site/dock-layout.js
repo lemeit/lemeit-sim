@@ -16,6 +16,16 @@ globalThis.SimDockLayout=(()=>{
   return s;
  }
  function slots(s){return s.swapped?{equipment:3,inspector:1}:{equipment:1,inspector:3};}
+ function resizeRect(p,edge,dx,dy,vw,vh){
+  const minW=220,minH=150;
+  const maxW=Math.max(minW,vw-16),maxH=Math.max(minH,vh-16);
+  let left=p.left,top=p.top,right=p.left+p.width,bottom=p.top+p.height;
+  if(edge.includes('w'))left=Math.max(8,Math.min(right-minW,left+dx));
+  if(edge.includes('e'))right=Math.min(vw-8,Math.max(left+minW,right+dx));
+  if(edge.includes('n'))top=Math.max(8,Math.min(bottom-minH,top+dy));
+  if(edge.includes('s'))bottom=Math.min(vh-8,Math.max(top+minH,bottom+dy));
+  return {left,top,width:Math.min(maxW,right-left),height:Math.min(maxH,bottom-top)};
+ }
  function mount(){
   const workspace=document.querySelector('.workspace');
   if(!workspace)return;
@@ -29,7 +39,7 @@ globalThis.SimDockLayout=(()=>{
   let state;try{state=normalise(JSON.parse(localStorage.getItem(STORE)||'null'));}catch{state=fresh();}
   const persist=()=>{try{localStorage.setItem(STORE,JSON.stringify(state));}catch{}};
   const mobile=()=>window.innerWidth<=760;
-  const floats={};
+  let zIndex=950;
   const make=(tag,label,title)=>{const el=document.createElement(tag);el.type='button';el.textContent=label;el.title=title;el.setAttribute('aria-label',title);return el;};
   const wrappers={};
   for(const id of IDS){
@@ -57,7 +67,7 @@ globalThis.SimDockLayout=(()=>{
    const w=Math.min(Math.max(220,p.width),Math.max(220,window.innerWidth-24));
    const h=Math.min(Math.max(150,p.height),Math.max(150,window.innerHeight-80));
    const x=Math.max(8,Math.min(p.left,window.innerWidth-w-8));
-   const y=Math.max(65,Math.min(p.top,window.innerHeight-h-8));
+   const y=Math.max(8,Math.min(p.top,window.innerHeight-h-8));
    el.style.left=x+'px';el.style.top=y+'px';el.style.width=w+'px';el.style.height=h+'px';
    return {left:x,top:y,width:w,height:h};
   }
@@ -91,25 +101,56 @@ globalThis.SimDockLayout=(()=>{
    }
    persist();
   }
+  // Arrastre del panel completo: el puntero queda capturado en la propia ventana,
+  // para que no se interrumpa al cruzar el SVG central.
   for(const id of IDS){
    const heading=wrappers[id].heading,el=elements[id];
-   let drag=null;
+   let gesture=null;
+   const start=(event,mode,edge='')=>{
+     if(event.button!==0||!el.classList.contains('sim-panel-floating'))return;
+     event.preventDefault();event.stopPropagation();
+     const r=el.getBoundingClientRect();
+     gesture={mode,edge,x:event.clientX,y:event.clientY,
+       start:{left:r.left,top:r.top,width:r.width,height:r.height}};
+     el.setPointerCapture(event.pointerId);
+     el.style.zIndex=String(++zIndex);
+   };
    heading.addEventListener('pointerdown',e=>{
-     if(e.button!==0||!el.classList.contains('sim-panel-floating')||e.target.closest('button,a,input,select,[role=button]'))return;
-     const p=state.positions[id];drag={x:e.clientX,y:e.clientY,left:p.left,top:p.top};heading.setPointerCapture(e.pointerId);
+     if(e.target.closest('button,a,input,select,textarea,[role=button]'))return;
+     start(e,'move');
    });
-   heading.addEventListener('pointermove',e=>{
-     if(!drag)return;
-     state.positions[id]=position(el,{...state.positions[id],left:drag.left+e.clientX-drag.x,top:drag.top+e.clientY-drag.y});
+   for(const edge of ['n','ne','e','se','s','sw','w','nw']){
+     const grip=document.createElement('span');
+     grip.className='dock-grip dock-grip-'+edge;
+     grip.dataset.dockResize=edge;
+     grip.setAttribute('aria-label','Cambiar tamaño del panel');
+     grip.setAttribute('role','separator');
+     el.append(grip);
+     grip.addEventListener('pointerdown',e=>start(e,'resize',edge));
+   }
+   el.addEventListener('pointerdown',()=>{if(el.classList.contains('sim-panel-floating'))el.style.zIndex=String(++zIndex);});
+   el.addEventListener('pointermove',e=>{
+     if(!gesture)return;
+     const g=gesture,dx=e.clientX-g.x,dy=e.clientY-g.y;
+     const next=g.mode==='move'
+       ?{...g.start,left:g.start.left+dx,top:g.start.top+dy}
+       :resizeRect(g.start,g.edge,dx,dy,window.innerWidth,window.innerHeight);
+     state.positions[id]=position(el,next);
    });
-   const end=()=>{if(drag){drag=null;persist();}};
-   heading.addEventListener('pointerup',end);heading.addEventListener('pointercancel',end);
-   el.addEventListener('pointerup',()=>{if(el.classList.contains('sim-panel-floating')){const r=el.getBoundingClientRect();state.positions[id]={left:r.left,top:r.top,width:r.width,height:r.height};persist();}});
+   const finish=e=>{
+     if(!gesture)return;
+     gesture=null;
+     if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);
+     persist();
+   };
+   el.addEventListener('pointerup',finish);
+   el.addEventListener('pointercancel',finish);
+   el.addEventListener('lostpointercapture',()=>{if(gesture){gesture=null;persist();}});
   }
   window.addEventListener('resize',apply);
   apply();return {reset:()=>{state=fresh();apply();}};
  }
- return Object.freeze({normalise,slots,mount});
+ return Object.freeze({normalise,slots,resizeRect,mount});
 })();
 
 document.addEventListener('DOMContentLoaded',()=>globalThis.SimDockLayout.mount());
