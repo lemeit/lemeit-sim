@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.17.2](https://img.shields.io/badge/portal-0.17.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.17.3](https://img.shields.io/badge/portal-0.17.3-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.17.2 — Documentación sincronizada**, 16/11/2026. El portal mantiene el acceso por código de clase, la administración privada y la información de sesión en el pie. Esta entrega actualiza las guías, el catálogo, la hoja de ruta y la wiki; no cambia los cálculos ni la operación de los motores.
+**0.17.3 — Ingreso desde enlaces directos**, 16/11/2026. Abrir una página protegida sin sesión muestra el ingreso con un aviso amigable y vuelve a esa página después de validar el acceso. Se mantienen permisos y respuestas de API; sin cambios en cálculos ni motores.
 
 La versión del portal es independiente de **DWSIM 10.2.15**. La versión efectivamente cargada se consulta en **Ayuda → Acerca de**. Los cambios anteriores están en el [historial completo](docs/CHANGELOG.md).
 

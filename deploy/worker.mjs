@@ -60,6 +60,10 @@ export async function handle(request, env, assets=ASSETS) {
     if(!gate.ok){
       if(path==='/index.html')return Response.redirect(url.origin+'/acceso.html',302);
       if(path==='/admin.html'&&[401,403].includes(gate.response.status))return Response.redirect(url.origin+'/acceso.html?role=admin',302);
+      if(path.endsWith('.html')&&[401,403].includes(gate.response.status)){
+        const login=new URL('/acceso.html',url);login.searchParams.set('next',path);
+        return Response.redirect(login.toString(),302);
+      }
       return gate.response;
     }
   }

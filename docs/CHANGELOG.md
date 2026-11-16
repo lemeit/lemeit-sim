@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.3 — 2026-11-16
+
+- Enlaces directos a ejemplos, ayuda, catálogo y adaptación sin sesión redirigen al ingreso con aviso claro y retorno a la página elegida. Destinos limitados a páginas conocidas del mismo portal; no se admiten redirecciones externas ni retorno al panel administrativo con rol de alumno.
+- APIs y scripts conservan sus respuestas JSON y controles de autorización.
+
 ## 0.17.2 — 2026-11-16
 
 - Consolida README e índice de documentación; agrega guía cotidiana de administración y actualiza acceso/seguridad, flujo de trabajo, despliegue, roadmap y comprobaciones. Separa propuestas históricas del estado publicado.

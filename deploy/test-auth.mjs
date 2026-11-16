@@ -91,3 +91,14 @@ test('panel privado exige ingreso administrativo también sin sesión y con quer
   assert.equal(r.status,302);assert.equal(r.headers.get('Location'),'https://sim.lemeit.ar/acceso.html?role=admin');
  }
 });
+
+
+test('enlaces HTML sin sesión conducen al ingreso, sin convertir APIs ni scripts en páginas',async()=>{
+ for(const path of ['/ejemplos.html','/ayuda.html','/catalogo.html','/adaptacion.html']){
+  const r=await handle(new Request('https://sim.lemeit.ar'+path),env(),asset(path));
+  assert.equal(r.status,302);const url=new URL(r.headers.get('Location'));assert.equal(url.pathname,'/acceso.html');assert.equal(url.searchParams.get('next'),path);
+ }
+ for(const path of ['/api/catalog','/app.js']){
+  const r=await handle(new Request('https://sim.lemeit.ar'+path),env(),asset(path));assert.equal(r.status,401);assert.match(r.headers.get('Content-Type'),/application\/json/);assert.equal(r.headers.get('Location'),null);
+ }
+});
