@@ -1430,3 +1430,14 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .inspector-wiki-help{margin:8px 0 14px;font:500 11px/1.45 var(--spx-font-sans)}
 .inspector-wiki-help a{display:inline-block;color:var(--spx-text);text-decoration:underline;text-underline-offset:3px}
 .inspector-wiki-help a:hover,.inspector-wiki-help a:focus-visible{color:var(--spx-accent,#cf263b)}
+
+/* Taller guiado: mantiene el diagrama intacto y permite regresar al editor. */
+.sim-shell .guided-hx-dialog{width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 28px)}
+.sim-shell .guided-hx-dialog .dialog-body{max-height:calc(100dvh - 120px);overflow-y:auto;line-height:1.6}
+.guided-hx-dialog h3{font-size:14px;margin:20px 0 7px}
+.guided-hx-dialog .guided-hx-predictions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0}
+.guided-hx-dialog .guided-hx-predictions label{display:grid;gap:5px;font-size:12px}
+.guided-hx-dialog .guided-hx-predictions input{width:100%;box-sizing:border-box;min-width:0;padding:8px;border:1px solid var(--spx-border);background:var(--spx-bg);color:var(--spx-text)}
+.guided-hx-dialog .guided-hx-table{width:100%;border-collapse:collapse;font-size:12px}
+.guided-hx-dialog .guided-hx-table th,.guided-hx-dialog .guided-hx-table td{border-bottom:1px solid var(--spx-border);text-align:left;padding:7px 5px}
+@media(max-width:540px){.guided-hx-dialog .guided-hx-predictions{grid-template-columns:1fr}.guided-hx-dialog .guided-hx-table{font-size:10px}}
