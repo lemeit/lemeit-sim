@@ -54,7 +54,7 @@ export async function handle(request, env, assets=ASSETS) {
   const path=url.pathname==='/'?'/index.html':url.pathname;
   // La portada de acceso es pública; el resto, incluido el editor y el panel,
   // requiere una sesión vigente. No confiar en ocultar botones con JavaScript.
-  const publicPaths=new Set(['/acceso.html','/acceso.js','/simprox-theme.css','/style.css','/theme-toggle.js','/favicon.ico','/assets/favicon.svg','/assets/sim-wordmark.svg']);
+  const publicPaths=new Set(['/acceso.html','/acceso.js','/simprox-theme.css','/style.css','/theme-toggle.js','/favicon.ico','/assets/favicon.svg','/assets/sim-wordmark.svg','/manifest.webmanifest','/sw.js','/offline.html']);
   if(!publicPaths.has(path)){
     const gate=await authorize(request,env,['/admin.html','/admin-monitor.js','/admin-classes.js'].includes(path)?'admin':'student');
     if(!gate.ok){
