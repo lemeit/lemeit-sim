@@ -111,3 +111,5 @@ globalThis.SimDockLayout=(()=>{
  }
  return Object.freeze({normalise,slots,mount});
 })();
+
+document.addEventListener('DOMContentLoaded',()=>globalThis.SimDockLayout.mount());
