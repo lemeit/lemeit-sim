@@ -34,5 +34,5 @@ test('reactor requiere parámetros básicos coherentes',()=>{
 });
 test('el diagnóstico utiliza las reglas de equipos y aclara su alcance',()=>{
   assert.match(rules,/issues\.push\(\.\.\.equipmentSpecificationIssues\(n\)/);
-  assert.match(rules,/no un cálculo algebraico completo de grados de libertad/);
+  assert.match(source,/no un cálculo algebraico completo de grados de libertad/);
 });
