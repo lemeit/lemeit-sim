@@ -1324,3 +1324,6 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #units-dialog :is(input,select):focus-visible {outline:none;border-color:var(--spx-accent);box-shadow:inset 0 0 0 1px var(--spx-accent)}
 #units-dialog .numeric-control:focus-within {border-color:var(--spx-accent);box-shadow:inset 0 0 0 1px var(--spx-accent)}
 #units-dialog .numeric-control > input:focus-visible {outline:none;box-shadow:none}
+
+/* El diseño de .field no debe volver visibles los campos de otro rol. */
+#access-form [hidden]{display:none!important}
