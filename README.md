@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.17.1](https://img.shields.io/badge/portal-0.17.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.17.2](https://img.shields.io/badge/portal-0.17.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,58 +16,22 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.17.1 — Tipografía uniforme**, 16/11/2026. Unifica fuente y color base del pie, incluida la identificación de sesión, y del texto en Acerca de. Reemplaza el listado acumulado de versiones por un resumen breve; el historial completo sigue disponible.
+**0.17.2 — Documentación sincronizada**, 16/11/2026. El portal mantiene el acceso por código de clase, la administración privada y la información de sesión en el pie. Esta entrega actualiza las guías, el catálogo, la hoja de ruta y la wiki; no cambia los cálculos ni la operación de los motores.
 
-**0.17.0 — Sesión en el pie y códigos disponibles**, 16/11/2026. Nombre de clase, rol, contador del alumnado y salida se integran en el pie existente. Los nuevos códigos activos se guardan cifrados y pueden volver a consultarse/copiarse solo desde administración. Los códigos anteriores no son recuperables.
+La versión del portal es independiente de **DWSIM 10.2.15**. La versión efectivamente cargada se consulta en **Ayuda → Acerca de**. Los cambios anteriores están en el [historial completo](docs/CHANGELOG.md).
 
-**0.16.0 — Acceso y administración reorganizados**, 16/11/2026. Ingreso separado de alumno y administrador, indicación de sesión existente y salida explícita. Panel privado centrado en clases y códigos; monitor de motores de solo lectura, sin tarjetas recortadas. Los diálogos se cierran al hacer clic fuera. El administrador no muestra contador. Se mantienen controles de rol en servidor.
+## Ingreso y administración
 
-**0.15.0 — Clase y tiempo restante**, 16/11/2026. El editor muestra rol, nombre de clase y cuenta regresiva del acceso real. El panel privado identifica la sesión administrativa. El vencimiento avisa sin cerrar el proyecto; no modifica la duración ni los permisos vigentes.
+- **Alumnos:** abrir [ΣIM](https://sim.lemeit.ar/acceso.html), elegir Alumno e ingresar el código de clase de 12 caracteres. No se necesita correo ni cuenta individual.
+- **Administrador:** elegir Administrador e ingresar la contraseña privada. El panel permite crear clases, consultar/copiar sus códigos activos y desactivar accesos.
+- El pie muestra rol, nombre de clase, tiempo restante del alumnado y **Salir**. El administrador no muestra contador. La sesión de alumno dura hasta 4 horas o hasta el vencimiento/desactivación de la clase, lo que ocurra primero; la administrativa dura hasta 8 horas.
+- Los códigos creados desde 0.17.0 quedan disponibles para el administrador mientras estén activos. Los anteriores siguen funcionando, pero no pueden recuperarse si no se conservaron.
+- **Herramientas → Estado de motores** es un monitor de consulta. **Administración de clases** es un acceso privado protegido en servidor. No hay inicio, parada ni reinicio remoto de motores.
+- Para cambiar de rol, cerrar la sesión actual. Elegir una opción en el formulario no concede permisos sin validar su credencial.
 
-**0.14.3 — Ingreso simplificado y diagnóstico**, 16/11/2026. Mensajes neutrales en la pantalla de acceso y diagnóstico interno de configuración, sin registrar secretos ni reducir los requisitos de las claves.
+[Guía para administrar clases](docs/administracion-clases.md) · [Acceso y seguridad](docs/acceso-clases-admin.md) · [Índice de documentación](docs/README.md).
 
-**0.14.2 — Campos de ingreso según el rol**, 16/11/2026. Corrige la visibilidad del formulario para mostrar únicamente código de clase o contraseña de administrador según corresponda.
-
-**0.14.1 — Acceso por clases y monitor integrado**, 16/11/2026. Ingreso del alumnado mediante código temporal, administración privada de clases y controles de sesión en servidor. Herramientas → Motores y servicios abre un diálogo de solo lectura para Windows y Debian. No ofrece inicio, parada ni reinicio remotos.
-
-**0.14.0 — Diagnóstico de ambos motores y comparación Windows–Debian**, 16/11/2026. Panel de consulta de Windows y Debian de solo lectura, información de recuperación local y 19 controles reales del Ejemplo 13 en Windows, equivalentes a Debian en las cifras reportadas. No habilita inicio/parada remotos. [Catálogo](site/catalogo.html) y [roadmap](docs/roadmap.md) actualizados.
-
-**0.13.0 — Monitor de versión y estado del gateway**, 15/11/2026. El portal consulta `/api/status` del motor seleccionado para distinguir el gateway cargado en memoria de los archivos actualizados. Se informa versión, arranque, uptime, ocupado/libre y tipos admitidos, sin claves ni controles remotos de servicio. Requiere reiniciar gateway Debian tras desplegar; pruebas automatizadas incluidas. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados.
-
-**0.12.0 — Intercambiador de dos corrientes y Ejemplo 13**, 15/11/2026. En Debian DWSIM MCP 10.2.15 se verificó la transferencia de 40 kW entre dos corrientes de agua, con cierre térmico de 0,00000033 kW y conservación de masa por lado. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados. Windows pendiente.
-
-**0.11.0 — Bomba y válvula con presión especificada y Ejemplo 12**, 14/11/2026. En Debian, la bomba y la válvula completaron siete verificaciones físicas sobre agua con IAPWS-IF97. Se corrigió la conversión de presión del adaptador MCP y se sincronizaron [catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md). Windows pendiente de validar.
-
-**0.10.0 — Separador flash bifásico y Ejemplo 11**, 14/11/2026. Se calculó en Debian DWSIM MCP 10.2.15 con NRTL: 0,638235 kg/s vapor y 0,361758 kg/s líquido para 1 kg/s alimentado. Los residuos reales de cierre de masa y especies quedan documentados y se aceptan con umbral explícito de 2×10⁻⁵ kg/s. [Detalle](docs/flash-0.10.0.md).
-
-**0.9.2 — Regresión Windows–Debian de los diez ejemplos**, verificada el 14/11/2026.
-
-Los diez ejemplos se ejecutaron en Debian con DWSIM 10.2.15 y se contrastaron con las referencias Windows usando tolerancias explícitas. Se comprobó conservación elemental en los reactores 07, 08 y 10. [Informe](docs/validacion-debian-0.9.2.md). No constituye validación experimental ni garantiza disponibilidad continua de los motores.
-
-Ayuda reúne la guía de uso y la tutoriales de DWSIM (en inglés). La guía de ejercicios está en Ejemplos. El foco de los campos de la calculadora se mantiene dentro de sus bordes, separado de las etiquetas.
-Guía 01–10 con índice, búsqueda, ejercicios plegables, anterior/siguiente y regreso
-al simulador. Presets SI, ingeniería y anglosajón; calculadora de magnitudes,
-fracciones, caudales y presiones parciales con masas molares reales de DWSIM.
-[Herramientas y criterios](docs/unidades-y-calculadora.md) ·
-[Adaptación por etapas](site/adaptacion.html).
-CSTR/PFR cinéticos y perfiles aún requieren adaptar y validar su acceso; el portal
-actual conserva conversión y equilibrio. No se modificaron los motores ni sus túneles.
-[Guía de casos y comparación](docs/ejemplos-validados.md) · [Guía web](site/ejemplos.html).
-La versión que recibe el navegador depende del último despliegue exitoso de
-Cloudflare: comprobarla en **Ayuda → Acerca de**. Fusionar y publicar son pasos
-separados, aunque Workers Builds automatiza el segundo.
-
-Nombre exacto: **ΣIM**, sigma griega mayúscula seguida de **I** y **M** latinas.
-Bajada: **Simulación de procesos**. Reemplaza a SIMPROX; el dominio y el repositorio
-mantienen sus direcciones.
-
-La versión del portal es independiente del motor DWSIM 10.2.15.
-Ayuda → Acerca de muestra la versión y los cambios de la entrega cargada.
-
-[Historial de versiones](docs/CHANGELOG.md) · [Guía de uso](docs/workflow.md) ·
-[Verificaciones realizadas](CHECKS.md) · [Operación local](docs/operacion-local.md).
-
-## Biblioteca de diez ejemplos
+## Biblioteca de trece ejemplos
 
 Desde Ejemplos se abre cada caso con sus condiciones y una consigna breve. Son
 modelos calculados, no mediciones experimentales. La [guía](docs/ejemplos-validados.md)
@@ -85,6 +49,10 @@ permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
 | 08 · Reactor de equilibrio | Síntesis de amoníaco | Amoníaco: 0,311687291752 kg/kg; Q: −999,736216 kW |
 | 09 · Red térmica ternaria | Mezcla, reparto 65/35, calentamiento, enfriamiento y recombinación | 2 kg/s a 51,158773 °C; Q neto +150,936145 kW |
 | 10 · Amoníaco con bypass | Equilibrio químico, acondicionamiento térmico y dilución | NH₃: 0,339948981 kg/s; P1: 69,240653 °C |
+| 11 · Separador flash | Equilibrio vapor–líquido agua–etanol con NRTL | Referencia Debian y residuos documentados en [el informe](docs/flash-0.10.0.md) |
+| 12 · Bomba y válvula | Presión de descarga, eficiencia y estrangulamiento de agua | 101,325 → 500 → 200 kPa; comprobación Debian |
+| 13 · Intercambiador de calor | Dos corrientes de agua sin mezcla | 40 kW; referencia contrastada Windows–Debian en 0.14.0 |
+
 
 Los casos 01–05 se recalcularon con el motor de ΣIM y la API oficial del DWSIM
 Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
@@ -101,7 +69,7 @@ Para repetir la comparación de 01–05, ver [procedimiento y requisitos](docs/e
 
 ## Flujo de trabajo
 
-La aplicación abre sin proyecto activo y sin cargar una simulación de ejemplo.
+Después de validar el acceso, la aplicación abre sin proyecto activo y sin cargar una simulación de ejemplo.
 Archivo → Nuevo proyecto solicita nombre, componentes y modelo de propiedades;
 crea un diagrama vacío. Después se agregan corrientes y equipos desde la biblioteca,
 se conectan sus puertos y se especifican sus condiciones en el inspector.
@@ -115,7 +83,8 @@ preparar archivos sin calcular. No contiene propiedades físicas ni resultados.
 ## Disponible
 
 Corrientes de materia y energía; mezclador, divisor de dos salidas, calentador y
-enfriador; reactores de conversión y equilibrio con una reacción por reactor y
+enfriador; separador flash, bomba, válvula e intercambiador de dos corrientes;
+reactores de conversión y equilibrio con una reacción por reactor y
 salidas de vapor y líquido. Régimen estacionario, sin recirculaciones.
 Selección de modelos físicos separada del modelo de reacción química.
 
@@ -284,7 +253,7 @@ HTTP en 5901 esté iniciado. Los cálculos se serializan y tienen 45 s de límit
 
 - Cloudflare Worker sirve la interfaz estática y mantiene disponible el editor.
 - El Worker solo admite /api/catalog y /api/simulate, limita cuerpos a 100 kB y
-  autentica al origen mediante un secreto de servidor, que nunca llega al navegador.
+  valida la sesión y el rol antes de reenviar solicitudes; autentica al origen mediante un secreto de servidor que nunca llega al navegador.
 - Cada motor tiene un destino y un túnel independientes; el gateway Windows escucha en 127.0.0.1:5911.
 - El origen requiere Host interno y secreto para las solicitudes del túnel;
   el motor MCP no se publica. La publicación del túnel requiere autorización explícita.
@@ -363,15 +332,11 @@ Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
 
-Pendientes: bombas, válvulas, separadores e intercambiador con dos fluidos.
-El calentador/enfriador actual representa un fluido con intercambio de calor.
-También quedan pendientes recirculaciones, análisis económico, 3D y pruebas de carga
-para una clase. No hay registro de usuarios ni acceso por código de clase implementado.
-La [propuesta de acceso](docs/acceso-propuesto.md) documenta esa etapa futura.
+Pendientes: separador por componente, compresores y expansores, columnas, recirculaciones y convergencia; adaptación y validación de CSTR/PFR cinéticos, análisis económico y pruebas de carga para una clase. La existencia de una operación en DWSIM no significa que ya esté adaptada al editor.
 
-Prioridad elegida: bombas, válvulas, intercambiadores y separadores. Se usarán los
-tutoriales oficiales de DWSIM como referencias para casos de validación y guías
-propias, con trazabilidad. Ver [plan y fuentes](docs/roadmap.md).
+El acceso por clases, el panel privado, flash, bomba, válvula e intercambiador ya están implementados. El inicio o reinicio remoto de servicios requiere un supervisor local independiente y sigue pendiente. La disponibilidad depende de las computadoras, gateways y túneles.
+
+Ver [alcance actual y prioridades](docs/roadmap.md) y [catálogo](site/catalogo.html).
 
 ## Licencias
 
@@ -383,21 +348,13 @@ edición oficial de DWSIM.
 
 ## Documentación y verificación
 
-La entrega 0.9.0 se comprueba con pruebas JS de regresión y de referencia física,
-compilación y preparación del despliegue. Se revisan en navegador la guía,
-calculadora, presets, cambio de base y conservación de resultados. El catálogo
-estático contiene 1601 masas molares reales y registra 19 no disponibles.
-Los casos anteriores mantienen sus informes: [0.7.0](docs/validacion-windows-0.7.0.md)
-y [0.8.0](docs/ejemplos-integrados.md). Ver [CHECKS](CHECKS.md) para las pruebas
-exactamente ejecutadas. No se afirma validación experimental ni prueba cinética.
+- [Índice de documentación](docs/README.md): recorridos para alumnos, administración y operación técnica.
+- [Guía de trabajo](docs/workflow.md), [administración de clases](docs/administracion-clases.md) y [acceso y seguridad](docs/acceso-clases-admin.md).
+- [Operación local](docs/operacion-local.md), [selección Windows/Debian](docs/seleccion-manual-motores.md) y [publicación](docs/despliegue-automatico.md).
+- [Historial](docs/CHANGELOG.md), [comprobaciones realizadas](CHECKS.md), [ejemplos validados](docs/ejemplos-validados.md) e informes por versión.
+- [Wiki en español](https://wiki.lemeit.ar/sim/) y [English documentation](https://wiki.lemeit.ar/en/sim/).
 
-[Guía de trabajo](docs/workflow.md) · [Historial completo](docs/CHANGELOG.md) ·
-[Identidad y logo](docs/brand-sim.md) · [Despliegue automático](docs/despliegue-automatico.md).
-
-[Servicios y arranque/apagado](docs/operacion-local.md) · [Propuesta de acceso sin correo para alumnos](docs/acceso-propuesto.md).
-
-[Selección Windows / Debian](docs/seleccion-manual-motores.md).
-
+Las comprobaciones de acceso y de interfaz no equivalen a una nueva validación de DWSIM. Los informes de casos reales conservan fecha, motor y tolerancias; no se afirma validación experimental ni prueba de carga simultánea del alumnado.
 
 ## Accesos del proyecto
 
@@ -407,7 +364,7 @@ exactamente ejecutadas. No se afirma validación experimental ni prueba cinétic
 - [Wiki de proyectos](https://wiki.lemeit.ar/sim/).
 - [Portal Lemeit](https://lemeit.ar/#sim).
 
-La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣIM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Esta revisión agrega referencias documentales; no cambia la versión funcional 0.7.2 ni los motores.
+La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣIM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Las fichas externas son presentaciones del proyecto; el estado operativo y las guías vigentes se mantienen en este repositorio y la wiki.
 
 ## Herramientas de unidades · 0.9.0
 

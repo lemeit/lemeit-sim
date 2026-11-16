@@ -1,6 +1,16 @@
 # Trabajar con un proyecto
 
-1. Entrar a Lemeit Sim abre una sesión sin proyecto. La biblioteca queda inactiva.
+Guía vigente para el portal 0.17.2 · revisión 16/11/2026.
+
+## Ingresar y reconocer la sesión
+
+Abrir el simulador, elegir **Alumno** e ingresar el código de clase. No se necesita correo ni cuenta individual. El pie gris muestra clase, tiempo restante y **Salir**. La sesión dura hasta cuatro horas o hasta que venza/se desactive la clase, lo que ocurra antes. Guardar el proyecto antes de cerrar sesión o volver a ingresar.
+
+**Herramientas → Estado de motores** es una consulta de disponibilidad; **Administración de clases** requiere rol de administrador. Los diálogos se cierran por botón, Escape o clic fuera. Para crear códigos, consultar [Administración de clases](administracion-clases.md).
+
+## Crear el proyecto
+
+1. Después de validar el acceso, ΣIM abre sin proyecto. La biblioteca queda inactiva.
 2. Elegir Archivo → Nuevo proyecto. Definir nombre, componentes y un modelo de
    propiedades adecuado a las sustancias y condiciones del caso.
 3. Crear el proyecto: el diagrama está vacío. Los componentes/modelo son metadatos,
@@ -79,8 +89,8 @@ acciones. Ctrl+N, Ctrl+O y Ctrl+S actúan sobre el proyecto fuera de los diálog
 - Archivo: nuevo, abrir, recuperar, guardar, cerrar y exportar resultados.
 - Simulación: calcular, revisar conexiones/especificaciones, modelo y compuestos.
 - Ver: diagrama, biblioteca, ventana separada, pantalla completa y balances.
-- Ejemplos: acceso directo a los tres casos implementados.
-- Herramientas: configuración, estado del motor y diagnóstico/actividad.
+- Ejemplos: acceso a los trece casos y a su guía de resolución.
+- Herramientas: configuración, calculadora de unidades/composición, estado de ambos motores, diagnóstico del proyecto y administración de clases (solo admin).
 - Ayuda: alcance, documentación y licencias.
 
 Configuración permite variar los decimales de las tablas y ocultar las ayudas del
@@ -88,7 +98,7 @@ lienzo. Las preferencias son locales; no modifican el cálculo ni las exportacio
 
 ## Diagnóstico y estado
 
-Estado del motor comprueba manualmente /api/catalog, registra fecha y latencia,
+El monitor del motor seleccionado, accesible desde el pie, comprueba /api/catalog y /api/status cuando están disponibles, y registra fecha y latencia,
 catálogo disponible y estado del último cálculo. No representa CPU/memoria,
 no inicia servicios y no da acceso a registros privados del servidor.
 
@@ -97,6 +107,8 @@ sugerencias por tipo de mensaje. Las sugerencias no prueban la causa del error.
 La actividad conserva hasta 30 entradas en memoria de esa vista; se pierde al
 recargar y no es una auditoría persistente del servidor. Descargar diagnóstico
 genera un archivo local con esos datos, sin incluir credenciales de conexión.
+
+Herramientas → Estado de motores consulta Windows y Debian en paralelo, con actualización manual u opcional cada 30 segundos mientras el diálogo está abierto y visible. Es una vista de solo lectura, distinta de la administración privada de clases.
 
 ## Exportaciones y panel de resultados
 

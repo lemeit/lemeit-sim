@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.2 — 2026-11-16
+
+- Consolida README e índice de documentación; agrega guía cotidiana de administración y actualiza acceso/seguridad, flujo de trabajo, despliegue, roadmap y comprobaciones. Separa propuestas históricas del estado publicado.
+- Actualiza ayuda y catálogo del portal, nombres del menú, plazos de sesión, copia de códigos activos y alcance del monitor de consulta. Sin cambios en motores ni cálculos.
+- Sincroniza la documentación de ΣIM en la wiki, en español e inglés, con las capacidades y límites actuales.
+
 ## 0.17.1 — 2026-11-16
 
 - Unifica tipografía del pie en la fuente de interfaz; la identificación de sesión hereda el mismo color y fuente que sus controles vecinos. Conserva colores semánticos de conexión y la identidad de marca.
