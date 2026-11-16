@@ -84,6 +84,7 @@ globalThis.SimGuidedHx=(()=>{
     open.onclick=()=>{render();dialog.showModal();};
     document.getElementById('guided-hx-refresh').onclick=render;
     document.getElementById('guided-hx-close').onclick=()=>dialog.close();
+    document.getElementById('guided-hx-back').onclick=()=>dialog.close();
     return {render};
   }
   return Object.freeze({id,reference,extract,evaluate,mount});
