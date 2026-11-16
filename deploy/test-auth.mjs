@@ -55,3 +55,12 @@ test('nunca habilitar el motor cuando faltan los secretos',async()=>{
  const r=await handle(new Request('https://sim.lemeit.ar/api/catalog',{headers:sessionHeaders}),{});
  assert.equal(r.status,503);
 });
+
+test('alumnado puede cargar monitor compartido pero no administrar clases',async()=>{
+ const monitor=await handle(new Request('https://sim.lemeit.ar/engines-monitor.js',{headers:sessionHeaders}),env(),asset('/engines-monitor.js'));
+ assert.equal(monitor.status,200);
+ for(const path of ['/api/auth/list-classes','/api/auth/create-class','/api/auth/disable-class']){
+  const r=await handle(new Request('https://sim.lemeit.ar'+path,{method:'POST',headers:{...sessionHeaders,'Origin':'https://sim.lemeit.ar','Content-Type':'application/json'},body:'{}'}),env());
+  assert.equal(r.status,403,path);
+ }
+});

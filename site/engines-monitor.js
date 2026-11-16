@@ -1,5 +1,8 @@
+(()=>{
 'use strict';
 const logs=[];
+const dialog=document.getElementById('services-dialog');
+const active=()=>!document.hidden&&(!dialog||dialog.open);
 const names={windows:'Windows',debian:'Debian'};
 const byId=id=>document.getElementById(id);
 function field(dl,name,value){
@@ -36,6 +39,7 @@ async function check(engine){
     snapshot(engine,'Sin estado confirmado',{'Última comprobación':stamp,'Diagnóstico':err.message,'Orientación':'Verificá alimentación, gateway, túnel y versión instalada'});
     logs.unshift(stamp+' · '+names[engine]+' · sin estado confirmado · '+err.message);
   }
+  logs.splice(20);
   const list=byId('events');list.replaceChildren();
   for(const entry of logs.slice(0,20)){const li=document.createElement('li');li.textContent=entry;list.append(li);}
 }
@@ -45,5 +49,12 @@ async function refresh(){if(running)return;running=true;byId('refresh').disabled
   finally{running=false;byId('refresh').disabled=false;}
 }
 byId('refresh').addEventListener('click',refresh);
-setInterval(()=>{if(byId('automatic').checked&&!document.hidden)refresh();},30000);
-refresh();
+setInterval(()=>{if(byId('automatic').checked&&active())refresh();},30000);
+document.addEventListener('visibilitychange',()=>{if(active()&&byId('automatic').checked)refresh();});
+if(dialog){
+  byId('services-button').addEventListener('click',()=>{
+    document.querySelectorAll('.app-menu[open]').forEach(menu=>menu.removeAttribute('open'));
+    dialog.showModal();refresh();
+  });
+}else refresh();
+})();

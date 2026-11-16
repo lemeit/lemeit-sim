@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.14.1 — 2026-11-16
+
+- Herramientas → Motores y servicios abre un diálogo integrado de solo lectura, sin navegación ni acciones administrativas.
+- Conserva comprobación manual, seguimiento de Windows y Debian cada 30 segundos solo con el diálogo abierto y la página visible, e historial de hasta 20 eventos.
+- Integra acceso por códigos de clase sin correo, sesiones protegidas, cuota de cálculos y panel privado de creación/desactivación de clases. Mantiene los controles de rol en servidor; no habilita reinicios ni administración de clases al alumnado.
+
 ## 0.14.0 — 2026-11-16
 
 - Panel de diagnóstico de solo lectura para Windows y Debian (`/admin.html`): disponibilidad, versión efectiva del gateway, hora de inicio, uptime y equipos reconocidos, con actualización manual o automática de 30 segundos e historial limitado a la sesión. Sin botones de encendido o apagado ni secretos.
