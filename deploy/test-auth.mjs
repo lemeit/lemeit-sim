@@ -44,7 +44,8 @@ test('usuario sin sesión no puede consultar ni calcular desde el motor',async()
 test('código de clase no permite leer panel ni JS de administración',async()=>{
  for(const path of ['/admin.html','/admin-classes.js','/admin-monitor.js']){
   const r=await handle(new Request('https://sim.lemeit.ar'+path,{headers:sessionHeaders}),env(),asset(path));
-  assert.equal(r.status,401,path);
+  assert.equal(r.status,path==='/admin.html'?302:403,path);
+  if(path==='/admin.html')assert.equal(r.headers.get('Location'),'https://sim.lemeit.ar/acceso.html?role=admin');
  }
 });
 test('sesión administrativa permite panel privado',async()=>{
@@ -82,4 +83,11 @@ test('clase desactivada no expone identidad ni vencimientos de la sesión',async
  const e=env();e.SIM_AUTH_DB=fakeDb('student',{active:0});
  const r=await handle(new Request('https://sim.lemeit.ar/api/auth/me',{headers:sessionHeaders}),e);
  const data=await r.json();assert.equal(data.authenticated,false);assert.equal(data.class_name,null);assert.equal(data.expires_at,null);
+});
+
+test('panel privado exige ingreso administrativo también sin sesión y con query',async()=>{
+ for(const path of ['/admin.html','/admin.html?role=admin']){
+  const r=await handle(new Request('https://sim.lemeit.ar'+path),env(),asset('/admin.html'));
+  assert.equal(r.status,302);assert.equal(r.headers.get('Location'),'https://sim.lemeit.ar/acceso.html?role=admin');
+ }
 });

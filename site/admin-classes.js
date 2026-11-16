@@ -20,7 +20,7 @@ async function listClasses(){
    const tr=document.createElement('tr'),label=document.createElement('td'),state=document.createElement('td'),expires=document.createElement('td'),action=document.createElement('td');
    label.textContent=entry.label;
    const active=entry.active===1&&entry.expires_at>Date.now()/1000;
-   state.textContent=active?'Activo':'Inactivo / vencido';
+   const badge=document.createElement('span');badge.className='class-state '+(active?'active':'inactive');badge.textContent=active?'Activa':'Inactiva / vencida';state.append(badge);
    expires.textContent=classDate(entry.expires_at);
    if(active){
     const button=document.createElement('button');button.type='button';button.textContent='Desactivar';
@@ -34,24 +34,28 @@ async function listClasses(){
    }
    tr.append(label,state,expires,action);target.append(tr);
   }
-  message.textContent=classes.length+' clases registradas. Los códigos no se almacenan en claro.';
+  message.textContent=classes.length?classes.length+' clases · '+classes.filter(c=>c.active===1&&c.expires_at>Date.now()/1000).length+' activas':'Todavía no hay clases. Creá el primer código arriba.';
  }catch(error){message.textContent=error.message;}
 }
 $class('class-create-form').addEventListener('submit',async event=>{
  event.preventDefault();
  const message=$class('classes-message'),out=$class('class-new-code'),button=event.currentTarget.querySelector('button[type="submit"]');
- button.disabled=true;out.textContent='';
+ button.disabled=true;out.hidden=true;$class('class-code-value').textContent='';
  try{
   const data=await classApi('create-class',{label:$class('class-label').value,hours:Number($class('class-hours').value)});
-  out.textContent='Código para compartir con la clase: '+data.code+' · vence '+classDate(data.expires_at)+' · copialo ahora, después no podrá consultarse.';
+  $class('class-code-value').textContent=data.code;
+  $class('class-code-detail').textContent=data.label+' · vence '+classDate(data.expires_at)+'. Copialo ahora: no se puede recuperar después.';
+  $class('class-copy').textContent='Copiar código';out.hidden=false;
   $class('class-label').value='';
   await listClasses();
  }catch(error){message.textContent=error.message;}
  finally{button.disabled=false;}
 });
 $class('classes-refresh').addEventListener('click',listClasses);
-$class('admin-logout').addEventListener('click',async()=>{
- try{await classApi('logout');location.assign('/acceso.html');}
- catch(error){$class('classes-message').textContent=error.message;}
-});
 listClasses();
+
+$class('class-code-dismiss').addEventListener('click',()=>{$class('class-new-code').hidden=true;$class('class-code-value').textContent='';});
+$class('class-copy').addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText($class('class-code-value').textContent);$class('class-copy').textContent='Copiado';}
+ catch{$class('classes-message').textContent='Seleccioná el código y copialo manualmente.';}
+});

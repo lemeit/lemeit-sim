@@ -59,6 +59,7 @@ export async function handle(request, env, assets=ASSETS) {
     const gate=await authorize(request,env,['/admin.html','/admin-monitor.js','/admin-classes.js'].includes(path)?'admin':'student');
     if(!gate.ok){
       if(path==='/index.html')return Response.redirect(url.origin+'/acceso.html',302);
+      if(path==='/admin.html'&&[401,403].includes(gate.response.status))return Response.redirect(url.origin+'/acceso.html?role=admin',302);
       return gate.response;
     }
   }

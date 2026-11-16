@@ -11,6 +11,7 @@ function field(dl,name,value){
 }
 function snapshot(engine,summary,details){
   const view=byId(engine);view.querySelector('.summary').textContent=summary;
+  view.dataset.state=summary==='Disponible'?'ready':summary==='Ocupado'?'busy':'unconfirmed';
   const dl=view.querySelector('dl');dl.replaceChildren();
   for(const [key,value] of Object.entries(details))field(dl,key,String(value));
 }
