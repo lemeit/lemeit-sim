@@ -10,6 +10,7 @@
     "ENGINE_URL": "https://engine-sim.lemeit.ar",
     "DEBIAN_ENGINE_URL": "https://sim-debian.lemeit.ar"
   },
+  "d1_databases": [{"binding":"SIM_AUTH_DB","database_name":"lemeit-sim-auth","database_id":"7a15efe9-d498-490f-9c69-8990103fcf56"}],
   "observability": {
     "enabled": true,
     "traces": {"enabled": true}
