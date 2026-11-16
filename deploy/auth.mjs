@@ -8,7 +8,15 @@ async function digest(secret,message){
   const k=await crypto.subtle.importKey('raw',utf8.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
   return hex(await crypto.subtle.sign('HMAC',k,utf8.encode(message)));
 }
-function configured(env){return !!(env.SIM_AUTH_DB&&typeof env.SIM_SESSION_SECRET==='string'&&env.SIM_SESSION_SECRET.length>=32&&typeof env.SIM_ADMIN_PASSWORD==='string'&&env.SIM_ADMIN_PASSWORD.length>=20);}
+function configured(env){
+ const invalid=[];
+ if(!env.SIM_AUTH_DB)invalid.push('SIM_AUTH_DB:missing');
+ if(typeof env.SIM_SESSION_SECRET!=='string'||env.SIM_SESSION_SECRET.length<32)invalid.push('SIM_SESSION_SECRET:missing-or-short');
+ if(typeof env.SIM_ADMIN_PASSWORD!=='string'||env.SIM_ADMIN_PASSWORD.length<20)invalid.push('SIM_ADMIN_PASSWORD:missing-or-short');
+ // Solo nombres y validación; nunca valores ni longitudes de credenciales.
+ if(invalid.length)console.warn(JSON.stringify({event:'auth_configuration_invalid',invalid}));
+ return invalid.length===0;
+}
 function cookie(request){const m=(request.headers.get('Cookie')||'').match(/(?:^|;\s*)sim_session=([a-f0-9]{64})(?:;|$)/);return m?.[1]||null;}
 function randomSession(){return hex(crypto.getRandomValues(new Uint8Array(32)));}
 function randomClassCode(){const buf=crypto.getRandomValues(new Uint8Array(12));return [...buf].map(b=>chars[b%chars.length]).join('');}
