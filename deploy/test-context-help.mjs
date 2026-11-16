@@ -31,5 +31,6 @@ test('vínculos para diagnóstico, conexiones, propiedades y especificaciones',(
 test('orden de scripts: ayuda disponible antes del editor',()=>{
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
   assert.ok(html.indexOf('context-help.js')>0&&html.indexOf('context-help.js')<html.indexOf('app.js'));
-  assert.match(html,/Wiki de ΣIM · 16 capítulos/);
+  assert.match(html,/Fundamentos y ejercicios · Wiki/);
+  assert.match(html,/Manual de uso/);
 });
