@@ -9,7 +9,7 @@ const extract=(start,end)=>script.slice(script.indexOf(start),script.indexOf(end
 test('la versión del portal utilizada por el monitor está sincronizada',()=>{
   const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
   assert.ok(admin.includes('data-portal-version="'+pkg.version+'"'));
-  assert.match(script,/dataset\.portalVersion/);
+  assert.match(script,/dataset\?\.portalVersion|dataset\.portalVersion/);
 });
 test('el comparador reconoce gateways viejos sin confundir versiones mayores',()=>{
   const compare=vm.runInNewContext(extract('function olderVersion(','function field(')+'\nolderVersion');
