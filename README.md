@@ -16,6 +16,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.14.1 en desarrollo, sin publicar** — Monitor de ambos motores en un diálogo integrado del editor. Cambio apilado sobre el PR #49 de acceso por clases, todavía borrador. Mantiene los controles de rol en servidor y no ofrece acciones administrativas al alumnado.
+
 **0.14.0 — Diagnóstico de ambos motores y comparación Windows–Debian**, 16/11/2026. Panel de consulta de Windows y Debian de solo lectura, información de recuperación local y 19 controles reales del Ejemplo 13 en Windows, equivalentes a Debian en las cifras reportadas. No habilita inicio/parada remotos. [Catálogo](site/catalogo.html) y [roadmap](docs/roadmap.md) actualizados.
 
 **0.13.0 — Monitor de versión y estado del gateway**, 15/11/2026. El portal consulta `/api/status` del motor seleccionado para distinguir el gateway cargado en memoria de los archivos actualizados. Se informa versión, arranque, uptime, ocupado/libre y tipos admitidos, sin claves ni controles remotos de servicio. Requiere reiniciar gateway Debian tras desplegar; pruebas automatizadas incluidas. [Catálogo](site/catalogo.html) y [hoja de ruta](docs/roadmap.md) actualizados.
