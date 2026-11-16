@@ -1458,7 +1458,26 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
   .sim-shell .sim-panel-floating{position:fixed!important;z-index:900!important;display:flex!important;flex-direction:column!important;min-width:220px!important;min-height:150px!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 72px)!important;resize:both;overflow:auto!important;background:var(--spx-bg)!important;border:1px solid var(--spx-border)!important;border-radius:8px!important;box-shadow:0 15px 40px #0004!important;margin:0!important;padding:12px!important}
   .sim-shell .sim-panel-floating .panel-heading,.sim-shell .sim-panel-floating .results-heading{cursor:move;touch-action:none;user-select:none}
   .sim-shell .sim-panel-floating .panel-resizer,.sim-shell .sim-panel-floating .results-resizer{display:none!important}
-  .sim-shell #results-panel.sim-panel-floating{flex:unset!important;max-height:calc(100dvh - 72px)!important;height:auto;min-height:180px}
+  .sim-shell #results-panel.sim-panel-floating{flex:unset!important;max-height:calc(100dvh - 24px)!important;min-height:180px}
   .sim-shell #results-panel.sim-panel-floating #results{min-height:80px}
 }
 @media(max-width:760px){.dock-swap{display:none}.sim-shell .dock-tools{margin-left:6px}}
+
+/* Controles discretos de tamaño: ocho bordes y esquinas para paneles flotantes. */
+@media(min-width:761px){
+  .sim-shell .sim-panel-floating{resize:none!important;box-sizing:border-box;overflow:hidden!important}
+  .sim-shell .sim-panel-floating .dock-grip{display:block;position:absolute;z-index:12;touch-action:none}
+  .sim-shell .sim-panel-floating .dock-grip-n{top:0;left:12px;right:12px;height:7px;cursor:n-resize}
+  .sim-shell .sim-panel-floating .dock-grip-s{bottom:0;left:12px;right:12px;height:7px;cursor:s-resize}
+  .sim-shell .sim-panel-floating .dock-grip-e{right:0;top:12px;bottom:12px;width:7px;cursor:e-resize}
+  .sim-shell .sim-panel-floating .dock-grip-w{left:0;top:12px;bottom:12px;width:7px;cursor:w-resize}
+  .sim-shell .sim-panel-floating .dock-grip-ne{top:0;right:0;width:14px;height:14px;cursor:ne-resize}
+  .sim-shell .sim-panel-floating .dock-grip-nw{top:0;left:0;width:14px;height:14px;cursor:nw-resize}
+  .sim-shell .sim-panel-floating .dock-grip-se{bottom:0;right:0;width:15px;height:15px;cursor:se-resize}
+  .sim-shell .sim-panel-floating .dock-grip-sw{bottom:0;left:0;width:14px;height:14px;cursor:sw-resize}
+  .sim-shell .sim-panel-floating .dock-grip-se::after{content:"";position:absolute;right:3px;bottom:3px;width:8px;height:8px;border-right:2px solid var(--spx-text-dim);border-bottom:2px solid var(--spx-text-dim);opacity:.55}
+  .sim-shell .sim-panel-floating #inspector,.sim-shell .sim-panel-floating #palette,.sim-shell .sim-panel-floating #results{min-height:0;overflow:auto}
+  .sim-shell #results-panel.sim-panel-floating{height:var(--results-height,350px)}
+  .sim-shell .results-panel.sim-panel-floating .results-heading{cursor:move}
+}
+.dock-grip{display:none}
