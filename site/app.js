@@ -207,6 +207,7 @@ function renderInspector(){
   const n=nodeById(selection?.node);if(!n){container.innerHTML='<div class="empty-inspector"><span>⌁</span>Seleccioná un objeto del diagrama.<br>Acá vas a definir sus condiciones y consultar sus resultados.</div>';return;}
   const t=TYPES[n.type],r=result?.streams[n.id];
   let html=`<p class="inspector-type">${esc(t.label.toUpperCase())}</p><h3 class="inspector-title">${esc(n.name)}</h3>${field('name','Nombre','',n.name,{text:true})}`;
+  html+=SimContextHelp.link(n.type);
   if(!isStream(n))html+=`<p class="inspector-section">DISEÑO</p><label class="field"><span class="field-label">Tamaño del símbolo · %</span><input data-field="scale" type="number" min="50" max="300" step="10" value="${Math.round(symbolScale(n)*100)}"></label><p class="mini">Tamaño gráfico; no modifica las dimensiones físicas del equipo.</p>`;
   if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;

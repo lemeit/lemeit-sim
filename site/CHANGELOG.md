@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.18.0 — 2026-11-16
+
+- Ayuda contextual en el inspector de los 12 tipos de objetos: enlace directo al capítulo correspondiente de la wiki de ΣIM.
+- Acceso al índice de 16 capítulos desde el menú Ayuda, en una pestaña nueva. No envía condiciones ni datos del proyecto a la wiki.
+- Pruebas unitarias del mapa de enlaces, de los tipos admitidos y del orden de carga del módulo.
+- Sin cambios de cálculo, conexiones, gateway ni motores. Las actividades guiadas paso a paso quedan para una entrega posterior.
+
 ## 0.17.5 — 2026-11-16
 
 - La revisión previa del proyecto muestra parámetros de equipo obligatorios faltantes, no numéricos o fuera de rango: bombas, válvulas, intercambiador, divisor, calentador, enfriador y reactores.
