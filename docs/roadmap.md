@@ -1,6 +1,6 @@
 # Hoja de ruta de ΣIM
 
-Estado al 16 de noviembre de 2026 · portal 0.17.2. Este editor no es todavía una réplica completa de DWSIM.
+Estado al 16 de noviembre de 2026 · portal 0.17.4. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
 ## Referencias y trazabilidad
@@ -60,6 +60,13 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - **Validación Windows realizada el 16/11/2026:** los 19 controles de la sonda devolvieron OK. Las cuatro temperaturas, presiones, caudales y entalpías coinciden con la prueba Debian en las cifras informadas. Agua caliente: 80,000000 → 70,456556 °C; agua fría: 20,000000 → 29,565765 °C; ambas a 300 kPa y 1 kg/s. Q cedido = 40,00000037 kW; Q recibido = 40,00000004 kW; residuo = 0,00000033 kW. Fuente: salida de PowerShell aportada por el usuario, ejecutando `tools/validate-hx13-windows.ps1` contra el gateway Windows real; informe JSON permanece local en `.local/runtime/validacion-hx13-windows.json`. Validación cruzada limitada a este caso, no prueba todos los modos de `HeatExchanger`.
 - El monitor de consulta se mantiene sin acciones administrativas; el panel actual de clases requiere rol admin.
 - Inicio/apagado desde el navegador requiere supervisor persistente y autenticación robusta; queda fuera del monitor de consulta.
+
+## 0.17.4 — Historial de transiciones del monitor
+
+- En el panel administrativo, cada consulta de Windows y Debian registra un evento solo al cambiar el estado del motor, en vez de registrar cada comprobación redundante.
+- Se muestra desde cuándo dura el estado observado, los errores consecutivos sin estado confirmado y las versiones de gateway anteriores al portal. No se interpreta falta de respuesta como confirmación de apagado.
+- Historial limitado a 20 eventos en memoria de la pestaña, sin datos de proyectos, claves, credenciales ni persistencia.
+- Consulta de solo lectura; arranque/reinicio remotos siguen fuera de alcance hasta contar con supervisor autorizado.
 
 ## Pendiente: supervisión remota de equipos
 

@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.4 — 2026-11-16
+
+- Administración: seguimiento de cambios de disponibilidad, ocupación y estado no confirmado de Windows y Debian; historial limitado a 20 eventos en memoria de la pestaña.
+- Se informa desde cuándo se observa el estado, fallos consecutivos y advertencia si la versión del gateway precede a la del portal.
+- No se controlan servicios ni se exponen credenciales; no hay cambios en el cálculo DWSIM ni en sus API.
+
 ## 0.17.3 — 2026-11-16
 
 - Enlaces directos a ejemplos, ayuda, catálogo y adaptación sin sesión redirigen al ingreso con aviso claro y retorno a la página elegida. Destinos limitados a páginas conocidas del mismo portal; no se admiten redirecciones externas ni retorno al panel administrativo con rol de alumno.

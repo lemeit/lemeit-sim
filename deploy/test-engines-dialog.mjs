@@ -6,8 +6,8 @@ const source=readFileSync(new URL('../site/engines-monitor.js',import.meta.url),
 function setup(){
  const nodes=new Map(),calls=[],timers=[],listeners={};
  function node(id){if(!nodes.has(id))nodes.set(id,{checked:true,open:false,disabled:false,dataset:{},children:[],addEventListener(t,f){this[t]=f},showModal(){this.open=true},querySelector(s){return node(id+s)},replaceChildren(){this.children=[]},append(...items){this.children.push(...items)}});return nodes.get(id)}
- const document={hidden:false,getElementById:node,querySelectorAll:()=>[],createElement:()=>({}),addEventListener:(t,f)=>listeners[t]=f};
- vm.runInNewContext(source,{document,performance,Date,AbortSignal,setInterval:(f,ms)=>timers.push({f,ms}),fetch:async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({gateway_version:'test',state:options.headers['X-SIM-Engine']==='windows'?'ready':'busy',supported_equipment:['Mixer'],started_at:'2026-11-16T00:00:00Z',uptime_s:3600})}}});
+ const document={documentElement:{dataset:{portalVersion:'0.17.4'}},hidden:false,getElementById:node,querySelectorAll:()=>[],createElement:()=>({}),addEventListener:(t,f)=>listeners[t]=f};
+ vm.runInNewContext(source,{document,performance,Date,AbortSignal,setInterval:(f,ms)=>timers.push({f,ms}),fetch:async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({gateway_version:'0.17.4',state:options.headers['X-SIM-Engine']==='windows'?'ready':'busy',supported_equipment:['Mixer'],started_at:'2026-11-16T00:00:00Z',uptime_s:3600})}}});
  return {node,calls,timers,document,listeners};
 }
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
