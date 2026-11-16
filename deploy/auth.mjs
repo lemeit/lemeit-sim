@@ -5,7 +5,7 @@ const hex=bytes=>[...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,'0'
 const now=()=>Math.floor(Date.now()/1000);
 const json=(value,status=200,headers={})=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 async function digest(secret,message){
-  const k=await crypto.subtle.importKey('raw',utf8.encode(secret),'HMAC',false,['sign']);
+  const k=await crypto.subtle.importKey('raw',utf8.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
   return hex(await crypto.subtle.sign('HMAC',k,utf8.encode(message)));
 }
 function configured(env){return !!(env.SIM_AUTH_DB&&typeof env.SIM_SESSION_SECRET==='string'&&env.SIM_SESSION_SECRET.length>=32&&typeof env.SIM_ADMIN_PASSWORD==='string'&&env.SIM_ADMIN_PASSWORD.length>=20);}
