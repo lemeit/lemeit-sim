@@ -1,93 +1,62 @@
-# Acceso por código de clase y administración de ΣIM
+# Acceso por clase y seguridad
 
-## Objetivo
+Estado vigente: portal 0.17.2 · revisión 16/11/2026. Para el uso cotidiano del panel, ver [Administración de clases](administracion-clases.md).
 
-Los alumnos ingresan con un código temporal y **sin correo ni cuenta individual**. La sesión
-se entrega en una cookie `HttpOnly; Secure; SameSite=Strict`, válida hasta cuatro horas,
-o hasta la caducidad/desactivación del código. El administrador usa una credencial
-distinta, almacenada solo como **secret** de Cloudflare, con sesión de hasta ocho horas.
+## Roles y sesiones
 
-Los cálculos **no son públicos**: el Worker valida la sesión antes de enviar solicitudes
-a Windows o Debian; sin configuración de autenticación, responde 503 y **no calcula**.
-Hay un límite de 4 solicitudes por minuto y sesión de alumno. Los gateways siguen
-aceptando únicamente las claves de origen de Cloudflare; nunca exponer los puertos.
+| Acceso | Credencial | Permisos | Duración de sesión |
+| --- | --- | --- | --- |
+| Alumno | Código compartido de clase, 12 caracteres | Editor, ejemplos, catálogo, cálculo y monitor de consulta | Hasta 4 h, sin superar el vencimiento o desactivación de la clase |
+| Administrador | Contraseña independiente | Editor y panel privado para crear, consultar y desactivar clases | Hasta 8 h; no muestra contador en pantalla |
 
-## Recursos Cloudflare y configuración
+No hay correo ni cuentas personales del alumnado. La vigencia de clase empieza al crear el código. La interfaz ofrece 2, 4, 8 y 24 horas, o 7 días; la API administrativa admite horas enteras entre 1 y 720. Son plazos de clase, no una extensión automática de cada sesión individual.
 
-La base dedicada `lemeit-sim-auth` está identificada en `wrangler.jsonc` como
-`SIM_AUTH_DB`. Las migraciones están versionadas en `migrations/`.
+La cookie de sesión es `HttpOnly; Secure; SameSite=Strict`, con un identificador aleatorio. El Worker valida sesión, rol, vencimiento y estado de clase antes de reenviar solicitudes a los motores. El pie muestra identidad y, solo para alumnos, cuenta regresiva sincronizada con el servidor. Al vencer, avisa sin descartar el proyecto.
 
-Hay que configurar **dos secretos antes de cualquier publicación**:
-```powershell
-cd C:\GitHub\lemeit-sim
-npx wrangler secret put SIM_SESSION_SECRET
-npx wrangler secret put SIM_ADMIN_PASSWORD
-```
-El primero debe ser aleatorio y tener **al menos 32 caracteres**; usar un generador
-criptográfico seguro, no una palabra memorizable. El segundo debe ser una contraseña
-única de **al menos 20 caracteres**. **Nunca guardar ni pegar valores en GitHub, chats
-o archivos del repositorio**. Usar un administrador de contraseñas.
-Cloudflare admite estos secretos como bindings; no deben agregarse a `vars`.
+## Rutas y límites
 
-`SIM_AUTH_DB` debe contener tablas `classes`, `sessions`, `login_attempts`
-y `calculation_usage`. Antes de desplegar, verificar manualmente la base y su
-binding en el ambiente correcto; una base remota distinta no se migra sola.
+- `/acceso.html`: ingreso público; muestra si ya hay una sesión abierta. Cambiar una opción del formulario no cambia el rol sin validar su credencial.
+- `/admin.html`: panel privado. Sin sesión administrativa, redirige al ingreso con Administrador seleccionado. Los scripts privados y las APIs no se habilitan por ocultar o mostrar enlaces.
+- `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`: inicio, salida y estado de la sesión actual.
+- `/api/auth/create-class`, `/api/auth/list-classes`, `/api/auth/disable-class`: requieren rol admin; el alumnado recibe 403.
+- `/api/catalog`, `/api/status`, `/api/simulate`: requieren sesión válida. Sin sesión, la API devuelve 401; si falta configuración válida, falla cerrada con 503.
+- Cálculos: hasta 4 por minuto y sesión de alumno. Intentos fallidos: 5 por 15 minutos, por IP y tipo de ingreso. No equivale a una prueba de carga concurrente ni a una protección total contra abuso distribuido.
 
-## Accesos
+**Herramientas → Estado de motores** es solo consulta y está disponible para usuarios autenticados. **Administración de clases** queda reservada a admin. No hay controles remotos de inicio, parada ni reinicio.
 
-- `/acceso.html`: pantalla pública con código de clase o credencial administrativa.
-- `/admin.html`: **requiere rol admin**; crea códigos de 12 caracteres, nombre de clase
-  y plazo de 2 a 720 horas; permite desactivarlos. Los nuevos códigos activos quedan visibles y copiables en el listado privado.
-- `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`: autenticación.
-- `/api/auth/create-class`, `/api/auth/disable-class`, `/api/auth/list-classes`:
-  acciones administrativas con sesión activa.
-- `/api/catalog`, `/api/status`, `/api/simulate`: requieren sesión válida.
-  Los recursos estáticos privados también quedan restringidos. Alumnos no acceden
-  al panel ni a su código JavaScript.
+## Recursos y secretos
 
-Los intentos de acceso fallidos se limitan por IP y rol (5 en 15 minutos);
-se recomienda agregar protección WAF/rate limiting en Cloudflare para abuso
-distribuido. Los códigos de clase son credenciales compartidas: entregarlos solo
-a la clase, rotarlos, revocarlos cuando termine el curso y reducir duración.
-No sustituyen identidades individuales ni generan trazabilidad personal.
+Worker `lemeit-sim`, dominio `sim.lemeit.ar`, base D1 `lemeit-sim-auth` vinculada como `SIM_AUTH_DB` en `wrangler.jsonc`.
 
-## Administración de equipos
+| Nombre | Tipo y finalidad |
+| --- | --- |
+| `SIM_SESSION_SECRET` | Secret aleatorio de al menos 32 caracteres: firma de sesiones/códigos y derivación de clave de cifrado |
+| `SIM_ADMIN_PASSWORD` | Secret con contraseña administrativa única de al menos 20 caracteres |
+| `ORIGIN_KEY` / `DEBIAN_ORIGIN_KEY` | Secrets de comunicación con los gateways; no son contraseñas de alumnos |
+| `ENGINE_URL` / `DEBIAN_ENGINE_URL` | Direcciones públicas de los gateways en configuración |
 
-El panel muestra estado y guía de recuperación. **No hay botones remotos
-de inicio, detención o reinicio**. Los procesos locales deben supervisarse desde
-Windows y Debian con cuentas autorizadas. Un servicio caído puede reiniciarse
-remotamente solo si existe un supervisor independiente, autentificado y limitado
-a comandos autorizados. Una máquina apagada o sin energía **no puede encenderse
-mediante su propio túnel Cloudflare**.
+Configurar secretos directamente en Cloudflare o mediante la herramienta oficial, sin pegarlos en chats, GitHub, comandos con valores visibles ni archivos versionados. Guardarlos en un gestor de contraseñas. La carga mediante `wrangler secret put` publica inmediatamente una nueva versión del Worker; para preparar una versión sin desplegar, usar el flujo de secretos versionados de Cloudflare. Los despliegues normales conservan los secretos existentes.
 
-Windows utiliza un acceso directo al iniciar sesión; Debian tiene `systemd`.
-Para encendido tras volver la luz, investigar en el BIOS/UEFI opciones de
-`Restore on AC Power Loss` o similares, y su compatibilidad con el equipo.
-Para encendido remoto sin presencia física se requeriría una infraestructura
-adicional (Wake-on-LAN con agente de la red encendido, equipo de gestión remota,
-o dispositivo de energía correctamente instalado).
+La configuración rechaza claves demasiado cortas. El diagnóstico registra solo los nombres de requisitos incumplidos, nunca valores ni longitudes de credenciales.
 
-## Pruebas y publicación
+## Códigos consultables y migraciones
 
-1. Ejecutar `npm test` y `npm run build:verified`.
-2. Verificar 503 sin secretos; 401 sin sesión al configurar secretos; 403 de alumno
-   al intentar acceder a admin; rechazo por cuota y 429 de intentos excesivos.
-3. Probar en staging con base separada antes de desplegar al dominio público.
-4. Configurar secretos y base remota; verificar ambas máquinas separadamente.
-5. Publicar con `npm run deploy` solo después de pruebas end-to-end exitosas.
+La base contiene `classes`, `sessions`, `login_attempts` y `calculation_usage`. Las migraciones versionadas son:
 
-## Identidad y tiempo restante
+1. `0001_class_access.sql`: clases, sesiones e intentos.
+2. `0002_calculation_quotas.sql`: cuota por sesión.
+3. `0003_recoverable_class_codes.sql`: columna nullable `code_encrypted`.
 
-El pie del editor identifica al alumno y su clase; el administrador ve «Administrador · Sesión administrativa» sin contador, tanto en editor como en panel privado. Solo para alumnos, la franja muestra el tiempo restante efectivo: el menor entre el plazo de clase y el vencimiento de la sesión (máximo 4 horas para alumnos, 8 para administradores). Si la clase dura más que la sesión, informa la fecha de cierre de clase y permite volver a ingresar para renovar acceso. El contador se sincroniza con la hora del servidor y revalida cada minuto y al volver a la pestaña. Al vencer o desactivarse, avisa sin descartar el proyecto; los cálculos siguen sujetos a autorización en servidor.
+Desde 0.17.0 se conserva el HMAC para validar el ingreso y una copia cifrada AES-GCM para permitir consulta posterior exclusivamente al administrador. La clave se deriva con contexto propio de `SIM_SESSION_SECRET`; el cifrado queda ligado al ID de clase. El listado devuelve el código solo si la clase sigue activa y vigente; no envía el cifrado ni el HMAC al navegador.
 
-## Separación de accesos e interfaz
+Los códigos anteriores no tienen copia cifrada y no pueden recuperarse, pero siguen siendo válidos hasta su vencimiento/desactivación. No se regeneran ni se invalidan clases al migrar. Si no se conservó un código anterior, crear un acceso nuevo. Una rotación de `SIM_SESSION_SECRET` invalida sesiones/códigos firmados con la clave anterior e impide descifrar su copia: planificar la renovación antes de cambiarlo.
 
-«Estado de motores» en el editor es un monitor de consulta sin administración de clases ni controles remotos. «Administración de clases» solo aparece para el administrador y su página exige rol admin en servidor; acceder con una sesión de alumno redirige al ingreso administrativo. Las APIs administrativas responden 403 al alumnado. Elegir Administrador en la pantalla de ingreso no concede permisos: es obligatorio validar la contraseña.
+Los códigos son credenciales compartidas: se pueden reenviar, no identifican individualmente a alumnos y se comparten solo con la clase correspondiente.
 
-La pantalla de ingreso indica si ya hay una sesión abierta. «Salir» cierra la sesión actual antes de cambiar de acceso. En el panel privado, las clases se crean y consultan antes del bloque separado de motores. Los diálogos admiten cierre por botón, Escape y clic fuera.
+## Publicación y comprobaciones
 
-## Consulta de códigos activos
+La aplicación ya está publicada; las propuestas anteriores no son requisitos pendientes de activación. Las entregas de acceso se publicaron por autorización del titular, con comprobaciones automáticas y recorridos locales con base en memoria. No se afirma un ensayo de carga ni una prueba integral independiente de todos los escenarios en producción.
 
-Desde 0.17.0 se conserva el HMAC para validar el ingreso y una copia cifrada con AES-GCM para permitir consulta posterior exclusivamente al administrador. La clave se deriva con contexto propio de `SIM_SESSION_SECRET`; el cifrado queda ligado al ID de clase. Nunca se guarda el código en claro en la base. El listado entrega el código solo si la clase está activa y no venció; no envía el cifrado ni el HMAC al navegador.
+Para próximas entregas: compilar y ejecutar comprobaciones relevantes; aplicar migraciones a la base y ambiente correctos antes del código que las necesita; revisar el despliegue efectivo y la versión de Ayuda → Acerca de. Usar un entorno aislado para ensayos que puedan alterar accesos reales. Ver [publicación y mantenimiento](despliegue-automatico.md).
 
-Aplicar `0003_recoverable_class_codes.sql` antes de publicar. Los códigos anteriores quedan sin copia cifrada y no se pueden recuperar: siguen funcionando, pero para volver a compartir un código desconocido hay que crear un acceso nuevo. Cambiar `SIM_SESSION_SECRET` también impide descifrar códigos guardados con la clave anterior; no rotarla sin planificar renovación de códigos.
+La web no enciende computadoras ni reinicia DWSIM. Recuperación y supervisión se realizan en cada equipo: [operación local](operacion-local.md) y [selección de motores](seleccion-manual-motores.md).

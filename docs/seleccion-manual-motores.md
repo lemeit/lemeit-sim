@@ -1,5 +1,7 @@
 # Motores Windows y Debian · configuración y operación
 
+Revisión de guía: 16/11/2026. El estado de instalación documentado abajo conserva sus fechas; no garantiza disponibilidad actual. En el portal, consultar el monitor de conexión y **Herramientas → Estado de motores**. El ingreso requiere código de clase o sesión administrativa; ver [acceso y seguridad](acceso-clases-admin.md).
+
 ## Estado documentado al 12/11/2026
 
 El segundo motor Debian está incorporado y configurado como destino alternativo

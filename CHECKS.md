@@ -1,4 +1,17 @@
-# Comprobaciones del prototipo · 6 de noviembre de 2026
+# Comprobaciones de ΣIM
+
+## Estado documental al 16/11/2026 · portal 0.17.2
+
+- Acceso y administración: suite de 107 comprobaciones correcta en 0.17.0. Incluye integración con SQLite en memoria: ingreso administrativo, crear/listar clases, ingreso de alumno, prohibir administración, revocar y cerrar sesión.
+- Códigos: comprobado guardado cifrado distinto del código, recuperación solo para admin/clases vigentes, resultado no recuperable para códigos anteriores o cifrado alterado, ocultación tras vencimiento/desactivación y rechazo de alumno.
+- Interfaz: recorridos locales con credenciales ficticias del Worker compilado; diálogo de motores sin recortes, cierre por clic exterior, cambio de acceso, códigos visibles tras recargar, sesión en el pie y administrador sin contador. No se usaron datos privados de producción.
+- Tipografía 0.17.1: 18 comprobaciones relevantes correctas; revisión visual y de estilos calculados: pie y sesión con igual fuente/tamaño/color; párrafos, créditos y viñetas de Acerca de iguales. Acerca de muestra solo cuatro puntos y enlaza al historial.
+- Compilaciones y despliegues confirmados para las entregas anteriores; migraciones D1 0001–0003 aplicadas. La actualización 0.17.2 es documental y se verifica por build, enlaces y sincronía de versión/historial.
+- No se volvieron a ejecutar simulaciones reales por estos cambios. Los informes anteriores conservan su motor, fecha y tolerancias. Siguen sin atribuirse validación experimental, carga simultánea de una clase o cobertura de todos los escenarios de producción.
+
+Los apartados siguientes son registros históricos, no declaraciones del estado actual del acceso o de los servicios.
+
+## Prototipo · 6 de noviembre de 2026
 
 - 11 pruebas pasaron con DWSIM 10.2.15 real: mezcla adiabática de agua, calentador
   con corriente de energía, enfriador, divisor y mezcla agua/etanol con NRTL;

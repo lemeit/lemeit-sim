@@ -1,6 +1,6 @@
 # Despliegue automático de ΣIM
 
-## Estado actual
+## Estado actual · revisión 16/11/2026
 
 Workers Builds ya está conectado al repositorio y publica al actualizar `main`.
 No hace falta volver a conectar ni crear otro Worker o proyecto Pages.
@@ -41,6 +41,21 @@ No se declaran rutas nuevas y workers_dev=false mantiene los dominios administra
 desde el panel; sim.lemeit.ar sigue asociado al mismo Worker. No se modifica DNS,
 Tunnel ni el puerto MCP. No se crean servicios pagos mediante esta configuración.
 
+## Acceso por clases y migraciones D1
+
+`SIM_AUTH_DB` vincula la base `lemeit-sim-auth`. Antes de publicar código que necesite columnas nuevas, aplicar las migraciones versionadas al ambiente correcto:
+
+```powershell
+npx wrangler d1 migrations list lemeit-sim-auth --remote
+npx wrangler d1 migrations apply lemeit-sim-auth --remote
+```
+
+Las migraciones 0001–0003 están aplicadas en la base de producción al 16/11/2026. Incluyen clases, sesiones, intentos, cuotas y copia cifrada de nuevos códigos. No reemplazan las clases ni permiten recuperar códigos antiguos guardados solo como HMAC.
+
+Además de las claves de origen, el Worker requiere `SIM_SESSION_SECRET` (aleatoria, mínimo 32 caracteres) y `SIM_ADMIN_PASSWORD` (mínimo 20). Se almacenan como Secrets, no en `vars`, Git ni archivos de build. Cambiar `SIM_SESSION_SECRET` invalida sesiones y códigos existentes, e impide descifrar su copia anterior: planificar la renovación.
+
+`workers_dev=false` y `preview_urls=false` conservan desactivadas esas URLs alternativas. Las versiones no sustituyen ni migran automáticamente una base D1 diferente. Ver [acceso y seguridad](acceso-clases-admin.md).
+
 ## Flujo cotidiano
 
 1. Preparar una rama, incrementar la versión y actualizar Acerca de, README e historial.
@@ -49,11 +64,10 @@ Tunnel ni el puerto MCP. No se crean servicios pagos mediante esta configuració
    fallidos, configurar aparte una regla de rama que exija el job verificar.
 4. Workers Builds ejecuta pruebas JS y build; solo publica si ambos pasan.
 5. En Builds comprobar Success y el commit desplegado. Recargar sim.lemeit.ar y
-   revisar Ayuda → Acerca de. La entrega publicada el 12/11/2026 es 0.7.0; comparar siempre con la versión del commit desplegado.
+   revisar Ayuda → Acerca de. El portal documentado es 0.17.2; comparar siempre con la versión del commit desplegado.
 6. Si hay un fallo, abrir el registro del build; no volver a copiar secretos.
 
-GitHub Actions no despliega: solo hay un publicador (Cloudflare), evitando dos
-procesos que sobrescriban la misma versión. Los PR no publican en producción.
+GitHub Actions valida y no despliega. Workers Builds es el publicador habitual al fusionar en `main`; los PR no publican en producción. Hubo publicaciones manuales autorizadas con Wrangler durante la puesta en marcha. Evitar publicar manualmente mientras otro build de `main` sigue activo: comprobar el despliegue que finalmente sirve el dominio.
 
 ## Backends Windows y Debian
 

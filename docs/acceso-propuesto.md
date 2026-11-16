@@ -1,27 +1,14 @@
-# Acceso propuesto, todavía sin implementar
+# Propuesta de acceso: referencia histórica
 
-## Estado actual
+La propuesta ya está implementada y publicada. Esta página conserva la dirección anterior para no romper enlaces; para el funcionamiento actual usar:
 
-La web no autentica personas. Cualquier visitante puede pedir cálculos mediante
-la API pública limitada. El secreto entre Worker y gateway protege el origen del
-motor, no identifica a alumnos. La comprobación de Origin tampoco es autenticación.
+- [Administración de clases](administracion-clases.md): ingreso, creación/copia/desactivación de códigos y tiempos.
+- [Acceso y seguridad](acceso-clases-admin.md): roles, sesiones, cuotas, secretos y almacenamiento cifrado.
 
-El gateway limita globalmente los cálculos públicos a 12/minuto y 120/hora, serializa
-los trabajos y aplica 45 s de límite total, tamaño de proyecto y entradas validadas.
-Los límites son compartidos: un tercero puede consumir capacidad y perjudicar una
-clase. Esto no habilita una terminal pública; las rutas expuestas están acotadas.
-El monitor de esta revisión muestra solo HTTP, latencia, estado y mensajes de esa
-vista, no archivos privados, comandos, credenciales ni registros internos de la PC.
+## Decisiones adoptadas
 
-## Propuesta para decidir con el docente
+Ingreso por código temporal de clase sin correo ni cuentas individuales; administración separada con contraseña; validación en servidor antes de llegar a los motores; vencimiento, desactivación, límite de intentos y cuota por sesión.
 
-- Edición y preparación de proyectos sin registro personal.
-- Cálculos de alumnos mediante código temporal de clase, sin correo ni cuenta.
-  Validación en servidor, vencimiento, revocación y límites por clase/sesión.
-- Administración privada con autenticación independiente del acceso de alumnos.
-  Protegerla antes de agregar control de servicios o registros privados.
-- Un código compartido puede reenviarse: no equivale a identificar individualmente
-  a cada alumno. Conservar la menor cantidad posible de datos personales.
+Un código compartido puede reenviarse y no identifica a una persona. El secreto de origen protege el gateway y no reemplaza la autenticación de alumnos. La comprobación de Origin tampoco equivale a autenticar una sesión.
 
-No se activaron cuentas, códigos, cookies de acceso ni nuevos servicios en este cambio.
-Referencia: https://api-security.owasp.org/editions/2023/en/0xa4-unrestricted-resource-consumption/
+La administración remota de procesos y el encendido de computadoras siguen fuera del alcance actual; requieren infraestructura independiente.
