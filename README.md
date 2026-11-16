@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.14.1](https://img.shields.io/badge/portal-0.14.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.14.2](https://img.shields.io/badge/portal-0.14.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -15,6 +15,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
+
+**0.14.2 — Campos de ingreso según el rol**, 16/11/2026. Corrige la visibilidad del formulario para mostrar únicamente código de clase o contraseña de administrador según corresponda.
 
 **0.14.1 — Acceso por clases y monitor integrado**, 16/11/2026. Ingreso del alumnado mediante código temporal, administración privada de clases y controles de sesión en servidor. Herramientas → Motores y servicios abre un diálogo de solo lectura para Windows y Debian. No ofrece inicio, parada ni reinicio remotos.
 
