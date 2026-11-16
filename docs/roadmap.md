@@ -46,12 +46,13 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Pruebas automatizadas del contrato HTTP y datos de estado. La publicación del Worker no reinicia el servicio: ejecutar `sudo systemctl restart lemeit-sim.service` tras actualizar `server.py` en Debian y verificar `GET /api/status`. Hasta comprobar la instalación concreta, la ejecución real en producción está pendiente.
 - No incorpora controles de inicio/apagado: requieren autenticación de administrador, autorización explícita y un proceso supervisor seguro.
 
-## En desarrollo · 0.14.0 — Diagnóstico rápido y validación cruzada
+## Entregado en 0.14.0 — Diagnóstico rápido y validación cruzada
 
 - Panel de solo lectura `site/admin.html`: comprobar Windows y Debian en paralelo mediante `/api/status`, ver estado, versión, último arranque y equipos reconocidos; seguimiento opcional cada 30 segundos con historial limitado a la sesión.
 - Guía de recuperación local para Windows (`start-online.ps1` / `stop-online.ps1`) y Debian (`systemctl`), sin acciones remotas ni exposición de credenciales.
 - Sonda Windows `tools/validate-hx13-windows.ps1`: ejecuta el Ejemplo 13 a través del gateway HTTP real y compara temperaturas, presión, caudales, calor cedido/recibido, balance energético y estado del equipo con la referencia Debian.
-- **Pendiente:** obtener salida real de la sonda desde Windows y registrar comparación con tolerancias; no afirmar equivalencia numérica antes del informe.
+- **Validación Windows realizada el 16/11/2026:** los 19 controles de la sonda devolvieron OK. Las cuatro temperaturas, presiones, caudales y entalpías coinciden con la prueba Debian en las cifras informadas. Agua caliente: 80,000000 → 70,456556 °C; agua fría: 20,000000 → 29,565765 °C; ambas a 300 kPa y 1 kg/s. Q cedido = 40,00000037 kW; Q recibido = 40,00000004 kW; residuo = 0,00000033 kW. Fuente: salida de PowerShell aportada por el usuario, ejecutando `tools/validate-hx13-windows.ps1` contra el gateway Windows real; informe JSON permanece local en `.local/runtime/validacion-hx13-windows.json`. Validación cruzada limitada a este caso, no prueba todos los modos de `HeatExchanger`.
+- El panel de diagnóstico queda implementado y protegido contra acciones administrativas desde el navegador; su funcionamiento publicado deberá verificarse luego del despliegue.
 - Inicio/apagado desde el navegador requiere supervisor persistente y autenticación robusta; queda fuera de este panel público.
 
 ## Próxima etapa: versión de administración
