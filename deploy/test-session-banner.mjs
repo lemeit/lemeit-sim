@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../site/session-banner.js',import.meta.url),'utf8');
 function setup(role='student'){
  const nodes=new Map(),timers=[],listeners={};let time=0;
- const get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',hidden:true,dataset:{}});return nodes.get(id)};
+ const get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',hidden:true,dataset:{},addEventListener(){}});return nodes.get(id)};
  const state={data:{authenticated:true,role,class_name:'Física <Grupo A>',expires_at:1120,class_expires_at:1120,server_time:1000}};
  vm.runInNewContext(source,{document:{hidden:false,getElementById:get,addEventListener:(t,f)=>listeners[t]=f},performance:{now:()=>time},Date,console,fetch:async()=>({ok:true,json:async()=>state.data}),setInterval:(f,ms)=>timers.push({f,ms})});
  return {get,state,timers,listeners,advance:ms=>time+=ms};

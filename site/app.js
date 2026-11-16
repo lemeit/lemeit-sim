@@ -678,7 +678,6 @@ async function checkEngine({silent=false}={}){
   return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
-  document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};

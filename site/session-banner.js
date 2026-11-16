@@ -35,6 +35,7 @@
    if(admin)el('session-countdown').textContent='';
    el('session-role').textContent=admin?'Administrador':'Alumno';
    el('session-name').textContent=admin?'Sesión administrativa':(data.class_name||'Clase');
+   el('session-name').title=el('session-name').textContent;
    el('session-countdown-label').textContent='Acceso restante';
    el('session-note').textContent=!admin&&data.class_expires_at>data.expires_at?'Clase hasta '+new Date(data.class_expires_at*1000).toLocaleString('es-AR')+' · la sesión puede renovarse al ingresar.':'';
    el('session-status').textContent='';el('session-login').hidden=true;
@@ -45,6 +46,12 @@
    banner.hidden=false;el('session-status').textContent=expired?'Acceso finalizado. Guardá el proyecto antes de volver a ingresar.':'No se pudo actualizar el estado del acceso.';
   }finally{loading=false;}
  }
+ el('session-logout')?.addEventListener('click',()=>el('signout-dialog').showModal());
+ el('session-confirm-logout')?.addEventListener('click',async()=>{
+  const button=el('session-confirm-logout');button.disabled=true;
+  try{const r=await fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:'{}'});if(!r.ok)throw Error();location.assign('/acceso.html');}
+  catch{el('session-logout-message').textContent='No se pudo cerrar la sesión. Intentá nuevamente.';button.disabled=false;}
+ });
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();refresh();}});
  setInterval(()=>{if(!document.hidden)tick();},1000);
  setInterval(()=>{if(!document.hidden)refresh();},60000);

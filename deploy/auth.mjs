@@ -62,7 +62,8 @@ export async function authorize(request,env,role='student'){
  if(!configured(env))return {ok:false,response:json({error:'Acceso a clases sin configurar; los motores permanecen cerrados.'},503)};
  try{
   const s=await sessionFor(request,env);
-  if(!s||(role==='admin'&&s.role!=='admin'))return {ok:false,response:json({error:'Acceso requerido. Ingresá un código de clase o credencial administrativa.'},401)};
+  if(!s)return {ok:false,response:json({error:'Acceso requerido. Ingresá un código de clase o credencial administrativa.'},401)};
+  if(role==='admin'&&s.role!=='admin')return {ok:false,response:json({error:'Se requiere acceso de administrador.'},403)};
   return {ok:true,session:s};
  }catch{return {ok:false,response:json({error:'No se pudo verificar el acceso; no se enviará el cálculo.'},503)};}
 }

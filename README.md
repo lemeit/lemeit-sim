@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.15.1](https://img.shields.io/badge/portal-0.15.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.16.0](https://img.shields.io/badge/portal-0.16.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.15.1 — Contador solo para alumnos**, 16/11/2026. El administrador muestra únicamente su rol y «Sesión administrativa». Se conserva el vencimiento interno y el control de acceso del servidor.
+**0.16.0 — Acceso y administración reorganizados**, 16/11/2026. Ingreso separado de alumno y administrador, indicación de sesión existente y salida explícita. Panel privado centrado en clases y códigos; monitor de motores de solo lectura, sin tarjetas recortadas. Los diálogos se cierran al hacer clic fuera. El administrador no muestra contador. Se mantienen controles de rol en servidor.
 
 **0.15.0 — Clase y tiempo restante**, 16/11/2026. El editor muestra rol, nombre de clase y cuenta regresiva del acceso real. El panel privado identifica la sesión administrativa. El vencimiento avisa sin cerrar el proyecto; no modifica la duración ni los permisos vigentes.
 

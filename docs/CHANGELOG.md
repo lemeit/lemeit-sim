@@ -6,10 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.15.1 — 2026-11-16
+## 0.16.0 — 2026-11-16
 
-- Elimina la cuenta regresiva y su etiqueta de la vista del administrador, tanto en editor como en panel privado. Conserva «Administrador · Sesión administrativa».
-- El contador continúa visible para alumnos. No modifica duración de sesiones ni controles de rol en servidor.
+- Reorganiza ingreso y panel privado: selección clara de alumno/administrador, sesión existente visible, salida explícita y administración centrada en clases. Código recién creado en un bloque propio con copia y ocultación; listado con estado y vencimiento.
+- Distingue «Estado de motores» (consulta) de «Administración de clases» (privado). El servidor redirige al ingreso administrativo al solicitar el panel sin el rol requerido y mantiene 403 en APIs y archivos administrativos.
+- Corrige las tarjetas de motores con altura natural y diálogo adaptable, sin heredar los límites de los resultados del editor. Registro y ayuda de recuperación plegables.
+- Todos los diálogos se cierran al hacer clic en el fondo, sin cerrar al pulsar dentro ni al arrastrar desde el contenido.
+- Franja de sesión compacta, nombre de clase con truncado accesible y salida explícita. Contador exclusivo del alumnado; administrador identificado sin cuenta regresiva. Conserva vencimientos y permisos internos.
 
 ## 0.15.0 — 2026-11-16
 
