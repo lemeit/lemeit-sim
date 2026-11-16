@@ -15,6 +15,7 @@ La cookie de sesión es `HttpOnly; Secure; SameSite=Strict`, con un identificado
 
 ## Rutas y límites
 
+- Enlaces directos a páginas protegidas sin sesión redirigen al ingreso con un aviso y vuelven a la página solicitada tras autenticarse; los destinos están limitados a páginas conocidas del portal. Las APIs y los scripts no redirigen.
 - `/acceso.html`: ingreso público; muestra si ya hay una sesión abierta. Cambiar una opción del formulario no cambia el rol sin validar su credencial.
 - `/admin.html`: panel privado. Sin sesión administrativa, redirige al ingreso con Administrador seleccionado. Los scripts privados y las APIs no se habilitan por ocultar o mostrar enlaces.
 - `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`: inicio, salida y estado de la sesión actual.
