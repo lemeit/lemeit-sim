@@ -1,3 +1,5 @@
+import {webcrypto} from 'node:crypto';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {handle as workerHandle} from './worker.mjs';
