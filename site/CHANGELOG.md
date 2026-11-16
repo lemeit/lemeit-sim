@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.14.3 — 2026-11-16
+
+- Simplifica el texto de ingreso: «Ingresá un código de clase para utilizar el simulador» y «El acceso es temporal».
+- Registra únicamente los nombres de configuración ausente o insuficiente, sin valores ni longitudes de secretos. Conserva mínimos de 32 caracteres para sesión y 20 para contraseña administrativa y el cierre ante configuración inválida.
+
 ## 0.14.2 — 2026-11-16
 
 - Respeta el atributo `hidden` en el formulario de ingreso: cada rol muestra solo su campo de credencial. Corrección visual; se conservan los controles de rol en servidor.
