@@ -1,6 +1,8 @@
 /* Editor local de procesos. Las propiedades físicas proceden del servidor DWSIM. */
 'use strict';
 const $ = id => document.getElementById(id);
+const PORTAL_VERSION = '0.13.0';
+const isGatewayOlder = version => /^\d+\.\d+\.\d+$/.test(version) && version.split('.').some((part,i,parts)=>Number(part)<Number(PORTAL_VERSION.split('.')[i]) && parts.slice(0,i).every((prev,j)=>Number(prev)===Number(PORTAL_VERSION.split('.')[j])));
 const TYPES = {
   MaterialStream: {label:'Corriente de materia', short:'Materia', icon:'material_stream', prefix:'C', w:150,h:70},
   EnergyStream: {label:'Corriente de energía', short:'Energía', icon:'energy_stream', prefix:'Q',w:130,h:65},
@@ -645,10 +647,12 @@ function renderServerDetails(){
   const elapsed=connectionCheck?`${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms`:'Sin respuesta';
   const catalogInfo=connectionCheck?.compounds?`<dt>Catálogo</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:'';
   const latest=lastCalculation?`${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}${lastCalculation.engine?' · '+(lastCalculation.engine==='debian'?'Debian':'Windows'):''}`:'Sin cálculos';
+  const missing=gatewayCheck?.ok&&hasProject?graph.nodes.filter(n=>!gatewayCheck.supported.includes(n.type)).map(n=>n.name+' ('+n.type+')'):[];
+  const compatibility=gatewayCheck?.ok?(gatewayCheck.older?'<p class="monitor-explanation"><strong>Gateway anterior al portal:</strong> actualizá el código y reiniciá el servicio antes de utilizar operaciones nuevas.</p>':'')+(missing.length?`<p class="monitor-explanation"><strong>Equipos no admitidos por este gateway:</strong> ${esc(missing.join(', '))}. Seleccioná un motor compatible o actualizá el gateway.</p>`:''):'';
   const gatewayInfo=gatewayCheck?.ok
     ?`<dt>Versión del gateway</dt><dd>${esc(gatewayCheck.version)}</dd><dt>Inicio del proceso</dt><dd>${esc(gatewayCheck.startedAt)}</dd><dt>Tiempo activo</dt><dd>${esc(gatewayCheck.uptime)}</dd><dt>Estado del gateway</dt><dd>${esc(gatewayCheck.state)}</dd><dt>Equipos reconocidos</dt><dd>${esc(gatewayCheck.equipment)}</dd>`
     :`<dt>Versión del gateway</dt><dd>No confirmada${gatewayCheck?.reason?' · '+esc(gatewayCheck.reason):''}</dd>`;
-  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
+  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section>${compatibility}<p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
 }
 async function readGatewayStatus(engine,generation){
   // Endpoint independiente: una respuesta 404 de un gateway antiguo no invalida el catálogo.
@@ -660,7 +664,7 @@ async function readGatewayStatus(engine,generation){
     if(!/^\\d+\\.\\d+\\.\\d+$/.test(data.gateway_version)||!Array.isArray(data.supported_equipment)||!['ready','busy'].includes(data.state))throw new Error('Datos de estado incompletos.');
     const date=Date.parse(data.started_at);
     if(!Number.isFinite(date)||!Number.isFinite(data.uptime_s))throw new Error('Fecha de inicio inválida.');
-    gatewayCheck={ok:true,version:data.gateway_version,startedAt:new Date(date).toLocaleString('es-AR'),uptime:fmt(data.uptime_s/3600,1)+' h',state:data.state==='busy'?'Ocupado':'Disponible',equipment:data.supported_equipment.join(', ')};
+    gatewayCheck={ok:true,version:data.gateway_version,older:isGatewayOlder(data.gateway_version),startedAt:new Date(date).toLocaleString('es-AR'),uptime:fmt(data.uptime_s/3600,1)+' h',state:data.state==='busy'?'Ocupado':'Disponible',equipment:data.supported_equipment.join(', '),supported:data.supported_equipment};
   }catch(error){if(generation!==engineCheckGeneration)return;gatewayCheck={ok:false,reason:error.message};}
 }
 async function checkEngine({silent=false}={}){
