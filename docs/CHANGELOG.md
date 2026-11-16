@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.20.1 — 2026-11-16
+
+- Arrastre corregido para los paneles flotantes, incluso por encima del SVG del editor.
+- Ocho bordes y esquinas de redimensionamiento con límites de pantalla y persistencia local.
+- Limpieza del menú Ver, sin instrucciones sueltas.
+
 ## 0.20.0 — 2026-11-16
 
 - Ventanas de trabajo flexibles en escritorio: intercambiar biblioteca y propiedades, flotarlas y acoplarlas, moverlas por cabecera y restaurar la distribución predeterminada.
