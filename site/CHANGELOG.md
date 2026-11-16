@@ -8,10 +8,9 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.20.1 — 2026-11-16
 
-- Se corrigió el arrastre libre de ventanas flotantes; el panel captura el puntero, incluso al atravesar el diagrama SVG.
-- Redimensionamiento por cuatro bordes y cuatro esquinas, respetando mínimos y viewport; tamaño y posición se recuerdan en el navegador.
-- Eliminado el texto explicativo fuera de contexto del menú Ver. Se conserva Restablecer distribución.
-- No modifica cálculos, gateway, permisos ni proyectos.
+- Arrastre corregido para los paneles flotantes, incluso por encima del SVG del editor.
+- Ocho bordes y esquinas de redimensionamiento con límites de pantalla y persistencia local.
+- Limpieza del menú Ver, sin instrucciones sueltas.
 
 ## 0.20.0 — 2026-11-16
 
