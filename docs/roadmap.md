@@ -1,6 +1,6 @@
 # Hoja de ruta de ΣIM
 
-Estado al 16 de noviembre de 2026 · portal 0.17.4. Este editor no es todavía una réplica completa de DWSIM.
+Estado al 16 de noviembre de 2026 · portal 0.17.5. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
 ## Referencias y trazabilidad
@@ -67,6 +67,12 @@ Los resultados de modelos se distinguen de mediciones experimentales.
 - Se muestra desde cuándo dura el estado observado, los errores consecutivos sin estado confirmado y las versiones de gateway anteriores al portal. No se interpreta falta de respuesta como confirmación de apagado.
 - Historial limitado a 20 eventos en memoria de la pestaña, sin datos de proyectos, claves, credenciales ni persistencia.
 - Consulta de solo lectura; arranque/reinicio remotos siguen fuera de alcance hasta contar con supervisor autorizado.
+
+## 0.17.5 — Especificaciones antes del cálculo
+
+- Revisión local de parámetros de bombas, válvulas, intercambiadores, divisores, calentadores/enfriadores y reactores; avisos en español cuando faltan valores, no son finitos o están fuera de rangos del contrato actual.
+- Mantiene la validación definitiva en `server.py`; la revisión no realiza un análisis algebraico completo de grados de libertad ni garantiza convergencia o plausibilidad física.
+- Vincular el diagnóstico con [la guía original de grados de libertad en la wiki](https://wiki.lemeit.ar/sim/grados-libertad-especificaciones/). No cambia la simulación DWSIM ni abre funciones nuevas.
 
 ## Pendiente: supervisión remota de equipos
 
