@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.19.0 — 2026-11-16
+
+- Actividad guiada opcional para el Ejemplo 13: reconocer entradas y especificación, formular dos predicciones, ejecutar el cálculo manualmente y comparar temperaturas de salidas y residuos de masa.
+- La comparación lee únicamente resultados vigentes devueltos por DWSIM; los valores de referencia históricos están identificados por separado y no se presentan como nuevos cálculos.
+- Se accede desde el menú Ejemplos, sin cambiar automáticamente de motor, modificar el gateway ni ejecutar cálculos desde el tutor.
+- Pruebas de reconocimiento de puertos, ausencia de resultados, valores del motor y ausencia de scripts inline.
+
 ## 0.18.0 — 2026-11-16
 
 - Ayuda contextual en el inspector de los 12 tipos de objetos: enlace directo al capítulo correspondiente de la wiki de ΣIM.
