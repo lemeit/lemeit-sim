@@ -49,7 +49,8 @@ globalThis.SimGuidedHx=(()=>{
       const state=extract(graph,result);
       const actual=evaluate(state,predictions);
       const recognized=!!state;
-      const baseline=recognized&&graph.compounds?.length===1&&graph.compounds[0]==='Water'&&graph.model==='Steam Tables (IAPWS-IF97)'&&state.heat_kW===40&&state.feed_hot_C===80&&state.feed_cold_C===20;
+      const hotFeed=graph.nodes?.find(n=>n.id==='hot_feed'),coldFeed=graph.nodes?.find(n=>n.id==='cold_feed');
+      const baseline=recognized&&graph.compounds?.length===1&&graph.compounds[0]==='Water'&&graph.model==='Steam Tables (IAPWS-IF97)'&&state.heat_kW===40&&state.feed_hot_C===80&&state.feed_cold_C===20&&hotFeed?.mass_flow===1&&coldFeed?.mass_flow===1&&hotFeed?.pressure_kPa===300&&coldFeed?.pressure_kPa===300;
       body.innerHTML=`
         <p>Actividad optativa: analizá un intercambiador de dos corrientes de agua sin mezcla. La referencia anterior de DWSIM no reemplaza un cálculo nuevo.</p>
         <h3>1 · Preparar y reconocer</h3>
