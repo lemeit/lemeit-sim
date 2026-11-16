@@ -630,10 +630,18 @@ function reviewGraph(){
     if(!isStream(n)){
       const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream');
       const products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');
-      if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);
-      if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);
-      if(n.type==='HeatExchanger'&&feeds.length<2)issues.push(`${n.name}: conectá las alimentaciones caliente y fría.`);
-      if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);
+      // Reflejar las cantidades exigidas por validate_graph() en el gateway.
+      // El mezclador admite de una a tres entradas; el resto tiene aridad fija.
+      const expectedFeeds=n.type==='HeatExchanger'?2:1;
+      const expectedProducts=['Splitter','Separator','HeatExchanger'].includes(n.type)||isReactor(n)?2:1;
+      if(n.type==='Mixer'){
+        if(feeds.length<1||feeds.length>3)issues.push(`${n.name}: conectá entre una y tres alimentaciones de materia.`);
+      }else if(feeds.length!==expectedFeeds){
+        issues.push(`${n.name}: conectá ${expectedFeeds===2?'dos alimentaciones de materia (caliente y fría)':'una alimentación de materia'}.`);
+      }
+      if(products.length!==expectedProducts){
+        issues.push(`${n.name}: conectá ${expectedProducts===2?'las dos salidas de materia':'una salida de materia'}.`);
+      }
       issues.push(...equipmentSpecificationIssues(n).map(issue=>`${n.name}: ${issue}`));
     }
   }
