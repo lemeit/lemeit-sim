@@ -1,4 +1,4 @@
-import {authorize,authRoute} from './auth.mjs';
+import {authorize,authRoute,authorizeCalculation} from './auth.mjs';
 // Los archivos estáticos se incorporan al publicar. Ninguna credencial va en ASSETS.
 const ASSETS = /* ASSETS */ {};
 const CSP = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
@@ -35,6 +35,8 @@ export async function handle(request, env, assets=ASSETS) {
       const chunks=[];let size=0;
       while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>100000){await reader.cancel();return error(413,'El proceso supera los 100 kB.');}chunks.push(value);}
       body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
+      const quota=await authorizeCalculation(env,gate.session);
+      if(!quota.ok)return quota.response;
     }
     const endpoint=engineId==='debian'?env.DEBIAN_ENGINE_URL:env.ENGINE_URL;
     const key=engineId==='debian'?env.DEBIAN_ORIGIN_KEY:env.ORIGIN_KEY;
@@ -54,7 +56,7 @@ export async function handle(request, env, assets=ASSETS) {
   // requiere una sesión vigente. No confiar en ocultar botones con JavaScript.
   const publicPaths=new Set(['/acceso.html','/acceso.js','/simprox-theme.css','/style.css','/theme-toggle.js','/favicon.ico','/assets/favicon.svg','/assets/sim-wordmark.svg']);
   if(!publicPaths.has(path)){
-    const gate=await authorize(request,env,path==='/admin.html'||path==='/admin-monitor.js'?'admin':'student');
+    const gate=await authorize(request,env,['/admin.html','/admin-monitor.js','/admin-classes.js'].includes(path)?'admin':'student');
     if(!gate.ok){
       if(path==='/index.html')return Response.redirect(url.origin+'/acceso.html',302);
       return gate.response;
