@@ -736,6 +736,10 @@ async function checkEngine({silent=false}={}){
 function bindWorkspaceTools(){
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
+  SimGuidedHx.mount({
+    getProject:()=>({graph,result}),
+    openExample:type=>{$('example-select').value=type;resetExample();closeMenus();}
+  });
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
