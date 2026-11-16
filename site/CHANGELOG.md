@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.20.0 — 2026-11-16
+
+- Ventanas de trabajo flexibles en escritorio: intercambiar biblioteca y propiedades, flotarlas y acoplarlas, moverlas por cabecera y restaurar la distribución predeterminada.
+- Balances y resultados también pueden flotar dentro de la página; se mantiene la opción anterior de separar diagrama o resultados en ventanas sincronizadas.
+- La distribución se guarda solamente en el navegador; nunca modifica el proyecto o la simulación.
+- Ayuda → Manual de uso abre ahora la documentación canónica de la wiki; ayuda.html redirige al manual para conservar enlaces antiguos.
+- Pruebas de disposición, controles y referencias. Sin cambios en gateway ni en motores DWSIM.
+
 ## 0.19.1 — 2026-11-16
 
 - La actividad guiada pasa a estar integrada en el Ejemplo 13, sin una entrada adicional en el menú Ejemplos.
