@@ -581,14 +581,61 @@ function exportResults(kind){
   else{const sheet=sheets[kind==='balances'?1:0];downloadLocal(stem+'-'+sheet.name.toLowerCase()+'.csv',SimproxFiles.csv(sheet.rows),'text/csv;charset=utf-8');}
   recordActivity('Resultados exportados',kind);closeMenus();
 }
+// Revisión de especificaciones antes de enviar el proceso a DWSIM.
+// Es una verificación estructural, no un cálculo algebraico completo de grados de libertad.
+function equipmentSpecificationIssues(node){
+  const issues=[];
+  const valid=(value,min,max)=>typeof value==='number'&&Number.isFinite(value)&&value>=min&&value<=max;
+  const requireNumber=(key,label,min,max)=>{
+    if(!valid(node[key],min,max))issues.push(`especificá ${label} (entre ${min} y ${max}).`);
+  };
+  switch(node.type){
+    case 'Heater':
+    case 'Cooler':
+      requireNumber('outlet_C','la temperatura objetivo de salida en °C',-273.14,3000);
+      break;
+    case 'Splitter':
+      // Intervalo abierto, igual que la validación del servidor.
+      if(!valid(node.split,0.000001,0.999999))issues.push('especificá la fracción de la salida 1 (mayor que 0 y menor que 1).');
+      break;
+    case 'Pump':
+    case 'Valve':
+      requireNumber('outlet_pressure_kPa','la presión absoluta de salida en kPa',0.001,1000000);
+      if(node.type==='Pump')requireNumber('efficiency_pct','la eficiencia de la bomba en %',0.01,100);
+      break;
+    case 'HeatExchanger':
+      requireNumber('heat_duty_kW','la potencia térmica transferida en kW',0.000001,1000000);
+      break;
+    case 'ConversionReactor':
+    case 'EquilibriumReactor':
+      requireNumber('outlet_C','la temperatura de reacción en °C',-273.14,3000);
+      if(node.type==='ConversionReactor')requireNumber('conversion','la conversión en %',0,100);
+      if(!['Vapor','Liquid','Mixture'].includes(node.phase))issues.push('seleccioná una fase de reacción.');
+      if(typeof node.base_compound!=='string'||!node.base_compound)issues.push('seleccioná el reactivo base.');
+      if(!node.stoichiometry||typeof node.stoichiometry!=='object'||Array.isArray(node.stoichiometry)||!Object.values(node.stoichiometry).some(x=>typeof x==='number'&&x<0)||!Object.values(node.stoichiometry).some(x=>typeof x==='number'&&x>0))issues.push('completá una estequiometría con reactivos negativos y productos positivos.');
+      break;
+  }
+  return issues;
+}
 function reviewGraph(){
   if(!hasProject)return ['Abrí o creá un proyecto.'];
   const issues=[];
   if(!graph.nodes.length)issues.push('El diagrama está vacío.');
   if(!graph.model)issues.push('Elegí un modelo de propiedades en Simulación.');
   for(const n of graph.nodes){
-    if(isFeed(n)){issues.push(...SimproxStreams.issues(n,graph.compounds).map(issue=>`${n.name}: ${issue}`));if(n.flash_spec==='PS'&&graph.model==='Steam Tables (IAPWS-IF97)')issues.push(`${n.name}: PS no está habilitado con IAPWS-IF97; usá TP o PH.`);}
-    if(!isStream(n)){const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream'),products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);if(n.type==='HeatExchanger'&&feeds.length<2)issues.push(`${n.name}: conectá las alimentaciones caliente y fría.`);if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);}
+    if(isFeed(n)){
+      issues.push(...SimproxStreams.issues(n,graph.compounds).map(issue=>`${n.name}: ${issue}`));
+      if(n.flash_spec==='PS'&&graph.model==='Steam Tables (IAPWS-IF97)')issues.push(`${n.name}: PS no está habilitado con IAPWS-IF97; usá TP o PH.`);
+    }
+    if(!isStream(n)){
+      const feeds=graph.edges.filter(e=>e.to===n.id&&nodeById(e.from)?.type==='MaterialStream');
+      const products=graph.edges.filter(e=>e.from===n.id&&nodeById(e.to)?.type==='MaterialStream');
+      if(!feeds.length)issues.push(`${n.name}: falta una alimentación de materia.`);
+      if(!products.length)issues.push(`${n.name}: falta una salida de materia.`);
+      if(n.type==='HeatExchanger'&&feeds.length<2)issues.push(`${n.name}: conectá las alimentaciones caliente y fría.`);
+      if((n.type==='Splitter'||n.type==='Separator'||n.type==='HeatExchanger'||isReactor(n))&&products.length<2)issues.push(`${n.name}: conectá las dos salidas de materia.`);
+      issues.push(...equipmentSpecificationIssues(n).map(issue=>`${n.name}: ${issue}`));
+    }
   }
   return [...new Set(issues)];
 }

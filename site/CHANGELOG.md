@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.17.5 — 2026-11-16
+
+- La revisión previa del proyecto muestra parámetros de equipo obligatorios faltantes, no numéricos o fuera de rango: bombas, válvulas, intercambiador, divisor, calentador, enfriador y reactores.
+- No realiza análisis algebraico completo de grados de libertad ni sustituye al validador del gateway, los cálculos del motor o comprobaciones físicas.
+- Se vincula con el capítulo propio de grados de libertad y especificaciones de la wiki; sin cambios de API ni de motores.
+
 ## 0.17.4 — 2026-11-16
 
 - Administración: seguimiento de cambios de disponibilidad, ocupación y estado no confirmado de Windows y Debian; historial limitado a 20 eventos en memoria de la pestaña.
