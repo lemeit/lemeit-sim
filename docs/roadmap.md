@@ -97,6 +97,15 @@ resultados, con mensajes claros cuando el motor no esté disponible.
 3. Mostrar resultado real, límites y modos disponibles en el Ejemplo 13; sincronizar `site/catalogo.html`, `docs/roadmap.md`, Acerca de y CHANGELOG.
 4. Pruebas automatizadas aprobadas; solo entonces fusionar y desplegar la versión 0.12.0.
 
+## Acceso a clases y administración privada · en desarrollo (NO PUBLICADO)
+
+- Códigos de clase de 12 caracteres de uso temporal, sin correo ni cuenta individual; HMAC en D1, sesiones aleatorias mediante cookie segura, revocación y vencimientos.
+- Acceso al editor, API y cálculos protegido por el Worker; en ausencia de D1/secretos, no se ejecutan simulaciones (fallo cerrado).
+- Panel de administración con altas, consulta y revocación de códigos, separado por rol del alumnado. Cuota de cuatro cálculos por minuto y sesión, más bloqueo de intentos de ingreso fallidos.
+- Base D1 creada, migraciones versionadas y rutas implementadas en rama de desarrollo. **Faltan secretos administrados por el titular**, pruebas integrales de autenticación y verificación en staging. No desplegar todavía.
+- Reinicio remoto de Windows o Debian queda pendiente de supervisor local persistente con autenticación y lista de comandos permitidos. Ni Cloudflare ni un gateway apagado pueden encender una computadora físicamente apagada.
+- Documento técnico: [Acceso por clase y seguridad](acceso-clases-admin.md).
+
 ## Desarrollo posterior
 
 - Grados de libertad, explicación de estados y errores de especificación.

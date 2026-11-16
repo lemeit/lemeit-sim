@@ -1,6 +1,37 @@
+import {webcrypto} from 'node:crypto';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {handle} from './worker.mjs';
+import {handle as workerHandle} from './worker.mjs';
+import {authorize,configured} from './auth.mjs';
+const db={prepare(){return {bind(){return {async first(){return {role:'admin',class_id:null,expires_at:Math.floor(Date.now()/1000)+3600}}}}}}};
+function handle(request,env={},assets={}){
+  const headers=new Headers(request.headers);
+  headers.set('Cookie','sim_session='+('a'.repeat(64)));
+  const sessionRequest=new Request(request,{headers});
+  return workerHandle(sessionRequest,{
+    SIM_AUTH_DB:db,SIM_SESSION_SECRET:'test-only-session-secret-at-least-32-char',SIM_ADMIN_PASSWORD:'test-only-admin-passphrase-at-least-20-chars',...env
+  },assets);
+}
+test('la sesión simulada usa la cookie y los bindings configurados',async()=>{
+ const env={SIM_AUTH_DB:db,SIM_SESSION_SECRET:'test-only-session-secret-at-least-32-char',SIM_ADMIN_PASSWORD:'test-only-admin-passphrase-at-least-20-chars'};
+ assert.equal(configured(env),true);
+ const headers=new Headers({'Cookie':'sim_session='+('a'.repeat(64))});
+ const request=new Request('https://sim.lemeit.ar/',{headers});
+ assert.equal(request.headers.get('Cookie')?.length,76);
+ const gate=await authorize(request,env);
+ assert.equal(gate.ok,true,gate.response?await gate.response.text():'sin detalles');
+});
+test('deniega cálculos sin configuración de acceso',async()=>{
+ const r=await workerHandle(new Request('https://sim.lemeit.ar/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),{});
+ assert.equal(r.status,503);
+});
+test('el editor redirige a acceso si no existe sesión',async()=>{
+ const r=await workerHandle(new Request('https://sim.lemeit.ar/'),{});
+ assert.equal(r.status,302);
+ assert.equal(r.headers.get('Location'),'https://sim.lemeit.ar/acceso.html');
+});
+
 test('interfaz disponible sin motor',async()=>{
   const r=await handle(new Request('https://sim.lemeit.ar/'),{}, {'/index.html':{type:'text/html',data:btoa('Editor')}});
   assert.equal(r.status,200);assert.equal(await r.text(),'Editor');

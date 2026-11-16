@@ -23,7 +23,8 @@ test('no se presenta tabla exclusiva de primeros cinco ejemplos',()=>{
 test('el monitor del motor sigue accesible desde el pie, sin repetirse en herramientas',()=>{
   const index=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
   const tools=index.slice(index.indexOf('<summary>Herramientas</summary>'),index.indexOf('</details>',index.indexOf('<summary>Herramientas</summary>')));
-  assert.match(tools,/Motores y servicios/);
+  assert.match(tools,/Administración de motores y clases/);
+  assert.match(tools,/id="admin-nav-link"[^>]* hidden/);
   assert.match(tools,/Diagnóstico del proyecto/);
   assert.doesNotMatch(tools,/Estado del motor/);
   assert.match(index,/id="connection-monitor-button"/);

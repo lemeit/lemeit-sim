@@ -1,3 +1,4 @@
+import {authorize,authRoute,authorizeCalculation} from './auth.mjs';
 // Los archivos estáticos se incorporan al publicar. Ninguna credencial va en ASSETS.
 const ASSETS = /* ASSETS */ {};
 const CSP = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
@@ -12,7 +13,10 @@ function error(status, message) {
 }
 export async function handle(request, env, assets=ASSETS) {
   const url=new URL(request.url);
+  if(url.pathname.startsWith('/api/auth/'))return authRoute(request,env);
   if(url.pathname.startsWith('/api/')) {
+    const gate=await authorize(request,env);
+    if(!gate.ok)return gate.response;
     const catalog=url.pathname==='/api/catalog'&&request.method==='GET';
     const status=url.pathname==='/api/status'&&request.method==='GET';
     const calculate=url.pathname==='/api/simulate'&&request.method==='POST';
@@ -31,6 +35,8 @@ export async function handle(request, env, assets=ASSETS) {
       const chunks=[];let size=0;
       while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>100000){await reader.cancel();return error(413,'El proceso supera los 100 kB.');}chunks.push(value);}
       body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
+      const quota=await authorizeCalculation(env,gate.session);
+      if(!quota.ok)return quota.response;
     }
     const endpoint=engineId==='debian'?env.DEBIAN_ENGINE_URL:env.ENGINE_URL;
     const key=engineId==='debian'?env.DEBIAN_ORIGIN_KEY:env.ORIGIN_KEY;
@@ -46,6 +52,16 @@ export async function handle(request, env, assets=ASSETS) {
   }
   if(!['GET','HEAD'].includes(request.method))return error(405,'Método no disponible.');
   const path=url.pathname==='/'?'/index.html':url.pathname;
+  // La portada de acceso es pública; el resto, incluido el editor y el panel,
+  // requiere una sesión vigente. No confiar en ocultar botones con JavaScript.
+  const publicPaths=new Set(['/acceso.html','/acceso.js','/simprox-theme.css','/style.css','/theme-toggle.js','/favicon.ico','/assets/favicon.svg','/assets/sim-wordmark.svg','/manifest.webmanifest','/sw.js','/offline.html']);
+  if(!publicPaths.has(path)){
+    const gate=await authorize(request,env,['/admin.html','/admin-monitor.js','/admin-classes.js'].includes(path)?'admin':'student');
+    if(!gate.ok){
+      if(path==='/index.html')return Response.redirect(url.origin+'/acceso.html',302);
+      return gate.response;
+    }
+  }
   const asset=assets[path];
   if(!asset)return new Response('Página no encontrada',{status:404,headers:headers('text/plain; charset=utf-8')});
   const bytes=request.method==='HEAD'?null:Uint8Array.from(atob(asset.data),c=>c.charCodeAt(0));

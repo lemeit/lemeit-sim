@@ -13,7 +13,13 @@ async function collect(dir,prefix=''){
 }
 await checkRelease();
 const assets=await collect(path.join(root,'site'));
-const source=(await readFile(path.join(root,'deploy/worker.mjs'),'utf8')).replace('/* ASSETS */ {}',JSON.stringify(assets));
+// Build sin bundler: incluir el módulo de autenticación dentro del Worker único.
+const auth=(await readFile(path.join(root,'deploy/auth.mjs'),'utf8'))
+  .replaceAll('export async function ','async function ')
+  .replace('export {configured};','');
+const source=(await readFile(path.join(root,'deploy/worker.mjs'),'utf8'))
+   .replace("import {authorize,authRoute,authorizeCalculation} from './auth.mjs';",auth)
+  .replace('/* ASSETS */ {}',JSON.stringify(assets));
 await mkdir(path.join(root,'.build'),{recursive:true});
 await writeFile(path.join(root,'.build/worker.mjs'),source);
 console.log(`Worker preparado: ${Object.keys(assets).length} archivos, ${Buffer.byteLength(source)} bytes. No se publicó.`);
