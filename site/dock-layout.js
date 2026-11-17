@@ -224,11 +224,13 @@ globalThis.SimDockLayout=(()=>{
       p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Corrientes y balances'}[id];
       const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
       heading.classList.add('sim-cad-heading');heading.tabIndex=0;
+      if(id!=='results')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
       heading.title='Arrastrar para mover o acoplar; Alt evita el acoplamiento; doble clic para flotar o volver';
       const grip=document.createElement('span');grip.className='sim-cad-move';
-      grip.textContent='⠿';grip.setAttribute('aria-hidden','true');heading.prepend(grip);
+      grip.textContent='⠿';grip.setAttribute('aria-hidden','true');grip.title='Arrastrar panel';heading.prepend(grip);
       const select=document.createElement('select');select.className='sim-cad-position';
-      select.setAttribute('aria-label','Acoplar '+p.title);
+      select.setAttribute('aria-label','Posición de '+p.title);
+      select.title='Cambiar posición o restaurar panel';
       for(const choice of [...MODES,'reset']){
         const o=document.createElement('option');o.value=choice;o.textContent=LABELS[choice];select.append(o);
       }
