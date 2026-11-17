@@ -1486,13 +1486,13 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 /* Ventanas estilo CAD: acoplamiento al borde, vista previa, franja de agarre. */
 .sim-cad-slot[hidden],.sim-cad-target[hidden]{display:none!important}
 .sim-cad-controls{display:inline-flex;gap:5px;align-items:center;flex:none}
-.sim-cad-heading{display:flex!important;align-items:center;gap:9px!important;flex:none;min-height:34px;cursor:grab;touch-action:none;user-select:none;border-bottom:1px solid var(--spx-border);padding:5px 7px!important;background:var(--spx-surface-2);border-radius:3px}
-.sim-cad-heading h2{flex:1!important;min-width:0;margin:0!important;line-height:1.35;font-size:12px!important}
+.sim-cad-heading{display:flex!important;flex-wrap:wrap;align-items:center;gap:9px!important;flex:none;min-height:34px;cursor:grab;touch-action:none;user-select:none;border-bottom:1px solid var(--spx-border);padding:5px 7px!important;background:var(--spx-surface-2);border-radius:3px}
+.sim-cad-heading h2{flex:1 1 95px!important;min-width:0;margin:0!important;line-height:1.35;font-size:12px!important}
 .sim-cad-heading>.sim-cad-move{display:inline-flex;align-items:center;justify-content:center;flex:none;width:19px;height:24px;color:var(--spx-text-dim);font-size:19px;line-height:1;opacity:.7;cursor:grab}
 .sim-cad-heading>.sim-cad-move:hover{opacity:1}
 .sim-cad-heading>.sim-cad-controls{margin-left:auto}
 .sim-cad-heading>.dock-tools{display:none!important}
-.sim-cad-heading>span:not(.sim-cad-controls):not(.sim-cad-move):not(.dock-tools){flex:none;margin-left:8px;margin-right:6px!important;white-space:nowrap}
+.sim-cad-heading>span:not(.sim-cad-controls):not(.sim-cad-move):not(.dock-tools){flex:none;margin-left:12px;margin-right:10px!important;white-space:nowrap}
 .sim-cad-position{width:91px;max-width:91px;font-size:10px;padding:3px 3px;background:var(--spx-surface);color:var(--spx-text);border:1px solid var(--spx-border);border-radius:4px}
 .sim-cad-float{padding:2px 5px;min-width:25px;height:24px;border:1px solid var(--spx-border);border-radius:4px;background:transparent;color:var(--spx-text);font-size:15px}
 .sim-cad-float:hover,.sim-cad-float:focus-visible,.sim-cad-position:focus-visible{border-color:var(--spx-accent);outline:1px solid var(--spx-accent)}
