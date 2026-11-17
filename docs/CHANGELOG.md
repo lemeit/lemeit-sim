@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.22.1 — 2026-11-17
+
+- Rectángulo de selección sin relleno: solo contorno discontinuo para conservar visible el diagrama durante el gesto. Sin cambios en selección, movimiento ni cálculo.
+
 ## 0.22.0 — 2026-11-17
 
 - Selección múltiple por rectángulo desde el fondo del diagrama, Ctrl+A / Cmd+A o Ver → Seleccionar todo. Shift+clic suma o quita objetos; Shift+rectángulo amplía la selección. Movimiento colectivo con ratón o flechas, sin cambiar las conexiones ni las condiciones; Esc o clic en el fondo deselecciona.

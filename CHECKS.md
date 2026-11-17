@@ -367,3 +367,9 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Navegador local, ejemplo 01: Ctrl+A seleccionó los cuatro objetos; rectángulo completo también. Rectángulo parcial seleccionó mezclador y una alimentación; Shift+clic agregó otra corriente a una selección previa.
 - Arrastre de los cuatro objetos: mismo desplazamiento del equipo y los recorridos, sin desconexión. Flechas de teclado desplazaron el grupo. Esc quitó la selección. Supr eliminó los cuatro objetos de este proyecto de prueba.
 - Sin ejecución de DWSIM ni cambios de motores. El PR 74 reúne explorador y selección múltiple en la entrega 0.22.0 todavía en revisión.
+
+
+## 0.22.1 · Selección sin relleno · 17/11/2026
+
+- CSS del rectángulo revisado: fill:none; se conservan contorno discontinuo y pointer-events:none. Sin cambios en la lógica.
+- 152 pruebas aprobadas y build:verified correcto. No se ejecutaron nuevas simulaciones.
