@@ -44,7 +44,10 @@ test('la interfaz tiene una franja de agarre explícita y un selector de acople'
  assert.match(src,/window\.addEventListener\('pointermove',onGestureMove,true\)/);
  const css=readFileSync(new URL('../site/style.css',import.meta.url),'utf8');
  assert.match(css,/sim-cad-heading>span:not/);
- assert.match(css,/margin-right:10px!important/);
+ assert.match(css,/sim-cad-heading \.sim-cad-index/);
+ assert.match(css,/sim-cad-heading \.sim-cad-position/);
+ assert.match(css,/width:22px!important/);
+ assert.match(src,/select\.title='Cambiar posición o restaurar panel'/);
  assert.match(css,/sim-cad-slot\[data-edge="bottom"\]/);
 });
 test('el menú Ver mantiene solo la opción de restaurar, sin instrucciones enormes',()=>{
