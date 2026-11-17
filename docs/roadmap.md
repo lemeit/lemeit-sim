@@ -1,7 +1,19 @@
 # Hoja de ruta de ΣIM
 
-Estado al 16 de noviembre de 2026 · portal 0.17.5. Este editor no es todavía una réplica completa de DWSIM.
+Estado al 17 de noviembre de 2026 · portal 0.21.4. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
+
+## Estado integrado · PR #72 / 0.21.4
+
+- Acceso por código de clase sin correo y administración privada; sesiones, vencimientos y desactivación de clases.
+- Manual de uso en la wiki y ayuda contextual desde el inspector (0.18.0); trece ejercicios y actividad guiada del intercambiador integrada en el Ejemplo 13 (0.19.1).
+- Paneles flotantes y acoplables a los cuatro bordes, redimensionamiento y distribución persistente en el navegador (0.20.0–0.21.1).
+- Arrastre de equipos y corrientes desde la biblioteca, eliminación con Supr/Retroceso y correcciones para Firefox (0.21.2–0.21.3).
+- Tipografía uniforme de los desplegables del inspector (0.21.4, PR #72).
+
+Estos avances de acceso, documentación e interfaz no amplían por sí mismos los modelos del motor. Continúan pendientes la adaptación de CSTR/PFR cinéticos, perfiles de reacción, recirculaciones, análisis económico y pruebas de carga con una clase. Windows y Debian se eligen manualmente; la disponibilidad depende de cada instalación.
+
+Los apartados por versión que siguen conservan la trazabilidad histórica. Ver el [historial completo](CHANGELOG.md) para el detalle de cada entrega. Esta revisión documental no constituye una nueva ejecución ni validación de los motores.
 
 ## Referencias y trazabilidad
 
@@ -11,7 +23,7 @@ es propia: no se presenta como traducción oficial ni se copia íntegramente un 
 Cada adaptación registrará enlace, versión del motor, parámetros y diferencias de interfaz.
 Los resultados de modelos se distinguen de mediciones experimentales.
 
-## Disponible y validado en motor real · hasta 0.12.0
+## Base de cálculo y validaciones históricas
 
 - Corrientes, mezclador, divisor de dos salidas, calentador y enfriador.
 - Reactores de conversión y equilibrio: una reacción por reactor, temperatura de
