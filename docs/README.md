@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 16/11/2026 · Portal 0.17.2 · Motor DWSIM 10.2.15.
+Revisión: 17/11/2026 · Portal 0.21.4 · Motor DWSIM 10.2.15.
 
 ## Empezar
 
