@@ -1615,3 +1615,15 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 }
 .diagram-trash-zone[hidden]{display:none!important}
 @media(max-width:540px){.diagram-trash-zone{bottom:8px;font-size:10px}}
+
+
+/* Vista previa ligera del objeto mientras se arrastra desde la biblioteca. */
+.palette-drag-preview{
+  position:fixed;z-index:1800;pointer-events:none;max-width:210px;
+  padding:6px 10px;border:1px solid var(--spx-accent);
+  border-radius:5px;background:var(--spx-surface);color:var(--spx-text);
+  box-shadow:0 7px 22px var(--spx-shadow);
+  font:500 11px/1.35 var(--spx-font-sans);white-space:nowrap;
+}
+#diagram:focus{outline:none}
+#diagram:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-2px}
