@@ -373,3 +373,9 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 
 - CSS del rectángulo revisado: fill:none; se conservan contorno discontinuo y pointer-events:none. Sin cambios en la lógica.
 - 152 pruebas aprobadas y build:verified correcto. No se ejecutaron nuevas simulaciones.
+
+
+## 0.22.2 · Apertura desde el nombre · 17/11/2026
+
+- Verificada correspondencia entre los 13 nombres y sus botones Abrir caso. Los nombres son botones nativos, activables con teclado, y reutilizan la carga existente.
+- 152 pruebas aprobadas y build:verified correcto. Sin cambios de motor.

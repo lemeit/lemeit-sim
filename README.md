@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.22.1](https://img.shields.io/badge/portal-0.22.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.22.2](https://img.shields.io/badge/portal-0.22.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.22.1 — Selección por contorno**, en revisión. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
+**0.22.2 — Abrir desde el nombre**, en revisión. El nombre del ejercicio abre el mismo caso que el botón Abrir caso, con la misma confirmación de reemplazo. Resolución sigue siendo una acción independiente.
+
+**0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 
 **0.22.0 — Explorador de ejemplos**, integrado. El acceso Ejemplos abre una biblioteca con búsqueda y filtros temáticos; cada caso permite abrir el proyecto o consultar directamente su resolución. Conserva los trece ejercicios, la guía completa y la confirmación antes de reemplazar el proyecto. Incluye selección múltiple por rectángulo, Ctrl+A y Shift+clic, con movimiento conjunto que conserva conexiones.
 
