@@ -17,6 +17,7 @@ const TYPES = {
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
+let marquee=null;
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let unitSystem='engineering';
@@ -98,7 +99,7 @@ function streamGeometry(n){
   for(const p of points){if(clean.length&&p.x===clean.at(-1).x&&p.y===clean.at(-1).y)continue;while(clean.length>1){const prev=clean.at(-2),last=clean.at(-1),aligned=(prev.x===last.x&&last.x===p.x)||(prev.y===last.y&&last.y===p.y),forward=(last.x-prev.x)*(p.x-last.x)+(last.y-prev.y)*(p.y-last.y)>=0;if(!aligned||!forward)break;clean.pop();}clean.push(p);}
   g.d=`M${clean[0].x} ${clean[0].y}`+clean.slice(1).map((p,i)=>p.x===clean[i].x?` V${p.y}`:` H${p.x}`).join('');
   let longest={length:-1};for(let i=1;i<clean.length;i++){const a=clean[i-1],b=clean[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
-  g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};return g;
+  g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};g.points=clean;return g;
 }
 function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=Math.max(0,Math.min(4000,value));}
 function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
@@ -182,7 +183,7 @@ function renderDiagram(){
   [...graph.nodes].sort((a,b)=>Number(isStream(a))-Number(isStream(b))).forEach(n=>{
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
     const g=isStream(n)?streamGeometry(n):null;
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node ${isStream(n)?'stream-node':'equipment-node'} ${selection?.node===n.id?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node ${isStream(n)?'stream-node':'equipment-node'} ${(selection?.node===n.id||selection?.nodes?.includes(n.id))?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
     if(g){
       html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line ${n.type==='EnergyStream'?'energy':''}" d="${g.d}" marker-end="url(#arrow-${n.type==='EnergyStream'?'energy':'material'})"/><text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
     }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${equipmentSymbol(n.type)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
@@ -197,6 +198,7 @@ function renderDiagram(){
     if(selection?.node===n.id){if(g)html+=`<circle class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" cx="${g.bend.x}" cy="${g.bend.y}" r="7"><title>Arrastrar para acomodar el recorrido</title></circle>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';
   });
+  if(marquee){const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);html+=`<rect class="selection-marquee" x="${r.left}" y="${r.top}" width="${r.right-r.left}" height="${r.bottom-r.top}"/>`;}
   svg.innerHTML=html;$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
@@ -247,6 +249,7 @@ function renderStreamInspector(n,r){
 
 function renderInspector(){
   const container=$('inspector');
+  if(selection?.nodes){const nodes=graph.nodes.filter(n=>selection.nodes.includes(n.id));container.innerHTML=`<p class="inspector-type">SELECCIÓN MÚLTIPLE</p><h3 class="inspector-title">${nodes.length} objetos seleccionados</h3><p class="mini">${nodes.filter(n=>!isStream(n)).length} equipo(s) · ${nodes.filter(isStream).length} corriente(s)</p><p class="mini">Arrastrá un objeto seleccionado para mover el conjunto. Esc o un clic en el fondo quita la selección. Las conexiones se conservan.</p><button type="button" class="delete-button" id="delete-selected">Eliminar selección</button>`;return;}
   if(selection?.edge!==undefined){
     const edge=graph.edges[selection.edge];if(!edge){selection=null;return renderInspector();}
     container.innerHTML=`<p class="inspector-type">CONEXIÓN</p><h3 class="inspector-title">${esc(nodeById(edge.from).name)} → ${esc(nodeById(edge.to).name)}</h3><p class="inspector-description">Esta línea conecta objetos del proceso en DWSIM. Seleccioná «Eliminar conexión» para modificar el recorrido.</p><button class="delete-button" id="delete-selected">Eliminar conexión</button>`;return;
@@ -338,7 +341,8 @@ function finishEndpointDrag(drag){
 }
 function removeSelected(){
   if(busy||!hasProject||!selection)return;
-  if(selection?.node){graph.nodes=graph.nodes.filter(n=>n.id!==selection.node);graph.edges=graph.edges.filter(e=>e.from!==selection.node&&e.to!==selection.node);}
+  if(selection?.nodes){const ids=new Set(selection.nodes);graph.nodes=graph.nodes.filter(n=>!ids.has(n.id));graph.edges=graph.edges.filter(e=>!ids.has(e.from)&&!ids.has(e.to));}
+  else if(selection?.node){graph.nodes=graph.nodes.filter(n=>n.id!==selection.node);graph.edges=graph.edges.filter(e=>e.from!==selection.node&&e.to!==selection.node);}
   else if(selection?.edge!==undefined)graph.edges.splice(selection.edge,1);
   selection=null;pending=null;changed();renderInspector();
 }
@@ -430,6 +434,12 @@ function updateDiagramGeometry(){
   svg.querySelectorAll('.snap-target').forEach(el=>el.classList.remove('snap-target'));
   if(endpointDrag?.snap){const {unit,p}=endpointDrag.snap;svg.querySelector(`[data-owner="${unit.id}"][data-port="${p.side}"][data-index="${p.index}"]`)?.classList.add('snap-target');}
 }
+function selectAllDiagram(){
+  if(busy||!hasProject||!graph.nodes.length)return;
+  selection={nodes:graph.nodes.map(n=>n.id)};pending=null;renderDiagram();renderInspector();$('diagram').focus({preventScroll:true});
+}
+function selectNodes(ids){const unique=[...new Set(ids)];selection=unique.length>1?{nodes:unique}:unique.length?{node:unique[0]}:null;}
+function nodeBounds(n){if(isStream(n)){const pts=streamGeometry(n).points;return {left:Math.min(...pts.map(p=>p.x)),right:Math.max(...pts.map(p=>p.x)),top:Math.min(...pts.map(p=>p.y)),bottom:Math.max(...pts.map(p=>p.y))};}const t=TYPES[n.type],scale=symbolScale(n);return {left:n.x,right:n.x+t.w*scale,top:n.y,bottom:n.y+t.h*scale};}
 function moveNode(n,start,p){
   const dx=p.x-start.start.x,dy=p.y-start.start.y;
   n.x=Math.max(15,Math.min(2700,start.x+dx));n.y=Math.max(15,Math.min(1800,start.y+dy));
@@ -456,10 +466,17 @@ function bindEvents(){
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
     const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
-    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
-    const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();if(edge)svg.focus({preventScroll:true});
+    if(node){const id=node.dataset.node,existing=selection?.nodes||[selection?.node].filter(Boolean);
+      if(e.shiftKey){selectNodes(existing.includes(id)?existing.filter(v=>v!==id):[...existing,id]);pending=null;renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+      if(selection?.nodes?.includes(id)){dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;}
+      selection={node:id};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+    const edge=e.target.closest('[data-edge]');if(edge){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+    const original=selection;marquee={start:svgPoint(e),end:svgPoint(e),base:e.shiftKey?(selection?.nodes||[selection?.node].filter(Boolean)):[],original};if(!e.shiftKey)selection=null;pending=null;svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});
   });
   svg.addEventListener('pointermove',e=>{
+    if(marquee){marquee.end=svgPoint(e);const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);selectNodes([...marquee.base,...graph.nodes.filter(n=>SimDiagramInteractions.encloses(r,nodeBounds(n))).map(n=>n.id)]);renderDiagram();renderInspector();return;}
+    if(dragging?.group){const p=svgPoint(e);SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,p.x-dragging.start.x,p.y-dragging.start.y);dragging.moved=true;queueDiagramMotion();return;}
+
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
     if(bending){const p=svgPoint(e),dx=p.x-bending.start.x,dy=p.y-bending.start.y;if(!bending.axis&&Math.hypot(dx,dy)<3/zoom)return;bending.axis??=Math.abs(dy)>Math.abs(dx)?'y':'x';setStreamBend(nodeById(bending.node),bending.axis,bending.axis==='y'?p.y:p.x);queueDiagramMotion();return;}
     if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;queueDiagramMotion();return;}
@@ -472,6 +489,7 @@ function bindEvents(){
   });
   const endDrag=e=>{
     const hadGesture=endpointDrag||dragging||resizing||bending||panning;
+    if(marquee){if(e.type==='pointercancel')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
     if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type!=='pointercancel'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
     const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     const visualChange=dragging?.moved||resizing||bending;
@@ -483,6 +501,8 @@ function bindEvents(){
   };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
   svg.addEventListener('keydown',e=>{
     if(busy)return;
+    if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='a'){e.preventDefault();selectAllDiagram();return;}
+    if(selection?.nodes&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();SimDiagramInteractions.translateNodes(graph.nodes,structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0),({'ArrowUp':-10,'ArrowDown':10}[e.key]||0));changed({physical:false});svg.focus({preventScroll:true});return;}
     const port=e.target.closest('[data-port]');if(port&&(e.key==='Enter'||e.key===' ')){e.preventDefault();connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');if(node&&['Enter',' '].includes(e.key)){e.preventDefault();selection={node:node.dataset.node};renderDiagram();renderInspector();}
     if(node&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const n=nodeById(node.dataset.node);moveNode(n,{start:{x:0,y:0},x:n.x,y:n.y,routeX:n.routeX,routeY:n.routeY,endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]]))},{x:({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0),y:({'ArrowUp':-10,'ArrowDown':10}[e.key]||0)});changed({physical:false});svg.querySelector(`[data-node="${n.id}"]`)?.focus();}
@@ -490,7 +510,7 @@ function bindEvents(){
   });
   document.addEventListener('keydown',e=>{
     if(SimDiagramInteractions.isEditable(e.target)||e.target.closest?.('dialog'))return;
-    if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();}
+    if(e.key==='Escape'){selection=null;marquee=null;pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();renderInspector();}
     if(SimDiagramInteractions.isDeleteShortcut(e)&&hasProject&&selection&&!busy){e.preventDefault();removeSelected();}
   });
   $('inspector').addEventListener('click',e=>{const tab=e.target.closest('[data-stream-tab]');if(tab){streamTabs.set(selection.node,tab.dataset.streamTab);renderInspector();return;}if(e.target.closest('#delete-selected'))removeSelected();});
@@ -801,6 +821,7 @@ function bindWorkspaceTools(){
     getProject:()=>({graph,result}),
     openExample:type=>{$('example-select').value=type;resetExample();closeMenus();}
   });
+  $('diagram-select-all').onclick=()=>{closeMenus();selectAllDiagram();};
   $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();

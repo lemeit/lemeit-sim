@@ -8,6 +8,8 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.22.0 — 2026-11-17
 
+- Selección múltiple por rectángulo desde el fondo del diagrama, Ctrl+A / Cmd+A o Ver → Seleccionar todo. Shift+clic suma o quita objetos; Shift+rectángulo amplía la selección. Movimiento colectivo con ratón o flechas, sin cambiar las conexiones ni las condiciones; Esc o clic en el fondo deselecciona.
+
 - Reemplaza el menú largo de Ejemplos por un explorador con búsqueda por número, equipo o tema y filtros de balances, energía, mezclas/fases, presión y reacciones.
 - Cada ejercicio ofrece abrir el caso o consultar su resolución directamente; la guía completa queda accesible en el mismo explorador.
 - Conserva los trece proyectos, confirmación de reemplazo y actividad guiada del Ejemplo 13. Sin cambios en cálculos ni motores.

@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.22.0 — Explorador de ejemplos**, en revisión. El acceso Ejemplos abre una biblioteca con búsqueda y filtros temáticos; cada caso permite abrir el proyecto o consultar directamente su resolución. Conserva los trece ejercicios, la guía completa y la confirmación antes de reemplazar el proyecto.
+**0.22.0 — Explorador de ejemplos**, en revisión. El acceso Ejemplos abre una biblioteca con búsqueda y filtros temáticos; cada caso permite abrir el proyecto o consultar directamente su resolución. Conserva los trece ejercicios, la guía completa y la confirmación antes de reemplazar el proyecto. Incluye selección múltiple por rectángulo, Ctrl+A y Shift+clic, con movimiento conjunto que conserva conexiones.
 
 **0.21.4 — Tipografía uniforme en el inspector**, 16/11/2026. Ajuste visual de los desplegables, sin alterar las condiciones del proceso.
 
