@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.21.3 — 2026-11-16
+
+- Corrección del arrastre desde Equipos y corrientes: seguimiento por puntero (ratón/lápiz) hasta el lienzo, con vista previa visible. No depende del drag-and-drop HTML5 de botones, que fallaba en Firefox.
+- El clic sobre un objeto de la biblioteca continúa agregándolo como antes; el gesto de arrastrar no crea duplicados.
+- Al seleccionar o incorporar un objeto, se devuelve el foco al SVG del diagrama para que Supr y Retroceso eliminen la selección. El SVG es enfocable con teclado.
+- Se mantienen las protecciones de edición de campos y diálogos, y la eliminación arrastrando fuera del área de diseño.
+- Pruebas del punto de entrega, foco, atajos y limpieza de la implementación anterior. Sin cambios en DWSIM ni en la interfaz de los motores.
+
 ## 0.21.2 — 2026-11-16
 
 - Se refuerza el arrastre nativo de equipos y corrientes desde la biblioteca al lienzo, con indicación visual del destino.
