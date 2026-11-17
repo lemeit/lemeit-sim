@@ -40,11 +40,31 @@ test('el portal muestra una indicación al arrastrar para eliminar y conserva el
  assert.ok(html.includes('diagram-interactions.js'));
  assert.ok(html.indexOf('diagram-interactions.js')<html.indexOf('app.js'));
  assert.ok(html.includes('id="diagram-trash-zone"'));
- assert.match(app,/draggable="true"/);
+ assert.ok(!app.includes('draggable="true"'));
+ assert.match(app,/palette\.addEventListener\('pointerdown'/);
+ assert.match(app,/window\.addEventListener\('pointermove',movePalette,true\)/);
+ assert.match(app,/window\.addEventListener\('pointerup',endPalette,true\)/);
+ assert.match(app,/svg\.focus\(\{preventScroll:true\}\)/);
+ assert.match(html,/id="diagram"[^>]*tabindex="0"/);
  assert.ok(!app.includes('<span class="add-sign">+</span>'));
  assert.match(app,/palette-drop-ready/);
  assert.match(app,/object-drop-delete/);
  assert.match(app,/SimDiagramInteractions\.isDeleteShortcut/);
  assert.match(app,/if\(deleteDrag\)\{removeSelected\(\)/);
  assert.match(app,/graph\.edges=graph\.edges\.filter\(e=>e\.from!==selection\.node&&e\.to!==selection\.node\)/);
+});
+
+test('acepta el punto de entrega dentro del diagrama, incluidos sus bordes',()=>{
+ assert.equal(gestures.insideCanvas(200,100,bounds),true);
+ assert.equal(gestures.insideCanvas(1000,600,bounds),true);
+ assert.equal(gestures.insideCanvas(500,350,bounds),true);
+ assert.equal(gestures.insideCanvas(199,300,bounds),false);
+ assert.equal(gestures.insideCanvas(500,601,bounds),false);
+ assert.equal(gestures.insideCanvas(NaN,300,bounds),false);
+});
+test('mantiene la incorporación por clic y evita duplicar el gesto de arrastre HTML5',()=>{
+ const app=readFileSync(new URL('../site/app.js',import.meta.url),'utf8');
+ assert.match(app,/palette'\)\.addEventListener\('click'/);
+ assert.match(app,/const p=svgPoint\(e\);\s*addNode\(type/);
+ assert.ok(!app.includes("addEventListener('dragstart'"));
 });
