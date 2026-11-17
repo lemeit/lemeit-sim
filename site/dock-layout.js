@@ -81,7 +81,7 @@ globalThis.SimDockLayout=(()=>{
     function setSize(edge,n){
       const side=edge==='left'||edge==='right';
       const extent=side?workspace.clientWidth:workspace.clientHeight;
-      const max=Math.max(side?160:100,extent*(side?.42:.40));
+      const max=Math.max(side?160:100,extent*(side ? .42 : .40));
       sizes[edge]=clamp(safe(n,sizes[edge]),side?160:100,max);
       workspace.style.setProperty('--sim-cad-'+edge,sizes[edge]+'px');
     }
