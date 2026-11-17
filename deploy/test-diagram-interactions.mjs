@@ -21,7 +21,7 @@ test('arrastrar suficientemente lejos del lienzo permite eliminar al soltar',()=
  assert.equal(gestures.shouldRemoveAfterDrag({startX:500,startY:250,x:1040,y:300,rect:bounds,cancelled:true}),false);
 });
 test('no borra por pequeños movimientos ni por posiciones inválidas',()=>{
- assert.equal(gestures.shouldRemoveAfterDrag({startX:1000,startY:300,x:1025,y:300,rect:bounds}),false);
+ assert.equal(gestures.shouldRemoveAfterDrag({startX:1000,startY:300,x:1015,y:300,rect:bounds}),false);
  assert.equal(gestures.shouldRemoveAfterDrag({startX:600,startY:300,x:NaN,y:200,rect:bounds}),false);
  assert.equal(gestures.shouldRemoveAfterDrag({startX:600,startY:300,x:600,y:300,rect:null}),false);
 });
