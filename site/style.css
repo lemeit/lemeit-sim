@@ -1543,3 +1543,54 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
  .sim-cad-size-grip,.sim-cad-resizer{display:none!important}
  .sim-cad-position{max-width:84px}
 }
+
+
+/* Controles CAD compactos: agarre sutil y menú de posición con icono discreto. */
+.sim-shell .sim-cad-heading{
+  min-height:27px!important;
+  gap:5px!important;
+  padding:3px 4px!important;
+  background:transparent!important;
+  border-radius:0!important;
+  border-bottom:1px solid var(--spx-border);
+}
+.sim-shell .sim-cad-heading.panel-heading{flex-wrap:nowrap}
+.sim-shell .sim-cad-heading h2{font-size:11px!important;line-height:1.3!important;flex:1 1 60px!important}
+.sim-shell .sim-cad-heading>.sim-cad-move{
+  width:12px;height:20px;font-size:12px;opacity:.42;
+  font-weight:400;letter-spacing:-2px;
+}
+.sim-shell .sim-cad-heading:hover>.sim-cad-move,
+.sim-shell .sim-cad-heading:focus-visible>.sim-cad-move{opacity:.8}
+.sim-shell .sim-cad-heading .sim-cad-index{
+  margin:0 3px 0 5px!important;
+  font:400 9px/1.2 var(--spx-font-mono);
+  opacity:.55;white-space:nowrap;
+}
+.sim-shell .sim-cad-heading>.sim-cad-controls{gap:2px!important;margin-left:2px}
+.sim-shell .sim-cad-heading .sim-cad-position{
+  appearance:none;-webkit-appearance:none;
+  display:block;flex:none;width:22px!important;min-width:22px;max-width:22px!important;height:22px;
+  padding:0!important;border:1px solid transparent!important;border-radius:3px!important;
+  color:transparent!important;font-size:0!important;cursor:pointer;
+  background-color:transparent!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='4.5' r='1.25' fill='%23888888'/%3E%3Ccircle cx='10' cy='10' r='1.25' fill='%23888888'/%3E%3Ccircle cx='10' cy='15.5' r='1.25' fill='%23888888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:16px 16px;
+}
+.sim-shell .sim-cad-heading .sim-cad-position option{
+  color:var(--spx-text)!important;background:var(--spx-surface);font-size:12px;
+}
+.sim-shell .sim-cad-heading .sim-cad-float{
+  width:22px;min-width:22px;height:22px;
+  padding:0!important;border:1px solid transparent!important;border-radius:3px!important;
+  font-size:13px;line-height:1;background:transparent!important;color:var(--spx-text-dim);
+}
+.sim-shell .sim-cad-heading .sim-cad-position:hover,
+.sim-shell .sim-cad-heading .sim-cad-float:hover{background-color:var(--spx-surface-2)!important;border-color:var(--spx-border)!important}
+.sim-shell .sim-cad-heading .sim-cad-position:focus-visible,
+.sim-shell .sim-cad-heading .sim-cad-float:focus-visible{outline:2px solid var(--spx-accent);outline-offset:1px}
+.sim-shell .sim-cad-panel[data-sim-cad-mode="float"]>.sim-cad-size-grip{
+  width:17px;height:17px;font-size:10px;background:transparent;opacity:.65;
+}
+.sim-shell .sim-cad-panel[data-sim-cad-mode="float"]>.sim-cad-size-grip:hover{opacity:1}
+.sim-cad-target{border-width:1px!important;font-size:11px!important;font-weight:500!important;background:var(--spx-accent-dim)}

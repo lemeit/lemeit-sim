@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.21.1 — 2026-11-16
+
+- Controles de acoplamiento minimalistas: reemplaza el selector grande por un icono compacto de tres puntos que conserva las cinco posiciones y restaurar.
+- Franja de agarre más fina, botones discretos, espaciado entre títulos, números y acciones.
+- Indicador de acoplamiento y control de redimensionamiento menos intrusivos.
+- Sin cambios en la lógica de arrastre, acoplamiento, motores o proyectos.
+
 ## 0.21.0 — 2026-11-16
 
 - Nuevo administrador de paneles estilo CAD: arrastrar desde una franja visible y acoplar a izquierda, derecha, arriba o abajo con vista previa.
