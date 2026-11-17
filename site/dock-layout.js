@@ -1,156 +1,298 @@
-/* Distribución flexible de paneles de ΣIM. Solo modifica presentación local. */
+/* Paneles acoplables de ΣIM: comportamiento de escritorio tipo CAD.
+ * Los datos de distribución son locales; no modifican proyectos ni resultados. */
 'use strict';
 globalThis.SimDockLayout=(()=>{
- const STORE='sim-dock-layout-v1';
- const IDS=['equipment','inspector','results'];
- const fresh=()=>({swapped:false,floating:{equipment:false,inspector:false,results:false},positions:{}});
- function normalise(value){
-  const s=fresh();
-  if(!value||typeof value!=='object')return s;
-  s.swapped=value.swapped===true;
-  for(const id of IDS){
-   s.floating[id]=value.floating?.[id]===true;
-   const p=value.positions?.[id];
-   if(p&&['left','top','width','height'].every(k=>Number.isFinite(p[k]))&&p.width>=220&&p.width<=1600&&p.height>=150&&p.height<=1200)s.positions[id]={left:p.left,top:p.top,width:p.width,height:p.height};
+  const KEY='sim-dock-layout-cad-v3';
+  const IDS=['equipment','inspector','results'];
+  const EDGES=['left','right','top','bottom'];
+  const MODES=['float',...EDGES];
+  const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
+  const DEFAULT={equipment:'left',inspector:'right',results:'bottom'};
+  const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
+  const safe=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
+  function fit(b,vw,vh){
+    const w=clamp(safe(b?.w,330),240,Math.max(240,vw-16));
+    const h=clamp(safe(b?.h,370),180,Math.max(180,vh-16));
+    return {x:clamp(safe(b?.x,80),8,Math.max(8,vw-w-8)),
+      y:clamp(safe(b?.y,90),8,Math.max(8,vh-h-8)),w,h};
   }
-  return s;
- }
- function slots(s){return s.swapped?{equipment:3,inspector:1}:{equipment:1,inspector:3};}
- function resizeRect(p,edge,dx,dy,vw,vh){
-  const minW=220,minH=150;
-  const maxW=Math.max(minW,vw-16),maxH=Math.max(minH,vh-16);
-  let left=p.left,top=p.top,right=p.left+p.width,bottom=p.top+p.height;
-  if(edge.includes('w'))left=Math.max(8,Math.min(right-minW,left+dx));
-  if(edge.includes('e'))right=Math.min(vw-8,Math.max(left+minW,right+dx));
-  if(edge.includes('n'))top=Math.max(8,Math.min(bottom-minH,top+dy));
-  if(edge.includes('s'))bottom=Math.min(vh-8,Math.max(top+minH,bottom+dy));
-  return {left,top,width:Math.min(maxW,right-left),height:Math.min(maxH,bottom-top)};
- }
- function mount(){
-  const workspace=document.querySelector('.workspace');
-  if(!workspace)return;
-  const elements={
-   equipment:document.querySelector('.equipment-panel'),
-   inspector:document.querySelector('.inspector-panel'),
-   results:document.querySelector('#results-panel')
-  };
-  if(IDS.some(id=>!elements[id]))return;
-  const menu=document.querySelector('#view-menu>.menu-panel');
-  let state;try{state=normalise(JSON.parse(localStorage.getItem(STORE)||'null'));}catch{state=fresh();}
-  const persist=()=>{try{localStorage.setItem(STORE,JSON.stringify(state));}catch{}};
-  const mobile=()=>window.innerWidth<=760;
-  let zIndex=950;
-  const make=(tag,label,title)=>{const el=document.createElement(tag);el.type='button';el.textContent=label;el.title=title;el.setAttribute('aria-label',title);return el;};
-  const wrappers={};
-  for(const id of IDS){
-   const el=elements[id],heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
-   const wrap=document.createElement('span');wrap.className='dock-tools';
-   if(id!=='results'){
-    const swap=make('button','⇄','Intercambiar paneles laterales');
-    swap.className='dock-action dock-swap';
-    swap.addEventListener('click',()=>{state.swapped=!state.swapped;apply();persist();});
-    wrap.append(swap);
-   }
-   const toggle=make('button','↗','Flotar panel');
-   toggle.className='dock-action dock-toggle';
-   toggle.addEventListener('click',()=>{if(mobile())return;state.floating[id]=!state.floating[id];if(state.floating[id]&&!state.positions[id])state.positions[id]=defaultPosition(id);apply();persist();});
-   wrap.append(toggle);heading.append(wrap);wrappers[id]={wrap,toggle,heading};
+  function targetEdge(x,y,rect){
+    if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return null;
+    if(x<rect.left+38)return 'left';
+    if(x>rect.right-38)return 'right';
+    if(y<rect.top+38)return 'top';
+    if(y>rect.bottom-38)return 'bottom';
+    return null;
   }
-  const reset=make('button','Restablecer distribución','Restablecer distribución de paneles');
-  reset.id='view-reset-layout';menu?.append(reset);
-  reset.addEventListener('click',()=>{state=fresh();apply();persist();document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));});
-  function defaultPosition(id){
-   const rect=elements[id].getBoundingClientRect();
-   return {left:Math.max(12,Math.min(window.innerWidth-350,rect.left+30)),top:Math.max(110,rect.top+25),width:id==='results'?Math.min(740,window.innerWidth-30):Math.min(340,window.innerWidth-30),height:id==='results'?350:Math.min(540,window.innerHeight-120)};
+  function recover(stored,vw,vh){
+    const fallback={
+      equipment:{x:60,y:130,w:310,h:500},
+      inspector:{x:Math.max(8,vw-390),y:130,w:355,h:500},
+      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350}
+    };
+    return Object.fromEntries(IDS.map(id=>{
+      const p=stored?.[id];
+      return [id,{id,mode:MODES.includes(p?.mode)?p.mode:DEFAULT[id],
+        lastDock:EDGES.includes(p?.lastDock)?p.lastDock:DEFAULT[id],
+        box:fit(p?.box||fallback[id],vw,vh)}];
+    }));
   }
-  function position(el,p){
-   const w=Math.min(Math.max(220,p.width),Math.max(220,window.innerWidth-24));
-   const h=Math.min(Math.max(150,p.height),Math.max(150,window.innerHeight-80));
-   const x=Math.max(8,Math.min(p.left,window.innerWidth-w-8));
-   const y=Math.max(8,Math.min(p.top,window.innerHeight-h-8));
-   el.style.left=x+'px';el.style.top=y+'px';el.style.width=w+'px';el.style.height=h+'px';
-   return {left:x,top:y,width:w,height:h};
-  }
-  function apply(){
-   const desktop=!mobile()&&!document.body.classList.contains('diagram-focus')&&!document.body.classList.contains('results-window');
-   const side=slots(state);
-   document.body.classList.toggle('layout-custom',desktop);
-   for(const id of IDS){
-    const el=elements[id],isFloat=desktop&&state.floating[id];
-    el.classList.toggle('sim-panel-floating',isFloat);
-    if(id!=='results'){
-      el.style.gridColumn=desktop?String(side[id]):'';
-      el.style.gridRow=desktop?'1':'';
+  function mount(){
+    // Vistas secundarias deben continuar usando el enlace sincronizado existente.
+    if(new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results'))return;
+    const workspace=document.querySelector('.workspace');
+    const diagram=workspace?.querySelector('.diagram-panel');
+    const elements={
+      equipment:workspace?.querySelector('.equipment-panel'),
+      inspector:workspace?.querySelector('.inspector-panel'),
+      results:document.getElementById('results-panel')
+    };
+    if(!workspace||!diagram||IDS.some(id=>!elements[id]))return;
+    let saved={};
+    try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch{}
+    const panels=recover(saved,innerWidth,innerHeight);
+    const sizes={left:186,right:265,top:200,bottom:160,...saved.sizes};
+    const slots={};
+    for(const edge of EDGES){
+      const slot=document.createElement('section');
+      slot.className='sim-cad-slot';slot.dataset.edge=edge;slots[edge]=slot;
     }
-    if(isFloat){state.positions[id]=position(el,state.positions[id]||defaultPosition(id));}
-    else for(const prop of ['left','top','width','height'])el.style[prop]='';
-    wrappers[id].toggle.textContent=isFloat?'↙':'↗';
-    wrappers[id].toggle.title=isFloat?'Acoplar panel':'Flotar panel';
-    wrappers[id].toggle.setAttribute('aria-label',wrappers[id].toggle.title);
-    wrappers[id].toggle.disabled=mobile();
-   }
-   if(desktop){
-    const leftId=state.swapped?'inspector':'equipment',rightId=state.swapped?'equipment':'inspector';
-    workspace.style.setProperty('--dock-left',state.floating[leftId]?'0px':`var(--${leftId==='equipment'?'equipment':'inspector'}-width, ${leftId==='equipment'?186:265}px)`);
-    workspace.style.setProperty('--dock-right',state.floating[rightId]?'0px':`var(--${rightId==='equipment'?'equipment':'inspector'}-width, ${rightId==='equipment'?186:265}px)`);
-    elements.inspector.style.removeProperty('display');elements.equipment.style.removeProperty('display');
-    document.body.classList.toggle('layout-swapped',state.swapped);
-   }else{
-    workspace.style.removeProperty('--dock-left');workspace.style.removeProperty('--dock-right');
-    document.body.classList.remove('layout-swapped');
-   }
-   persist();
+    workspace.classList.add('sim-cad-workspace');
+    workspace.replaceChildren(slots.top,slots.left,diagram,slots.right,slots.bottom);
+    const indicator=document.createElement('div');
+    indicator.className='sim-cad-target';indicator.hidden=true;
+    indicator.setAttribute('aria-hidden','true');document.body.append(indicator);
+    let z=900,gesture=null,saveTimer=null;
+    const mobile=()=>innerWidth<=760;
+    const activeMode=p=>mobile()?DEFAULT[p.id]:p.mode;
+    const visible=p=>!p.el.hidden;
+    function persist(){
+      const value=Object.fromEntries(IDS.map(id=>[id,{mode:panels[id].mode,
+        lastDock:panels[id].lastDock,box:panels[id].box}]));
+      value.sizes=sizes;
+      try{localStorage.setItem(KEY,JSON.stringify(value));}catch{}
+    }
+    function store(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,120);}
+    const makeButton=(value,title)=>{
+      const b=document.createElement('button');b.type='button';b.textContent=value;
+      b.setAttribute('aria-label',title);b.title=title;return b;
+    };
+    function setSize(edge,n){
+      const side=edge==='left'||edge==='right';
+      const extent=side?workspace.clientWidth:workspace.clientHeight;
+      const max=Math.max(side?160:100,extent*(side?.42:.40));
+      sizes[edge]=clamp(safe(n,sizes[edge]),side?160:100,max);
+      workspace.style.setProperty('--sim-cad-'+edge,sizes[edge]+'px');
+    }
+    function updateSlots(){
+      for(const edge of EDGES){
+        const el=slots[edge];
+        el.hidden=!IDS.some(id=>panels[id].el.parentNode===el&&visible(panels[id]));
+        setSize(edge,sizes[edge]);
+        if(el.hidden)workspace.style.setProperty('--sim-cad-'+edge,'0px');
+      }
+    }
+    function apply(p,save=true){
+      const mode=activeMode(p);
+      const parent=mode==='float'?document.body:slots[mode];
+      p.el.dataset.simCadMode=mode;
+      p.el.classList.add('sim-cad-panel');
+      if(p.el.parentNode!==parent)parent.append(p.el);
+      p.box=fit(p.box,innerWidth,innerHeight);
+      for(const key of ['left','top','width','height','zIndex'])p.el.style.removeProperty(key);
+      if(mode==='float'){
+        Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',
+          width:p.box.w+'px',height:p.box.h+'px',zIndex:String(++z)});
+      }
+      p.select.value=mode;
+      p.select.querySelectorAll('option').forEach(o=>{
+        o.disabled=mobile()&&EDGES.includes(o.value);
+      });
+      p.button.textContent=mode==='float'?'↙':'↗';
+      p.button.title=mode==='float'?'Volver a acoplar':'Separar panel';
+      p.button.setAttribute('aria-label',p.button.title+' '+p.title);
+      updateSlots();if(save)store();
+    }
+    function place(p,mode){
+      if(mode==='reset'){
+        p.mode=DEFAULT[p.id];p.lastDock=DEFAULT[p.id];
+        p.box=recover(null,innerWidth,innerHeight)[p.id].box;
+      }else if(MODES.includes(mode)){
+        if(p.mode!=='float')p.lastDock=p.mode;
+        p.mode=mode;
+      }
+      apply(p);
+    }
+    function preview(edge){
+      indicator.hidden=!edge;
+      if(!edge)return;
+      const r=workspace.getBoundingClientRect();
+      const w=edge==='top'||edge==='bottom'?r.width:Math.min(300,r.width*.32);
+      const h=edge==='left'||edge==='right'?r.height:Math.min(210,r.height*.30);
+      Object.assign(indicator.style,{
+        left:(edge==='right'?r.right-w:r.left)+'px',
+        top:(edge==='bottom'?r.bottom-h:r.top)+'px',
+        width:w+'px',height:h+'px'
+      });
+      indicator.textContent='Acoplar '+LABELS[edge].toLowerCase();
+    }
+    function stopGesture(cancel=false){
+      if(!gesture)return;
+      const g=gesture;gesture=null;preview(null);
+      document.body.classList.remove('sim-cad-dragging');
+      window.removeEventListener('pointermove',onGestureMove,true);
+      window.removeEventListener('pointerup',onGestureUp,true);
+      window.removeEventListener('pointercancel',onGestureCancel,true);
+      if(cancel){g.panel.mode=g.before.mode;g.panel.box=g.before.box;apply(g.panel);}
+      else if(g.mode==='move'&&g.edge)place(g.panel,g.edge);
+      else apply(g.panel);
+    }
+    function onGestureMove(e){
+      if(!gesture||e.pointerId!==gesture.pointer)return;
+      const g=gesture,p=g.panel;
+      if(g.mode==='move'){
+        p.box=fit({...p.box,x:e.clientX-g.dx,y:e.clientY-g.dy},innerWidth,innerHeight);
+        p.el.style.left=p.box.x+'px';p.el.style.top=p.box.y+'px';
+        g.edge=e.altKey||mobile()?null:targetEdge(e.clientX,e.clientY,workspace.getBoundingClientRect());
+        preview(g.edge);
+      }else{
+        p.box=fit({...g.before.box,
+          w:g.before.box.w+e.clientX-g.x,
+          h:g.before.box.h+e.clientY-g.y},innerWidth,innerHeight);
+        p.el.style.width=p.box.w+'px';p.el.style.height=p.box.h+'px';
+      }
+    }
+    function onGestureUp(e){if(gesture&&e.pointerId===gesture.pointer)stopGesture();}
+    function onGestureCancel(e){if(gesture&&e.pointerId===gesture.pointer)stopGesture(true);}
+    function begin(e,p,mode){
+      if(e.button!==0||mobile()||gesture)return;
+      e.preventDefault();e.stopPropagation();
+      const r=p.el.getBoundingClientRect();
+      const before={mode:p.mode,box:{...p.box}};
+      let dx=clamp(e.clientX-r.left,0,Math.max(30,r.width-30));
+      let dy=clamp(e.clientY-r.top,0,35);
+      if(mode==='move'){
+        if(activeMode(p)!=='float'){p.lastDock=p.mode;p.mode='float';}
+        p.box=fit({x:e.clientX-dx,y:e.clientY-dy,w:r.width,h:r.height},innerWidth,innerHeight);
+        apply(p,false);
+      }else{p.box=fit({x:r.left,y:r.top,w:r.width,h:r.height},innerWidth,innerHeight);}
+      gesture={panel:p,pointer:e.pointerId,mode,x:e.clientX,y:e.clientY,dx,dy,edge:null,before};
+      document.body.classList.add('sim-cad-dragging');
+      p.el.style.zIndex=String(++z);
+      // Global listeners: el movimiento continúa al cruzar el SVG y otros paneles.
+      window.addEventListener('pointermove',onGestureMove,true);
+      window.addEventListener('pointerup',onGestureUp,true);
+      window.addEventListener('pointercancel',onGestureCancel,true);
+    }
+    for(const edge of EDGES){
+      const slot=slots[edge],vertical=edge==='left'||edge==='right';
+      const handle=document.createElement('div');handle.className='sim-cad-resizer';
+      handle.tabIndex=0;handle.setAttribute('role','separator');
+      handle.setAttribute('aria-label','Redimensionar acoplamiento '+LABELS[edge]);
+      handle.setAttribute('aria-orientation',vertical?'vertical':'horizontal');
+      slot.append(handle);
+      let resizing=null;
+      handle.addEventListener('pointerdown',e=>{
+        if(e.button!==0)return;
+        resizing={id:e.pointerId,start:vertical?e.clientX:e.clientY,size:sizes[edge]};
+        handle.setPointerCapture(e.pointerId);e.preventDefault();
+      });
+      handle.addEventListener('pointermove',e=>{
+        if(!resizing)return;
+        const d=(vertical?e.clientX:e.clientY)-resizing.start;
+        setSize(edge,resizing.size+d*(edge==='right'||edge==='bottom'?-1:1));
+      });
+      const finish=e=>{
+        if(!resizing)return;resizing=null;
+        if(handle.hasPointerCapture(e.pointerId))handle.releasePointerCapture(e.pointerId);
+        store();
+      };
+      handle.addEventListener('pointerup',finish);
+      handle.addEventListener('pointercancel',finish);
+      handle.addEventListener('dblclick',()=>{setSize(edge,edge==='left'?186:edge==='right'?265:edge==='bottom'?160:200);store();});
+      handle.addEventListener('keydown',e=>{
+        if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+        e.preventDefault();
+        const delta=(e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1)*(edge==='right'||edge==='bottom'?-1:1);
+        setSize(edge,sizes[edge]+delta*(e.shiftKey?30:10));store();
+      });
+    }
+    for(const id of IDS){
+      const el=elements[id],p=panels[id];
+      p.el=el;
+      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Corrientes y balances'}[id];
+      const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
+      heading.classList.add('sim-cad-heading');heading.tabIndex=0;
+      heading.title='Arrastrar para mover o acoplar; Alt evita el acoplamiento; doble clic para flotar o volver';
+      const grip=document.createElement('span');grip.className='sim-cad-move';
+      grip.textContent='⠿';grip.setAttribute('aria-hidden','true');heading.prepend(grip);
+      const select=document.createElement('select');select.className='sim-cad-position';
+      select.setAttribute('aria-label','Acoplar '+p.title);
+      for(const choice of [...MODES,'reset']){
+        const o=document.createElement('option');o.value=choice;o.textContent=LABELS[choice];select.append(o);
+      }
+      p.select=select;
+      const button=makeButton('↗','Separar '+p.title);
+      button.className='sim-cad-float';
+      p.button=button;
+      const tools=document.createElement('span');tools.className='sim-cad-controls';
+      tools.append(select,button);heading.append(tools);
+      const sizeGrip=makeButton('◢','Redimensionar '+p.title);
+      sizeGrip.className='sim-cad-size-grip';el.append(sizeGrip);
+      select.addEventListener('change',()=>place(p,select.value));
+      button.addEventListener('click',()=>place(p,activeMode(p)==='float'?p.lastDock:'float'));
+      heading.addEventListener('dblclick',e=>{
+        if(!e.target.closest('button,select,a,input'))place(p,activeMode(p)==='float'?p.lastDock:'float');
+      });
+      heading.addEventListener('pointerdown',e=>{
+        if(e.target.closest('button,select,a,input,textarea'))return;
+        begin(e,p,'move');
+      });
+      sizeGrip.addEventListener('pointerdown',e=>{
+        if(activeMode(p)==='float')begin(e,p,'resize');
+      });
+      sizeGrip.addEventListener('keydown',e=>{
+        if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+        e.preventDefault();
+        p.box=fit({...p.box,w:p.box.w+(e.key==='ArrowLeft'?-10:e.key==='ArrowRight'?10:0),
+          h:p.box.h+(e.key==='ArrowUp'?-10:e.key==='ArrowDown'?10:0)},innerWidth,innerHeight);
+        apply(p);
+      });
+      heading.addEventListener('keydown',e=>{
+        if(e.target!==heading||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+        e.preventDefault();if(activeMode(p)!=='float')place(p,'float');
+        p.box=fit({...p.box,x:p.box.x+(e.key==='ArrowLeft'?-10:e.key==='ArrowRight'?10:0),
+          y:p.box.y+(e.key==='ArrowUp'?-10:e.key==='ArrowDown'?10:0)},innerWidth,innerHeight);
+        apply(p);
+      });
+      el.addEventListener('pointerdown',()=>{if(activeMode(p)==='float')el.style.zIndex=String(++z);});
+      // Ocultar y recuperar resultados desde Ver debe actualizar el espacio ocupado.
+      if(id==='results'){
+        new MutationObserver(updateSlots).observe(el,{attributes:true,attributeFilter:['hidden']});
+      }
+      apply(p,false);
+    }
+    const menu=document.querySelector('#view-menu>.menu-panel');
+    const existing=document.getElementById('view-reset-layout');
+    if(existing)existing.remove();
+    const reset=makeButton('Restablecer distribución','Restablecer distribución de paneles');
+    reset.id='view-reset-layout';menu?.append(reset);
+    reset.addEventListener('click',()=>{
+      for(const id of IDS)place(panels[id],'reset');
+      Object.assign(sizes,{left:186,right:265,top:200,bottom:160});
+      updateSlots();store();
+      document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));
+    });
+    window.addEventListener('resize',()=>{
+      if(gesture)stopGesture(true);
+      for(const id of IDS)apply(panels[id],false);
+    });
+    window.addEventListener('pagehide',persist);
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
+    },true);
+    updateSlots();store();
   }
-  // Arrastre del panel completo: el puntero queda capturado en la propia ventana,
-  // para que no se interrumpa al cruzar el SVG central.
-  for(const id of IDS){
-   const heading=wrappers[id].heading,el=elements[id];
-   let gesture=null;
-   const start=(event,mode,edge='')=>{
-     if(event.button!==0||!el.classList.contains('sim-panel-floating'))return;
-     event.preventDefault();event.stopPropagation();
-     const r=el.getBoundingClientRect();
-     gesture={mode,edge,x:event.clientX,y:event.clientY,
-       start:{left:r.left,top:r.top,width:r.width,height:r.height}};
-     el.setPointerCapture(event.pointerId);
-     el.style.zIndex=String(++zIndex);
-   };
-   heading.addEventListener('pointerdown',e=>{
-     if(e.target.closest('button,a,input,select,textarea,[role=button]'))return;
-     start(e,'move');
-   });
-   for(const edge of ['n','ne','e','se','s','sw','w','nw']){
-     const grip=document.createElement('span');
-     grip.className='dock-grip dock-grip-'+edge;
-     grip.dataset.dockResize=edge;
-     grip.setAttribute('aria-label','Cambiar tamaño del panel');
-     grip.setAttribute('role','separator');
-     el.append(grip);
-     grip.addEventListener('pointerdown',e=>start(e,'resize',edge));
-   }
-   el.addEventListener('pointerdown',()=>{if(el.classList.contains('sim-panel-floating'))el.style.zIndex=String(++zIndex);});
-   el.addEventListener('pointermove',e=>{
-     if(!gesture)return;
-     const g=gesture,dx=e.clientX-g.x,dy=e.clientY-g.y;
-     const next=g.mode==='move'
-       ?{...g.start,left:g.start.left+dx,top:g.start.top+dy}
-       :resizeRect(g.start,g.edge,dx,dy,window.innerWidth,window.innerHeight);
-     state.positions[id]=position(el,next);
-   });
-   const finish=e=>{
-     if(!gesture)return;
-     gesture=null;
-     if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);
-     persist();
-   };
-   el.addEventListener('pointerup',finish);
-   el.addEventListener('pointercancel',finish);
-   el.addEventListener('lostpointercapture',()=>{if(gesture){gesture=null;persist();}});
-  }
-  window.addEventListener('resize',apply);
-  apply();return {reset:()=>{state=fresh();apply();}};
- }
- return Object.freeze({normalise,slots,resizeRect,mount});
+  return Object.freeze({fit,targetEdge,recover,mount});
 })();
-
 document.addEventListener('DOMContentLoaded',()=>globalThis.SimDockLayout.mount());
