@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.23.0 — 2026-11-17
+
+- En desarrollo, sin publicar: segunda paleta DWSIM con diez SVG originales, manteniendo ΣIM y sus símbolos originales.
+- Gestor global con selector accesible, persistencia local y sincronización entre ventanas. No modifica archivos de proyecto, puertos, conexiones ni resultados.
+- Tanque independiente reservado para un alcance posterior por acuerdo con el usuario: el catálogo actual contiene separador flash.
+- Ver alcance, licencias y regresión en docs/PALETA-DWSIM.md.
+
 ## 0.22.2 — 2026-11-17
 
 - El nombre de cada ejercicio es un botón accesible que abre su caso, reutilizando la carga y confirmación existentes. Resolución conserva su acción independiente.
