@@ -16,7 +16,7 @@ const TYPES = {
   EquilibriumReactor: {label:'Reactor de equilibrio',short:'Equilibrio',icon:'reactor_equilibrium',prefix:'R',w:130,h:110},
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
-let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, paletteDragType=null, suppressPaletteUntil=0;
+let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let unitSystem='engineering';
@@ -124,10 +124,57 @@ function equipmentSymbol(type){
   return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
 }
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" draggable="true" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
+  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
-  $('palette').addEventListener('dragstart',e=>{const b=e.target.closest('button[data-type]');if(!b||b.disabled){e.preventDefault();return;}paletteDragType=b.dataset.type;e.dataTransfer.setData('application/x-lemeit-object',paletteDragType);e.dataTransfer.effectAllowed='copy';});
-  $('palette').addEventListener('dragend',()=>{paletteDragType=null;$('canvas-wrap').classList.remove('palette-drop-ready');suppressPaletteUntil=performance.now()+500;});
+  // Firefox y el acoplamiento de paneles pueden interferir con el drag HTML5 de botones.
+  // Seguimiento de puntero desde la paleta: el clic sigue agregando como antes.
+  const palette=$('palette'),canvas=$('canvas-wrap');
+  let paletteGesture=null;
+  const cleanup=()=>{
+    canvas.classList.remove('palette-drop-ready');
+    paletteGesture?.ghost?.remove();
+    paletteGesture=null;
+    window.removeEventListener('pointermove',movePalette,true);
+    window.removeEventListener('pointerup',endPalette,true);
+    window.removeEventListener('pointercancel',cancelPalette,true);
+  };
+  function movePalette(e){
+    const g=paletteGesture;if(!g||e.pointerId!==g.pointer)return;
+    if(!g.moved&&Math.hypot(e.clientX-g.startX,e.clientY-g.startY)<7)return;
+    if(!g.moved){
+      g.moved=true;
+      suppressPaletteUntil=performance.now()+1000;
+      const ghost=document.createElement('div');
+      ghost.className='palette-drag-preview';
+      ghost.textContent=TYPES[g.type].label;
+      ghost.setAttribute('aria-hidden','true');
+      document.body.append(ghost);g.ghost=ghost;
+    }
+    e.preventDefault();
+    g.ghost.style.left=(e.clientX+14)+'px';
+    g.ghost.style.top=(e.clientY+14)+'px';
+    canvas.classList.toggle('palette-drop-ready',SimDiagramInteractions.insideCanvas(e.clientX,e.clientY,canvas.getBoundingClientRect()));
+  }
+  function endPalette(e){
+    const g=paletteGesture;if(!g||e.pointerId!==g.pointer)return;
+    const place=g.moved&&SimDiagramInteractions.insideCanvas(e.clientX,e.clientY,canvas.getBoundingClientRect());
+    if(g.moved){e.preventDefault();suppressPaletteUntil=performance.now()+700;}
+    const type=g.type;cleanup();
+    if(place&&!busy&&hasProject){
+      const p=svgPoint(e);
+      addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});
+    }
+  }
+  function cancelPalette(e){if(paletteGesture?.pointer===e.pointerId)cleanup();}
+  palette.addEventListener('pointerdown',e=>{
+    if(e.button!==0||e.pointerType==='touch'||busy||!hasProject)return;
+    const b=e.target.closest('button[data-type]');
+    if(!b||b.disabled)return;
+    paletteGesture={pointer:e.pointerId,type:b.dataset.type,startX:e.clientX,startY:e.clientY,moved:false};
+    window.addEventListener('pointermove',movePalette,true);
+    window.addEventListener('pointerup',endPalette,true);
+    window.addEventListener('pointercancel',cancelPalette,true);
+  });
 }
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
@@ -245,7 +292,7 @@ function addNode(type,pos){
   if(type==='Pump')Object.assign(node,{outlet_pressure_kPa:500,efficiency_pct:75});
   if(type==='Valve')node.outlet_pressure_kPa=200;
   if(isReactor(node))Object.assign(node,{outlet_C:500,conversion:50,phase:'Vapor',base_compound:graph.compounds[0],stoichiometry:Object.fromEntries(graph.compounds.map(c=>[c,0]))});
-  graph.nodes.push(node);selection={node:node.id};pending=null;changed();renderInspector();notice('');
+  graph.nodes.push(node);selection={node:node.id};pending=null;changed();renderInspector();notice('');$('diagram').focus({preventScroll:true});
 }
 function connect(owner,side,index){
   if(busy)return;
@@ -409,8 +456,8 @@ function bindEvents(){
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
     const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
-    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
-    const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();
+    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+    const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();if(edge)svg.focus({preventScroll:true});
   });
   svg.addEventListener('pointermove',e=>{
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
@@ -445,16 +492,6 @@ function bindEvents(){
     if(SimDiagramInteractions.isEditable(e.target)||e.target.closest?.('dialog'))return;
     if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();}
     if(SimDiagramInteractions.isDeleteShortcut(e)&&hasProject&&selection&&!busy){e.preventDefault();removeSelected();}
-  });
-  const canvas=$('canvas-wrap');
-  canvas.addEventListener('dragover',e=>{if(!paletteDragType)return;e.preventDefault();e.dataTransfer.dropEffect='copy';canvas.classList.add('palette-drop-ready');});
-  canvas.addEventListener('dragleave',e=>{if(!canvas.contains(e.relatedTarget))canvas.classList.remove('palette-drop-ready');});
-  canvas.addEventListener('drop',e=>{
-    canvas.classList.remove('palette-drop-ready');
-    const type=e.dataTransfer?.getData('application/x-lemeit-object');
-    if(!paletteDragType||type!==paletteDragType||!Object.hasOwn(TYPES,type))return;
-    e.preventDefault();paletteDragType=null;suppressPaletteUntil=performance.now()+500;
-    const p=svgPoint(e);addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});
   });
   $('inspector').addEventListener('click',e=>{const tab=e.target.closest('[data-stream-tab]');if(tab){streamTabs.set(selection.node,tab.dataset.streamTab);renderInspector();return;}if(e.target.closest('#delete-selected'))removeSelected();});
   $('inspector').addEventListener('input',e=>{
