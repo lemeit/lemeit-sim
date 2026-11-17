@@ -1,4 +1,4 @@
-/* Paneles acoplables de ΣIM: comportamiento de escritorio tipo CAD.
+/* Paneles acoplables de ΣIM: manejo estilo CAD de las ventanas del proyecto.
  * Los datos de distribución son locales; no modifican proyectos ni resultados. */
 'use strict';
 globalThis.SimDockLayout=(()=>{
@@ -51,6 +51,7 @@ globalThis.SimDockLayout=(()=>{
     let saved={};
     try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch{}
     const panels=recover(saved,innerWidth,innerHeight);
+    for(const id of IDS)panels[id].el=elements[id];
     const sizes={left:186,right:265,top:200,bottom:160,...saved.sizes};
     const slots={};
     for(const edge of EDGES){
