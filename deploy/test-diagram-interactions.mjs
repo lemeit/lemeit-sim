@@ -41,6 +41,7 @@ test('el portal muestra una indicación al arrastrar para eliminar y conserva el
  assert.ok(html.indexOf('diagram-interactions.js')<html.indexOf('app.js'));
  assert.ok(html.includes('id="diagram-trash-zone"'));
  assert.match(app,/draggable="true"/);
+ assert.ok(!app.includes('<span class="add-sign">+</span>'));
  assert.match(app,/palette-drop-ready/);
  assert.match(app,/object-drop-delete/);
  assert.match(app,/SimDiagramInteractions\.isDeleteShortcut/);
