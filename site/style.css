@@ -1512,7 +1512,9 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
  .sim-shell .sim-cad-panel .panel-heading,.sim-shell .sim-cad-panel .results-heading{width:100%;box-sizing:border-box}
  .sim-shell .sim-cad-panel .panel-resizer,.sim-shell .sim-cad-panel .results-resizer,.sim-shell .sim-cad-panel .dock-grip{display:none!important}
  .sim-shell .sim-cad-panel #inspector,.sim-shell .sim-cad-panel #palette,.sim-shell .sim-cad-panel #results{min-height:0;overflow:auto;flex:1}
- .sim-shell #results-panel.sim-cad-panel{flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important}
+ .sim-shell #results-panel.sim-cad-panel:not([data-sim-cad-mode="float"]){flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important}
+ .sim-shell #results-panel.sim-cad-panel[data-sim-cad-mode="float"]{flex:none!important;margin:0!important;min-height:180px!important;max-height:calc(100dvh - 16px)!important}
+ .sim-shell .sim-cad-panel[hidden]{display:none!important}
  .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] #results{min-height:75px}
  .sim-cad-panel[data-sim-cad-mode="float"]>.sim-cad-size-grip{display:grid;place-items:center;position:absolute;bottom:0;right:0;width:24px;height:24px;border:0;border-radius:4px 0 0 0;background:var(--spx-accent-dim);color:var(--spx-text);cursor:nwse-resize;touch-action:none;z-index:12}
  .sim-cad-slot>.sim-cad-resizer{position:absolute;z-index:10;touch-action:none}
