@@ -160,7 +160,7 @@ globalThis.SimDockLayout=(()=>{
         p.box=fit({...g.before.box,
           w:g.before.box.w+e.clientX-g.x,
           h:g.before.box.h+e.clientY-g.y},innerWidth,innerHeight);
-        p.el.style.width=p.box.w+'px';p.el.style.height=p.box.h+'px';
+        Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',width:p.box.w+'px',height:p.box.h+'px'});
       }
     }
     function onGestureUp(e){if(gesture&&e.pointerId===gesture.pointer)stopGesture();}
