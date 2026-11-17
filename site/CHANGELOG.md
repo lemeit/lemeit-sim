@@ -9,6 +9,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 ## 0.21.2 — 2026-11-16
 
 - Se refuerza el arrastre nativo de equipos y corrientes desde la biblioteca al lienzo, con indicación visual del destino.
+- Se retira el signo + de cada elemento de la biblioteca, para evitar que parezca una opción desplegable.
 - Arrastrar un objeto del diagrama fuera del área de diseño (con margen de seguridad de 24 px) y soltarlo elimina ese objeto y todas sus conexiones. Una indicación aparece antes de soltar.
 - Supr y Retroceso eliminan el objeto o la conexión seleccionada, sin interferir con la edición de texto, controles ni diálogos.
 - Los movimientos de objetos dentro del lienzo conservan las conexiones. La eliminación invalida los resultados anteriores, como corresponde.
