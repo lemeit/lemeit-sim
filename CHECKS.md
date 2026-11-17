@@ -350,3 +350,12 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Navegador tras recargar: Acerca de muestra 0.9.1; Ayuda contiene guía de uso, tutoriales DWSIM en inglés y Acerca de. La guía de ejercicios permanece en Ejemplos.
 - Revisados los campos de selección y numéricos de la calculadora: foco interior y etiquetas separadas. La guía de uso se abre correctamente y ofrece regreso al simulador.
 - Sin cambios en cálculos, motores ni túneles. No publicado.
+
+
+## 0.22.0 · Explorador de ejemplos · 17/11/2026
+
+- 150 pruebas Node aprobadas y build:verified correcto. Nuevas comprobaciones de búsqueda exacta por número, texto sin acentos, combinación de filtros y correspondencia de los trece casos con sus resoluciones.
+- Navegador local: búsqueda 13 devuelve un caso; Resolución abre directamente el ejercicio 13. Abrir caso carga el intercambiador y conserva la actividad guiada. Intentar abrir 01 con otro proyecto pide confirmación; Cancelar conserva el 13.
+- Filtro Reacciones devuelve tres casos; una búsqueda sin coincidencias muestra el aviso; Enter en búsqueda mantiene el explorador abierto.
+- Acerca de revisado después de recargar: 0.22.0. Foco interior de búsqueda y cierre coherente con otros diálogos.
+- Sin nuevas simulaciones ni cambios en gateways, motores o resultados de referencia. Vista local sin autenticación de producción; no equivale a comprobar la sesión publicada.

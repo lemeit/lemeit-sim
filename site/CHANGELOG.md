@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.22.0 — 2026-11-17
+
+- Reemplaza el menú largo de Ejemplos por un explorador con búsqueda por número, equipo o tema y filtros de balances, energía, mezclas/fases, presión y reacciones.
+- Cada ejercicio ofrece abrir el caso o consultar su resolución directamente; la guía completa queda accesible en el mismo explorador.
+- Conserva los trece proyectos, confirmación de reemplazo y actividad guiada del Ejemplo 13. Sin cambios en cálculos ni motores.
+
 ## 0.21.4 — 2026-11-16
 
 - Tipografía y escala de los select del inspector unificadas con el resto de ΣIM (11 px, fuente institucional); incluye base y expresión de fracciones, unidades y opciones nativas.

@@ -794,7 +794,9 @@ async function checkEngine({silent=false}={}){
 }
 function bindWorkspaceTools(){
   document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
-  document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('example-select').value=b.dataset.example;resetExample();closeMenus();});
+  document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{if(busy)return;$('examples-dialog').close();$('example-select').value=b.dataset.example;resetExample();closeMenus();});
+  SimExamplesBrowser.mount({openGuide:id=>{closeMenus();SimGuide.open($('guide-dialog'),$('guide-host'),id);}});
+  $('examples-browser-button').onclick=()=>{closeMenus();$('examples-dialog').showModal();$('examples-search').focus();};
   SimGuidedHx.mount({
     getProject:()=>({graph,result}),
     openExample:type=>{$('example-select').value=type;resetExample();closeMenus();}

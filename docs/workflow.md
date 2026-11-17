@@ -215,3 +215,10 @@ sigue usando la red para evitar archivos de versiones anteriores. El guardado
 JSON y el almacenamiento local de proyectos conservan su funcionamiento habitual.
 
 Referencia: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+
+
+## Explorar ejemplos · 0.22.0
+
+El acceso **Ejemplos** abre una biblioteca, sin una lista creciente en el menú principal. Buscá por número, equipo o tema, o filtrá por balances, energía, mezclas y fases, presión o reacciones. La búsqueda y el filtro se combinan.
+
+Cada ejercicio tiene dos acciones: **Abrir caso** carga el proyecto (con confirmación si hay otro abierto); **Resolución** consulta directamente el ejercicio en la guía integrada sin reemplazar el diagrama. **Ver guía completa** permite recorrer todas las resoluciones. Consultar una resolución no ejecuta DWSIM.
