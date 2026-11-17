@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.21.0](https://img.shields.io/badge/portal-0.21.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.21.1](https://img.shields.io/badge/portal-0.21.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -15,6 +15,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
+
+**0.21.1 — Controles de acoplamiento compactos**, 16/11/2026. Cabeceras reducidas, agarre discreto y selector de ubicación reducido a un icono con las mismas opciones.
 
 **0.21.0 — Paneles estilo CAD**, 16/11/2026. Ventanas movibles con franja de agarre, vista previa y acople a los cuatro bordes, redimensionamiento, posiciones recordadas y mejor separación de números de panel.
 
