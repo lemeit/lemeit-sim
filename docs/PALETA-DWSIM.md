@@ -1,6 +1,6 @@
 # Segunda paleta visual DWSIM
 
-Versión 0.23.1 en desarrollo, sin publicar. Rama feature/paleta-dwsim.
+Versión 0.23.1 lista para publicación. Rama feature/paleta-dwsim.
 
 ## Uso y alcance
 

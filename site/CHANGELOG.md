@@ -10,7 +10,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 - Selector de diseño dentro de Equipos y corrientes; siluetas DWSIM más diferenciadas y acento azul compatible con ambos temas.
 
-- En desarrollo, sin publicar: movimiento individual y de extremos sin límites artificiales del origen; colocación libre desde la biblioteca.
+- Movimiento individual y de extremos sin límites artificiales del origen; colocación libre desde la biblioteca.
 - Proyectos admiten coordenadas negativas finitas; Ajustar incluye todos los lados del diagrama.
 - Se conservan las conexiones y condiciones físicas al mover equipos y corrientes.
 

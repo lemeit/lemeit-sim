@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.23.1 — Paleta visual DWSIM y movimiento libre**, en desarrollo, sin publicar. Se elimina el límite invisible del movimiento y se admiten coordenadas negativas al guardar, abrir y ajustar. Selector global «Símbolos» en la biblioteca Equipos y corrientes: ΣIM (original) y DWSIM (SVG propios). La preferencia se conserva en el navegador y se sincroniza entre ventanas, sin guardarse en proyectos ni invalidar resultados. Cubre bomba, mezclador, intercambiador, separador flash, válvula, divisor, calentador, enfriador y ambos reactores. El tanque independiente queda para un alcance posterior; no se agrega una operación sin respaldo de cálculo.
+**0.23.1 — Paleta visual DWSIM y movimiento libre**, lista para publicación. Se elimina el límite invisible del movimiento y se admiten coordenadas negativas al guardar, abrir y ajustar. Selector global «Símbolos» en la biblioteca Equipos y corrientes: ΣIM (original) y DWSIM (SVG propios). La preferencia se conserva en el navegador y se sincroniza entre ventanas, sin guardarse en proyectos ni invalidar resultados. Cubre bomba, mezclador, intercambiador, separador flash, válvula, divisor, calentador, enfriador y ambos reactores. El tanque independiente queda para un alcance posterior; no se agrega una operación sin respaldo de cálculo.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 
