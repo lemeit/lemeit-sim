@@ -124,10 +124,10 @@ function equipmentSymbol(type){
   return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
 }
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" draggable="true" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span><span class="add-sign">+</span></button>`).join('');
+  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" draggable="true" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
   $('palette').addEventListener('dragstart',e=>{const b=e.target.closest('button[data-type]');if(!b||b.disabled){e.preventDefault();return;}paletteDragType=b.dataset.type;e.dataTransfer.setData('application/x-lemeit-object',paletteDragType);e.dataTransfer.effectAllowed='copy';});
-  $('palette').addEventListener('dragend',()=>{paletteDragType=null;suppressPaletteUntil=performance.now()+500;});
+  $('palette').addEventListener('dragend',()=>{paletteDragType=null;$('canvas-wrap').classList.remove('palette-drop-ready');suppressPaletteUntil=performance.now()+500;});
 }
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
@@ -290,7 +290,7 @@ function finishEndpointDrag(drag){
   pending=null;changed();renderInspector();
 }
 function removeSelected(){
-  if(busy)return;
+  if(busy||!hasProject||!selection)return;
   if(selection?.node){graph.nodes=graph.nodes.filter(n=>n.id!==selection.node);graph.edges=graph.edges.filter(e=>e.from!==selection.node&&e.to!==selection.node);}
   else if(selection?.edge!==undefined)graph.edges.splice(selection.edge,1);
   selection=null;pending=null;changed();renderInspector();
@@ -409,7 +409,7 @@ function bindEvents(){
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
     const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
-    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
+    if(node){selection={node:node.dataset.node};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();return;}
     const edge=e.target.closest('[data-edge]');selection=edge?{edge:Number(edge.dataset.edge)}:null;if(!edge)pending=null;renderDiagram();renderInspector();
   });
   svg.addEventListener('pointermove',e=>{
@@ -417,12 +417,20 @@ function bindEvents(){
     if(bending){const p=svgPoint(e),dx=p.x-bending.start.x,dy=p.y-bending.start.y;if(!bending.axis&&Math.hypot(dx,dy)<3/zoom)return;bending.axis??=Math.abs(dy)>Math.abs(dx)?'y':'x';setStreamBend(nodeById(bending.node),bending.axis,bending.axis==='y'?p.y:p.x);queueDiagramMotion();return;}
     if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;queueDiagramMotion();return;}
     if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;queueDiagramMotion();return;}
-    if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p);dragging.moved=true;queueDiagramMotion();
+    if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p);dragging.moved=true;
+    dragging.outside=SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
+    $('canvas-wrap').classList.toggle('object-drop-delete',dragging.outside);
+    $('diagram-trash-zone').hidden=!dragging.outside;
+    queueDiagramMotion();
   });
   const endDrag=e=>{
     const hadGesture=endpointDrag||dragging||resizing||bending||panning;
     if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type!=='pointercancel'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
-    const visualChange=dragging?.moved||resizing||bending;dragging=null;resizing=null;bending=null;panning=null;
+    const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
+    const visualChange=dragging?.moved||resizing||bending;
+    dragging=null;resizing=null;bending=null;panning=null;
+    $('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;
+    if(deleteDrag){removeSelected();notice('Objeto eliminado del diagrama. También podés seleccionar y pulsar Supr.');return;}
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
     if(visualChange){changed({physical:false});renderInspector();}else renderDiagram();
   };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
@@ -433,8 +441,21 @@ function bindEvents(){
     if(node&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const n=nodeById(node.dataset.node);moveNode(n,{start:{x:0,y:0},x:n.x,y:n.y,routeX:n.routeX,routeY:n.routeY,endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]]))},{x:({'ArrowLeft':-10,'ArrowRight':10}[e.key]||0),y:({'ArrowUp':-10,'ArrowDown':10}[e.key]||0)});changed({physical:false});svg.querySelector(`[data-node="${n.id}"]`)?.focus();}
     const edge=e.target.closest('[data-edge]');if(edge&&e.key==='Enter'){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();}
   });
-  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(e.target.tagName)||e.target.closest('dialog'))return;if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;renderDiagram();}if(e.key==='Delete'){e.preventDefault();removeSelected();}});
-  $('canvas-wrap').addEventListener('dragover',e=>{if(paletteDragType)e.preventDefault();});$('canvas-wrap').addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('application/x-lemeit-object');if(!paletteDragType||type!==paletteDragType||!Object.hasOwn(TYPES,type))return;paletteDragType=null;suppressPaletteUntil=performance.now()+500;const p=svgPoint(e);addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});});
+  document.addEventListener('keydown',e=>{
+    if(SimDiagramInteractions.isEditable(e.target)||e.target.closest?.('dialog'))return;
+    if(e.key==='Escape'){pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();}
+    if(SimDiagramInteractions.isDeleteShortcut(e)&&hasProject&&selection&&!busy){e.preventDefault();removeSelected();}
+  });
+  const canvas=$('canvas-wrap');
+  canvas.addEventListener('dragover',e=>{if(!paletteDragType)return;e.preventDefault();e.dataTransfer.dropEffect='copy';canvas.classList.add('palette-drop-ready');});
+  canvas.addEventListener('dragleave',e=>{if(!canvas.contains(e.relatedTarget))canvas.classList.remove('palette-drop-ready');});
+  canvas.addEventListener('drop',e=>{
+    canvas.classList.remove('palette-drop-ready');
+    const type=e.dataTransfer?.getData('application/x-lemeit-object');
+    if(!paletteDragType||type!==paletteDragType||!Object.hasOwn(TYPES,type))return;
+    e.preventDefault();paletteDragType=null;suppressPaletteUntil=performance.now()+500;
+    const p=svgPoint(e);addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});
+  });
   $('inspector').addEventListener('click',e=>{const tab=e.target.closest('[data-stream-tab]');if(tab){streamTabs.set(selection.node,tab.dataset.streamTab);renderInspector();return;}if(e.target.closest('#delete-selected'))removeSelected();});
   $('inspector').addEventListener('input',e=>{
     if(busy)return;const key=e.target.dataset.field,n=nodeById(selection?.node);

@@ -6,6 +6,15 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.21.2 — 2026-11-16
+
+- Se refuerza el arrastre nativo de equipos y corrientes desde la biblioteca al lienzo, con indicación visual del destino.
+- Se retira el signo + de cada elemento de la biblioteca, para evitar que parezca una opción desplegable.
+- Arrastrar un objeto del diagrama fuera del área de diseño (con margen de seguridad de 24 px) y soltarlo elimina ese objeto y todas sus conexiones. Una indicación aparece antes de soltar.
+- Supr y Retroceso eliminan el objeto o la conexión seleccionada, sin interferir con la edición de texto, controles ni diálogos.
+- Los movimientos de objetos dentro del lienzo conservan las conexiones. La eliminación invalida los resultados anteriores, como corresponde.
+- Pruebas geométricas, de teclado y de integración del diagrama. Sin cambios de gateway, motor ni contrato de simulación.
+
 ## 0.21.1 — 2026-11-16
 
 - Controles de acoplamiento minimalistas: reemplaza el selector grande por un icono compacto de tres puntos que conserva las cinco posiciones y restaurar.

@@ -1594,3 +1594,24 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 }
 .sim-shell .sim-cad-panel[data-sim-cad-mode="float"]>.sim-cad-size-grip:hover{opacity:1}
 .sim-cad-target{border-width:1px!important;font-size:11px!important;font-weight:500!important;background:var(--spx-accent-dim)}
+
+/* Interacciones del diagrama: entrada desde la paleta y eliminación al arrastrar fuera. */
+.sim-shell .canvas-wrap.palette-drop-ready{outline:2px dashed var(--spx-accent);outline-offset:-5px}
+.sim-shell .canvas-wrap.palette-drop-ready::after{
+  content:"Soltá para agregar al diagrama";
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:7;
+  padding:6px 11px;background:var(--spx-surface);color:var(--spx-text);
+  border:1px solid var(--spx-accent);border-radius:5px;
+  font:500 11px/1.3 var(--spx-font-sans);pointer-events:none;
+}
+.sim-shell .canvas-wrap.object-drop-delete{outline:2px dashed var(--spx-accent);outline-offset:-5px}
+.diagram-trash-zone{
+  position:absolute;z-index:9;left:50%;bottom:16px;transform:translateX(-50%);
+  max-width:calc(100% - 28px);box-sizing:border-box;
+  padding:9px 13px;border:1px solid var(--spx-accent);
+  border-radius:5px;background:var(--spx-surface);color:var(--spx-text);
+  box-shadow:0 5px 22px var(--spx-shadow);
+  font:500 11px/1.4 var(--spx-font-sans);text-align:center;pointer-events:none;
+}
+.diagram-trash-zone[hidden]{display:none!important}
+@media(max-width:540px){.diagram-trash-zone{bottom:8px;font-size:10px}}
