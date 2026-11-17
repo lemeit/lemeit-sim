@@ -20,5 +20,11 @@ globalThis.SimDiagramInteractions=(()=>{
     return (event.key==='Delete'||event.key==='Backspace')&&
       !event.altKey&&!event.ctrlKey&&!event.metaKey&&!isEditable(event.target);
   }
-  return Object.freeze({insideCanvas,outsideCanvas,shouldRemoveAfterDrag,isEditable,isDeleteShortcut});
+  function selectionRect(a,b){return {left:Math.min(a.x,b.x),right:Math.max(a.x,b.x),top:Math.min(a.y,b.y),bottom:Math.max(a.y,b.y)};}
+  function encloses(outer,inner){return inner.left>=outer.left&&inner.right<=outer.right&&inner.top>=outer.top&&inner.bottom<=outer.bottom;}
+  function translateNodes(nodes,originals,dx,dy){
+    const keysX=['x','startX','endX','routeX'],keysY=['y','startY','endY','routeY'];
+    for(const n of nodes){const original=originals.find(o=>o.id===n.id);if(!original)continue;for(const key of keysX)if(Number.isFinite(original[key]))n[key]=original[key]+dx;for(const key of keysY)if(Number.isFinite(original[key]))n[key]=original[key]+dy;}
+  }
+  return Object.freeze({selectionRect,encloses,translateNodes,insideCanvas,outsideCanvas,shouldRemoveAfterDrag,isEditable,isDeleteShortcut});
 })();

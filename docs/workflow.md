@@ -215,3 +215,20 @@ sigue usando la red para evitar archivos de versiones anteriores. El guardado
 JSON y el almacenamiento local de proyectos conservan su funcionamiento habitual.
 
 Referencia: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+
+
+## Explorar ejemplos · 0.22.0
+
+El acceso **Ejemplos** abre una biblioteca, sin una lista creciente en el menú principal. Buscá por número, equipo o tema, o filtrá por balances, energía, mezclas y fases, presión o reacciones. La búsqueda y el filtro se combinan.
+
+Cada ejercicio tiene dos acciones: **Abrir caso** carga el proyecto (con confirmación si hay otro abierto); **Resolución** consulta directamente el ejercicio en la guía integrada sin reemplazar el diagrama. **Ver guía completa** permite recorrer todas las resoluciones. Consultar una resolución no ejecuta DWSIM.
+
+
+## Seleccionar y mover varios objetos
+
+- Arrastrá sobre un espacio vacío del diagrama para dibujar un rectángulo. Quedan seleccionados los equipos y corrientes cuyo cuerpo o recorrido esté completamente dentro.
+- **Shift+clic** agrega o quita un objeto. **Shift+rectángulo** suma los objetos encerrados a la selección actual.
+- **Ctrl+A** (Cmd+A en macOS), con el foco en el diagrama, selecciona todos los equipos y corrientes. También está en **Ver → Seleccionar todo el diagrama**. En un campo de texto sigue seleccionando su texto.
+- Arrastrá un objeto seleccionado para mover el conjunto o usá las flechas del teclado. Las conexiones se mantienen; el movimiento gráfico no invalida resultados.
+- **Esc** o un clic en el fondo quita la selección. **Supr/Retroceso** elimina los objetos seleccionados y sus conexiones e invalida los resultados. El gesto de arrastrar fuera para eliminar sigue reservado al objeto individual.
+- **Alt+arrastrar** o el botón central desplazan la vista en lugar de seleccionar.

@@ -15,10 +15,11 @@ globalThis.SimGuide=(()=>{
   filter();if(standalone&&location.hash)reveal(decodeURIComponent(location.hash.slice(1)));else if(sections[0])sections[0].querySelector('details').open=true;
   const observer=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting&&!e.target.hidden)activate(e.target.id);},{root:standalone?null:root,rootMargin:'-15% 0px -65% 0px'});sections.forEach(s=>observer.observe(s));
  }
- async function open(dialog,host){
-  dialog.showModal();if(host.shadowRoot)return;host.textContent='Cargando guía…';
+ async function open(dialog,host,exerciseId){
+  const selectExercise=()=>{const root=host.shadowRoot;if(!root||!exerciseId)return;const search=root.querySelector("#guide-search");search.value="";search.dispatchEvent(new Event("input"));const link=[...root.querySelectorAll(".exercise-index a")].find(a=>a.hash==="#"+exerciseId);link?.click();};
+  dialog.showModal();if(host.shadowRoot){selectExercise();return;}host.textContent='Cargando guía…';
   try{const response=await fetch('ejemplos.html');if(!response.ok)throw Error('No se pudo cargar la guía.');const parsed=new DOMParser().parseFromString(await response.text(),'text/html'),main=parsed.querySelector('main');if(!main)throw Error('La guía no tiene contenido.');
-   host.textContent='';const shadow=host.attachShadow({mode:'open'}),link=document.createElement('link');link.rel='stylesheet';link.href='examples-guide.css';const style=document.createElement('style');style.textContent=':host{display:block;height:100%;width:100%;min-height:0} *,*::before,*::after{box-sizing:border-box} .guide-embedded{height:100%;overflow:auto;background:var(--spx-bg);color:var(--spx-text);font:15px/1.6 var(--spx-font-sans)}';const root=document.createElement('div');root.className='guide-embedded';root.append(main);shadow.append(link,style,root);mount(root,()=>dialog.close());
+   host.textContent='';const shadow=host.attachShadow({mode:'open'}),link=document.createElement('link');link.rel='stylesheet';link.href='examples-guide.css';const style=document.createElement('style');style.textContent=':host{display:block;height:100%;width:100%;min-height:0} *,*::before,*::after{box-sizing:border-box} .guide-embedded{height:100%;overflow:auto;background:var(--spx-bg);color:var(--spx-text);font:15px/1.6 var(--spx-font-sans)}';const root=document.createElement('div');root.className='guide-embedded';root.append(main);shadow.append(link,style,root);mount(root,()=>dialog.close());selectExercise();
   }catch(e){host.textContent=e.message+' Abrila desde Ayuda o volvé a intentarlo.';}
  }
  if(!document.body.classList.contains('sim-shell')){try{const saved=localStorage.getItem('simprox-theme');if(saved==='dark'||saved==='light')document.documentElement.dataset.theme=saved;}catch{}}
