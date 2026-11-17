@@ -101,7 +101,7 @@ function streamGeometry(n){
   let longest={length:-1};for(let i=1;i<clean.length;i++){const a=clean[i-1],b=clean[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
   g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};g.points=clean;return g;
 }
-function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=Math.max(0,Math.min(4000,value));}
+function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=value;}
 function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
 const engineHeaders=()=>({'X-SIM-Engine':selectedEngine});
 async function selectCalculationEngine(id){
@@ -166,7 +166,7 @@ function renderPalette(){
     const type=g.type;cleanup();
     if(place&&!busy&&hasProject){
       const p=svgPoint(e);
-      addNode(type,{x:Math.max(15,p.x-60),y:Math.max(45,p.y-40)});
+      addNode(type,{x:p.x-60,y:p.y-40});
     }
   }
   function cancelPalette(e){if(paletteGesture?.pointer===e.pointerId)cleanup();}
@@ -336,7 +336,7 @@ function finishEndpointDrag(drag){
     if(Math.hypot(drag.preview.x-fixed.x,drag.preview.y-fixed.y)<minimum){const other=out?original.b:original.a,dx=other.x-fixed.x,dy=other.y-fixed.y,length=Math.hypot(dx,dy);drag.preview={x:fixed.x+(length?dx/length:(out?1:-1))*minimum,y:fixed.y+(length?dy/length:0)*minimum};}
     n.startX=original.a.x;n.startY=original.a.y;n.endX=original.b.x;n.endY=original.b.y;
     graph.edges=graph.edges.filter(e=>out?e.from!==n.id:e.to!==n.id);
-    n[out?'endX':'startX']=Math.max(0,Math.min(4000,drag.preview.x));n[out?'endY':'startY']=Math.max(0,Math.min(4000,drag.preview.y));
+    n[out?'endX':'startX']=drag.preview.x;n[out?'endY':'startY']=drag.preview.y;
     notice('Extremo libre. Arrastralo a un puerto para conectarlo.');
   }
   delete n.orientation;delete n.routeAxis;delete n.routeX;delete n.routeY;
@@ -412,7 +412,7 @@ function loadGraph(data){
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
   const ids=new Set();
-  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>3000||n.y>2000)throw new Error('El archivo tiene objetos inválidos.');if(n.routeAxis!==undefined&&!['x','y'].includes(n.routeAxis))throw new Error('Recorrido de corriente inválido.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const [key,allowed] of Object.entries({flash_spec:['TP','PH','PS','PV','TV'],flow_basis:['mass','molar'],composition_basis:['mass','molar']}))if(n[key]!==undefined&&!allowed.includes(n[key]))throw new Error('Especificación de corriente inválida.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])||n[k]<0||n[k]>4000))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
+  for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y))throw new Error('El archivo tiene objetos inválidos.');if(n.routeAxis!==undefined&&!['x','y'].includes(n.routeAxis))throw new Error('Recorrido de corriente inválido.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const [key,allowed] of Object.entries({flash_spec:['TP','PH','PS','PV','TV'],flow_basis:['mass','molar'],composition_basis:['mass','molar']}))if(n[key]!==undefined&&!allowed.includes(n[key]))throw new Error('Especificación de corriente inválida.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
   graph=structuredClone(data);if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
@@ -443,11 +443,20 @@ function selectAllDiagram(){
 }
 function selectNodes(ids){const unique=[...new Set(ids)];selection=unique.length>1?{nodes:unique}:unique.length?{node:unique[0]}:null;}
 function nodeBounds(n){if(isStream(n)){const pts=streamGeometry(n).points;return {left:Math.min(...pts.map(p=>p.x)),right:Math.max(...pts.map(p=>p.x)),top:Math.min(...pts.map(p=>p.y)),bottom:Math.max(...pts.map(p=>p.y))};}const t=TYPES[n.type],scale=symbolScale(n);return {left:n.x,right:n.x+t.w*scale,top:n.y,bottom:n.y+t.h*scale};}
+function fitDiagram(){
+  const bounds=graph.nodes.map(nodeBounds);
+  viewX=Math.min(0,...bounds.map(b=>b.left-45));
+  viewY=Math.min(0,...bounds.map(b=>b.top-45));
+  const width=Math.max(1000,...bounds.map(b=>b.right+45-viewX));
+  const height=Math.max(520,...bounds.map(b=>b.bottom+55-viewY));
+  zoom=Math.min(1,1000/width,520/height);
+  renderDiagram();
+}
 function moveNode(n,start,p){
   const dx=p.x-start.start.x,dy=p.y-start.start.y;
-  n.x=Math.max(15,Math.min(2700,start.x+dx));n.y=Math.max(15,Math.min(1800,start.y+dy));
-  for(const [key,value] of Object.entries(start.endpoints||{}))n[key]=Math.max(0,Math.min(4000,value+(key.endsWith('X')?n.x-start.x:n.y-start.y)));
-  if(isStream(n)&&start.routeX!==undefined)n.routeX=Math.max(0,Math.min(4000,start.routeX+n.x-start.x));if(isStream(n)&&start.routeY!==undefined)n.routeY=Math.max(0,Math.min(4000,start.routeY+n.y-start.y));
+  n.x=start.x+dx;n.y=start.y+dy;
+  for(const [key,value] of Object.entries(start.endpoints||{}))n[key]=value+(key.endsWith('X')?n.x-start.x:n.y-start.y);
+  if(isStream(n)&&start.routeX!==undefined)n.routeX=start.routeX+n.x-start.x;if(isStream(n)&&start.routeY!==undefined)n.routeY=start.routeY+n.y-start.y;
 }
 function endpointCandidate(drag){
   const n=nodeById(drag.node),medium=n.type==='EnergyStream'?'energy':'material',out=drag.side==='out',m=$('diagram').getScreenCTM();
@@ -551,7 +560,7 @@ function bindEvents(){
   const changeZoom=(next,anchor)=>{const before=anchor?svgPoint(anchor):{x:viewX+500/zoom,y:viewY+260/zoom};const old=zoom;zoom=Math.max(.2,Math.min(4,next));viewX=before.x-(before.x-viewX)*old/zoom;viewY=before.y-(before.y-viewY)*old/zoom;renderDiagram();};
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
-  $('fit-button').onclick=()=>{viewX=0;viewY=0;const points=graph.nodes.flatMap(n=>{if(isStream(n)){const g=streamGeometry(n);return [g.a,g.b,g.bend];}return [{x:n.x+TYPES[n.type].w*symbolScale(n),y:n.y+TYPES[n.type].h*symbolScale(n)}];});const maxX=Math.max(1000,...points.map(p=>p.x+45)),maxY=Math.max(520,...points.map(p=>p.y+55));zoom=Math.max(.2,Math.min(1000/maxX,520/maxY));renderDiagram();};
+  $('fit-button').onclick=fitDiagram;
   $('save-button').onclick=()=>{const blob=new Blob([JSON.stringify(graph,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='proceso-lemeit.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Proceso descargado. El archivo conserva el diagrama, los compuestos y las condiciones.');};
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>100000)throw new Error('El archivo supera los 100 kB.');const data=JSON.parse(await file.text());loadGraph(data);notice('Proceso abierto. Calculá para obtener resultados actualizados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }

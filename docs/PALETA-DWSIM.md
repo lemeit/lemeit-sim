@@ -1,10 +1,10 @@
 # Segunda paleta visual DWSIM
 
-Versión 0.23.0 en desarrollo, sin publicar. Rama feature/paleta-dwsim.
+Versión 0.23.1 en desarrollo, sin publicar. Rama feature/paleta-dwsim.
 
 ## Uso y alcance
 
-El selector «Símbolos» de la barra del diagrama alterna ΣIM y DWSIM.
+El selector «Símbolos» de la biblioteca Equipos y corrientes alterna ΣIM y DWSIM.
 La apariencia se aplica simultáneamente a biblioteca, vista previa de arrastre
 y equipos del diagrama. ΣIM sigue siendo el valor inicial y conserva sus SVG.
 Las corrientes conservan su representación y enrutamiento actuales.
@@ -52,3 +52,12 @@ Las imágenes DWSIM históricas ya presentes conservan sus licencias y créditos
 
 Para ampliar la biblioteca se agrega el tipo al catálogo físico existente y su
 entrada SVG al gestor; los puertos siguen siendo responsabilidad del editor.
+
+## Revisión 0.23.1
+
+Selector trasladado al panel Equipos y corrientes y siluetas más diferenciadas
+con acento azul compatible con temas claro y oscuro. Movimiento individual,
+extremos y codos sin recorte al origen; validación admite coordenadas finitas
+negativas y Ajustar encuadra también esas posiciones. Suite completa: 159 pruebas.
+Navegador: bomba trasladada con teclado desde x=340 hasta x=-210 y encuadrada
+con Ajustar; Acerca de verificado tras recarga en 0.23.1.
