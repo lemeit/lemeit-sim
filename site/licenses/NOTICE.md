@@ -50,3 +50,11 @@ Marca ΣIM: reconstrucción vectorial propia basada en la referencia del usuario
 DWSIM MCP 10.2.15 desde ConstantProperties.Molar_Weight. No son estimaciones ni
 una base de constantes cinéticas. Se conservan las atribuciones y la licencia de
 DWSIM indicadas arriba; las propiedades no disponibles no se completan artificialmente.
+
+## Paleta visual DWSIM (0.23.0)
+
+`equipment-palettes.js` contiene diez símbolos SVG originales de ΣIM. El nombre
+DWSIM identifica una apariencia inspirada en convenciones de simulación; no es
+una paleta oficial. No se copiaron recursos ni código DWSIM para esta paleta.
+Los PNG históricos anteriores conservan las atribuciones GPL indicadas arriba.
+Los SVG nuevos se distribuyen con la licencia GPL-3.0-or-later del proyecto.

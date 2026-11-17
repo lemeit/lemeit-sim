@@ -1684,3 +1684,5 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .sim-shell #examples-dialog .example-title{font:inherit;font-weight:inherit;line-height:inherit;color:inherit;background:transparent;border:0;padding:0;text-align:left;cursor:pointer}
 .sim-shell #examples-dialog .example-title:hover{color:var(--spx-accent);text-decoration:underline;text-underline-offset:3px}
 .sim-shell #examples-dialog .example-title:focus-visible{outline:1px solid var(--spx-accent);outline-offset:3px}
+
+#visual-palette{font-size:11px;min-height:25px;width:88px}.visual-palette-label{font-size:11px}

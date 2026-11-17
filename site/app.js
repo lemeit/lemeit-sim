@@ -114,7 +114,8 @@ async function selectCalculationEngine(id){
   await checkEngine();
 }
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
-function equipmentSymbol(type){
+function equipmentSymbol(type){return SimEquipmentPalettes.symbol(type,originalEquipmentSymbol);}
+function originalEquipmentSymbol(type){
   if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
   if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
   if(type==='Separator')return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130 M35 55 H95"/><text class="symbol-sign" x="65" y="62" text-anchor="middle">V/L</text>';
@@ -126,6 +127,8 @@ function equipmentSymbol(type){
 }
 function renderPalette(){
   $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
+  if($('palette').dataset.bound)return;
+  $('palette').dataset.bound='true';
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
   // Firefox y el acoplamiento de paneles pueden interferir con el drag HTML5 de botones.
   // Seguimiento de puntero desde la paleta: el clic sigue agregando como antes.
@@ -554,7 +557,7 @@ function bindEvents(){
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
-  $('project-title').value=graph.title;renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
+  $('project-title').value=graph.title;bindVisualPalette();renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=selectedEngine;
   const initialCheckStarted=performance.now();let initialHttp=null;
   try{const response=await fetch('/api/catalog',{headers:engineHeaders(),signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
@@ -841,4 +844,16 @@ function bindWorkspaceTools(){
   handle.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();resizingResults={y:e.clientY,height:dock.getBoundingClientRect().height};handle.setPointerCapture(e.pointerId);};handle.onpointermove=e=>{if(resizingResults)setHeight(resizingResults.height+resizingResults.y-e.clientY);};handle.onpointerup=handle.onpointercancel=()=>resizingResults=null;handle.onkeydown=e=>{if(['ArrowUp','ArrowDown','Home'].includes(e.key)){e.preventDefault();setHeight(e.key==='Home'?160:dock.getBoundingClientRect().height+(e.key==='ArrowUp'?20:-20));}};handle.ondblclick=()=>dock.style.removeProperty('--results-height');
   document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]'))return;if((e.ctrlKey||e.metaKey)&&!e.altKey){const action={s:'save-button',o:'open-button',n:'new-project-button'}[e.key.toLowerCase()];if(action){e.preventDefault();if(!$(action).disabled)$(action).click();}}});
   updateControls();
+}
+
+// La preferencia visual pertenece al navegador; nunca al proyecto ni a su cálculo.
+function bindVisualPalette(){
+  const selector=$('visual-palette');
+  selector.innerHTML=SimEquipmentPalettes.list.map(p=>`<option value="${p.id}">${p.label}</option>`).join('');
+  selector.value=SimEquipmentPalettes.current;
+  selector.addEventListener('change',()=>SimEquipmentPalettes.select(selector.value));
+  SimEquipmentPalettes.subscribe(id=>{
+    selector.value=id;
+    renderPalette();renderDiagram();updateControls();
+  });
 }

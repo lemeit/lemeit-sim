@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.22.2](https://img.shields.io/badge/portal-0.22.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.23.0](https://img.shields.io/badge/portal-0.23.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.22.2 — Abrir desde el nombre**, en revisión. El nombre del ejercicio abre el mismo caso que el botón Abrir caso, con la misma confirmación de reemplazo. Resolución sigue siendo una acción independiente.
+**0.23.0 — Paleta visual DWSIM**, en desarrollo, sin publicar. Selector global «Símbolos» en la barra del diagrama: ΣIM (original) y DWSIM (SVG propios). La preferencia se conserva en el navegador y se sincroniza entre ventanas, sin guardarse en proyectos ni invalidar resultados. Cubre bomba, mezclador, intercambiador, separador flash, válvula, divisor, calentador, enfriador y ambos reactores. El tanque independiente queda para un alcance posterior; no se agrega una operación sin respaldo de cálculo.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 
