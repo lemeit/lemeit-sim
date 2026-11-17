@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.21.0 — 2026-11-16
+
+- Nuevo administrador de paneles estilo CAD: arrastrar desde una franja visible y acoplar a izquierda, derecha, arriba o abajo con vista previa.
+- Selector de posición por panel, doble clic para separar/acoplar y opción de restaurar la distribución estándar.
+- Redimensionamiento flotante desde una esquina y de paneles acoplados con separadores; posiciones y tamaños se conservan en el navegador.
+- Cabeceras con separación clara entre título, número de orden (01/02) y controles; el diagrama sigue ocupando el área central.
+- Persistencia independiente del JSON y los cálculos DWSIM. No se cambian gateways, motores, conexiones ni permisos.
+
 ## 0.20.1 — 2026-11-16
 
 - Arrastre corregido para los paneles flotantes, incluso por encima del SVG del editor.
