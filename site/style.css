@@ -1778,3 +1778,16 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #diagram-grid[aria-pressed="true"],#view-grid[aria-pressed="true"],#view-snap[aria-pressed="true"]{color:var(--spx-accent);background:var(--spx-accent-dim)}
 #diagnostics-dialog .dialog-copy{margin-left:auto;display:inline-grid;place-items:center;width:30px;height:30px;padding:4px;border:1px solid var(--spx-border);background:transparent;color:var(--spx-text);border-radius:4px;cursor:pointer}
 #diagnostics-dialog .dialog-copy:hover{color:var(--spx-accent)}
+
+/* Tabla compacta de compatibilidad de gateways: datos observados, no comandos de operación. */
+.engine-compatibility{border-top:1px solid var(--spx-border);margin-top:18px;padding-top:14px;min-width:0}
+.engine-compatibility h3,.sim-shell dialog .engine-compatibility h3{font-size:13px;margin:0 0 5px;font-weight:600}
+.engine-compat-summary{margin:0 0 10px;font-size:11px;line-height:1.5;color:var(--spx-text-dim)}
+.engine-compat-scroll{overflow-x:auto;max-width:100%}
+#engine-compat-table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.4}
+#engine-compat-table th,#engine-compat-table td{border-bottom:1px solid var(--spx-border);padding:7px 9px;text-align:left}
+#engine-compat-table th:not(:first-child),#engine-compat-table td:not(:first-child){text-align:center;white-space:nowrap}
+#engine-compat-table th{font-weight:600;color:var(--spx-text-dim)}
+#engine-compat-table .compat-supported{color:var(--spx-good)}
+#engine-compat-table .compat-unsupported{color:var(--spx-moderate)}
+#engine-compat-table .compat-unknown{color:var(--spx-text-dim)}
