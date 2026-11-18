@@ -4,19 +4,25 @@ const $ = id => document.getElementById(id);
 const TYPES = {
   MaterialStream: {label:'Corriente de materia', short:'Materia', icon:'material_stream', prefix:'C', w:150,h:70},
   EnergyStream: {label:'Corriente de energía', short:'Energía', icon:'energy_stream', prefix:'Q',w:130,h:65},
-  Mixer: {label:'Mezclador',short:'Mezclador',icon:'mixer',prefix:'M',w:120,h:100},
-  Splitter: {label:'Divisor',short:'Divisor',icon:'splitter',prefix:'D',w:120,h:100},
-  Separator: {label:'Separador flash',short:'Flash',icon:'separator',prefix:'V',w:130,h:110},
-  Tank: {label:'Tanque',short:'Tanque',icon:'tank',prefix:'TK',w:120,h:100},
-  Expander: {label:'Expansor',short:'Expansor',icon:'expander',prefix:'X',w:120,h:100},
-  Compressor: {label:'Compresor',short:'Compresor',icon:'compressor',prefix:'K',w:120,h:100},
-  Pump: {label:'Bomba',short:'Bomba',icon:'pump',prefix:'P',w:120,h:100},
-  HeatExchanger: {label:'Intercambiador',short:'Intercambiador',icon:'heat-exchanger',prefix:'HX',w:130,h:110},
-  Valve: {label:'Válvula',short:'Válvula',icon:'valve',prefix:'V',w:120,h:100},
-  Heater: {label:'Calentador',short:'Calentador',icon:'heater',prefix:'H',w:120,h:100},
-  Cooler: {label:'Enfriador',short:'Enfriador',icon:'cooler',prefix:'E',w:120,h:100},
-  ConversionReactor: {label:'Reactor de conversión',short:'Conversión',icon:'reactor_conversion',prefix:'R',w:130,h:110},
-  EquilibriumReactor: {label:'Reactor de equilibrio',short:'Equilibrio',icon:'reactor_equilibrium',prefix:'R',w:130,h:110},
+  Mixer: {label:'Mezclador',short:'Mezclador',icon:'mixer',prefix:'M',w:80,h:80},
+  Splitter: {label:'Divisor',short:'Divisor',icon:'splitter',prefix:'D',w:80,h:80},
+  Separator: {label:'Separador flash',short:'Flash',icon:'separator',prefix:'V',w:140,h:140},
+  Tank: {label:'Tanque',short:'Tanque',icon:'tank',prefix:'TK',w:80,h:80},
+  Expander: {label:'Expansor',short:'Expansor',icon:'expander',prefix:'X',w:80,h:80},
+  Compressor: {label:'Compresor',short:'Compresor',icon:'compressor',prefix:'K',w:80,h:80},
+  Pump: {label:'Bomba',short:'Bomba',icon:'pump',prefix:'P',w:80,h:80},
+  HeatExchanger: {label:'Intercambiador',short:'Intercambiador',icon:'heat-exchanger',prefix:'HX',w:95,h:95},
+  Valve: {label:'Válvula',short:'Válvula',icon:'valve',prefix:'V',w:68,h:68},
+  Heater: {label:'Calentador',short:'Calentador',icon:'heater',prefix:'H',w:80,h:80},
+  Cooler: {label:'Enfriador',short:'Enfriador',icon:'cooler',prefix:'E',w:80,h:80},
+  ConversionReactor: {label:'Reactor de conversión',short:'Conversión',icon:'reactor_conversion',prefix:'R',w:100,h:100},
+  EquilibriumReactor: {label:'Reactor de equilibrio',short:'Equilibrio',icon:'reactor_equilibrium',prefix:'R',w:100,h:100},
+  CSTR: {label:'Reactor de tanque agitado',short:'CSTR',prefix:'CSTR-',w:100,h:100,diagramOnly:true},
+  Polymerization: {label:'Reactor de polimerización',short:'Polimerización',prefix:'POLY-',w:100,h:100,diagramOnly:true},
+  PFR: {label:'Reactor tubular',short:'PFR',prefix:'PFR-',w:140,h:40,diagramOnly:true},
+  RigorousColumn: {label:'Columna de destilación',short:'Destilación',prefix:'DCOL-',w:180,h:225,diagramOnly:true},
+  AbsorptionColumn: {label:'Columna de absorción',short:'Absorción',prefix:'ABS-',w:67.5,h:225,diagramOnly:true},
+  ReliefValve: {label:'Válvula de seguridad',short:'PSV',prefix:'PSV-',w:80,h:80,diagramOnly:true},
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
@@ -61,26 +67,53 @@ function updateControls(){
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
 function isStream(n){return n.type.endsWith('Stream');}
 function isFeed(n){return n.type==='MaterialStream'&&!graph.edges.some(e=>e.to===n.id);}
+// Fractions of the DWSIM graphic bounds. Edge indices remain those of ΣIM projects.
+const equipmentPorts = {
+  Mixer: [[0,0],[0,.2],[0,.4],[1,.5]],
+  Splitter: [[0,.5],[1,0],[1,1]],
+  Separator: [[.25,.2],[.5,0,'up'],[.75,5/7]],
+  Tank: [[0,.5],[1,.5]],
+  Expander: [[0,.3],[1,0],[1,.5,'right']],
+  Compressor: [[0,0],[1,.3],[0,.5,'left']],
+  Pump: [[0,.5],[1,.1]],
+  HeatExchanger: [[0,.5],[.5,0,'up'],[1,.5],[.5,1,'down']],
+  Valve: [[0,.5],[1,.5]],
+  Heater: [[0,.5],[1,.5],[.5,1,'down']],
+  Cooler: [[0,.5],[1,.5],[.5,1,'down']],
+  ConversionReactor: [[.11,.5],[.89,.17],[.89,.83]],
+  EquilibriumReactor: [[.11,.5],[.89,.17],[.89,.83]],
+  CSTR: [[0,.5],[1,.5],[.5,0,'up']],
+  Polymerization: [[0,.5],[1,.5],[.5,0,'up']],
+  PFR: [[0,.5],[1,.5],[.75,0,'up']],
+  RigorousColumn: [[.0625,.26],[1,.3],[1,.98]],
+  AbsorptionColumn: [[.0625,.5],[1,.02],[1,.98]],
+  ReliefValve: [[.5,1,'down'],[1,.5]],
+};
+const inputCount = {Mixer:3,HeatExchanger:2};
+const energyPortSide = {Compressor:'energy-in',Heater:'energy-in',Expander:'energy-out',Cooler:'energy-out'};
+const portDirections = {up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
 function basePortList(n){
-  const {w,h}=TYPES[n.type], list=[];
+  const {w,h}=TYPES[n.type];
   if(isStream(n)){
     const medium=n.type==='EnergyStream'?'energy':'material',g=streamGeometry(n);
     return [{side:'in',index:0,x:g.a.x-n.x,y:g.a.y-n.y,medium},{side:'out',index:0,x:g.b.x-n.x,y:g.b.y-n.y,medium}];
   }
-  if(n.type==='Mixer')return [{side:'in',index:0,x:0,y:25,medium:'material'},{side:'in',index:1,x:0,y:75,medium:'material'},{side:'in',index:2,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'}];
-  if(n.type==='Splitter')return [{side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:25,medium:'material'},{side:'out',index:1,x:120,y:75,medium:'material'}];
-  if(n.type==='HeatExchanger')return [{side:'in',index:0,x:0,y:30,medium:'material'},{side:'in',index:1,x:0,y:80,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
-  if(n.type==='Separator')return [{side:'in',index:0,x:0,y:55,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
-  if(isReactor(n))return [{side:'in',index:0,x:0,y:55,medium:'material'},{side:'out',index:0,x:130,y:30,medium:'material'},{side:'out',index:1,x:130,y:80,medium:'material'}];
-  list.push({side:'in',index:0,x:0,y:50,medium:'material'},{side:'out',index:0,x:120,y:50,medium:'material'});
-  if(n.type==='Heater'||n.type==='Compressor')list.push({side:'energy-in',index:0,x:60,y:100,medium:'energy'});
-  if(n.type==='Cooler'||n.type==='Expander')list.push({side:'energy-out',index:0,x:60,y:100,medium:'energy'});
-  return list;
+  const inputs=inputCount[n.type]??1, energy=energyPortSide[n.type];
+  const ports=equipmentPorts[n.type];
+  return ports.map(([x,y,direction],i)=>{
+    const isEnergy=energy&&i===ports.length-1;
+    const side=isEnergy?energy:i<inputs?'in':'out';
+    return {side,index:isEnergy?0:i<inputs?i:i-inputs,
+      x:x*w,y:y*h,medium:isEnergy?'energy':'material',direction};
+  });
 }
 function symbolScale(n){return isStream(n)?1:(n.scale??1);}
 function portList(n){const ports=basePortList(n);return isStream(n)?ports:ports.map(p=>({...p,x:p.x*symbolScale(n),y:p.y*symbolScale(n)}));}
 function point(n,side,index=0){const p=portList(n).find(p=>p.side===side&&p.index===index);return p?{x:n.x+p.x,y:n.y+p.y,medium:p.medium}:null;}
-function normalForPort(n,side){return side.startsWith('energy')?{x:0,y:1}:side.endsWith('in')?{x:-1,y:0}:{x:1,y:0};}
+function normalForPort(n,side,index){
+  const port=portList(n).find(p=>p.side===side&&p.index===index);
+  return portDirections[port?.direction]??portDirections[side.endsWith('in')?'left':'right'];
+}
 function streamGeometry(n){
   let source=graph.edges.find(e=>e.to===n.id),target=graph.edges.find(e=>e.from===n.id);
   const a=source?point(nodeById(source.from),source.fromPort||'out',source.fromIndex||0):{x:n.startX??n.x,y:n.startY??(n.y+TYPES[n.type].h/2)};
@@ -90,10 +123,9 @@ function streamGeometry(n){
   if(endpointDrag?.node===n.id&&endpointDrag.moved){if(endpointDrag.side==='in')source=null;else target=null;}
   const dx=g.b.x-g.a.x,dy=g.b.y-g.a.y;
   const travel=Math.abs(dy)>Math.abs(dx)?{x:0,y:Math.sign(dy)||1}:{x:Math.sign(dx)||1,y:0};
-  const energyPort=(target?.toPort||'').startsWith('energy')||(source?.fromPort||'').startsWith('energy');
-  const routeAxis=n.routeAxis||(energyPort?'y':travel.y!==0?'y':'x');
-  const startNormal=source?normalForPort(nodeById(source.from),source.fromPort||'out'):travel;
-  const endNormal=target?normalForPort(nodeById(target.to),target.toPort||'in'):{x:-travel.x,y:-travel.y};
+  const startNormal=source?normalForPort(nodeById(source.from),source.fromPort||'out',source.fromIndex||0):travel;
+  const endNormal=target?normalForPort(nodeById(target.to),target.toPort||'in',target.toIndex||0):{x:-travel.x,y:-travel.y};
+  const routeAxis=n.routeAxis||(startNormal.y&&endNormal.y?'y':'x');
   const stub=28,A={x:g.a.x+startNormal.x*stub,y:g.a.y+startNormal.y*stub},B={x:g.b.x+endNormal.x*stub,y:g.b.y+endNormal.y*stub};
   let points;
   if(routeAxis==='y'){const mid=n.routeY??(A.y+B.y)/2;g.mid=mid;g.bend={x:(A.x+B.x)/2,y:mid,axis:'y'};points=[g.a,A,{x:A.x,y:mid},{x:B.x,y:mid},B,g.b];}
@@ -102,6 +134,11 @@ function streamGeometry(n){
   for(const p of points){if(clean.length&&p.x===clean.at(-1).x&&p.y===clean.at(-1).y)continue;while(clean.length>1){const prev=clean.at(-2),last=clean.at(-1),aligned=(prev.x===last.x&&last.x===p.x)||(prev.y===last.y&&last.y===p.y),forward=(last.x-prev.x)*(p.x-last.x)+(last.y-prev.y)*(p.y-last.y)>=0;if(!aligned||!forward)break;clean.pop();}clean.push(p);}
   g.d=`M${clean[0].x} ${clean[0].y}`+clean.slice(1).map((p,i)=>p.x===clean[i].x?` V${p.y}`:` H${p.x}`).join('');
   let longest={length:-1};for(let i=1;i<clean.length;i++){const a=clean[i-1],b=clean[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
+  const segment=!source&&target?{a:clean[0],b:clean[1]}:source&&!target?{a:clean.at(-2),b:clean.at(-1)}:longest;
+  if(segment.a&&segment.b){
+    const length=Math.hypot(segment.b.x-segment.a.x,segment.b.y-segment.a.y);
+    g.arrow=DwsimSymbols.arrowTransform({...segment,length},!source&&target?'in':source&&!target?'out':'center');
+  }
   g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};g.points=clean;return g;
 }
 function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=value;}
@@ -117,27 +154,8 @@ async function selectCalculationEngine(id){
   await checkEngine();
 }
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
-function equipmentSymbol(type){return SimEquipmentPalettes.symbol(type,originalEquipmentSymbol);}
-function originalEquipmentSymbol(type){
-  if(type==='Mixer')return '<path d="M20 15 H60 L105 50 L60 85 H20 Z M0 25 H20 M0 75 H20 M0 50 H20 M105 50 H120"/>';
-  if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
-  if(type==='Separator')return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130 M35 55 H95"/><text class="symbol-sign" x="65" y="62" text-anchor="middle">V/L</text>';
-  if(type==='HeatExchanger')return '<rect x="20" y="10" width="90" height="90" rx="12"/><path d="M0 30 H35 L95 80 H130 M0 80 H35 L95 30 H130"/><text class="symbol-sign" x="65" y="58" text-anchor="middle">HX</text>';
-  if(type==='Tank')return '<path d="M25 20 C25 3 95 3 95 20 V80 C95 97 25 97 25 80 Z M25 20 C25 37 95 37 95 20 M0 50 H25 M95 50 H120"/>';
-  if(type==='Expander')return '<path d="M0 50 H20 M20 35 L100 15 V85 L20 65 Z M100 50 H120 M60 75 V100"/>';
-  if(type==='Compressor')return '<path d="M0 50 H20 M20 15 L100 35 V65 L20 85 Z M100 50 H120 M60 75 V100"/>';
-  if(type==='Pump')return '<circle cx="60" cy="50" r="40"/><path d="M0 50 H20 M100 50 H120 M40 72 L82 50 L40 28 Z"/>';
-  if(type==='Valve')return '<path d="M0 50 H20 M20 25 L60 50 L20 75 Z M100 25 L60 50 L100 75 Z M100 50 H120"/>';
-  if(type==='Heater'||type==='Cooler')return `<path d="M0 50 L60 5 L120 50 L60 95 Z M60 95 V100"/><text class="symbol-sign" x="60" y="57" text-anchor="middle">${type==='Heater'?'H':'C'}</text>`;
-  return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
-}
-function paletteStreamSymbol(type){
-  return type==='EnergyStream'
-    ?'<g class="palette-energy-symbol"><path d="M5 55 H120" stroke-dasharray="18 12"/><path d="M100 40 L120 55 L100 70"/></g>'
-    :'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>';
-}
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?paletteStreamSymbol(type):equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
+  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}">${DwsimSymbols.thumbnail(type,t)}<span>${t.label}</span></button>`).join('');
   if($('palette').dataset.bound)return;
   $('palette').dataset.bound='true';
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
@@ -193,14 +211,14 @@ function renderPalette(){
 }
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  let html='<defs><marker id="arrow-material" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--spx-text)"/></marker><marker id="arrow-energy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--spx-good)"/></marker></defs>';
+  let html='';
   [...graph.nodes].sort((a,b)=>Number(isStream(a))-Number(isStream(b))).forEach(n=>{
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
     const g=isStream(n)?streamGeometry(n):null;
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node ${isStream(n)?'stream-node':'equipment-node'} ${(selection?.node===n.id||selection?.nodes?.includes(n.id))?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${(selection?.node===n.id||selection?.nodes?.includes(n.id))?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
     if(g){
-      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line ${n.type==='EnergyStream'?'energy':''}" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}" marker-end="url(#arrow-${n.type==='EnergyStream'?'energy':'material'})"/><text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${equipmentSymbol(n.type)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
+      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}<text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selection?.node===n.id||selection?.nodes?.includes(n.id)?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
     const readingX=g?g.label.x:t.w*scale/2,readingY=g?g.label.y+32:t.h*scale+52;
     if(r)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}</text>`;
     else if(feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass')html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}</text>`;
@@ -276,6 +294,7 @@ function renderInspector(){
   if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
   if(n.type==='HeatExchanger')html+=`<p class="inspector-description">Intercambiador de dos corrientes sin mezcla. Puerto 1: caliente, puerto 2: frío. Se especifica únicamente la potencia térmica transferida del caliente al frío (kW); DWSIM calcula ambas temperaturas de salida. El modelo inicial no incluye pérdidas externas ni caídas de presión.</p>${field('heat_duty_kW','Calor transferido','kW',n.heat_duty_kW,{min:0.000001})}`;
+  if(TYPES[n.type].diagramOnly)html+='<p class="inspector-description">Disponible para dibujar y conectar en el PFD. Cálculo sin implementar en ΣIM.</p>';
   if(n.type==='Tank')html+=`<p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
   if(n.type==='Expander')html+=`<p class="inspector-description">Expansión adiabática de gas con producción de trabajo de eje. Especificá una presión absoluta de descarga menor que la entrada y la eficiencia isentrópica. Solo alimentación vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}${Number.isFinite(result?.equipment[n.id]?.shaft_power_generated_kW)?`<p class="reading-row">Potencia de eje producida: <strong>${fmt(result.equipment[n.id].shaft_power_generated_kW,3)} kW</strong></p>`:''}`;
   if(n.type==='Compressor')html+=`<p class="inspector-description">Compresión adiabática de gas: especificá presión absoluta de descarga y eficiencia isentrópica. DWSIM calcula temperatura y potencia de eje. Solo alimentación completamente vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}`;
@@ -390,6 +409,9 @@ async function convertFlowBase(n,next){
 async function calculate(){
   if(!hasProject||!engineOnline)return;
   if(busy)return;
+  const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
+  if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
+
   const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
   if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
   notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
@@ -454,7 +476,7 @@ function updateDiagramGeometry(){
     const el=svg.querySelector(`[data-node="${n.id}"]`);if(!el)continue;
     const t=TYPES[n.type],s=symbolScale(n),g=isStream(n)?streamGeometry(n):null;
     el.setAttribute('transform',`translate(${g?0:n.x} ${g?0:n.y})`);
-    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const label=el.querySelector('.stream-label');label.setAttribute('x',g.label.x);label.setAttribute('y',g.label.y);const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
+    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const arrow=el.querySelector('.dwsim-stream-arrow');if(arrow)arrow.setAttribute('transform',g.arrow??'scale(0)');const label=el.querySelector('.stream-label');label.setAttribute('x',g.label.x);label.setAttribute('y',g.label.y);const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
     else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);for(const [selector,y] of [['.equipment-label',20],['.node-kind',35]]){const label=el.querySelector(selector);label.setAttribute('x',equipmentLabelX(n));label.setAttribute('y',t.h*s+y);}const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
     const reading=el.querySelector('.node-reading');if(reading){reading.setAttribute('x',g?g.label.x:t.w*s/2);reading.setAttribute('y',g?g.label.y+32:t.h*s+52);}
     for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
@@ -601,7 +623,7 @@ function bindEvents(){
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
-  $('project-title').value=graph.title;bindVisualPalette();renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
+  $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=selectedEngine;
   const initialCheckStarted=performance.now();let initialHttp=null;
   try{const response=await fetch('/api/catalog',{headers:engineHeaders(),signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
@@ -897,13 +919,3 @@ function bindWorkspaceTools(){
 }
 
 // La preferencia visual pertenece al navegador; nunca al proyecto ni a su cálculo.
-function bindVisualPalette(){
-  const selector=$('visual-palette');
-  selector.innerHTML=SimEquipmentPalettes.list.map(p=>`<option value="${p.id}">${p.label}</option>`).join('');
-  selector.value=SimEquipmentPalettes.current;
-  selector.addEventListener('change',()=>SimEquipmentPalettes.select(selector.value));
-  SimEquipmentPalettes.subscribe(id=>{
-    selector.value=id;
-    renderPalette();renderDiagram();updateControls();
-  });
-}

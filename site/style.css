@@ -910,9 +910,9 @@ footer.site-footer{font-family:var(--spx-font-sans)}.footer-wordmark{font-family
 
 /* Corrientes y controles del espacio de trabajo. */
 .stream-hit{fill:transparent;stroke:none;pointer-events:all}
-.stream-line{fill:none;stroke:var(--spx-accent);stroke-width:2.5}
-.stream-line.energy{stroke:var(--spx-good);stroke-dasharray:7 4}
-.node.selected .stream-line{stroke-width:4}
+
+
+
 .node.stream-node text{pointer-events:none}
 .equipment-panel,.inspector-panel{position:relative;min-width:0}
 .panel-resizer{position:absolute;top:0;bottom:0;width:10px;z-index:5;cursor:col-resize;touch-action:none}
@@ -925,18 +925,18 @@ footer.site-footer{font-family:var(--spx-font-sans)}.footer-wordmark{font-family
 
 /* Símbolos genéricos de proceso y una única línea por corriente. */
 .node .stream-hit{fill:none;stroke:transparent;stroke-width:18;pointer-events:stroke}
-.node .stream-line{pointer-events:none;stroke:var(--spx-text);stroke-width:1.8}
-.node .stream-line.energy{stroke:var(--spx-good)}
-.node.selected .stream-line{stroke:var(--spx-accent);stroke-width:2.5}
-.node .equipment-symbol{fill:var(--spx-surface);stroke:var(--spx-text);stroke-width:1.8;stroke-linejoin:round}
-.node.selected .equipment-symbol{stroke:var(--spx-accent);stroke-width:2.5}
-.node .equipment-symbol .symbol-sign{fill:var(--spx-text);stroke:none;font-size:16px}
+
+
+
+
+
+
 .node.stream-node .stream-label{pointer-events:all;cursor:move;paint-order:stroke;stroke:var(--spx-surface);stroke-width:5px;stroke-linejoin:round}
 .stream-node [data-port]{cursor:crosshair}
 .node:not(.selected):not(:hover) .port{opacity:0}
 .node:not(.selected):not(:hover) .port.pending{opacity:1}
 
-.palette-symbol{width:26px;height:26px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:5;stroke-linejoin:round}.palette-symbol .symbol-sign{fill:currentColor;stroke:none}
+.palette-symbol{width:26px;height:26px;flex-shrink:0}
 
 #diagram{touch-action:none;user-select:none}
 .palette-symbol,.palette-item span{pointer-events:none}
@@ -956,7 +956,7 @@ body.diagram-focus .notice{margin:0}
 body.diagram-focus{height:100dvh;overflow:hidden}
 #diagram-focus,#diagram-popout{width:auto;white-space:nowrap;padding:0 8px;font-size:10px}
 
-#diagram-add{font-size:10px;width:105px;padding:3px;min-height:25px}.node .equipment-symbol .symbol-sign{font-size:23px;font-family:var(--spx-font-mono)}
+#diagram-add{font-size:10px;width:105px;padding:3px;min-height:25px}
 .diagram-toolbar{flex-wrap:wrap;gap:6px}.zoom-controls{flex-wrap:wrap;gap:3px}
 
 .zoom-controls #diagram-popout{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--spx-border);border-radius:4px;color:var(--spx-text);text-decoration:none;min-height:25px;background:var(--spx-surface);cursor:pointer}
@@ -1685,18 +1685,48 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .sim-shell #examples-dialog .example-title:hover{color:var(--spx-accent);text-decoration:underline;text-underline-offset:3px}
 .sim-shell #examples-dialog .example-title:focus-visible{outline:1px solid var(--spx-accent);outline-offset:3px}
 
-#visual-palette{font-size:10px;min-height:22px;width:78px}.visual-palette-label{font-size:10px}
 
 .visual-palette-control{display:flex;align-items:center;gap:6px;margin:2px 0 6px;padding:0;border:0}
-.visual-palette-control #visual-palette{width:78px;padding:1px 4px;height:22px}
-.dwsim-symbol{fill:#e2edf6;stroke:#28618a;stroke-width:1.8;stroke-linejoin:round}
-[data-theme="dark"] .dwsim-symbol{fill:#193549;stroke:#89bde1}
-.node.selected .dwsim-symbol{stroke:var(--spx-accent);stroke-width:2.5}
 
 .sim-shell .equipment-panel .palette-item{padding:3px 4px;min-height:28px}.sim-shell .equipment-panel .palette-symbol{width:22px;height:22px}.sim-shell .equipment-panel .palette-group{margin:8px 0 3px}
 
-.palette-symbol .palette-energy-symbol{stroke:var(--spx-good);stroke-width:5;stroke-linecap:butt;fill:none}
+@font-face {
+  font-family: "DWSIM Asap";
+  src: url("assets/Asap-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+.dwsim {
+  --dwsim-ink: #fa8072;
+  --dwsim-fill: color-mix(in srgb, var(--dwsim-ink) 19.608%, transparent);
+}
+.dwsim-calculated, button[data-type="MaterialStream"] .dwsim { --dwsim-ink: #4682b4; }
+[data-theme="dark"] .dwsim-calculated { --dwsim-ink: #f5f5f5; }
+.dwsim-energy { --dwsim-fill: rgba(255, 255, 0, .19608); }
+.dwsim .equipment-symbol, .dwsim .dwsim-stream-arrow, .palette-symbol.dwsim {
+  fill: var(--dwsim-fill);
+  stroke: var(--dwsim-ink);
+  stroke-width: 1.8;
+}
+.dwsim .equipment-symbol :is(path, rect, ellipse), .dwsim-stream-arrow path,
+.palette-symbol.dwsim :is(path, rect, ellipse) { vector-effect: non-scaling-stroke; }
+.palette-symbol.dwsim { stroke-width: .9; }
+.dwsim .dwsim-paper { fill: var(--spx-surface); stroke: none; }
+.dwsim .stream-line { fill: none; stroke: var(--dwsim-ink); stroke-width: 1.8; pointer-events: none; }
+.dwsim .dwsim-stream-arrow { pointer-events: none; }
+.dwsim .dwsim-letter, .node.dwsim :is(.stream-label,.equipment-label) {
+  fill: var(--dwsim-ink);
+  stroke: none;
+  font-family: "DWSIM Asap", sans-serif;
+  font-weight: 600;
+}
+.dwsim.selected .stream-line { stroke-width: 3; }
 
-/* El recorrido de energía conserva su identidad al cambiar de paleta o seleccionar. */
-.node .stream-line.energy,.node.selected .stream-line.energy{stroke-dasharray:7 4}
+.dwsim .equipment-symbol .equipment-selection {
+  fill: #add8e640;
+  stroke: #add8e6;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
 .node .bend-handle{fill:var(--spx-accent);stroke:var(--spx-surface);stroke-width:1}

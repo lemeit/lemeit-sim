@@ -51,10 +51,24 @@ DWSIM MCP 10.2.15 desde ConstantProperties.Molar_Weight. No son estimaciones ni
 una base de constantes cinéticas. Se conservan las atribuciones y la licencia de
 DWSIM indicadas arriba; las propiedades no disponibles no se completan artificialmente.
 
-## Paleta visual DWSIM (0.23.0)
+## Símbolos del PFD
 
-`equipment-palettes.js` contiene diez símbolos SVG originales de ΣIM. El nombre
-DWSIM identifica una apariencia inspirada en convenciones de simulación; no es
-una paleta oficial. No se copiaron recursos ni código DWSIM para esta paleta.
-Los PNG históricos anteriores conservan las atribuciones GPL indicadas arriba.
-Los SVG nuevos se distribuyen con la licencia GPL-3.0-or-later del proyecto.
+Port a SVG del modo de dibujo predeterminado de DWSIM (DrawMode 0).
+Copyright Daniel Wagner Oliveira de Medeiros y colaboradores de DWSIM.
+El port se distribuye bajo GNU GPL versión 3, incluida en DWSIM-GPL-3.txt.
+ΣIM se distribuye bajo GPL-3.0-or-later, compatible con el port bajo GPLv3.
+
+Fuente principal: https://github.com/DanWBR/dwsim10/tree/c8cdb6593f0c58d02ffe9dd1f9a47cd4c16eca12/engine/DWSIM.Drawing.SkiaSharp/GraphicObjects
+
+- Shapes: AbsorptionColumn, Compressor, Cooler, CSTR, EnergyStream, Expander,
+  HeatExchanger, Heater, MaterialStream, Mixer, PFR, Pump, RigorousColumn,
+  SeparatorVessel, Splitter, Tank y Valve.
+- Shapes/ConversionReactor y Shapes/EquilibriumReactor usan ShapeGraphic.DrawReactor.
+  Shapes/Polymerization hereda el dibujo de CSTR.
+- Válvula de seguridad: https://github.com/DanWBR/dwsim10/blob/c8cdb6593f0c58d02ffe9dd1f9a47cd4c16eca12/engine/DWSIM.UnitOperations/UnitOperations/ReliefValve.vb
+- Se contrastó con https://github.com/DanWBR/dwsim/tree/1abf72d1b6b41d3e9a8cc770d3cc4e8fc76e5766/DWSIM.Drawing.SkiaSharp/GraphicObjects.
+  La captura incluye POLY-1, cuya clase de dibujo está en DWSIM 10. La imagen
+  permite identificar el modo y la familia de código, pero no la compilación exacta.
+
+Asap SemiBold, distribuida por DWSIM, se incluye bajo SIL Open Font License 1.1.
+Ver Asap-OFL.txt.
