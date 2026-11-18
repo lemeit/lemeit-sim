@@ -30,7 +30,7 @@ jobs:
         env:
           PLAYWRIGHT_CHANNEL: chrome
       - name: Validar entradas del servidor
-        run: python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation test_examples test_compressor test_tank test_expander -v
+        run: python -m unittest test_recycle test_server.ValidationTests test_stream_properties.StreamValidation test_examples test_compressor test_tank test_expander -v
       - name: Preparar despliegue sin publicar
         run: npm run deploy:check
         env:
