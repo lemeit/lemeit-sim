@@ -51,6 +51,8 @@ def solve_simple_recycle(graph,shape,solve_open,max_iterations=5):
     """Converge una corriente de corte y verifica masa, T, P y composición.
     solve_open(torn_graph) resuelve mediante el motor real y devuelve su salida habitual.
     """
+    if graph.get('compounds')!=['Water'] or graph.get('model')!='Steam Tables (IAPWS-IF97)':
+        raise RecycleError('Este primer reciclado está limitado a agua pura con IAPWS-IF97; otros sistemas quedan para una etapa posterior.')
     by_id={n['id']:n for n in graph['nodes']}
     fresh=by_id[shape['fresh']]
     splitter=by_id[shape['splitter']]
