@@ -10,7 +10,7 @@ test('búsqueda exacta por número y búsqueda de texto sin acentos respetan el 
 });
 test('los diecisiete casos tienen resolución propia y ya no forman un desplegable largo',()=>{
  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');const browser=html.slice(html.indexOf('<dialog id="examples-dialog"'));
- const ids=[...browser.matchAll(/data-example="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,17);assert.equal(new Set(ids).size,16);
+ const ids=[...browser.matchAll(/data-example="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,17);assert.equal(new Set(ids).size,17);
  for(const id of ids)assert.ok(browser.includes('data-example-guide="'+id+'"'));
  const header=html.slice(0,html.indexOf('</header>'));assert.doesNotMatch(header,/data-example=/);assert.match(header,/aria-haspopup="dialog">Ejemplos/);
 });
