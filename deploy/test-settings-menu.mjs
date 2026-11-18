@@ -8,7 +8,9 @@ const html=read('index.html'),js=read('app.js');
 test('el menú de herramientas conserva configuración y diagnóstico del proyecto',()=>{
   assert.match(html,/id="settings-button"/);
   assert.match(html,/id="settings-dialog"/);
-  assert.match(html,/id="diagnostics-button"/);
+  assert.match(html,/<summary>Herramientas<\/summary>[^]*?id="diagnostics-button"/);
+  assert.doesNotMatch(html,/id="menu-validate"/);
+  assert.match(html,/Decimales de las tablas en pantalla<input id="settings-digits"/);
   assert.match(js,/\$\('settings-button'\)\.onclick/);
 });
 test('monitor de motor accesible desde indicador del pie de página',()=>{
