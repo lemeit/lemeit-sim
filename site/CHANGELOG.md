@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.36.1 — 2026-11-18
+
+- Corregida la etiqueta de motor fijado: al elegir Windows o Debian refleja inmediatamente el destino seleccionado, incluso si el gateway está desconectado.
+- El diagnóstico de compatibilidad identifica la operación o función ausente, en vez del mensaje genérico «Gateway sin las operaciones requeridas».
+- No modifica el enrutamiento del POST de cálculo ni realiza cambios de motor en modo fijo; solo frontend.
+
 ## 0.36.0 — 2026-11-18
 
 - Selección automática de Windows o Debian por disponibilidad y capacidades; modo manual reservado al administrador.
