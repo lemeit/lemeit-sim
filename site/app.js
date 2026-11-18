@@ -1030,7 +1030,7 @@ function bindWorkspaceTools(){
     openExample:type=>{$('example-select').value=type;resetExample();closeMenus();}
   });
   $('diagram-select-all').onclick=()=>{closeMenus();selectAllDiagram();};
-  $('menu-calculate').onclick=calculate;$('menu-validate').onclick=$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
+  $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;

@@ -120,6 +120,8 @@ la principal; no se recalcula por abrir la vista. Esta función no es multiusuar
 
 ### Exportar resultados y diagramas
 
+En **Herramientas → Configuración**, el ajuste de decimales controla la presentación de las tablas en pantalla. El diagnóstico de especificaciones y conexiones está en **Herramientas → Diagnóstico del proyecto**.
+
 En **Archivo**, los resultados vigentes se exportan como corrientes o balances:
 
 - **CSV para Excel (Argentina)** usa UTF-8 con BOM, punto y coma entre campos y

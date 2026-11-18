@@ -12,6 +12,8 @@ La versión del portal es independiente de la versión del motor DWSIM.
 - Libro Excel con valores numéricos, formatos decimales y anchos de columna adecuados.
 - Exportación del diagrama completo o la selección a SVG, PNG y PDF vectorial. El PNG permite elegir escala y fondo. El PDF permite elegir papel, orientación, margen y ajuste.
 
+- El diagnóstico del proyecto queda en Herramientas. Configuración aclara el alcance de los decimales en pantalla.
+
 ## 0.28.5 — 2026-11-18
 
 - Corrientes: busca alternativas ortogonales por fuera de los equipos cuando el codo guardado cruza un cuerpo. Conserva el codo manual válido y las normales de entrada/salida.
