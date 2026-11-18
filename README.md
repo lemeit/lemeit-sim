@@ -16,6 +16,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.32.0 — Cuadrícula y edición de corrientes**. Mostrar cuadrícula y ajustar posiciones a pasos de 20 unidades de manera independiente; Shift restringe el movimiento horizontal o vertical. El trazado penaliza retrocesos y segmentos diminutos, y Diagnóstico y actividad incorpora un botón para copiar el texto. No afecta motores ni exportaciones.
+
 **0.31.0 — Resultados completos y rótulos únicos**. Exportar resultados reúne corrientes, balances, componentes y datos: Excel por pestañas o CSV como tabla única (sección, registro, objeto, campo, valor). Exportaciones parciales disponibles en el diálogo. Cada equipo muestra un solo rótulo; el tipo permanece en Propiedades.
 
 **0.28.5 — Recorridos exteriores y llamadas compactas**. El recorrido evalúa alternativas ortogonales fuera de los equipos, respetando codos manuales válidos. Las llamadas reducen su línea horizontal y la separación inicial. No modifica conexiones ni cálculos.
