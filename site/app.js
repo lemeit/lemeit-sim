@@ -69,13 +69,13 @@ function isStream(n){return n.type.endsWith('Stream');}
 function isFeed(n){return n.type==='MaterialStream'&&!graph.edges.some(e=>e.to===n.id);}
 // Fractions of the DWSIM graphic bounds. Edge indices remain those of ΣIM projects.
 const equipmentPorts = {
-  Mixer: [[0,0],[0,.2],[0,.4],[1,.5]],
-  Splitter: [[0,.5],[1,0],[1,1]],
+  Mixer: [[0,.2],[0,.5],[0,.8],[1,.5]],
+  Splitter: [[0,.5],[1,.2],[1,.8]],
   Separator: [[.25,.2],[.5,0,'up'],[.75,5/7]],
   Tank: [[0,.5],[1,.5]],
-  Expander: [[0,.3],[1,0],[1,.5,'right']],
-  Compressor: [[0,0],[1,.3],[0,.5,'left']],
-  Pump: [[0,.5],[1,.1]],
+  Expander: [[0,.5],[1,.5],[1,.85,'right']],
+  Compressor: [[0,.5],[1,.5],[0,.85,'left']],
+  Pump: [[-.05,.5],[1,.125]],
   HeatExchanger: [[0,.5],[.5,0,'up'],[1,.5],[.5,1,'down']],
   Valve: [[0,.5],[1,.5]],
   Heater: [[0,.5],[1,.5],[.5,1,'down']],
@@ -211,10 +211,11 @@ function renderPalette(){
 }
 // Las llamadas son decoración del objeto: no agregan puertos ni conexiones.
 function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
-  let anchor;
+  let anchor,tangent={x:1,y:0};
   if(g){
     let longest={length:-1};
     for(let i=1;i<g.points.length;i++){const a=g.points[i-1],b=g.points[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
+    if(longest.a)tangent={x:longest.b.x-longest.a.x,y:longest.b.y-longest.a.y};
     anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
   }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
   const width=240,dx=g?0:n.x,dy=g?0:n.y;
@@ -236,6 +237,10 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     const box={left:x-4,right:x+width,top:y-14,bottom:y+5};
     const area=(box.right-box.left)*(box.bottom-box.top);
     let score=(area-overlap(box,viewport))*20+(distance-32)*2;
+    // Al cambiar el sentido u orientación del tramo, girar hacia su zona exterior.
+    const preferredSide=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?1:-1):(tangent.x>=0?1:-1);
+    const preferredVertical=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?-1:1):-1;
+    score+=(side===preferredSide?0:20)+(vertical===preferredVertical?0:20);
     for(const obstacle of obstacles)score+=overlap(box,obstacle)*obstacle.weight;
     // Favorecer el interior del área visible y evitar el rótulo simple sobre la corriente.
     if(vertical<0)score+=overlap(box,{left:anchor.x-90,right:anchor.x+90,top:anchor.y-28,bottom:anchor.y-6})*4;
@@ -270,7 +275,8 @@ function renderDiagram(){
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${n.type==='HeatExchanger'?(p.index===0?' · lado caliente':' · lado frío'):(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
-      html+=`<g data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
+      const connected=graph.edges.some(e=>p.side.endsWith('in')?e.to===n.id&&(e.toPort||'in')===p.side&&(e.toIndex||0)===p.index:e.from===n.id&&(e.fromPort||'out')===p.side&&(e.fromIndex||0)===p.index);
+      html+=`<g class="${connected?'connected-port':''}" data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
     if(selection?.node===n.id){if(g)html+=`<rect class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" x="${g.bend.x-3}" y="${g.bend.y-3}" width="6" height="6"><title>Arrastrar para acomodar el recorrido</title></rect>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';

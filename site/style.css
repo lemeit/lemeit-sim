@@ -1743,3 +1743,6 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #information-dialog .dialog-body{max-height:55dvh;overflow:auto}
 #information-dialog pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
 #information-dialog .dialog-actions{margin:0;padding:12px 20px}
+
+.node .connected-port .port{opacity:0}
+.node:hover .connected-port .port,.node.selected .connected-port .port,.node .connected-port:focus .port,.node .connected-port.snap-target .port{opacity:1}
