@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.27.0](https://img.shields.io/badge/portal-0.27.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.27.1](https://img.shields.io/badge/portal-0.27.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,9 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.27.1 — Navegación (en desarrollo).** Volvé de las licencias y el historial sin salir del editor. Las sesiones administradoras pueden abrir Administración desde la cabecera en otra ventana y conservar el proyecto abierto.
+**0.27.2 — Navegación.** Volvé de las licencias y el historial sin salir del editor. Las sesiones administradoras pueden abrir Administración desde la cabecera en otra ventana y conservar el proyecto abierto.
+
+**0.27.1 — Corrientes más claras**. Energía con línea de trazos en el listado y el diagrama DWSIM, también al seleccionar. El ajuste del recorrido usa un pequeño cuadrado visible solo en la corriente seleccionada; se conservan conexiones y arrastre.
 
 **0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
 

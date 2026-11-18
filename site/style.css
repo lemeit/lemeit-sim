@@ -1729,6 +1729,8 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
   pointer-events: none;
 }
 
+.node .bend-handle{fill:var(--spx-accent);stroke:var(--spx-surface);stroke-width:1}
+
 .app-header #admin-nav-link{text-decoration:none;white-space:nowrap}
 #information-dialog{width:min(680px,calc(100% - 24px));max-height:calc(100dvh - 24px)}
 #information-dialog .dialog-body{max-height:55dvh;overflow:auto}
