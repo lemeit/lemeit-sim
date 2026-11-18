@@ -211,6 +211,9 @@ async function selectCalculationEngine(mode){
   if(busy||!['auto','windows','debian'].includes(mode))return;
   if(mode!=='auto'&&document.body.dataset.sessionRole!=='admin')return;
   engineMode=mode;$('engine-select').value=mode;
+  // En modo fijo, el destino solicitado es el motor seleccionado aunque esté apagado.
+  // No conservar el identificador del motor anterior después de cambiar el selector.
+  if(mode!=='auto')selectedEngine=mode;
   engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
