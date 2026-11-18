@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.28.2 — Navegación.** Volvé de las licencias y el historial sin salir del editor. Las sesiones administradoras pueden abrir Administración desde la cabecera en otra ventana y conservar el proyecto abierto.
+**0.28.3 — Llamadas adaptativas**. Las referencias de valores evalúan posiciones a izquierda, derecha, arriba y abajo para reducir salidas del área visible y cruces con equipos o corrientes. Se conserva la navegación interna publicada y los nombres sin flecha.
 
 **0.28.1 — Llamadas solo para valores**. Los nombres y tipos son rótulos simples. Las llamadas instrumentales se reservan para temperatura, presión y caudal; no se dibujan cuando no hay valores para mostrar.
 
