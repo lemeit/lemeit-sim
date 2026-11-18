@@ -20,6 +20,22 @@ test('los motores antiguos no reciben reciclado y un gateway con la capacidad s�
  assert.equal(routing.supports({...states,supported_equipment:states.supported_equipment.filter(x=>x!=='Splitter')},example),false);
  assert.equal(routing.supports({...states,supported_features:[]},{nodes:[{id:'h',type:'Heater'}],edges:[]}),true);
 });
+test('modo fijo actualiza el motor señalado antes de verificar disponibilidad',()=>{
+ const app=readFileSync(new URL('../site/app.js',import.meta.url),'utf8');
+ const start=app.indexOf('async function selectCalculationEngine(mode)');
+ const finish=app.indexOf('async function readCatalogResponse(',start);
+ const selection=app.slice(start,finish);
+ assert.ok(selection.indexOf("if(mode!=='auto')selectedEngine=mode;")>=0);
+ assert.ok(selection.indexOf("if(mode!=='auto')selectedEngine=mode;")<selection.indexOf('paintConnection();'));
+});
+test('las causas de incompatibilidad identifican la capacidad faltante',()=>{
+ const check=routing.check({...states,supported_features:[]},example);
+ assert.equal(check.compatible,false);
+ assert.match(check.reason,/simple_material_recycle/);
+ assert.deepEqual([...check.missingFeatures],['simple_material_recycle']);
+ const missing=routing.check({...states,supported_equipment:states.supported_equipment.filter(t=>t!=='Splitter')},example);
+ assert.deepEqual([...missing.missing],['Splitter']);
+});
 test('la interfaz permite modo automático a alumnos y control administrativo al rol correcto',()=>{
  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');
  const app=readFileSync(new URL('../site/app.js',import.meta.url),'utf8');
