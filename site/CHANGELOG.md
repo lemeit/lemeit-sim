@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.0 — 2026-11-18
+
+- Todas las referencias del diagrama (nombre, tipo y valores) se agrupan en llamadas instrumentales: línea fina quebrada, flecha abierta y texto alineado.
+- Las llamadas siguen al objeto al mover, redimensionar o acomodar el recorrido. Ajustar diagrama incluye sus límites; no se agregan conexiones ni campos a los proyectos.
+- Se conservan los trazos de energía y los controles discretos de edición.
+
 ## 0.27.1 — 2026-11-18
 
 - Corrientes de energía distinguidas por trazos en el listado DWSIM y en el diagrama, también al seleccionar.

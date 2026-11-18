@@ -1730,3 +1730,10 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 }
 
 .node .bend-handle{fill:var(--spx-accent);stroke:var(--spx-surface);stroke-width:1}
+
+/* Llamadas instrumentales: trazo fino y flecha abierta, sin aspecto de puerto. */
+.diagram-callout .callout-leader,.diagram-callout .callout-tip{fill:none;stroke:var(--dwsim-ink,var(--spx-text-dim));stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none;stroke-linejoin:miter}
+.diagram-callout .callout-leader{opacity:.65}
+.node .diagram-callout text{text-anchor:start;paint-order:stroke;stroke:var(--spx-surface);stroke-width:3px;stroke-linejoin:round;pointer-events:all;cursor:move}
+.node .diagram-callout .node-kind{font-size:8px;letter-spacing:1px}
+.node .diagram-callout .node-reading{font-size:9px}
