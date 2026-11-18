@@ -17,6 +17,13 @@ globalThis.SimContextHelp = (() => {
     Pump: ['bombas-valvulas-presion/', 'Bombas y cambios de presión'],
     Valve: ['bombas-valvulas-presion/', 'Válvulas y estrangulamiento'],
     ConversionReactor: ['reactores-estequiometria/', 'Reacciones y conversión'],
+    CSTR: ['reactores-estequiometria/', 'Reacciones y estequiometría'],
+    Polymerization: ['reactores-estequiometria/', 'Reacciones y estequiometría'],
+    PFR: ['reactores-estequiometria/', 'Reacciones y estequiometría'],
+    RigorousColumn: ['equilibrio-fases-flash/', 'Equilibrio de fases'],
+    AbsorptionColumn: ['equilibrio-fases-flash/', 'Equilibrio de fases'],
+    ReliefValve: ['diagramas-conexiones/', 'Diagramas y conexiones'],
+
     EquilibriumReactor: ['reactores-estequiometria/', 'Reacciones y equilibrio']
   });
   const chapters = Object.freeze({

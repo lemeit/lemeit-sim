@@ -16,6 +16,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.27.0 — En revisión.** El PFD y su biblioteca usan los símbolos de DWSIM. Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar en el PFD. Sus cálculos todavía no están disponibles en ΣIM.
+
 **0.26.1 — Guías centradas en el usuario**. Los servicios se muestran como Motor principal y Motor alternativo. Las guías y los ejemplos explican operaciones, datos, resultados y límites sin detalles del sistema operativo. Técnicamente, principal conserva el identificador windows y alternativo, debian; se mantienen destinos, credenciales y selección manual.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
