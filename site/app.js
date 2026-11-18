@@ -344,7 +344,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
 function renderDiagram(){
   const svg=$('diagram');
   svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();if($('recycle-caption'))$('recycle-caption').textContent=diagramHasRecirculation(graph)?'CON RECIRCULACIÓN SIMPLE':'SIN RECIRCULACIÓN';$('object-count').textContent=`${graph.nodes.length} objetos`;
+  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();if($('recycle-caption'))$('recycle-caption').textContent=diagramHasRecirculation(graph)?'CON RECIRCULACIÓN':'SIN RECIRCULACIÓN';$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
