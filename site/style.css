@@ -1805,3 +1805,4 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 /* Un solo estado visible de resultados en el extremo derecho del lienzo. */
 .diagram-footer,.sim-shell .diagram-footer{justify-content:flex-end}
 .diagram-footer #calculation-state{display:none!important}
+.canvas-caption #recycle-caption{font-style:normal}
