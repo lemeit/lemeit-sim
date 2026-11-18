@@ -42,4 +42,3 @@ test('arrastrar un puerto de una selección mueve el conjunto sin conectar ni ed
  handlers.pointermove({clientX:210,clientY:130});assert.equal(nodes[0].x,60);assert.equal(nodes[1].x,160);assert.equal(nodes[1].endX,260);assert.equal(nodes[1].endY,130);
  assert.deepEqual(env.selection.nodes,['p','s']);
 });
-
