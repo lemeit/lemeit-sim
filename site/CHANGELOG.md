@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.23.3 — 2026-11-17
+
+- Biblioteca: flecha recta para materia y flecha en zigzag verde para energía, en ambas paletas y en la vista previa de arrastre.
+- La distinción usa forma y color. Sin cambios en la representación de corrientes del lienzo ni en puertos, proyectos o cálculos.
+
 ## 0.23.2 — 2026-11-17
 
 - Biblioteca y selector de símbolos compactos, sin marco adicional.

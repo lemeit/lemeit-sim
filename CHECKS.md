@@ -391,3 +391,11 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
   los cuatro objetos; distancia entre equipos conservada (560 unidades).
 - Verificados biblioteca compacta y Ayuda → Acerca de 0.23.2.
 - No se modificaron cálculos ni motores.
+
+## 0.23.3 · Corrientes diferenciadas · 17/11/2026
+
+- 162 pruebas aprobadas; build correcto.
+- Navegador: biblioteca con flecha recta para materia y zigzag verde para energía,
+  comprobadas en ΣIM y DWSIM sobre el ejemplo de calentamiento de agua.
+- Acerca de verificado en 0.23.3. SVG de la biblioteca reutilizado en la vista
+  previa de arrastre; sin cambios en datos físicos ni dibujo del lienzo.

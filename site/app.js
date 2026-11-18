@@ -125,8 +125,13 @@ function originalEquipmentSymbol(type){
   if(type==='Heater'||type==='Cooler')return `<path d="M0 50 L60 5 L120 50 L60 95 Z M60 95 V100"/><text class="symbol-sign" x="60" y="57" text-anchor="middle">${type==='Heater'?'H':'C'}</text>`;
   return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130"/>';
 }
+function paletteStreamSymbol(type){
+  return type==='EnergyStream'
+    ?'<path class="palette-energy-symbol" d="M5 55 H25 L40 25 L58 85 L76 25 L92 55 H120 M103 38 L120 55 L103 72"/>'
+    :'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>';
+}
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>':equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
+  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}"><svg class="palette-symbol" viewBox="0 0 130 110" aria-hidden="true">${type.endsWith('Stream')?paletteStreamSymbol(type):equipmentSymbol(type)}</svg><span>${t.label}</span></button>`).join('');
   if($('palette').dataset.bound)return;
   $('palette').dataset.bound='true';
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
