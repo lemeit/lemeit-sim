@@ -20,11 +20,11 @@ test('arrastrar un extremo libre conserva la corriente y desconecta solo ese ext
  assert.equal(actual.edges,2);assert.equal(actual.count,4);assert.deepEqual(actual.ends.b,{x:300,y:400});
 });
 test('un extremo se reconecta al puerto libre y conserva el otro extremo',()=>{
- const run=editor();const actual=run(`finishEndpointDrag({node:'c1',side:'out',preview:{x:435,y:222}});return {edges:graph.edges,ends:streamGeometry(nodeById('c1'))};`);
- assert.equal(actual.edges.length,3);assert.equal(actual.edges.find(e=>e.from==='c1').toIndex,2);assert.deepEqual(actual.ends.b,{x:435,y:222});
+ const run=editor();const actual=run(`finishEndpointDrag({node:'c1',side:'out',preview:{x:435,y:254}});return {edges:graph.edges,ends:streamGeometry(nodeById('c1'))};`);
+ assert.equal(actual.edges.length,3);assert.equal(actual.edges.find(e=>e.from==='c1').toIndex,2);assert.deepEqual(actual.ends.b,{x:435,y:254});
 });
 test('un puerto ocupado o del sentido incorrecto no destruye la conexión previa',()=>{
- for(const preview of [{x:435,y:206},{x:515,y:230}]){
+ for(const preview of [{x:435,y:230},{x:515,y:230}]){
  const run=editor();const actual=run(`const before=JSON.stringify(graph.edges);finishEndpointDrag({node:'c1',side:'out',preview:${JSON.stringify(preview)}});return before===JSON.stringify(graph.edges);`);assert.equal(actual,true);
  }
 });

@@ -22,3 +22,11 @@ test('elige izquierda junto al borde derecho y cambia ante obstáculos',()=>{
  const blocked=context.calloutGeometry(n,{points:[{x:20,y:240},{x:120,y:240}]});assert.ok(blocked.y>300||blocked.y<160);
  context.graph.nodes=[];
 });
+
+test('invertir un tramo vertical cambia la orientación de su llamada',()=>{
+ context.graph.nodes=[];context.viewX=-1000;context.viewY=-1000;context.zoom=.25;
+ const n={id:'s',type:'MaterialStream',name:'S'};
+ const down=context.calloutGeometry(n,{points:[{x:200,y:100},{x:200,y:300}]});
+ const up=context.calloutGeometry(n,{points:[{x:200,y:300},{x:200,y:100}]});
+ assert.notEqual(down.side,up.side);assert.notEqual(down.vertical,up.vertical);
+});

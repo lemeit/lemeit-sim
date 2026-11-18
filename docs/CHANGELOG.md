@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.4 — 2026-11-18
+
+- Puertos de mezclador, divisor, compresor, expansor y bomba ajustados a las caras de conexión, evitando esquinas extremas. Conserva índices y topología de proyectos.
+- Los controles circulares de uniones conectadas se muestran al seleccionar, enfocar o pasar el puntero; el dibujo normal conserva una unión limpia.
+- Llamadas de valores: la elección considera el sentido del tramo además del espacio y los obstáculos. Se comprueba el cambio de orientación al invertir un tramo vertical.
+
 ## 0.28.3 — 2026-11-18
 
 - Llamadas de valores adaptativas: evalúan ambos lados y tres alturas arriba/abajo, penalizando bordes visibles y solapamientos con equipos y tramos de corrientes.
