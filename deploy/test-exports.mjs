@@ -11,3 +11,8 @@ test('exportación distingue trabajo de eje de calor sin cambiar la potencia num
  const sheets=api.tables({title:'Compresión',nodes:[{id:'k',name:'K1'}]},{streams:{},balances:[{id:'k',energy_kind:'shaft',heat_to_fluid_kW:152.233190001056}]});
  assert.equal(sheets[1].rows[1][4],152.233190001056);assert.equal(sheets[1].rows[1][6],'Trabajo de eje');
 });
+
+test('expansor exporta trabajo negativo hacia el fluido sin convertirlo en calor',()=>{
+ const sheets=api.tables({title:'Expansión',nodes:[{id:'x',name:'X1'}]},{streams:{},balances:[{id:'x',energy_kind:'shaft',heat_to_fluid_kW:-66.6179460348}]});
+ assert.equal(sheets[1].rows[1][4],-66.6179460348);assert.equal(sheets[1].rows[1][6],'Trabajo de eje');
+});

@@ -146,9 +146,19 @@ Los estados actuales son disponibilidad/ocupación o estado no confirmado; no se
   y [alcance](tanque.md). Debian pendiente; requiere gateway actualizado.
 - Energía con trazo discontinuo también en biblioteca y vista previa de arrastre.
 
+## Entregado en 0.26.0 — Expansor adiabático
+
+- `Expander`: una entrada/salida de materia y energía de salida opcional.
+- Presión absoluta de descarga menor que la entrada, eficiencia isentrópica y
+  alimentación completamente vapor; sin politropía, curvas o dimensionamiento.
+- Caso 16: nitrógeno PR, 25 °C, 300 → 100 kPa, 1 kg/s y 80 %:
+  salida −39,464231 °C y 66,617946 kW producidos. El balance informa
+  −66,617946 kW hacia el fluido. Tres eficiencias reales Windows verificadas.
+- [Sonda](../tools/probe_expander_windows.py), [informe](validation/expander-0.26.0-windows.json)
+  y [alcance](expansor.md). Debian pendiente; requiere gateway actualizado.
+
 ## Siguientes equipos de la ampliación
 
-- Expansor: presión de descarga, eficiencia y trabajo de eje, con validación real.
 - Filtro: definir suspensión, sólidos y especificaciones admitidas por el motor.
 - Columna: delimitar un primer modo de separación y validar puertos, condensador,
   rehervidor y especificaciones antes de mostrarla como disponible.

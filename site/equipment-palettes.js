@@ -3,6 +3,7 @@
 (function(root){
   const symbols=Object.freeze({
     Tank:'<path d="M0 50 H22 M98 50 H120 M34 90 V100 M86 90 V100"/><path d="M22 20 Q60 -5 98 20 V82 Q60 105 22 82 Z M22 20 Q60 43 98 20 M22 65 Q60 88 98 65"/>',
+    Expander:'<path d="M0 50 H20 M100 50 H120 M60 75 V100"/><path d="M20 30 L100 10 V90 L20 70 Z M35 36 V64 M50 32 V68 M65 28 V72 M80 24 V76"/>',
     Compressor:'<path d="M0 50 H20 M100 50 H120 M60 75 V100"/><path d="M20 10 L100 30 V70 L20 90 Z M35 24 V76 M50 28 V72 M65 32 V68 M80 36 V64"/>',
     Pump:'<path d="M0 50 H26 M94 50 H120 M35 90 H92 L82 76 H45 Z"/><path d="M26 50 C26 7 92 3 94 40 V66 L78 78 H48 C34 78 26 66 26 50 Z"/><circle cx="60" cy="47" r="16"/><path d="M60 31 V63 M44 47 H76"/>',
     Mixer:'<path d="M0 25 H20 L40 40 M0 50 H40 M0 75 H20 L40 60 M90 50 H120"/><path d="M40 20 H80 L100 50 L80 80 H40 Z"/><path d="M50 35 L78 65 M50 65 L78 35"/>',

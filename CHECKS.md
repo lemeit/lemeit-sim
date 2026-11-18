@@ -423,3 +423,13 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
   inspector muestra residencia 83,095 min. Energía con flecha de trazos en ambas
   paletas y Acerca de 0.25.0 comprobados. Sin dinámica de nivel.
 - Informe, guía, catálogo y hoja de ruta sincronizados; Debian pendiente de validar.
+
+## 0.26.0 · Expansor adiabático · 17/11/2026
+
+- 164 pruebas JS y 45 pruebas Python aprobadas; build y versiones coherentes.
+- Tres casos reales Windows a 60/80/90 % de eficiencia: 24 controles físicos y
+  orden de potencia producida. Informe público y sonda reproducible incluidos.
+- Navegador contra gateway temporal y motor real: caso 16, −39,464 °C, 100 kPa,
+  1 kg/s. Inspector muestra 66,618 kW producidos; balance −66,618 kW hacia gas.
+- Ambas paletas, energía de salida, guía del ejemplo y Acerca de 0.26.0 verificados.
+- Catálogo y hoja de ruta sincronizados. Sin politropía ni curvas; Debian pendiente.

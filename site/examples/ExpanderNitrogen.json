@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "title": "16 · Expansión adiabática de nitrógeno",
+  "compounds": [
+    "Nitrogen"
+  ],
+  "model": "Peng-Robinson (PR)",
+  "learning": "Expandí 1 kg/s de nitrógeno a 25 °C desde 300 hasta 100 kPa absolutos, con eficiencia isentrópica del 80 %. Compará enfriamiento, trabajo de eje producido y conservación de masa. Validado Windows; Debian requiere gateway actualizado.",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Nitrogeno entrada",
+      "x": 90,
+      "y": 140,
+      "temperature_C": 25,
+      "pressure_kPa": 300,
+      "mass_flow": 1,
+      "composition": {
+        "Nitrogen": 1
+      }
+    },
+    {
+      "id": "expander",
+      "type": "Expander",
+      "name": "X1 Expansor",
+      "x": 450,
+      "y": 125,
+      "outlet_pressure_kPa": 100,
+      "efficiency_pct": 80
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "Nitrogeno expandido",
+      "x": 800,
+      "y": 140
+    },
+    {
+      "id": "power",
+      "type": "EnergyStream",
+      "name": "Potencia producida",
+      "x": 520,
+      "y": 340
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "expander"
+    },
+    {
+      "from": "expander",
+      "to": "product"
+    },
+    {
+      "from": "expander",
+      "to": "power",
+      "fromPort": "energy-out"
+    }
+  ]
+}

@@ -1,0 +1,1019 @@
+{
+  "portal": "0.26.0",
+  "engine": "DWSIM 10.2.15",
+  "platform": "Windows",
+  "model": "Peng-Robinson (PR)",
+  "scope": "real isolated MCP; no experimental validation; Debian not tested",
+  "pressure_Pa": 100000,
+  "efficiency_order_check": true,
+  "cases": {
+    "60": {
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Nitrogeno entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Nitrogeno expandido",
+            "temperature_K": 249.6664807175183,
+            "pressure_Pa": 100000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 249.6664807175183,
+                "pressure_Pa": 100000.0,
+                "enthalpy_kJ_kg": -50.78397373683718,
+                "entropy_kJ_kgK": -0.18176218096247806,
+                "density_kg_m3": 1.3508569554260372,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -50.78397373683718,
+                "entropy_kJ_kgK": -0.18176218096247806,
+                "density_kg_m3": 1.3508569554260372,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "expander": {
+            "name": "X1 Expansor",
+            "type": "Expander",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Temperature Difference": {
+                "value": "-48.483519282481666",
+                "units": "C."
+              },
+              "Power Generated": {
+                "value": "49.96345952608632",
+                "units": "kW"
+              },
+              "Pressure": {
+                "value": "1",
+                "units": "bar"
+              },
+              "AdiabaticCoefficient": {
+                "value": "1.402786422546417",
+                "units": ""
+              },
+              "PolytropicCoefficient": {
+                "value": "1.1928992580492366",
+                "units": ""
+              }
+            },
+            "calculation_modes": [
+              "OutletPressure",
+              "Delta_P",
+              "PowerGenerated",
+              "Head",
+              "Curves",
+              "PressureRatio"
+            ],
+            "calculation_mode": "OutletPressure",
+            "shaft_power_generated_kW": 49.96345952608632
+          }
+        },
+        "balances": [
+          {
+            "id": "expander",
+            "name": "X1 Expansor",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": -49.96345937236477,
+            "components": {
+              "Nitrogen": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "shaft"
+          }
+        ],
+        "elapsed_s": 0.97,
+        "engine": "DWSIM 10.2.15",
+        "model": "Peng-Robinson (PR)"
+      },
+      "checks": {
+        "calculated": true,
+        "inlet_vapor": true,
+        "outlet_pressure": true,
+        "mass_conserved": true,
+        "temperature_decreases": true,
+        "shaft_power_positive": true,
+        "energy_balance": true,
+        "shaft_label": true
+      }
+    },
+    "80": {
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Nitrogeno entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Nitrogeno expandido",
+            "temperature_K": 233.68576914904494,
+            "pressure_Pa": 100000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 233.68576914904494,
+                "pressure_Pa": 100000.0,
+                "enthalpy_kJ_kg": -67.43846039907041,
+                "entropy_kJ_kgK": -0.25069205511181186,
+                "density_kg_m3": 1.4437633341703118,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -67.43846039907041,
+                "entropy_kJ_kgK": -0.25069205511181186,
+                "density_kg_m3": 1.4437633341703118,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "expander": {
+            "name": "X1 Expansor",
+            "type": "Expander",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Temperature Difference": {
+                "value": "-64.46423085095503",
+                "units": "C."
+              },
+              "Power Generated": {
+                "value": "66.61794603478175",
+                "units": "kW"
+              },
+              "Pressure": {
+                "value": "1",
+                "units": "bar"
+              },
+              "AdiabaticCoefficient": {
+                "value": "1.402786422546417",
+                "units": ""
+              },
+              "PolytropicCoefficient": {
+                "value": "1.2857599701115054",
+                "units": ""
+              }
+            },
+            "calculation_modes": [
+              "OutletPressure",
+              "Delta_P",
+              "PowerGenerated",
+              "Head",
+              "Curves",
+              "PressureRatio"
+            ],
+            "calculation_mode": "OutletPressure",
+            "shaft_power_generated_kW": 66.61794603478175
+          }
+        },
+        "balances": [
+          {
+            "id": "expander",
+            "name": "X1 Expansor",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": -66.61794603459799,
+            "components": {
+              "Nitrogen": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "shaft"
+          }
+        ],
+        "elapsed_s": 1.05,
+        "engine": "DWSIM 10.2.15",
+        "model": "Peng-Robinson (PR)"
+      },
+      "checks": {
+        "calculated": true,
+        "inlet_vapor": true,
+        "outlet_pressure": true,
+        "mass_conserved": true,
+        "temperature_decreases": true,
+        "shaft_power_positive": true,
+        "energy_balance": true,
+        "shaft_label": true
+      }
+    },
+    "90": {
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Nitrogeno entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -0.8205143644724172,
+                "entropy_kJ_kgK": -0.32449905889913555,
+                "density_kg_m3": 3.39294744052104,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Nitrogeno expandido",
+            "temperature_K": 225.69772055840272,
+            "pressure_Pa": 100000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 35.69720205330306,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 0.0,
+                "temperature_K": 225.69772055840272,
+                "pressure_Pa": 100000.0,
+                "enthalpy_kJ_kg": -75.76570365205359,
+                "entropy_kJ_kgK": -0.28694340648712596,
+                "density_kg_m3": 1.495193480978292,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": "NaN",
+                    "mass_fraction": "NaN"
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": -75.76570365205359,
+                "entropy_kJ_kgK": -0.28694340648712596,
+                "density_kg_m3": 1.495193480978292,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Nitrogen": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "expander": {
+            "name": "X1 Expansor",
+            "type": "Expander",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Temperature Difference": {
+                "value": "-72.45227944159726",
+                "units": "C."
+              },
+              "Power Generated": {
+                "value": "74.94518928912947",
+                "units": "kW"
+              },
+              "Pressure": {
+                "value": "1",
+                "units": "bar"
+              },
+              "AdiabaticCoefficient": {
+                "value": "1.402786422546417",
+                "units": ""
+              },
+              "PolytropicCoefficient": {
+                "value": "1.3406811480191296",
+                "units": ""
+              }
+            },
+            "calculation_modes": [
+              "OutletPressure",
+              "Delta_P",
+              "PowerGenerated",
+              "Head",
+              "Curves",
+              "PressureRatio"
+            ],
+            "calculation_mode": "OutletPressure",
+            "shaft_power_generated_kW": 74.94518928912947
+          }
+        },
+        "balances": [
+          {
+            "id": "expander",
+            "name": "X1 Expansor",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": -74.94518928758117,
+            "components": {
+              "Nitrogen": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "shaft"
+          }
+        ],
+        "elapsed_s": 0.97,
+        "engine": "DWSIM 10.2.15",
+        "model": "Peng-Robinson (PR)"
+      },
+      "checks": {
+        "calculated": true,
+        "inlet_vapor": true,
+        "outlet_pressure": true,
+        "mass_conserved": true,
+        "temperature_decreases": true,
+        "shaft_power_positive": true,
+        "energy_balance": true,
+        "shaft_label": true
+      }
+    }
+  }
+}
