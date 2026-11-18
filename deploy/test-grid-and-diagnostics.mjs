@@ -26,8 +26,8 @@ test('las corrientes priorizan recorridos ortogonales sin serrucho',()=>{
 });
 test('controles de cuadrícula y copiar diagnóstico están accesibles y no se exportan',()=>{
   for(const id of ['diagram-grid','view-grid','view-snap','diagnostics-copy','diagnostics-copy-status'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(app,/gridVisible\\?showGrid\\(\\):''/);
-  assert.match(app,/navigator\\.clipboard\\?\\.writeText/);
-  assert.match(app,/SimDiagramInteractions\\.routePenalty/);
-  assert.match(app,/moveNode\\(nodeById\\(dragging\\.node\\),dragging,p,e\\.shiftKey\\)/);
+  assert.ok(app.includes("gridVisible?showGrid():''"));
+  assert.ok(app.includes('navigator.clipboard?.writeText'));
+  assert.ok(app.includes('SimDiagramInteractions.routePenalty'));
+  assert.ok(app.includes('moveNode(nodeById(dragging.node),dragging,p,e.shiftKey)'));
 });
