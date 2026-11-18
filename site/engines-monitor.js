@@ -22,6 +22,17 @@ function snapshot(engine,summary,details){
   view.dataset.state=summary==='Disponible'?'ready':summary==='Ocupado'?'busy':'unconfirmed';
   const dl=view.querySelector('dl');dl.replaceChildren();
   for(const [key,value] of Object.entries(details))field(dl,key,String(value));
+  field(dl,'Ficha del equipo','Datos declarados · no implica disponibilidad');
+  const hardware=engine==='windows'?{
+    'Sistema operativo':'Windows 11 Home Single Language · 25H2 · 64 bits',
+    'Compilación del sistema':'26200.9974',
+    'Nombre del equipo':'DESKTOP-L3GD8TH',
+    'Procesador':'Intel Core i9-10900 · 2,80 GHz',
+    'Memoria instalada':'16 GB',
+    'Gráficos':'Radeon RX 550/550 Series · 4 GB'
+  }:{'Sistema operativo':'GNU/Linux Debian','Versión del sistema':'Pendiente de confirmar'};
+  for(const [key,value] of Object.entries(hardware))field(dl,key,value);
+
 }
 function transition(engine,state,detail,when){
   const previous=history.get(engine);
