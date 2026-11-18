@@ -71,3 +71,10 @@ test('el extremo libre se orienta hacia donde se arrastra, aunque el archivo ten
 });
 test('la vista previa del extremo desconectado toma su nueva dirección',()=>{const run=editor();const g=run(`const n=nodeById('c1');endpointDrag={node:n.id,side:'out',moved:true,preview:{x:90,y:20}};return streamGeometry(n);`);assert.match(g.d,/ V20$/);});
 test('el codo puede cambiar de eje sin cambiar la topología',()=>{const run=editor();const actual=run(`const n=nodeById('c1'),before=JSON.stringify(graph.edges);setStreamBend(n,'y',70);const g=streamGeometry(n);return {g,unchanged:before===JSON.stringify(graph.edges)};`);assert.equal(actual.g.bend.axis,'y');assert.match(actual.g.d,/V70/);assert.equal(actual.unchanged,true);});
+
+test('divisor arriba y mezclador debajo: el recorrido evita ambos cuerpos aunque el codo guardado cruce el divisor',()=>{
+ const run=editor();const data=run(`graph.nodes=[{id:'d',type:'Splitter',name:'D',x:100,y:100},{id:'m',type:'Mixer',name:'M',x:120,y:400},{id:'s',type:'MaterialStream',name:'S',x:0,y:0,routeX:40}];graph.edges=[{from:'d',to:'s',fromPort:'out',fromIndex:1,toPort:'in'},{from:'s',to:'m',fromPort:'out',toPort:'in',toIndex:0}];const g=streamGeometry(nodeById('s'));return {points:g.points,bend:g.bend};`);
+ const boxes=[{left:100,right:180,top:100,bottom:180},{left:120,right:200,top:400,bottom:480}];
+ for(let i=1;i<data.points.length;i++){const a=data.points[i-1],b=data.points[i];for(const o of boxes){const crosses=a.x===b.x?a.x>o.left&&a.x<o.right&&Math.max(a.y,b.y)>o.top&&Math.min(a.y,b.y)<o.bottom:a.y>o.top&&a.y<o.bottom&&Math.max(a.x,b.x)>o.left&&Math.min(a.x,b.x)<o.right;assert.equal(crosses,false);}}
+ assert.equal(data.bend.axis,'y');
+});

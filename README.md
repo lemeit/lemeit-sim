@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.28.4 — Uniones y orientación de referencias**. Puertos gráficos corregidos en mezclador, divisor, compresor, expansor y bomba. Círculos de unión visibles al editar; las llamadas responden al sentido del tramo y al espacio disponible. No cambia la topología ni el cálculo.
+**0.28.5 — Recorridos exteriores y llamadas compactas**. El recorrido evalúa alternativas ortogonales fuera de los equipos, respetando codos manuales válidos. Las llamadas reducen su línea horizontal y la separación inicial. No modifica conexiones ni cálculos.
 
 **0.28.1 — Llamadas solo para valores**. Los nombres y tipos son rótulos simples. Las llamadas instrumentales se reservan para temperatura, presión y caudal; no se dibujan cuando no hay valores para mostrar.
 
