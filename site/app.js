@@ -25,6 +25,14 @@ const TYPES = {
   ReliefValve: {label:'Válvula de seguridad',short:'PSV',prefix:'PSV-',w:80,h:80,diagramOnly:true},
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
+function diagramHasRecirculation(g){
+  const links=new Map(g.nodes.map(n=>[n.id,[]]));
+  for(const e of g.edges)if(links.has(e.from))links.get(e.from).push(e.to);
+  const active=new Set(),done=new Set();
+  function visit(id){if(active.has(id))return true;if(done.has(id))return false;active.add(id);for(const next of links.get(id)||[])if(visit(next))return true;active.delete(id);done.add(id);return false;}
+  return [...links.keys()].some(id=>visit(id));
+}
+
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
 let marquee=null;
 let gridVisible=false,gridSnap=false;
@@ -336,7 +344,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
 function renderDiagram(){
   const svg=$('diagram');
   svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();$('object-count').textContent=`${graph.nodes.length} objetos`;
+  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();if($('recycle-caption'))$('recycle-caption').textContent=diagramHasRecirculation(graph)?'CON RECIRCULACIÓN':'SIN RECIRCULACIÓN';$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
@@ -497,8 +505,9 @@ function renderResults(){
   const labels=['Caudal másico','Caudal molar','Temperatura','Presión absoluta','Entalpía','Densidad'];
   const numeric=(key,value,digits=resultDigits)=>fmt(SimproxStreams.fromCanonical(key,value,SimproxStreams.defaultUnit(key)),digits);
   const rows=Object.entries(result.streams).map(([id,r])=>{const values=[r.mass_flow_kg_s,r.molar_flow_mol_s,r.temperature_K-273.15,r.pressure_Pa/1000,r.phases[0].enthalpy_kJ_kg,r.phases[0].density_kg_m3];return `<tr><td>${esc(nodeById(id)?.name||r.name)}</td>${keys.map((key,i)=>`<td>${numeric(key,values[i])}</td>`).join('')}</tr>`;}).join('');
+  const recycleNote=result.recycle?`<p class="results-note"><strong>Recirculación estacionaria:</strong> ${esc(result.recycle.iterations)} iteraciones · residuo del caudal de retorno: ${shown('mass_flow',result.recycle.mass_residual_kg_s,null,9)} · residuo de temperatura: ${fmt(result.recycle.temperature_residual_K,4)} K · residuo de presión: ${fmt(result.recycle.pressure_residual_kPa,4)} kPa. El método usa una alimentación virtual de corte, que no forma parte del proyecto.</p>`:'';
   const cards=result.balances.map(b=>`<article class="balance-card"><h3>${esc(nodeById(b.id)?.name||b.name)}</h3><p>Conservación de masa</p><p class="equation">${shown('mass_flow',b.mass_in,null,6)} → ${shown('mass_flow',b.mass_out,null,6)}</p><p>Residuo: <strong>${shown('mass_flow',b.mass_residual,null,9)}</strong></p><details class="component-balances"><summary>Balance por componente</summary>${Object.entries(b.components||{}).map(([c,v])=>`<p>${esc(c)}: ${shown('mass_flow',v.in_kg_s)} → ${shown('mass_flow',v.out_kg_s)}<br>${b.reactive?'Consumo neto (+) / generación (−)':'Residuo'}: ${shown('mass_flow',v.residual_kg_s,null,9)}</p>`).join('')}</details><p>${b.energy_kind==='shaft'?'Potencia de eje hacia el fluido':'Potencia térmica neta hacia el fluido'}</p><p class="equation">${b.reactive?'Q̇ del motor, incluye el calor de reacción':b.energy_kind==='shaft'?'Ẇ = Σ (ṁh)<sub>s</sub> − Σ (ṁh)<sub>e</sub>':'Q̇ = Σ (ṁh)<sub>s</sub> − Σ (ṁh)<sub>e</sub>'}</p><p class="equation">${shown('power_kW',b.heat_to_fluid_kW)}</p></article>`).join('');
-  $('results').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Corriente</th>${keys.map((k,i)=>`<th>${labels[i]} · ${esc(SimproxStreams.defaultUnit(k))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="balance-grid">${cards}</div><p class="results-note">Modelo: <strong>${esc(result.model)}</strong>. ${esc(SimproxStreams.systems[unitSystem].label)}. Presiones absolutas. Régimen estacionario; sin variaciones de energía cinética y potencial. Bombas y compresores reciben trabajo de eje; el expansor lo produce. Un trabajo negativo hacia el fluido indica potencia producida. Calor positivo hacia el fluido. La potencia de los reactores procede de DWSIM e incluye reacción. CSV y Excel conservan las unidades canónicas indicadas en sus cabeceras.</p>`;
+  $('results').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Corriente</th>${keys.map((k,i)=>`<th>${labels[i]} · ${esc(SimproxStreams.defaultUnit(k))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="balance-grid">${cards}</div>${recycleNote}<p class="results-note">Modelo: <strong>${esc(result.model)}</strong>. ${esc(SimproxStreams.systems[unitSystem].label)}. Presiones absolutas. Régimen estacionario; sin variaciones de energía cinética y potencial. Bombas y compresores reciben trabajo de eje; el expansor lo produce. Un trabajo negativo hacia el fluido indica potencia producida. Calor positivo hacia el fluido. La potencia de los reactores procede de DWSIM e incluye reacción. CSV y Excel conservan las unidades canónicas indicadas en sus cabeceras.</p>`;
   $('result-meta').textContent='DWSIM 10.2.15 · '+fmt(result.elapsed_s,2)+' s';
 }
 async function convertCompositionBase(n,next){
@@ -526,12 +535,14 @@ async function calculate(){
   lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
-    if(newEquipment.length){
+    const hasRecirculation=diagramHasRecirculation(payload);
+    if(newEquipment.length||hasRecirculation){
       const statusResponse=await fetch('/api/status',{headers:engineHeaders(),signal:AbortSignal.timeout(10000)});
       if(!statusResponse.ok)throw new Error('No se pudo comprobar las operaciones admitidas por el motor seleccionado. Revisá su conexión.');
       const status=await statusResponse.json();
       const unsupported=newEquipment.find(n=>!status.supported_equipment?.includes(n.type));
       if(unsupported)throw new Error(`El gateway del motor seleccionado todavía no admite ${TYPES[unsupported.type].label.toLowerCase()}. Actualizalo o elegí un motor actualizado; no se cambia de motor automáticamente.`);
+      if(hasRecirculation&&!status.supported_features?.includes('simple_material_recycle'))throw new Error('El gateway seleccionado todavía no admite el reciclado simple. Actualizá y reiniciá el backend de ese motor; no se cambia automáticamente.');
     }
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');

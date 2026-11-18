@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.34.1](https://img.shields.io/badge/portal-0.34.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.35.0](https://img.shields.io/badge/portal-0.35.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -127,7 +127,7 @@ preparar archivos sin calcular. No contiene propiedades físicas ni resultados.
 Corrientes de materia y energía; mezclador, divisor de dos salidas, calentador y
 enfriador; separador flash, bomba, válvula e intercambiador de dos corrientes;
 reactores de conversión y equilibrio con una reacción por reactor y
-salidas de vapor y líquido. Régimen estacionario, sin recirculaciones.
+salidas de vapor y líquido. Régimen estacionario: lazos de recirculación limitados al caso elemental de agua sin reacción, mezclador y divisor; otras recirculaciones continúan restringidas.
 Selección de modelos físicos separada del modelo de reacción química.
 
 El catálogo consulta compuestos reales de DWSIM 10.2.15. Los modelos disponibles
@@ -374,7 +374,7 @@ Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
 
-Pendientes: separador por componente, columnas, recirculaciones y convergencia; adaptación y validación de CSTR/PFR cinéticos, análisis económico y pruebas de carga para una clase. La existencia de una operación en DWSIM no significa que ya esté adaptada al editor.
+Pendientes: separador por componente, columnas, recirculaciones generales y convergencia de lazos complejos; adaptación y validación de CSTR/PFR cinéticos, análisis económico y pruebas de carga para una clase. La existencia de una operación en DWSIM no significa que ya esté adaptada al editor.
 
 El acceso por clases, el panel privado, flash, bomba, válvula, compresor adiabático, expansor, tanque e intercambiador ya están implementados. El inicio o reinicio remoto de servicios requiere un supervisor local independiente y sigue pendiente. La disponibilidad depende de las computadoras, gateways y túneles.
 

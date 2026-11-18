@@ -77,7 +77,7 @@ async function check(engine){
     if(!/^\d+\.\d+\.\d+$/.test(data.gateway_version)||!['ready','busy'].includes(data.state)||!Array.isArray(data.supported_equipment)||!data.supported_equipment.every(x=>typeof x==='string'))throw new Error('Respuesta de estado incompleta');
     const startedAt=new Date(data.started_at);
     if(!Number.isFinite(startedAt.getTime())||!Number.isFinite(data.uptime_s)||data.uptime_s<0)throw new Error('Fecha de inicio o tiempo activo inválido');
-    lastStatus[engine]={gateway_version:data.gateway_version,supported_equipment:[...data.supported_equipment]};
+    lastStatus[engine]={gateway_version:data.gateway_version,supported_equipment:[...data.supported_equipment],supported_features:Array.isArray(data.supported_features)?[...data.supported_features]:[]};
     const state=data.state==='busy'?'Ocupado':'Disponible';
     const entry=transition(engine,data.state,'gateway '+data.gateway_version,time);
     snapshot(engine,state,{

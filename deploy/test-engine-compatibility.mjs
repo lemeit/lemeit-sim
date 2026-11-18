@@ -33,6 +33,9 @@ test('matriz de operaciones compara ambos gateways sin inventar respuestas',()=>
  assert.equal(unknown.debian,'unknown');
  assert.ok(rows.some(x=>x.type==='HeatExchanger'));
  assert.ok(rows.some(x=>x.type==='EquilibriumReactor'));
+ assert.ok(rows.some(x=>x.type==='simple_material_recycle'));
+ assert.equal(compat.capability({supported_equipment:[],supported_features:['simple_material_recycle']},'simple_material_recycle'),'supported');
+ assert.equal(compat.capability({supported_equipment:[]},'simple_material_recycle'),'unsupported');
 });
 test('monitor en las dos vistas consulta la API y muestra diferencias en una tabla de solo lectura',()=>{
  for(const page of ['index.html','admin.html']){
