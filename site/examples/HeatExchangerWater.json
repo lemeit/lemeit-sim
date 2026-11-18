@@ -17,7 +17,7 @@
         "Water": 1
       },
       "x": 70,
-      "y": 85
+      "y": 215
     },
     {
       "id": "cold_feed",
@@ -29,8 +29,8 @@
       "composition": {
         "Water": 1
       },
-      "x": 70,
-      "y": 325
+      "x": 760,
+      "y": 65
     },
     {
       "id": "hx",
@@ -45,14 +45,14 @@
       "type": "MaterialStream",
       "name": "P1 · Salida caliente",
       "x": 820,
-      "y": 90
+      "y": 310
     },
     {
       "id": "cold_out",
       "type": "MaterialStream",
       "name": "P2 · Salida fría",
-      "x": 820,
-      "y": 325
+      "x": 235,
+      "y": 365
     }
   ],
   "edges": [

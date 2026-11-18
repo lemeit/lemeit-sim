@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.27.0 — 2026-11-18
+
+- El PFD y la biblioteca usan el modo de dibujo predeterminado de DWSIM; se retiró el selector visual.
+- Columnas, CSTR, reactor tubular, polimerización y válvula de seguridad disponibles para diagramar. Los cálculos de estos equipos quedan pendientes.
+- Los proyectos versión 1 conservan las conexiones y su numeración; sus puertos se dibujan en las posiciones correspondientes a los símbolos nuevos.
+
 ## 0.26.2 — 2026-11-17
 
 - Estado técnico de motores identifica Windows 11 Home Single Language 25H2, compilación 26200.9974, CPU, memoria y gráficos declarados del equipo principal.

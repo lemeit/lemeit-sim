@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.26.2](https://img.shields.io/badge/portal-0.26.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.27.0](https://img.shields.io/badge/portal-0.27.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -15,6 +15,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
+
+**0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
 
 **0.26.2 — Identificación técnica de los motores**. Estado de motores muestra Windows 11 Home Single Language 25H2 y GNU/Linux Debian (versión pendiente de confirmar), con características declaradas del equipo principal. Estos datos descriptivos no indican disponibilidad ni se obtienen mediante detección remota. El selector conserva Motor principal y Motor alternativo; las guías siguen centradas en el uso del simulador.
 
