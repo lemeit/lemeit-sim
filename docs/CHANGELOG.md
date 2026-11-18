@@ -6,10 +6,16 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.27.2 — 2026-11-18
+## 0.28.1 — 2026-11-18
 
 - Las licencias y el historial se abren en el editor y permiten volver con el botón, Escape o el historial del navegador.
 - Administración aparece en la cabecera solo con una sesión administradora y abre el portal en otra ventana para conservar el proyecto y sus resultados.
+
+## 0.28.0 — 2026-11-18
+
+- Todas las referencias del diagrama (nombre, tipo y valores) se agrupan en llamadas instrumentales: línea fina quebrada, flecha abierta y texto alineado.
+- Las llamadas siguen al objeto al mover, redimensionar o acomodar el recorrido. Ajustar diagrama incluye sus límites; no se agregan conexiones ni campos a los proyectos.
+- Se conservan los trazos de energía y los controles discretos de edición.
 
 ## 0.27.1 — 2026-11-18
 

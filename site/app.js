@@ -209,6 +209,25 @@ function renderPalette(){
     window.addEventListener('pointercancel',cancelPalette,true);
   });
 }
+// Las llamadas son decoración del objeto: no agregan puertos ni conexiones.
+function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
+  let anchor;
+  if(g){
+    let longest={length:-1};
+    for(let i=1;i<g.points.length;i++){const a=g.points[i-1],b=g.points[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
+    anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
+  }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
+  const x=anchor.x+28,y=anchor.y-32,width=Math.max(110,Math.min(340,Math.max(n.name.length,TYPES[n.type].short.length)*7+16));
+  return {x:x+6,y:y-8,width,anchor,line:`M${anchor.x} ${anchor.y} L${x} ${y} H${x+width}`,tip:`M${anchor.x+2} ${anchor.y-7} L${anchor.x} ${anchor.y} L${anchor.x+7} ${anchor.y-2}`};
+}
+function renderCallout(n,g,r,feed){
+  const c=calloutGeometry(n,g),stream=Boolean(g);
+  let texts=`<text class="${stream?'stream-label':'equipment-label'}" x="0" y="0">${esc(n.name)}</text>`;
+  if(!stream)texts+=`<text class="node-kind" x="0" y="19">${esc(TYPES[n.type].short.toUpperCase())}</text>`;
+  const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
+  if(reading)texts+=`<text class="node-reading" x="0" y="${stream?19:36}">${reading}</text>`;
+  return `<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})">${texts}</g></g>`;
+}
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
   let html='';
@@ -217,11 +236,9 @@ function renderDiagram(){
     const g=isStream(n)?streamGeometry(n):null;
     html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${(selection?.node===n.id||selection?.nodes?.includes(n.id))?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
     if(g){
-      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}<text class="stream-label" text-anchor="middle" x="${g.label.x}" y="${g.label.y}">${esc(n.name)}</text>`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selection?.node===n.id||selection?.nodes?.includes(n.id)?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g><text text-anchor="middle" class="equipment-label" x="${equipmentLabelX(n)}" y="${t.h*scale+20}">${esc(n.name)}</text><text text-anchor="middle" class="node-kind" x="${equipmentLabelX(n)}" y="${t.h*scale+35}">${esc(t.short.toUpperCase())}</text>`;
-    const readingX=g?g.label.x:t.w*scale/2,readingY=g?g.label.y+32:t.h*scale+52;
-    if(r)html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}</text>`;
-    else if(feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass')html+=`<text class="node-reading" x="${readingX}" y="${readingY}" text-anchor="middle">${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}</text>`;
+      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selection?.node===n.id||selection?.nodes?.includes(n.id)?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
+    html+=renderCallout(n,g,r,feed);
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${n.type==='HeatExchanger'?(p.index===0?' · lado caliente':' · lado frío'):(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
@@ -476,9 +493,10 @@ function updateDiagramGeometry(){
     const el=svg.querySelector(`[data-node="${n.id}"]`);if(!el)continue;
     const t=TYPES[n.type],s=symbolScale(n),g=isStream(n)?streamGeometry(n):null;
     el.setAttribute('transform',`translate(${g?0:n.x} ${g?0:n.y})`);
-    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const arrow=el.querySelector('.dwsim-stream-arrow');if(arrow)arrow.setAttribute('transform',g.arrow??'scale(0)');const label=el.querySelector('.stream-label');label.setAttribute('x',g.label.x);label.setAttribute('y',g.label.y);const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
-    else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);for(const [selector,y] of [['.equipment-label',20],['.node-kind',35]]){const label=el.querySelector(selector);label.setAttribute('x',equipmentLabelX(n));label.setAttribute('y',t.h*s+y);}const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
-    const reading=el.querySelector('.node-reading');if(reading){reading.setAttribute('x',g?g.label.x:t.w*s/2);reading.setAttribute('y',g?g.label.y+32:t.h*s+52);}
+    if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const arrow=el.querySelector('.dwsim-stream-arrow');if(arrow)arrow.setAttribute('transform',g.arrow??'scale(0)');const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
+    else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
+    const c=calloutGeometry(n,g),callout=el.querySelector('.diagram-callout');
+    callout.querySelector('.callout-leader').setAttribute('d',c.line);callout.querySelector('.callout-tip').setAttribute('d',c.tip);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);
     for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
   }
   svg.querySelectorAll('.snap-target').forEach(el=>el.classList.remove('snap-target'));
@@ -494,7 +512,7 @@ function touchesSelection(rect,n){
   return isStream(n)?SimDiagramInteractions.polylineIntersects(rect,streamGeometry(n).points,3/zoom):SimDiagramInteractions.intersects(rect,nodeBounds(n));
 }
 function fitDiagram(){
-  const bounds=graph.nodes.map(nodeBounds);
+  const bounds=graph.nodes.map(n=>{const b=nodeBounds(n),c=calloutGeometry(n),dx=isStream(n)?0:n.x,dy=isStream(n)?0:n.y;return {left:Math.min(b.left,c.x+dx),right:Math.max(b.right,c.x+c.width+dx),top:Math.min(b.top,c.y-16+dy),bottom:Math.max(b.bottom,c.y+40+dy)};});
   viewX=Math.min(0,...bounds.map(b=>b.left-45));
   viewY=Math.min(0,...bounds.map(b=>b.top-45));
   const width=Math.max(1000,...bounds.map(b=>b.right+45-viewX));
