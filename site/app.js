@@ -49,6 +49,20 @@ let unitSystem='engineering';
 let selectedEngine='windows',engineCheckGeneration=0; // Selección explícita; no se realiza failover.
 let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
+const diagnosticEvents=[];
+function debugEvent(level,event,fields={}){
+  SimDiagnostics.add(diagnosticEvents,{time:new Date().toISOString(),level,event,...fields});
+  if($('diagnostics-dialog')?.open)renderDiagnosticLog();
+}
+function renderDiagnosticLog(){
+  const output=$('diagnostics-log');if(!output)return;
+  const filter=$('diagnostics-filter')?.value||'all';
+  const events=SimDiagnostics.show(diagnosticEvents,filter);
+  output.textContent=events.length?events.map(SimDiagnostics.line).join('\n'):'Sin eventos para este filtro.';
+  output.scrollTop=output.scrollHeight;
+}
+function diagnosticReport(){return SimDiagnostics.exportReport({project:graph.title,model:graph.model,engine:selectedEngine,portalVersion:document.documentElement.dataset.portalVersion,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,events:diagnosticEvents});}
+
 let workspaceChannel=null,applyingWorkspace=false,workspaceId=new URLSearchParams(location.search).get('workspace')||crypto.randomUUID();
 const emptyProject=()=>({version:1,unit_system:unitSystem,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -526,8 +540,9 @@ async function calculate(){
   const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
   if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
 
+  debugEvent('INFO','Validación previa',{engine:selectedEngine,objects:graph.nodes.length,connections:graph.edges.length,model:graph.model});
   const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
-  if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
+  if(!selectedIsReady){debugEvent('ERROR','Motor no disponible · cálculo no enviado',{engine:selectedEngine,stage:'preflight'});return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);}
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
@@ -537,18 +552,23 @@ async function calculate(){
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
     const hasRecirculation=diagramHasRecirculation(payload);
     if(newEquipment.length||hasRecirculation){
+      debugEvent('INFO','Verificación de capacidades',{engine:selectedEngine,stage:'preflight',equipment:newEquipment.length,feature:hasRecirculation?'simple_material_recycle':'equipos'});
       const statusResponse=await fetch('/api/status',{headers:engineHeaders(),signal:AbortSignal.timeout(10000)});
       if(!statusResponse.ok)throw new Error('No se pudo comprobar las operaciones admitidas por el motor seleccionado. Revisá su conexión.');
       const status=await statusResponse.json();
+      debugEvent('OK','Respuesta de capacidades',{engine:selectedEngine,http:statusResponse.status,version:status.gateway_version,available:!hasRecirculation||status.supported_features?.includes('simple_material_recycle'),feature:hasRecirculation?'simple_material_recycle':'equipos'});
       const unsupported=newEquipment.find(n=>!status.supported_equipment?.includes(n.type));
       if(unsupported)throw new Error(`El gateway del motor seleccionado todavía no admite ${TYPES[unsupported.type].label.toLowerCase()}. Actualizalo o elegí un motor actualizado; no se cambia de motor automáticamente.`);
       if(hasRecirculation&&!status.supported_features?.includes('simple_material_recycle'))throw new Error('El gateway seleccionado todavía no admite el reciclado simple. Actualizá y reiniciá el backend de ese motor; no se cambia automáticamente.');
     }
+    debugEvent('INFO','Solicitud entregada a la API',{engine:selectedEngine,stage:'POST /api/simulate',objects:payload.nodes.length,connections:payload.edges.length});
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
+    debugEvent(response.ok?'OK':'ERROR','Respuesta del cálculo',{engine:selectedEngine,stage:'POST /api/simulate',http:response.status,ms:Math.round(performance.now()-started),message:response.ok?'Motor devolvió resultados':'La API rechazó la simulación'});
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
+    debugEvent('OK','Resultados verificados',{engine:selectedEngine,streams:Object.keys(data.streams||{}).length,equipment:Object.keys(data.equipment||{}).length,ms:Math.round(performance.now()-started)});
     lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
-  }catch(error){lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
+  }catch(error){debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:calculationHttp?'respuesta del motor/API':'validación o conexión antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
   finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
 }
 function renderCompounds(){
@@ -1004,11 +1024,16 @@ function failureHints(message){
 }
 function renderDiagnostics(){
   const issues=reviewGraph(),failed=lastCalculation?.ok===false;
-  $('diagnostics-content').innerHTML=`<h3>Revisión del proyecto</h3>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>No se detectaron problemas básicos de conexiones o alimentación. Esta revisión no sustituye al solver.</p>'}<h3>Último cálculo</h3>${lastCalculation?`<p>${esc(lastCalculation.time)} · ${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}</p><pre class="diagnostic-message">${esc(lastCalculation.message)}</pre>`:'<p>Todavía no se ejecutó un cálculo en esta sesión.</p>'}${failed?'<h3>Sugerencias para revisar</h3><ul>'+failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')+'</ul><p class="mini">Son orientaciones basadas en el mensaje, no un diagnóstico confirmado de la causa.</p>':''}<h3>Actividad de esta sesión</h3>${activity.length?'<ol>'+activity.map(v=>`<li><time>${esc(v.time)}</time> · ${esc(v.message)}${v.detail?'<br>'+esc(v.detail):''}</li>`).join('')+'</ol>':'<p>Sin actividad registrada.</p>'}`;
+  const status=lastCalculation?calculationLabel(lastCalculation):'Sin cálculos';
+  const http=lastCalculation?.http?(' · HTTP '+lastCalculation.http):'';
+  const duration=calculationDuration(lastCalculation);
+  $('diagnostics-content').innerHTML=`<p class="diagnostics-status"><strong>Proyecto:</strong> ${esc(graph.title)} · <strong>Motor:</strong> ${selectedEngine==='debian'?'Debian':'Windows'} · <strong>Último cálculo:</strong> ${esc(status+http+duration)}</p><p class="diagnostics-status"><strong>Conexión:</strong> ${esc(connectionCheck?.state||'No comprobada')} · <strong>Gateway:</strong> ${esc(gatewayCheck?.version||'Versión no confirmada')} · <strong>Resultado:</strong> ${resultValidity==='valid'?'Vigente':resultValidity==='stale'?'Recalcular':'Sin resultados'}</p><details ${issues.length?'open':''}><summary>Validación del proyecto · ${issues.length?issues.length+' observaciones':'sin problemas básicos'}</summary>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>Los puertos y parámetros básicos no presentan observaciones. No garantiza convergencia en DWSIM.</p>'}</details>${failed?`<p class="diagnostics-status"><strong>Error:</strong> ${esc(lastCalculation.message)}</p><details><summary>Posibles causas</summary><ul>${failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>`:''}`;
+  renderDiagnosticLog();
 }
 function calculationLabel(entry){return entry?.state==='running'?'En curso':entry?.ok?'Completado':'Fallido';}
 function calculationDuration(entry){return Number.isFinite(entry?.duration_ms)?` · ${fmt(entry.duration_ms/1000,2)} s (solicitud completa)`:'';}
 function traceConnection(operation,entry){
+  debugEvent(entry?.state==='offline'?'ERROR':entry?.state==='busy'?'WARN':entry?.state==='running'?'INFO':'OK',entry?.kind==='calculation'?'Cálculo · '+operation:'Conexión · '+operation,{engine:entry?.engine||selectedEngine,http:entry?.http,ms:entry?.ms,stage:entry?.state,message:entry?.message});
   connectionTrace.push({operation,engine:selectedEngine,...entry});connectionTrace=connectionTrace.slice(-40);renderConnectionTrace();
 }
 function renderConnectionTrace(){
@@ -1092,13 +1117,15 @@ function bindWorkspaceTools(){
   $('diagram-grid').onclick=()=>$('view-grid').click();
   $('view-snap').onclick=()=>{gridSnap=!gridSnap;saveCanvasPreferences();refreshCanvasButtons();closeMenus();};
   refreshCanvasButtons();
-  $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
+  $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{$('diagnostics-dialog').showModal();renderDiagnostics();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
   monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
-  $('diagnostics-copy').onclick=async()=>{const button=$('diagnostics-copy'),status=$('diagnostics-copy-status'),content=$('diagnostics-content').innerText;try{if(!navigator.clipboard?.writeText)throw Error('Clipboard API no disponible');await navigator.clipboard.writeText(content);status.textContent='Copiado';button.title='Diagnóstico copiado';}catch{status.textContent='No se pudo copiar. Usá Descargar diagnóstico.';button.title='Copiar diagnóstico';}};
-  $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
+  $('diagnostics-filter').onchange=renderDiagnosticLog;
+  $('diagnostics-clear').onclick=()=>{diagnosticEvents.length=0;renderDiagnosticLog();$('diagnostics-copy-status').textContent='Eventos locales limpiados';};
+  $('diagnostics-copy').onclick=async()=>{const button=$('diagnostics-copy'),status=$('diagnostics-copy-status'),content=diagnosticReport();try{if(!navigator.clipboard?.writeText)throw Error('Clipboard API no disponible');await navigator.clipboard.writeText(content);status.textContent='Copiado';button.title='Diagnóstico copiado';}catch{status.textContent='No se pudo copiar. Usá Descargar diagnóstico.';button.title='Copiar diagnóstico';}};
+  $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.json',diagnosticReport(),'application/json;charset=utf-8');
   try{const p=JSON.parse(localStorage.getItem('simprox-ui')||'{}');if(Object.hasOwn(SimproxStreams.systems,p.units)){unitSystem=p.units;SimproxStreams.setSystem(unitSystem);}if(Number.isInteger(p.digits)&&p.digits>=0&&p.digits<=8)resultDigits=p.digits;document.body.classList.toggle('hide-canvas-hints',p.hints===false);}catch{}
   $('settings-button').onclick=()=>{$('settings-unit-system').value=unitSystem;$('settings-digits').value=resultDigits;$('settings-hints').checked=!document.body.classList.contains('hide-canvas-hints');$('settings-dialog').showModal();closeMenus();};
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
