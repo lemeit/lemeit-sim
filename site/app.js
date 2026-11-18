@@ -25,6 +25,14 @@ const TYPES = {
   ReliefValve: {label:'Válvula de seguridad',short:'PSV',prefix:'PSV-',w:80,h:80,diagramOnly:true},
 };
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
+function diagramHasRecirculation(g){
+  const links=new Map(g.nodes.map(n=>[n.id,[]]));
+  for(const e of g.edges)if(links.has(e.from))links.get(e.from).push(e.to);
+  const active=new Set(),done=new Set();
+  function visit(id){if(active.has(id))return true;if(done.has(id))return false;active.add(id);for(const next of links.get(id)||[])if(visit(next))return true;active.delete(id);done.add(id);return false;}
+  return [...links.keys()].some(id=>visit(id));
+}
+
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
 let marquee=null;
 let gridVisible=false,gridSnap=false;
@@ -336,7 +344,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
 function renderDiagram(){
   const svg=$('diagram');
   svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();$('object-count').textContent=`${graph.nodes.length} objetos`;
+  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();if($('recycle-caption'))$('recycle-caption').textContent=diagramHasRecirculation(graph)?'CON RECIRCULACIÓN SIMPLE':'SIN RECIRCULACIÓN';$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
@@ -526,12 +534,14 @@ async function calculate(){
   lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
-    if(newEquipment.length){
+    const hasRecirculation=diagramHasRecirculation(payload);
+    if(newEquipment.length||hasRecirculation){
       const statusResponse=await fetch('/api/status',{headers:engineHeaders(),signal:AbortSignal.timeout(10000)});
       if(!statusResponse.ok)throw new Error('No se pudo comprobar las operaciones admitidas por el motor seleccionado. Revisá su conexión.');
       const status=await statusResponse.json();
       const unsupported=newEquipment.find(n=>!status.supported_equipment?.includes(n.type));
       if(unsupported)throw new Error(`El gateway del motor seleccionado todavía no admite ${TYPES[unsupported.type].label.toLowerCase()}. Actualizalo o elegí un motor actualizado; no se cambia de motor automáticamente.`);
+      if(hasRecirculation&&!status.supported_features?.includes('simple_material_recycle'))throw new Error('El gateway seleccionado todavía no admite el reciclado simple. Actualizá y reiniciá el backend de ese motor; no se cambia automáticamente.');
     }
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
