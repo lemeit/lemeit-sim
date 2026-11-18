@@ -399,3 +399,17 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
   comprobadas en ΣIM y DWSIM sobre el ejemplo de calentamiento de agua.
 - Acerca de verificado en 0.23.3. SVG de la biblioteca reutilizado en la vista
   previa de arrastre; sin cambios en datos físicos ni dibujo del lienzo.
+
+## 0.24.0 · Compresor adiabático · 17/11/2026
+
+- 163 pruebas JS aprobadas; 26 pruebas Python de validación y contratos aprobadas;
+  build correcto y versiones sincronizadas.
+- Motor Windows real en procesos aislados: caso 14 con eficiencias 60/75/90 %,
+  24 controles físicos y orden de potencia. Informe público sin credenciales en
+  docs/validation/compressor-0.24.0-windows.json.
+- Navegador con gateway de prueba y motor real: abrir caso 14, elegir DWSIM,
+  calcular; Tsalida=170,881 °C, 300 kPa, 1 kg/s y 152,233 kW de trabajo de eje.
+  Cambiar paleta conserva resultados. Acerca de comprobado en 0.24.0.
+- Catálogo, hoja de ruta, guía del ejemplo y documentación actualizados.
+- Debian pendiente de actualizar y validar; comprobación de capacidad por gateway
+  antes del cálculo. No se hace conmutación automática de motor.

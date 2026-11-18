@@ -20,7 +20,7 @@ GATEWAY_STARTED_AT = time.time()
 GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Valve', 'HeatExchanger'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Valve', 'HeatExchanger'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -172,7 +172,7 @@ def ports(kind):
     if kind == 'EnergyStream':
         return {'in': ('energy', 1), 'out': ('energy', 1)}
     result = {'in': ('material', 3 if kind == 'Mixer' else 2 if kind == 'HeatExchanger' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator', 'HeatExchanger') or kind in REACTORS else 1)}
-    if kind == 'Heater': result['energy-in'] = ('energy', 1)
+    if kind in ('Heater', 'Compressor'): result['energy-in'] = ('energy', 1)
     if kind == 'Cooler': result['energy-out'] = ('energy', 1)
     # La bomba con presión prescrita calcula su trabajo; no requiere corriente de energía.
     return result
@@ -268,11 +268,11 @@ def validate_graph(graph, catalog):
             if kind == 'Splitter':
                 if len(outs) != 2: raise InputError(f'{name}: conectá las dos salidas del divisor.')
                 number(node.get('split'), name + ': fracción de salida 1', .000001, .999999)
-            if kind in ('Pump', 'Valve'):
+            if kind in ('Pump', 'Compressor', 'Valve'):
                 if len(ins) != 1 or len(outs) != 1:
                     raise InputError(f'{name}: conectá una entrada y una salida de materia.')
                 number(node.get('outlet_pressure_kPa'), name + ': presión absoluta de salida (kPa)', 0.001, 1000000)
-                if kind == 'Pump':
+                if kind in ('Pump', 'Compressor'):
                     number(node.get('efficiency_pct'), name + ': eficiencia (%)', 0.01, 100)
                 # La dirección de cambio de presión se comprueba en el resultado físico del motor,
                 # ya que las corrientes intermedias no especifican su presión en el JSON.
@@ -357,6 +357,10 @@ def simulate(engine, graph):
             if node['type'] == 'Pump':
                 # MCP 10.2.15 interpreta PROP_PU_5 en bar, no en Pa: 500 kPa -> 5 bar.
                 props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] / 100}
+            if node['type'] == 'Compressor':
+                # Propiedades CLR verificadas en MCP Windows 10.2.15: POut en Pa.
+                props = {'CalcMode': 'OutletPressure', 'ProcessPath': 'Adiabatic',
+                         'POut': node['outlet_pressure_kPa'] * 1000, 'AdiabaticEfficiency': node['efficiency_pct']}
             if node['type'] == 'HeatExchanger':
                 # Hipótesis MCP a verificar en Debian: CalcBothTemp (modo 2)
                 # y HeatDuty en kW (propiedad nativa del equipo DWSIM).
@@ -373,6 +377,19 @@ def simulate(engine, graph):
         for node in graph['nodes']:
             if node['type'] == 'MaterialStream': streams[node['id']] = call('dwsim_stream_get_results', name=node['name'])
             elif not node['type'].endswith('Stream'): equipment[node['id']] = call('dwsim_unitop_get_results', name=node['name'])
+        for node in graph['nodes']:
+            if node['type'] != 'Compressor': continue
+            feed = streams[next(e['from'] for e in graph['edges'] if e['to'] == node['id'] and by_id[e['from']]['type'] == 'MaterialStream')]
+            product = streams[next(e['to'] for e in graph['edges'] if e['from'] == node['id'] and by_id[e['to']]['type'] == 'MaterialStream')]
+            vapor = next((p.get('fraction') for p in feed['phases'] if p.get('name') == 'Vapor'), None)
+            if not isinstance(vapor, (int, float)) or not math.isfinite(vapor) or vapor < 1 - 1e-6:
+                raise InputError(node['name'] + ': esta adaptación requiere alimentación completamente vapor; no admite líquido ni mezcla bifásica.')
+            if not product['pressure_Pa'] > feed['pressure_Pa']:
+                raise InputError(node['name'] + ': la presión de descarga debe superar la de entrada. Para expandir, usá otro equipo.')
+            if not math.isclose(product['pressure_Pa'], node['outlet_pressure_kPa'] * 1000, rel_tol=1e-5, abs_tol=1):
+                raise InputError(node['name'] + ': el motor no conservó la presión de descarga especificada.')
+            if not equipment[node['id']].get('calculated') or equipment[node['id']].get('error'):
+                raise InputError(node['name'] + ': el compresor no terminó de calcularse correctamente.')
         # Algunos paquetes pueden informar éxito sin respetar la especificación solicitada.
         for node in graph['nodes']:
             if node['type'] != 'MaterialStream' or any(e['to'] == node['id'] for e in graph['edges']): continue
@@ -413,7 +430,7 @@ def simulate(engine, graph):
                 components[compound] = {'in_kg_s': cin, 'out_kg_s': cout, 'residual_kg_s': cin - cout}
             checks.append({'id': node['id'], 'name': node['name'], 'mass_in': mass_in, 'mass_out': mass_out,
                            'mass_residual': mass_in - mass_out, 'heat_to_fluid_kW': heat, 'components': components,
-                           'reactive':node['type'] in REACTORS})
+                           'reactive':node['type'] in REACTORS, 'energy_kind':'shaft' if node['type'] in ('Pump', 'Compressor') else 'heat'})
         return {'streams': streams, 'equipment': equipment, 'balances': checks,
                 'elapsed_s': round(time.monotonic() - started, 2), 'engine': catalog['engine'], 'model': graph['model']}
     finally:

@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.23.3](https://img.shields.io/badge/portal-0.23.3-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.24.0](https://img.shields.io/badge/portal-0.24.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.23.3 — Corrientes diferenciadas en la biblioteca**. Materia usa una flecha recta; energía, una flecha en zigzag con acento verde. La forma permite distinguirlas incluso sin percibir el color, en ambas paletas y al arrastrar. Sin cambios en el diagrama, conexiones ni cálculos.
+**0.24.0 — Compresor adiabático**. Presión de descarga y eficiencia isentrópica para gases, símbolos en ambas paletas y corriente de energía opcional. Ejemplo 14 de nitrógeno validado con DWSIM Windows: 100 → 300 kPa, 75 %, 170,880686 °C y 152,233190 kW. Requiere gateway actualizado; Debian pendiente de validar. Los balances distinguen trabajo de eje de calor.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 
@@ -360,9 +360,9 @@ Ver [guía de despliegue](docs/despliegue-automatico.md).
 
 ## Próximos pasos
 
-Pendientes: separador por componente, compresores y expansores, columnas, recirculaciones y convergencia; adaptación y validación de CSTR/PFR cinéticos, análisis económico y pruebas de carga para una clase. La existencia de una operación en DWSIM no significa que ya esté adaptada al editor.
+Pendientes: separador por componente, expansores, columnas, recirculaciones y convergencia; adaptación y validación de CSTR/PFR cinéticos, análisis económico y pruebas de carga para una clase. La existencia de una operación en DWSIM no significa que ya esté adaptada al editor.
 
-El acceso por clases, el panel privado, flash, bomba, válvula e intercambiador ya están implementados. El inicio o reinicio remoto de servicios requiere un supervisor local independiente y sigue pendiente. La disponibilidad depende de las computadoras, gateways y túneles.
+El acceso por clases, el panel privado, flash, bomba, válvula, compresor adiabático e intercambiador ya están implementados. El inicio o reinicio remoto de servicios requiere un supervisor local independiente y sigue pendiente. La disponibilidad depende de las computadoras, gateways y túneles.
 
 Ver [alcance actual y prioridades](docs/roadmap.md) y [catálogo](site/catalogo.html).
 

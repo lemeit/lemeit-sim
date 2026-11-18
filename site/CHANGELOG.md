@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.24.0 — 2026-11-17
+
+- Compresor adiabático de gas con presión de descarga, eficiencia isentrópica y corriente de energía opcional. Símbolos propios en ΣIM y DWSIM, inspector, validaciones y ejemplo 14 con guía.
+- Caso real Windows: nitrógeno a 25 °C, 100 → 300 kPa, 1 kg/s, eficiencia 75 %: 170,880686 °C y 152,233190 kW. Tres eficiencias verificadas; informe y sonda reproducible en docs/validation y tools.
+- Balances distinguen trabajo de eje de calor, conservando la clave histórica de exportación. Se rechazan alimentación no vapor, expansión y presión no respetada por el motor.
+- Cálculo comprueba Compressor en el gateway seleccionado. Debian requiere actualización y validación propia; no se realiza cambio automático de motor.
+
 ## 0.23.3 — 2026-11-17
 
 - Biblioteca: flecha recta para materia y flecha en zigzag verde para energía, en ambas paletas y en la vista previa de arrastre.
