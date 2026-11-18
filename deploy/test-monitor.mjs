@@ -28,7 +28,7 @@ function monitor(routes={}){
 const readState=context=>JSON.parse(vm.runInContext('JSON.stringify({selectedEngine,engineOnline,engineMode,connectionCheck,lastCalculation,resultValidity})',context));
 test('selección automática mantiene Windows cuando responde y tiene capacidades',async()=>{
  const {context,calls,elements}=monitor();assert.equal(await vm.runInContext('checkEngine({silent:true})',context),true);
- assert.equal(readState(context).selectedEngine,'windows');
+ assert.equal(readState(context).selectedEngine,'windows',JSON.stringify(vm.runInContext('diagnosticEvents',context)));
  assert.match(elements.get('engine-current').textContent,/Automático · Windows/);
  assert.equal(calls[0].url,'/api/status');assert.equal(calls[0].engine,'windows');
 });
