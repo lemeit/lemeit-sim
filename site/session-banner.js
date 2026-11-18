@@ -8,7 +8,7 @@
   expired=true;banner.hidden=false;banner.dataset.state='expired';
   el('session-countdown').textContent='00:00:00';
   el('session-status').textContent='Acceso finalizado. Guardá el proyecto antes de volver a ingresar.';
-  el('session-login').hidden=false;if(adminLink)adminLink.hidden=true;
+  el('session-login').hidden=false;if(adminLink)adminLink.hidden=true;document.dispatchEvent(new CustomEvent('sim-session-role',{detail:{role:'student'}}));
  }
  function tick(){
   if(!session||!clock||expired)return;
@@ -40,6 +40,7 @@
    el('session-note').textContent=!admin&&data.class_expires_at>data.expires_at?'Clase hasta '+new Date(data.class_expires_at*1000).toLocaleString('es-AR')+' · la sesión puede renovarse al ingresar.':'';
    el('session-status').textContent='';el('session-login').hidden=true;
    if(adminLink)adminLink.hidden=!admin;
+   document.dispatchEvent(new CustomEvent('sim-session-role',{detail:{role:data.role}}));
    banner.hidden=false;tick();
   }catch{
    if(adminLink)adminLink.hidden=true;

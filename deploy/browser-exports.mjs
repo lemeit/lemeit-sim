@@ -21,7 +21,7 @@ async function browserPage(t){
     try{
       if(path==='/api/catalog'||path==='/api/simulate'||path==='/api/status'){
         response.setHeader('Content-Type','application/json');
-        response.end(path.endsWith('/catalog')?catalog:path.endsWith('/simulate')?result:'{}');
+        response.end(path.endsWith('/catalog')?catalog:path.endsWith('/simulate')?result:JSON.stringify({gateway_version:'0.35.0',state:'ready',supported_equipment:['MaterialStream','EnergyStream','Mixer','Splitter','Heater','Cooler','Separator','Pump','Compressor','Expander','Tank','Valve','HeatExchanger','ConversionReactor','EquilibriumReactor'],supported_features:['simple_material_recycle'],started_at:'2026-11-18T16:00:00Z',uptime_s:100}));
       }else if(/^\/[a-zA-Z0-9_./-]+$/.test(path)){
         response.setHeader('Content-Type',types[path.split('.').at(-1)]??'application/octet-stream');
         response.end(await load('../site'+path));

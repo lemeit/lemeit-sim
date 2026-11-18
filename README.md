@@ -122,6 +122,10 @@ Ejemplos; nunca se abren por defecto. Ver [guía de trabajo](docs/workflow.md).
 Si el motor no responde, un catálogo de nombres/modelos tomado de DWSIM permite
 preparar archivos sin calcular. No contiene propiedades físicas ni resultados.
 
+## Selección automática de motores
+
+ΣIM elige antes de cada cálculo un gateway disponible y compatible con las operaciones del diagrama. Los administradores pueden fijar Windows o Debian. Nunca se reenvía automáticamente un POST incierto: si se pierde el gateway después del envío, se prepara el alternativo para el próximo intento.
+
 ## Disponible
 
 Corrientes de materia y energía; mezclador, divisor de dos salidas, calentador y
