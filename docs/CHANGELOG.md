@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.36.2 — 2026-11-18
+
+- Corregidos los controles del diálogo Herramientas → Diagnóstico: etiqueta Eventos sin cortes de palabra, selector alineado y botones que se acomodan en pantallas pequeñas.
+- La consola y la zona de acciones respetan el ancho disponible sin alterar registros ni cálculos del motor.
+
 ## 0.36.1 — 2026-11-18
 
 - Corregida la etiqueta de motor fijado: al elegir Windows o Debian refleja inmediatamente el destino seleccionado, incluso si el gateway está desconectado.
