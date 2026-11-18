@@ -1746,3 +1746,18 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 
 .node .connected-port .port{opacity:0}
 .node:hover .connected-port .port,.node.selected .connected-port .port,.node .connected-port:focus .port,.node .connected-port.snap-target .port{opacity:1}
+
+/* El SVG se mide con la tipografía real y una paleta de impresión estable. */
+.diagram-export-stage{position:fixed;inset:0 auto auto 0;width:0;height:0;overflow:hidden;pointer-events:none;
+  --spx-surface:#fff;--spx-text:#17212a;--spx-text-dim:#3c4a56;--spx-accent:#8c2632;--spx-good:#296740}
+.diagram-export-stage .dwsim{--dwsim-ink:#9b3d38}
+[data-theme] .diagram-export-stage .dwsim-calculated,.diagram-export-stage .dwsim-calculated{--dwsim-ink:#315c7e}
+.diagram-export-stage .node .export-port{opacity:1}
+.diagram-export-stage .node text{font-family:"DWSIM Asap",Arial,sans-serif;font-weight:600}
+.diagram-export-stage .node text.dwsim-letter{stroke:none}
+.diagram-export-stage .node .diagram-callout text{stroke:none}
+.diagram-export-options{display:grid;gap:10px}
+.diagram-export-options fieldset{border:0;padding:0;margin:0;min-width:0}
+.diagram-export-options label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-block:3px}
+.diagram-export-options select{min-width:12rem;max-width:100%}
+.command-bar .zoom-controls .diagram-export-tool{width:auto;padding-inline:8px}

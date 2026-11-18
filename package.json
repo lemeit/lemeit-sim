@@ -1,12 +1,13 @@
 {
   "name": "lemeit-sim",
-  "version": "0.28.6",
+  "version": "0.29.1",
   "private": true,
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "test": "node --test deploy/test-*.mjs",
+    "test:exports-browser": "node --test deploy/browser-exports.mjs",
     "build": "node deploy/build.mjs",
     "build:verified": "npm test && npm run build",
     "predeploy": "npm run build:verified",
@@ -14,6 +15,7 @@
     "deploy:check": "wrangler deploy --dry-run --outdir .build/dry-run"
   },
   "devDependencies": {
+    "playwright": "1.60.0",
     "wrangler": "4.158.0"
   }
 }
