@@ -520,6 +520,7 @@ async function calculate(){
   const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
   if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
+  if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
   lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
