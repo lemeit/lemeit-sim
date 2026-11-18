@@ -5,6 +5,7 @@ No pretende resolver lazos generales, reactores ni sistemas dinámicos.
 """
 import copy
 import math
+import time
 
 class RecycleError(ValueError):
     pass
@@ -73,8 +74,13 @@ def solve_simple_recycle(graph,shape,solve_open,max_iterations=5):
     edge=next(e for e in torn['edges'] if e['from']==shape['recycle'] and e['to']==shape['mixer'])
     edge['from']=guess_id
     last=None
+    total_elapsed=0.0
+    started=time.monotonic()
     for iteration in range(1,max_iterations+1):
+        if time.monotonic()-started>40:
+            raise RecycleError('El reciclado excedió los 40 segundos de cómputo. Revisá las condiciones.')
         result=solve_open(torn)
+        total_elapsed+=float(result.get('elapsed_s',0))
         if not isinstance(result,dict) or shape['recycle'] not in result.get('streams',{}):
             raise RecycleError('DWSIM no devolvió los datos de la corriente reciclada.')
         actual=result['streams'][shape['recycle']]
@@ -97,6 +103,7 @@ def solve_simple_recycle(graph,shape,solve_open,max_iterations=5):
             # La alimentación virtual solo existe durante la iteración; la salida
             # final usa el identificador original del reciclado y no la publica.
             result['streams'].pop(guess_id,None)
+            result['elapsed_s']=round(total_elapsed,2)
             result['recycle']={'mode':'simple_material','iterations':iteration,
                                'mass_residual_kg_s':mass_error,
                                'temperature_residual_K':temperature_error,
