@@ -8,9 +8,16 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.36.0 — 2026-11-18
 
-- Motor automático por disponibilidad y operaciones requeridas; selección manual solo administrativa.
-- No se repite automáticamente un POST de simulación incierto; se comprueba el alternativo para el siguiente cálculo.
-- Sin cambios de motor DWSIM ni reinicios de gateways.
+- Selección automática de Windows o Debian por disponibilidad y capacidades; modo manual reservado al administrador.
+- Un POST de simulación ya enviado no se retransmite automáticamente: el alternativo queda preparado para el siguiente cálculo.
+- Consola de diagnóstico de la 0.35.1 conservada íntegramente; sin cambios en gateways DWSIM.
+
+## 0.35.1 — 2026-11-18
+
+- Herramientas → Diagnóstico se convierte en consola técnica con eventos estructurados, filtro de advertencias/errores, tiempos, motor, versión y HTTP.
+- Se diferencian explícitamente la comprobación de conexión, validación de capacidades, solicitud POST, respuesta del backend y fallo previo al envío; sin inventar pasos internos de DWSIM.
+- Reporte JSON descargable o copiable con metadatos limitados y sin cuerpos de solicitud, credenciales ni rutas privadas. Registro limitado a 100 eventos locales; se pierde al recargar.
+- Solo afecta al frontend: no modifica la selección manual de motores, ecuaciones, gateways ni los resultados de simulación.
 
 ## 0.35.0 — 2026-11-18
 
