@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.26.1 — 2026-11-17
+
+- Guías de usuario y mensajes de ejemplos sin referencias a Windows/Debian ni registros internos de pruebas. Se conservan datos numéricos, procedimientos y límites físicos.
+- Selector, monitor e historial muestran Motor principal y Motor alternativo. Los identificadores windows/debian, destinos y credenciales no cambian; su correspondencia se documenta en README y documentación técnica.
+
 ## 0.26.0 — 2026-11-17
 
 - Expansor adiabático de gas: presión de descarga, eficiencia isentrópica y corriente de energía de salida opcional. Símbolos en ambas paletas, inspector, validación y ejemplo 16 con guía.

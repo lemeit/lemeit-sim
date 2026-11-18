@@ -4,7 +4,7 @@
 const logs=[], history=new Map();
 const dialog=document.getElementById('services-dialog');
 const active=()=>!document.hidden&&(!dialog||dialog.open);
-const names={windows:'Windows',debian:'Debian'};
+const names={windows:'Motor principal',debian:'Motor alternativo'};
 const byId=id=>document.getElementById(id);
 const portalVersion=document.documentElement?.dataset?.portalVersion||'';
 function olderVersion(gateway,portal){

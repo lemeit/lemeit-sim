@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.26.0](https://img.shields.io/badge/portal-0.26.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.26.1](https://img.shields.io/badge/portal-0.26.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.26.0 — Expansor adiabático**. Presión de descarga y eficiencia isentrópica para gases, con salida opcional de energía y símbolos en ambas paletas. Ejemplo 16 validado Windows: nitrógeno a 25 °C, 300 → 100 kPa, 80 %, salida −39,464231 °C y 66,617946 kW producidos. El balance conserva trabajo negativo hacia el fluido; Debian requiere actualizar y validar su gateway.
+**0.26.1 — Guías centradas en el usuario**. Los servicios se muestran como Motor principal y Motor alternativo. Las guías y los ejemplos explican operaciones, datos, resultados y límites sin detalles del sistema operativo. Técnicamente, principal conserva el identificador windows y alternativo, debian; se mantienen destinos, credenciales y selección manual.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 

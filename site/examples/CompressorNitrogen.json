@@ -5,7 +5,7 @@
     "Nitrogen"
   ],
   "model": "Peng-Robinson (PR)",
-  "learning": "Comprimí 1 kg/s de nitrógeno a 25 °C desde 100 hasta 300 kPa absolutos, con eficiencia isentrópica del 75 %. Compará temperatura, potencia de eje y conservación de masa. Validado con DWSIM Windows; Debian requiere gateway actualizado.",
+  "learning": "Comprimí 1 kg/s de nitrógeno a 25 °C desde 100 hasta 300 kPa absolutos, con eficiencia isentrópica del 75 %. Compará temperatura, potencia de eje y conservación de masa.",
   "nodes": [
     {
       "id": "feed",

@@ -810,7 +810,7 @@ function renderConnectionTrace(){
  / /__   _| |_  | |  | |
 /_____| |_____| |_|  |_|`;
   const banner=`<div class="console-boot" aria-label="ΣIM · Simulación de procesos"><pre class="boot-classic boot-logo" aria-hidden="true">${esc(asciiLogo)}</pre><div class="boot-title">Simulación de procesos</div><div>Desarrollado por Ing. Luciano Lamaita</div><div>Motor de cálculo: DWSIM 10.2.15 · Daniel Wagner Oliveira de Medeiros y colaboradores</div><div>GNU GPL v3 · Créditos y licencias en «Acerca de»</div><div class="boot-ready">----------------------------------------------------</div></div>`;
-  const events=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.engine==='debian'?'Debian':'Windows')} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
+  const events=connectionTrace.map(v=>{const calculation=v.kind==='calculation';const status=v.http?' · HTTP '+v.http:calculation?(v.state==='running'?' · En curso':' · Sin respuesta HTTP'):' · Sin respuesta HTTP';const duration=Number.isFinite(v.ms)?(calculation?' · Duración '+fmt(v.ms/1000,2)+' s':' · '+v.ms+' ms'):'';return `<div class="trace-${v.state}"><time>${esc(new Date(v.time).toLocaleTimeString('es-AR'))}</time> ${calculation?'CÁLCULO':'CONEXIÓN'} · ${esc(v.engine==='debian'?'Motor alternativo':'Motor principal')} · ${esc(v.operation)}${esc(status+duration)}<br><span>${esc(v.message)}</span></div>`;}).join('');
   consoleView.innerHTML=banner+events;
   if(atBottom&&connectionTrace.length>2)consoleView.scrollTop=consoleView.scrollHeight;
 }
@@ -824,7 +824,7 @@ function paintConnection(){
 }
 function renderServerDetails(){
   renderConnectionTrace();
-  const engineName=selectedEngine==='debian'?'Notebook · Debian':'PC remota · Windows';
+  const engineName=selectedEngine==='debian'?'Motor alternativo':'Motor principal';
   const state=connectionCheck?.state||(engineOnline?'online':'checking');
   const labels={online:'Servicio accesible',busy:'Motor ocupado',offline:'Sin conexión verificada',checking:'Comprobando conexión'};
   const status=labels[state]||state;
@@ -832,7 +832,7 @@ function renderServerDetails(){
   const checked=connectionCheck?new Date(connectionCheck.time).toLocaleString('es-AR'):'Todavía no realizada';
   const elapsed=connectionCheck?`${connectionCheck.http??'Sin respuesta'} · ${connectionCheck.ms} ms`:'Sin respuesta';
   const catalogInfo=connectionCheck?.compounds?`<dt>Catálogo</dt><dd>${connectionCheck.compounds} compuestos · ${connectionCheck.models} modelos</dd>`:'';
-  const latest=lastCalculation?`${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}${lastCalculation.engine?' · '+(lastCalculation.engine==='debian'?'Debian':'Windows'):''}`:'Sin cálculos';
+  const latest=lastCalculation?`${calculationLabel(lastCalculation)}${calculationDuration(lastCalculation)}${lastCalculation.engine?' · '+(lastCalculation.engine==='debian'?'Motor alternativo':'Motor principal'):''}`:'Sin cálculos';
   const gatewayInfo=gatewayCheck?.ok
     ?`<dt>Versión del gateway</dt><dd>${esc(gatewayCheck.version)}</dd><dt>Inicio del proceso</dt><dd>${esc(gatewayCheck.startedAt)}</dd><dt>Tiempo activo</dt><dd>${esc(gatewayCheck.uptime)}</dd><dt>Estado del gateway</dt><dd>${esc(gatewayCheck.state)}</dd><dt>Equipos reconocidos</dt><dd>${esc(gatewayCheck.equipment)}</dd>`
     :`<dt>Versión del gateway</dt><dd>No confirmada${gatewayCheck?.reason?' · '+esc(gatewayCheck.reason):''}</dd>`;
