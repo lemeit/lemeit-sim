@@ -6,8 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.29.1 — 2026-11-18
+## 0.30.0 — 2026-11-18
 
+- Exportar resultados abre un diálogo previo con formato, datos y separador decimal coma/punto para CSV; recuerda la elección. Excel conserva números y explica que su visualización depende de Excel. Se retiran denominaciones regionales del menú.
+- Diálogos de datos e imágenes con ancho acotado, encabezado y pie alineados, contenido desplazable y disposición adaptable.
 - Las puntas de las llamadas de valores se anclan al borde del cuerpo de la flecha de su corriente, usando el mismo tramo, escala y orientación del símbolo SVG.
 - El anclaje se recalcula durante el movimiento y el cambio de recorrido. Mantiene nombres simples, llamadas compactas y conexiones.
 - Regresión de alimentación y corriente vertical. Conserva las exportaciones de 0.29.0.

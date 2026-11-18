@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.29.1 — Referencias ancladas a las flechas**. Las llamadas de valores se unen al borde del cuerpo de la flecha SVG de su corriente y siguen su posición y orientación. Conserva llamadas compactas, nombres simples y las exportaciones de diagramas y datos publicadas.
+**0.30.0 — Exportaciones claras y referencias sobre flechas**. Diálogo previo con separador decimal coma/punto para CSV y explicación del formato numérico de Excel. Diálogos ajustados al área disponible. Las llamadas se unen al cuerpo de las flechas de corriente.
 
 **0.28.5 — Recorridos exteriores y llamadas compactas**. El recorrido evalúa alternativas ortogonales fuera de los equipos, respetando codos manuales válidos. Las llamadas reducen su línea horizontal y la separación inicial. No modifica conexiones ni cálculos.
 
