@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const context=vm.createContext({});
 vm.runInContext(readFileSync(new URL('../site/engine-routing.js',import.meta.url),'utf8'),context);
 const routing=context.SimEngineRouting;
-const states={ready:'ready',supported_equipment:['MaterialStream','EnergyStream','Mixer','Splitter','Heater','Cooler','Pump','Tank','Compressor','Expander','ConversionReactor','EquilibriumReactor'],supported_features:['simple_material_recycle']};
+const states={state:'ready',supported_equipment:['MaterialStream','EnergyStream','Mixer','Splitter','Heater','Cooler','Pump','Tank','Compressor','Expander','ConversionReactor','EquilibriumReactor'],supported_features:['simple_material_recycle']};
 const example={nodes:[{id:'f',type:'MaterialStream'},{id:'m',type:'Mixer'},{id:'s',type:'MaterialStream'},{id:'d',type:'Splitter'},{id:'r',type:'MaterialStream'}],
 edges:[{from:'f',to:'m'},{from:'m',to:'s'},{from:'s',to:'d'},{from:'d',to:'r'},{from:'r',to:'m'}]};
 test('auto conserva destino efectivo o prueba alternativo; fijación no conmuta',()=>{
