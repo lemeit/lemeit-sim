@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.36.0 — 2026-11-18
+
+- Motor automático por disponibilidad y operaciones requeridas; selección manual solo administrativa.
+- No se repite automáticamente un POST de simulación incierto; se comprueba el alternativo para el siguiente cálculo.
+- Sin cambios de motor DWSIM ni reinicios de gateways.
+
 ## 0.35.0 — 2026-11-18
 
 - Nuevo Ejemplo 17, recirculación estacionaria de agua sin reacción con mezclador y divisor (60 % producto / 40 % retorno).
