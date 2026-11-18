@@ -3,6 +3,10 @@
 Estado al 17 de noviembre de 2026 · portal 0.21.4. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
+## Implementación en revisión · 0.35.0
+
+Primer lazo de recirculación sin reacción: mezclador–divisor con corriente de corte y convergencia acotada (Ejemplo 17). PR #104 en revisión, sin validación todavía en los dos motores DWSIM MCP. Los reactores cinéticos CSTR/PFR y lazos de recirculación con reacción permanecen para otra ronda; no se deben confundir con el ejemplo 10 de bypass.
+
 ## Estado integrado · PR #72 / 0.21.4
 
 - Acceso por código de clase sin correo y administración privada; sesiones, vencimientos y desactivación de clases.
