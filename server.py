@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from recycle import simple_recycle_shape, solve_simple_recycle, RecycleError
 
 ROOT = Path(__file__).resolve().parent
 GATEWAY_STARTED_AT = time.time()
@@ -220,8 +221,11 @@ def validate_graph(graph, catalog):
             occupied.add(key)
         adjacency[a['id']].append(b['id'])
     active, done = set(), set()
+    recycle_shape = simple_recycle_shape(graph)
     def visit(ident):
-        if ident in active: raise InputError('Esta versión admite procesos sin recirculaciones.')
+        if ident in active:
+            if not recycle_shape: raise InputError('Recirculación no admitida. Esta versión resuelve únicamente el lazo simple Mezclador → Divisor → Mezclador, sin reacción.')
+            return
         if ident in done: return
         active.add(ident)
         for nxt in adjacency[ident]: visit(nxt)
@@ -300,6 +304,12 @@ def validate_graph(graph, catalog):
 def simulate(engine, graph):
     catalog = engine.get_catalog()
     by_id = validate_graph(graph, catalog)
+    recycle_shape = simple_recycle_shape(graph)
+    if recycle_shape:
+        try:
+            return solve_simple_recycle(graph, recycle_shape, lambda opened: simulate(engine, opened))
+        except RecycleError as error:
+            raise InputError(str(error)) from error
     started = time.monotonic()
     fid = engine.call('dwsim_flowsheet_create', name='Proceso pedagógico')['flowsheet_id']
     def call(tool, **kw): return engine.call(tool, flowsheet_id=fid, **kw)
@@ -490,6 +500,7 @@ def gateway_status():
         'uptime_s': max(0, int(time.time() - GATEWAY_STARTED_AT)),
         'state': 'busy' if LOCK.locked() else 'ready',
         'supported_equipment': sorted(KINDS),
+        'supported_features': ['simple_material_recycle'],
     }
 
 
