@@ -2,6 +2,7 @@
 'use strict';
 (function(root){
   const symbols=Object.freeze({
+    Compressor:'<path d="M0 50 H20 M100 50 H120 M60 75 V100"/><path d="M20 10 L100 30 V70 L20 90 Z M35 24 V76 M50 28 V72 M65 32 V68 M80 36 V64"/>',
     Pump:'<path d="M0 50 H26 M94 50 H120 M35 90 H92 L82 76 H45 Z"/><path d="M26 50 C26 7 92 3 94 40 V66 L78 78 H48 C34 78 26 66 26 50 Z"/><circle cx="60" cy="47" r="16"/><path d="M60 31 V63 M44 47 H76"/>',
     Mixer:'<path d="M0 25 H20 L40 40 M0 50 H40 M0 75 H20 L40 60 M90 50 H120"/><path d="M40 20 H80 L100 50 L80 80 H40 Z"/><path d="M50 35 L78 65 M50 65 L78 35"/>',
     Splitter:'<path d="M0 50 H30 M90 35 H105 V25 H120 M90 65 H105 V75 H120"/><rect x="30" y="20" width="60" height="60" rx="8"/><path d="M40 50 H60 V35 H80 M60 50 V65 H80"/>',

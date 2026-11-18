@@ -121,6 +121,19 @@ Los estados actuales son disponibilidad/ocupación o estado no confirmado; no se
 [Administración de clases](administracion-clases.md) · [Acceso y seguridad](acceso-clases-admin.md) · [Verificaciones](../CHECKS.md).
 
 
+## Entregado en 0.24.0 — Compresor adiabático
+
+- `Compressor`: una entrada/salida de materia y entrada opcional de energía.
+- Modo inicial por presión absoluta de descarga y eficiencia isentrópica; solo gas
+  completamente vapor. Sin politropía, curvas, dimensionamiento ni expansión.
+- Caso 14: nitrógeno puro, PR, 25 °C, 100 → 300 kPa, 1 kg/s, 75 %.
+- Windows real: salida 170,880686 °C, potencia 152,233190 kW, masa 1 kg/s.
+  Eficiencias 60, 75 y 90 % verificadas: 24 controles físicos más orden de potencia.
+- [Sonda](../tools/probe_compressor_windows.py) e [informe](validation/compressor-0.24.0-windows.json).
+- Requiere gateway actualizado. Debian pendiente de ejecutar; el editor lo comprueba
+  mediante supported_equipment y no conmuta de motor automáticamente.
+- [Guía del compresor](compresor.md), ejemplo integrado y catálogo sincronizados.
+
 ## Desarrollo posterior
 
 - Grados de libertad, explicación de estados y errores de especificación.

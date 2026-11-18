@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "title": "14 · Compresión adiabática de nitrógeno",
+  "compounds": [
+    "Nitrogen"
+  ],
+  "model": "Peng-Robinson (PR)",
+  "learning": "Comprimí 1 kg/s de nitrógeno a 25 °C desde 100 hasta 300 kPa absolutos, con eficiencia isentrópica del 75 %. Compará temperatura, potencia de eje y conservación de masa. Validado con DWSIM Windows; Debian requiere gateway actualizado.",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Nitrógeno entrada",
+      "x": 90,
+      "y": 140,
+      "temperature_C": 25,
+      "pressure_kPa": 100,
+      "mass_flow": 1,
+      "composition": {
+        "Nitrogen": 1
+      }
+    },
+    {
+      "id": "compressor",
+      "type": "Compressor",
+      "name": "K1 · Compresor",
+      "x": 450,
+      "y": 125,
+      "outlet_pressure_kPa": 300,
+      "efficiency_pct": 75
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "Nitrógeno comprimido",
+      "x": 800,
+      "y": 140
+    },
+    {
+      "id": "power",
+      "type": "EnergyStream",
+      "name": "Potencia de eje",
+      "x": 360,
+      "y": 340
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "compressor"
+    },
+    {
+      "from": "compressor",
+      "to": "product"
+    },
+    {
+      "from": "power",
+      "to": "compressor",
+      "toPort": "energy-in"
+    }
+  ]
+}

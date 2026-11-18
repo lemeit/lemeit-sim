@@ -8,9 +8,9 @@ const SimproxFiles=(()=>{
   const name=id=>graph.nodes.find(n=>n.id===id)?.name||id;
   const streams=[['Corriente','Caudal [kg/s]','Temperatura [°C]','Presión [kPa]','Entalpía [kJ/kg]','Entropía [kJ/(kg K)]','Densidad [kg/m³]','Caudal molar [mol/s]']];
   for(const [id,r] of Object.entries(result.streams||{})){const p=r.phases?.[0]||{};streams.push([name(id),r.mass_flow_kg_s,r.temperature_K-273.15,r.pressure_Pa/1000,p.enthalpy_kJ_kg,p.entropy_kJ_kgK,p.density_kg_m3,r.molar_flow_mol_s]);}
-  const balances=[['Equipo','Entrada [kg/s]','Salida [kg/s]','Residuo masa [kg/s]','Calor hacia fluido [kW]','Reactivo']];
+  const balances=[['Equipo','Entrada [kg/s]','Salida [kg/s]','Residuo masa [kg/s]','Energía hacia fluido [kW]','Reactivo','Tipo de transferencia']];
   const components=[['Equipo','Componente','Entrada [kg/s]','Salida [kg/s]','Residuo o consumo neto [kg/s]','Interpretación']];
-  for(const b of result.balances||[]){balances.push([name(b.id),b.mass_in,b.mass_out,b.mass_residual,b.heat_to_fluid_kW,b.reactive?'Sí':'No']);for(const [compound,c] of Object.entries(b.components||{}))components.push([name(b.id),compound,c.in_kg_s,c.out_kg_s,c.residual_kg_s,b.reactive?'Consumo (+), generación (−)':'Residuo']);}
+  for(const b of result.balances||[]){balances.push([name(b.id),b.mass_in,b.mass_out,b.mass_residual,b.heat_to_fluid_kW,b.reactive?'Sí':'No',b.energy_kind==='shaft'?'Trabajo de eje':'Calor']);for(const [compound,c] of Object.entries(b.components||{}))components.push([name(b.id),compound,c.in_kg_s,c.out_kg_s,c.residual_kg_s,b.reactive?'Consumo (+), generación (−)':'Residuo']);}
   return [{name:'Corrientes',rows:streams},{name:'Balances',rows:balances},{name:'Componentes',rows:components},{name:'Datos',rows:[['Proyecto',graph.title],['Modelo',result.model],['Motor',result.engine],['Duración [s]',result.elapsed_s],['Exportado [UTC]',new Date().toISOString()],['Origen','Simulación calculada por DWSIM; no mediciones experimentales']]}];
  }
  const encoder=new TextEncoder();
