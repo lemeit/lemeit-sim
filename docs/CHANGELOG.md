@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.36.0 — 2026-11-18
+
+- Selección automática de Windows o Debian por disponibilidad y capacidades; modo manual reservado al administrador.
+- Un POST de simulación ya enviado no se retransmite automáticamente: el alternativo queda preparado para el siguiente cálculo.
+- Consola de diagnóstico de la 0.35.1 conservada íntegramente; sin cambios en gateways DWSIM.
+
 ## 0.35.1 — 2026-11-18
 
 - Herramientas → Diagnóstico se convierte en consola técnica con eventos estructurados, filtro de advertencias/errores, tiempos, motor, versión y HTTP.

@@ -46,7 +46,7 @@ let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let resultValidity='none'; // none | stale | valid; solo resultados calculados pueden quedar obsoletos.
 let unitSystem='engineering';
-let selectedEngine='windows',engineCheckGeneration=0; // Selección explícita; no se realiza failover.
+let selectedEngine='windows',engineMode='auto',engineCheckGeneration=0; // Selección automática predeterminada.
 let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 const diagnosticEvents=[];
@@ -207,15 +207,15 @@ function streamGeometry(n){
 function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=snapCoordinate(value);}
 function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
 const engineHeaders=()=>({'X-SIM-Engine':selectedEngine});
-async function selectCalculationEngine(id){
-  if(busy||!['windows','debian'].includes(id))return;
-  selectedEngine=id;engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
-  const element=$('engine-select');element.value=id;
+async function selectCalculationEngine(mode){
+  if(busy||!['auto','windows','debian'].includes(mode))return;
+  if(mode!=='auto'&&document.body.dataset.sessionRole!=='admin')return;
+  engineMode=mode;$('engine-select').value=mode;
+  engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
-  $('calculation-state').textContent='Comprobá el motor elegido antes de calcular';
-  updateControls();paintConnection();
-  await checkEngine();
+  $('calculation-state').textContent='Comprobando motor de cálculo';
+  updateControls();paintConnection();await checkEngine();
 }
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
 function renderPalette(){
@@ -535,19 +535,18 @@ async function convertFlowBase(n,next){
  try{const db=await SimUnitCalculator.getMasses();if(nodeById(n.id)!==n||busy)return;const mixed=SimUnits.mixture(graph.compounds.map(c=>n.composition?.[c]??0),graph.compounds.map(c=>db[c]),n.composition_basis||'mass');const known=n[old==='mass'?'mass_flow':'molar_flow'];if(!(known>0))throw Error('Completá un caudal positivo antes de cambiar su base.');if(next==='molar')n.molar_flow=known*1000/mixed.M;else n.mass_flow=known*mixed.M/1000;n.flow_basis=next;changed();renderInspector();notice('Caudal convertido con la masa molar de la mezcla.');}catch(error){renderInspector();notice('No se pudo convertir el caudal: '+error.message,true);}
 }
 async function calculate(){
-  if(!hasProject||!engineOnline)return;
-  if(busy)return;
+  if(!hasProject||busy)return;
   const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
   if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
 
   debugEvent('INFO','Validación previa',{engine:selectedEngine,objects:graph.nodes.length,connections:graph.edges.length,model:graph.model});
-  const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
-  if(!selectedIsReady){debugEvent('ERROR','Motor no disponible · cálculo no enviado',{engine:selectedEngine,stage:'preflight'});return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);}
+  const selectedIsReady=await checkEngine(); // Selección previa al POST; sin reenvío ambiguo.
+  if(!selectedIsReady){debugEvent('ERROR','Motor no disponible · cálculo no enviado',{engine:selectedEngine,stage:'preflight'});return notice(engineMode==='auto'?'No hay un motor disponible y compatible con el proceso.':'El motor fijado no está disponible o no es compatible; elegí Automático.',true);}
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
-  const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null,simulationRequested=false;
-  lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
+  const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;let calculationHttp=null,simulationRequested=false,transportFailed=false;
+  lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
     const hasRecirculation=diagramHasRecirculation(payload);
@@ -569,9 +568,9 @@ async function calculate(){
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
     debugEvent('OK','Resultados verificados',{engine:selectedEngine,streams:Object.keys(data.streams||{}).length,equipment:Object.keys(data.equipment||{}).length,ms:Math.round(performance.now()-started)});
-    lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
-  }catch(error){debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:simulationRequested?'POST enviado o conexión interrumpida':'validación local antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection(simulationRequested?'POST /api/simulate':'Preflight /api/status',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
-  finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
+    lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
+  }catch(error){transportFailed=simulationRequested&&(calculationHttp===503||/fetch|NetworkError|Failed to fetch|timeout/i.test(error.message));debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:simulationRequested?'POST enviado o conexión interrumpida':'validación local antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection(simulationRequested?'POST /api/simulate':'Preflight /api/status',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
+  finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);if(transportFailed&&engineMode==='auto')void checkEngine({silent:true,exclude:[calculationEngine]});}
 }
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
@@ -769,10 +768,11 @@ function bindEvents(){
 async function init(){
   SimproxTheme.init();graph=emptyProject();
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
-  $('engine-select').value=selectedEngine;
-  const initialCheckStarted=performance.now();let initialHttp=null;
-  try{const response=await fetch('/api/catalog',{headers:engineHeaders(),signal:AbortSignal.timeout(15000)});initialHttp=response.status;const data=await readCatalogResponse(response);if(!response.ok)throw new Error(data.error);catalog=data;engineOnline=true;$('engine-state').textContent=`DWSIM conectado · ${fmt(catalog.compound_count,0)} compuestos`;$('engine-state').className='engine-state online';connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-initialCheckStarted),compounds:data.compound_count??data.compounds.length,models:data.models.length};traceConnection('GET /api/catalog',connectionCheck);paintConnection();}
-  catch(error){const occupied=initialHttp===409;engineOnline=occupied;connectionCheck={time:new Date().toISOString(),ok:occupied,state:occupied?'busy':'offline',http:initialHttp,message:error.message,ms:Math.round(performance.now()-initialCheckStarted)};traceConnection('GET /api/catalog',connectionCheck);paintConnection();try{catalog=await(await fetch('catalog-cache.json')).json();notice(occupied?'El motor está ocupado. Podés editar y volver a intentar el cálculo.':'Modo de edición: el motor no está disponible. Podés crear y guardar proyectos; el cálculo requiere conexión con DWSIM.');}catch{notice(error.message,true);}}
+  $('engine-select').value=engineMode;
+  if(!await checkEngine()){
+    try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: los motores están desconectados o no son compatibles. Podés guardar y reintentar.');}
+    catch(error){notice(error.message,true);}
+  }
   if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderCompounds();updateControls();
 }
@@ -1057,6 +1057,7 @@ function paintConnection(){
   let state=connectionCheck?.state||(engineOnline?'online':'checking');if((state==='online'||state==='busy')&&age>75)state='stale';
   const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
   $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
+  $('engine-current').textContent=engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows');
   $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
 }
@@ -1074,7 +1075,7 @@ function renderServerDetails(){
   const gatewayInfo=gatewayCheck?.ok
     ?`<dt>Versión del gateway</dt><dd>${esc(gatewayCheck.version)}</dd><dt>Inicio del proceso</dt><dd>${esc(gatewayCheck.startedAt)}</dd><dt>Tiempo activo</dt><dd>${esc(gatewayCheck.uptime)}</dd><dt>Estado del gateway</dt><dd>${esc(gatewayCheck.state)}</dd><dt>Equipos reconocidos</dt><dd>${esc(gatewayCheck.equipment)}</dd>`
     :`<dt>Versión del gateway</dt><dd>No confirmada${gatewayCheck?.reason?' · '+esc(gatewayCheck.reason):''}</dd>`;
-  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>No se cambia de motor automáticamente.</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
+  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>${engineMode==='auto'?'Selección automática antes del cálculo; no se reenvían cálculos ambiguos.':'Motor fijado por administración; sin conmutación automática.'}</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
 }
 async function readGatewayStatus(engine,generation){
   // Endpoint independiente: una respuesta 404 de un gateway antiguo no invalida el catálogo.
@@ -1089,19 +1090,49 @@ async function readGatewayStatus(engine,generation){
     gatewayCheck={ok:true,version:data.gateway_version,startedAt:new Date(date).toLocaleString('es-AR'),uptime:fmt(data.uptime_s/3600,1)+' h',state:data.state==='busy'?'Ocupado':'Disponible',equipment:data.supported_equipment.join(', ')};
   }catch(error){if(generation!==engineCheckGeneration)return;gatewayCheck={ok:false,reason:error.message};}
 }
-async function checkEngine({silent=false}={}){
-  const generation=++engineCheckGeneration,engine=selectedEngine;
-  monitorRequest=true;$('server-refresh').disabled=true;const start=performance.now();let http=null;
-  try{
-    const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(15000)});http=response.status;
-    if(generation!==engineCheckGeneration)return;const data=await readCatalogResponse(response);
-    if(response.status===409){engineOnline=true;connectionCheck={time:new Date().toISOString(),ok:true,state:'busy',http,message:'El servicio responde; DWSIM está resolviendo otra tarea.',ms:Math.round(performance.now()-start)};}
-    else{if(!response.ok)throw new Error(data.error||'El motor no respondió correctamente.');engineOnline=true;catalog=data;connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http,message:'Conexión verificada; esta consulta solo comprueba disponibilidad.',ms:Math.round(performance.now()-start),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};}
-    if(!silent)recordActivity('Comprobación de conexión: '+connectionCheck.state);
-    if(connectionCheck.state==='online'||connectionCheck.state==='busy')await readGatewayStatus(engine,generation);
-  }catch(error){if(generation!==engineCheckGeneration)return;engineOnline=false;gatewayCheck=null;connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http,message:error.message,ms:Math.round(performance.now()-start)};if(!silent)recordActivity('Comprobación de conexión fallida',error.message);}
-  finally{if(generation===engineCheckGeneration){monitorRequest=false;$('server-refresh').disabled=false;traceConnection('GET /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();}}
-  return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
+async function checkEngine({silent=false,exclude=[]}={}){
+  if(busy)return engineOnline;
+  const generation=++engineCheckGeneration,order=SimEngineRouting.order(engineMode,selectedEngine).filter(id=>!exclude.includes(id));
+  monitorRequest=true;$('server-refresh').disabled=true;
+  let lastError='Sin motores disponibles',lastHttp=null,successful=false;
+  for(const engine of order){
+    if(generation!==engineCheckGeneration)break;
+    const started=performance.now();
+    try{
+      const statusResponse=await fetch('/api/status',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(7000),cache:'no-store'});
+      const status=await readCatalogResponse(statusResponse);
+      lastHttp=statusResponse.status;
+      if(!statusResponse.ok)throw Error(status.error||'Gateway sin conexión');
+      if(status.state!=='ready')throw Error('Gateway ocupado');
+      if(!SimEngineRouting.supports(status,graph))throw Error('Gateway sin las operaciones requeridas');
+      const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(12000),cache:'no-store'});
+      lastHttp=response.status;
+      const data=await readCatalogResponse(response);
+      if(!response.ok)throw Error(data.error||'Catálogo no disponible');
+      if(generation!==engineCheckGeneration)return false;
+      const changedMotor=selectedEngine!==engine;
+      selectedEngine=engine;engineOnline=true;catalog=data;successful=true;
+      const date=Date.parse(status.started_at);
+      gatewayCheck={ok:true,version:status.gateway_version,startedAt:Number.isFinite(date)?new Date(date).toLocaleString('es-AR'):'Sin datos',uptime:fmt(status.uptime_s/3600,1)+' h',state:'Disponible',equipment:status.supported_equipment.join(', ')};
+      connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:(engineMode==='auto'?'Selección automática':'Motor fijado')+' · '+(engine==='debian'?'Debian':'Windows')+' · compatible con el proceso.',ms:Math.round(performance.now()-started),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};
+      if(changedMotor&&!silent)recordActivity('Motor elegido: '+(engine==='debian'?'Debian':'Windows'));
+      const modelSelect=$('model-select'),savedModel=modelSelect.value||graph.model;
+      if(data.models?.length&&(!modelSelect.options.length||modelSelect.options.length<=1)){
+        modelSelect.innerHTML='<option value="">Sin modelo seleccionado</option>'+data.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
+        modelSelect.value=savedModel;
+      }
+      break;
+    }catch(error){lastError=(engine==='debian'?'Debian':'Windows')+': '+error.message;}
+  }
+  if(generation!==engineCheckGeneration)return false;
+  if(!successful){
+    engineOnline=false;gatewayCheck=null;
+    connectionCheck={time:new Date().toISOString(),ok:false,state:'offline',http:lastHttp,message:lastError,ms:0};
+    if(!silent)recordActivity('No hay motor compatible',lastError);
+  }
+  monitorRequest=false;$('server-refresh').disabled=false;
+  traceConnection('GET /api/status + /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();
+  return successful;
 }
 function bindWorkspaceTools(){
   bindDataExport();
@@ -1121,9 +1152,10 @@ function bindWorkspaceTools(){
   refreshCanvasButtons();
   $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{$('diagnostics-dialog').showModal();renderDiagnostics();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
+  document.addEventListener('sim-session-role',event=>{const admin=event.detail?.role==='admin';document.body.dataset.sessionRole=admin?'admin':'student';$('engine-select').hidden=!admin;document.querySelector('label[for="engine-select"]').hidden=!admin;if(!admin&&engineMode!=='auto')void selectCalculationEngine('auto');});
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
-  monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
+  monitorTimer=setInterval(()=>{if(!busy&&$('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
   $('diagnostics-filter').onchange=renderDiagnosticLog;
   $('diagnostics-clear').onclick=()=>{diagnosticEvents.length=0;renderDiagnosticLog();$('diagnostics-copy-status').textContent='Eventos locales limpiados';};
   $('diagnostics-copy').onclick=async()=>{const button=$('diagnostics-copy'),status=$('diagnostics-copy-status'),content=diagnosticReport();try{if(!navigator.clipboard?.writeText)throw Error('Clipboard API no disponible');await navigator.clipboard.writeText(content);status.textContent='Copiado';button.title='Diagnóstico copiado';}catch{status.textContent='No se pudo copiar. Usá Descargar diagnóstico.';button.title='Copiar diagnóstico';}};
