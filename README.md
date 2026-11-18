@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.24.0](https://img.shields.io/badge/portal-0.24.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.25.0](https://img.shields.io/badge/portal-0.25.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.24.0 — Compresor adiabático**. Presión de descarga y eficiencia isentrópica para gases, símbolos en ambas paletas y corriente de energía opcional. Ejemplo 14 de nitrógeno validado con DWSIM Windows: 100 → 300 kPa, 75 %, 170,880686 °C y 152,233190 kW. Requiere gateway actualizado; Debian pendiente de validar. Los balances distinguen trabajo de eje de calor.
+**0.25.0 — Tanque líquido y energía con trazos**. La biblioteca usa una flecha recta de trazos verdes para energía. Tanque independiente con volumen útil, pérdida de presión y tiempo de residencia; ejemplo 15 validado con DWSIM Windows: 5 m³, 1 kg/s, 300 → 290 kPa y residencia 4985,687325 s. Solo régimen estacionario líquido, sin llenado ni vaciado. Debian requiere actualización y validación propia.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 

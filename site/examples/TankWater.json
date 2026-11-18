@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "title": "15 · Tanque de agua y tiempo de residencia",
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "learning": "Tanque líquido estacionario de 5 m³: agua a 25 °C, 300 kPa y 1 kg/s, pérdida de presión 10 kPa. Compará presión, entalpía y tiempo de residencia V/Q. No representa llenado ni vaciado. Validado Windows; Debian requiere gateway actualizado.",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Agua entrada",
+      "x": 90,
+      "y": 140,
+      "temperature_C": 25,
+      "pressure_kPa": 300,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      }
+    },
+    {
+      "id": "tank",
+      "type": "Tank",
+      "name": "TK1 Tanque",
+      "x": 450,
+      "y": 125,
+      "volume_m3": 5,
+      "pressure_drop_kPa": 10
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "Agua salida",
+      "x": 800,
+      "y": 140
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "tank"
+    },
+    {
+      "from": "tank",
+      "to": "product"
+    }
+  ]
+}

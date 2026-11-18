@@ -61,3 +61,7 @@ extremos y codos sin recorte al origen; validación admite coordenadas finitas
 negativas y Ajustar encuadra también esas posiciones. Suite completa: 159 pruebas.
 Navegador: bomba trasladada con teclado desde x=340 hasta x=-210 y encuadrada
 con Ajustar; Acerca de verificado tras recarga en 0.23.1.
+
+## Ampliaciones funcionales
+
+0.24.0 incorporó Compressor; 0.25.0 incorpora Tank con cálculo propio y ejemplo validado. El tanque deja de estar pospuesto. Los detalles físicos están en compresor.md y tanque.md. Energía se representa en la biblioteca con una flecha recta de trazos, como en el lienzo.

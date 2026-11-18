@@ -134,6 +134,27 @@ Los estados actuales son disponibilidad/ocupación o estado no confirmado; no se
   mediante supported_equipment y no conmuta de motor automáticamente.
 - [Guía del compresor](compresor.md), ejemplo integrado y catálogo sincronizados.
 
+## Entregado en 0.25.0 — Tanque líquido estacionario
+
+- `Tank`: una entrada/salida de materia, volumen útil y pérdida de presión.
+- Tiempo de residencia nativo del motor, contrastado contra V/Q. Sin niveles,
+  llenado/vaciado, geometría de fabricación ni separación de fases.
+- Caso 15: agua IAPWS-IF97, 25 °C, 300 → 290 kPa, 1 kg/s y 5 m³:
+  residencia 4985,687325 s; salida 25,002215 °C. Tres casos Windows, 24 controles
+  físicos y relación de residencia con volumen verificados.
+- [Sonda](../tools/probe_tank_windows.py), [informe](validation/tank-0.25.0-windows.json)
+  y [alcance](tanque.md). Debian pendiente; requiere gateway actualizado.
+- Energía con trazo discontinuo también en biblioteca y vista previa de arrastre.
+
+## Siguientes equipos de la ampliación
+
+- Expansor: presión de descarga, eficiencia y trabajo de eje, con validación real.
+- Filtro: definir suspensión, sólidos y especificaciones admitidas por el motor.
+- Columna: delimitar un primer modo de separación y validar puertos, condensador,
+  rehervidor y especificaciones antes de mostrarla como disponible.
+- No habilitar equipos solo por tener un símbolo; cada entrega conserva su informe,
+  ejemplo reproducible, catálogo y estado Windows/Debian.
+
 ## Desarrollo posterior
 
 - Grados de libertad, explicación de estados y errores de especificación.

@@ -413,3 +413,13 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 - Catálogo, hoja de ruta, guía del ejemplo y documentación actualizados.
 - Debian pendiente de actualizar y validar; comprobación de capacidad por gateway
   antes del cálculo. No se hace conmutación automática de motor.
+
+## 0.25.0 · Tanque líquido y energía con trazos · 17/11/2026
+
+- 163 pruebas JS y 35 pruebas Python aprobadas; build y versiones correctos.
+- Sonda Windows real: casos 5 m³/10 kPa, 1 m³/10 kPa y 5 m³/sin pérdida;
+  24 controles físicos y proporcionalidad de residencia con volumen.
+- Navegador con gateway temporal real: caso 15 calculado, 290 kPa y 25,002 °C;
+  inspector muestra residencia 83,095 min. Energía con flecha de trazos en ambas
+  paletas y Acerca de 0.25.0 comprobados. Sin dinámica de nivel.
+- Informe, guía, catálogo y hoja de ruta sincronizados; Debian pendiente de validar.

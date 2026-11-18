@@ -1695,4 +1695,4 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 
 .sim-shell .equipment-panel .palette-item{padding:3px 4px;min-height:28px}.sim-shell .equipment-panel .palette-symbol{width:22px;height:22px}.sim-shell .equipment-panel .palette-group{margin:8px 0 3px}
 
-.palette-symbol .palette-energy-symbol{stroke:var(--spx-good);stroke-width:6;stroke-linecap:round;fill:none}
+.palette-symbol .palette-energy-symbol{stroke:var(--spx-good);stroke-width:5;stroke-linecap:butt;fill:none}

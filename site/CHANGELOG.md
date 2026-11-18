@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.25.0 — 2026-11-17
+
+- Energía: flecha recta de trazos verdes en biblioteca y vista previa, coherente con la corriente del lienzo.
+- Tanque líquido independiente: volumen útil, pérdida de presión y tiempo de residencia nativo de DWSIM. Una entrada y salida; símbolos en ambas paletas, inspector, validación y ejemplo 15 con guía.
+- Agua a 25 °C, 300 → 290 kPa y 1 kg/s, volumen 5 m³: residencia 4985,687325 s y salida 25,002215 °C. Tres casos reales Windows y 24 controles físicos; sin dinámica de nivel ni separación de fases.
+- El cálculo comprueba Tank en el gateway elegido. Windows actualizado; Debian pendiente de actualizar y validar, sin conmutación automática.
+
 ## 0.24.0 — 2026-11-17
 
 - Compresor adiabático de gas con presión de descarga, eficiencia isentrópica y corriente de energía opcional. Símbolos propios en ΣIM y DWSIM, inspector, validaciones y ejemplo 14 con guía.

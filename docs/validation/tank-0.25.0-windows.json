@@ -1,0 +1,949 @@
+{
+  "portal": "0.25.0",
+  "engine": "DWSIM 10.2.15",
+  "platform": "Windows",
+  "model": "Steam Tables (IAPWS-IF97)",
+  "scope": "steady state liquid only; no dynamic or experimental validation; Debian not tested",
+  "volume_scaling_check": true,
+  "cases": {
+    "base": {
+      "volume_m3": 5,
+      "pressure_drop_kPa": 10,
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Agua entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Agua salida",
+            "temperature_K": 298.15221458478163,
+            "pressure_Pa": 290000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15221458478163,
+                "pressure_Pa": 290000.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "tank": {
+            "name": "TK1 Tanque",
+            "type": "Tank",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Residence Time": {
+                "value": "4985.687324640951",
+                "units": "s"
+              }
+            },
+            "residence_time_s": 4985.687324640951
+          }
+        },
+        "balances": [
+          {
+            "id": "tank",
+            "name": "TK1 Tanque",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": 7.716170102867181e-08,
+            "components": {
+              "Water": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "heat"
+          }
+        ],
+        "elapsed_s": 1.05,
+        "engine": "DWSIM 10.2.15",
+        "model": "Steam Tables (IAPWS-IF97)"
+      },
+      "checks": {
+        "calculated": true,
+        "liquid_feed": true,
+        "pressure": true,
+        "mass": true,
+        "enthalpy": true,
+        "residence": true,
+        "positive_residence": true,
+        "negligible_external_energy": true
+      }
+    },
+    "small": {
+      "volume_m3": 1,
+      "pressure_drop_kPa": 10,
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Agua entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Agua salida",
+            "temperature_K": 298.15221458478163,
+            "pressure_Pa": 290000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15221458478163,
+                "pressure_Pa": 290000.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968310815,
+                "entropy_kJ_kgK": 0.3672134390986543,
+                "density_kg_m3": 997.1323964788404,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "tank": {
+            "name": "TK1 Tanque",
+            "type": "Tank",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Residence Time": {
+                "value": "997.1374649281903",
+                "units": "s"
+              }
+            },
+            "residence_time_s": 997.1374649281903
+          }
+        },
+        "balances": [
+          {
+            "id": "tank",
+            "name": "TK1 Tanque",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": 7.716170102867181e-08,
+            "components": {
+              "Water": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "heat"
+          }
+        ],
+        "elapsed_s": 1.0,
+        "engine": "DWSIM 10.2.15",
+        "model": "Steam Tables (IAPWS-IF97)"
+      },
+      "checks": {
+        "calculated": true,
+        "liquid_feed": true,
+        "pressure": true,
+        "mass": true,
+        "enthalpy": true,
+        "residence": true,
+        "positive_residence": true,
+        "negligible_external_energy": true
+      }
+    },
+    "no_drop": {
+      "volume_m3": 5,
+      "pressure_drop_kPa": 0,
+      "result": {
+        "streams": {
+          "feed": {
+            "name": "Agua entrada",
+            "temperature_K": 298.15,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327960594645,
+                "entropy_kJ_kgK": 0.3671798024294232,
+                "density_kg_m3": 997.1374649281903,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          },
+          "product": {
+            "name": "Agua salida",
+            "temperature_K": 298.15000001834915,
+            "pressure_Pa": 300000.0,
+            "mass_flow_kg_s": 1.0,
+            "molar_flow_mol_s": 55.50843506179199,
+            "phases": [
+              {
+                "name": "Mixture",
+                "fraction": 1.0,
+                "temperature_K": 298.15000001834915,
+                "pressure_Pa": 300000.0,
+                "enthalpy_kJ_kg": 105.11327968267072,
+                "entropy_kJ_kgK": 0.3671798026867582,
+                "density_kg_m3": 997.1374649234853,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "OverallLiquid",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968267072,
+                "entropy_kJ_kgK": 0.3671798026867582,
+                "density_kg_m3": 997.1374649234853,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Vapor",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid1",
+                "fraction": 1.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 105.11327968267072,
+                "entropy_kJ_kgK": 0.3671798026867582,
+                "density_kg_m3": 997.1374649234853,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 1.0,
+                    "mass_fraction": 1.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid2",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Liquid3",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Aqueous",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              },
+              {
+                "name": "Solid",
+                "fraction": 0.0,
+                "temperature_K": 0.0,
+                "pressure_Pa": 0.0,
+                "enthalpy_kJ_kg": 0.0,
+                "entropy_kJ_kgK": 0.0,
+                "density_kg_m3": 0.0,
+                "compounds": {
+                  "Water": {
+                    "mole_fraction": 0.0,
+                    "mass_fraction": 0.0
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "equipment": {
+          "tank": {
+            "name": "TK1 Tanque",
+            "type": "Tank",
+            "calculated": true,
+            "error": "",
+            "properties": {
+              "Residence Time": {
+                "value": "4985.687324640951",
+                "units": "s"
+              }
+            },
+            "residence_time_s": 4985.687324640951
+          }
+        },
+        "balances": [
+          {
+            "id": "tank",
+            "name": "TK1 Tanque",
+            "mass_in": 1.0,
+            "mass_out": 1.0,
+            "mass_residual": 0.0,
+            "heat_to_fluid_kW": 7.672427670968318e-08,
+            "components": {
+              "Water": {
+                "in_kg_s": 1.0,
+                "out_kg_s": 1.0,
+                "residual_kg_s": 0.0
+              }
+            },
+            "reactive": false,
+            "energy_kind": "heat"
+          }
+        ],
+        "elapsed_s": 0.95,
+        "engine": "DWSIM 10.2.15",
+        "model": "Steam Tables (IAPWS-IF97)"
+      },
+      "checks": {
+        "calculated": true,
+        "liquid_feed": true,
+        "pressure": true,
+        "mass": true,
+        "enthalpy": true,
+        "residence": true,
+        "positive_residence": true,
+        "negligible_external_energy": true
+      }
+    }
+  }
+}
