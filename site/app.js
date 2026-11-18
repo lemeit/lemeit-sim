@@ -1107,7 +1107,8 @@ async function checkEngine({silent=false,exclude=[]}={}){
       lastHttp=statusResponse.status;
       if(!statusResponse.ok)throw Error(status.error||'Gateway sin conexión');
       if(status.state!=='ready')throw Error('Gateway ocupado');
-      if(!SimEngineRouting.supports(status,graph))throw Error('Gateway sin las operaciones requeridas');
+      const compatibility=SimEngineRouting.check(status,graph);
+      if(!compatibility.compatible)throw Error(compatibility.reason||'Gateway incompatible con el proceso');
       const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(12000),cache:'no-store'});
       lastHttp=response.status;
       const data=await readCatalogResponse(response);
