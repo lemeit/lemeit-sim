@@ -163,7 +163,7 @@ test('Editor: SVG completo fuera del viewport, selección, PNG transparente y PD
   assert.doesNotMatch(source,/\/Subtype \/Image/);
   const content=pdfStreams(pdf.bytes).find(stream=>stream.includes(' Tf'));
   assert.ok(content,'El contenido contiene texto vectorial');
-  assert.match(content,/\d+(?:\.\d+)? -?\d+(?:\.\d+)? l\n/);
+  assert.match(content,/-?\d+(?:\.\d*)? -?\d+(?:\.\d*)? l\n/);
   assert.ok(source.includes('/ToUnicode'),'El PDF incluye una tabla Unicode para las etiquetas');
 
   const pdfSelection=await exportDiagram(page,'pdf',async dialog=>{

@@ -1771,3 +1771,5 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .sim-shell :is(#diagram-export-dialog,#data-export-dialog) select{width:100%;min-width:0;box-sizing:border-box}
 .sim-shell :is(#diagram-export-dialog,#data-export-dialog) .dialog-actions{margin:0;padding:12px 20px;border-top:1px solid var(--spx-border);display:flex;justify-content:flex-end;flex-shrink:0}
 @media(max-width:420px){.sim-shell :is(#diagram-export-dialog,#data-export-dialog) .diagram-export-options label{grid-template-columns:1fr;gap:4px}}
+
+.node .diagram-callout circle.callout-tip{fill:var(--spx-surface);stroke-width:1;pointer-events:none}
