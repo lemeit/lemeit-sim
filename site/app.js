@@ -145,7 +145,7 @@ function streamGeometry(n){
       const inner=axis==='x'?[A,{x:mid,y:A.y},{x:mid,y:B.y},B]:[A,{x:A.x,y:mid},{x:B.x,y:mid},B];
       if(!clear(inner))continue;
       const length=inner.slice(1).reduce((v,p,i)=>v+Math.abs(p.x-inner[i].x)+Math.abs(p.y-inner[i].y),0);
-      const quality=SimDiagramInteractions.routePenalty([g.a,...inner,g.b]);
+      const quality=typeof SimDiagramInteractions==='undefined'?0:SimDiagramInteractions.routePenalty([g.a,...inner,g.b]);
       candidates.push({axis,mid,inner,score:length+quality+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?45:0)});
     }
   }
@@ -600,8 +600,10 @@ function fitDiagram(){
   renderDiagram();
 }
 function moveNode(n,start,p,constrain=false){
-  const delta=SimDiagramInteractions.constrainDelta(p.x-start.start.x,p.y-start.start.y,constrain);
-  n.x=snapCoordinate(start.x+delta.dx);n.y=snapCoordinate(start.y+delta.dy);
+  let dx=p.x-start.start.x,dy=p.y-start.start.y;
+  if(constrain){if(Math.abs(dx)>=Math.abs(dy))dy=0;else dx=0;}
+  const snap=v=>typeof snapCoordinate==='function'?snapCoordinate(v):v;
+  n.x=snap(start.x+dx);n.y=snap(start.y+dy);
   for(const [key,value] of Object.entries(start.endpoints||{}))n[key]=value+(key.endsWith('X')?n.x-start.x:n.y-start.y);
   if(isStream(n)&&start.routeX!==undefined)n.routeX=start.routeX+n.x-start.x;if(isStream(n)&&start.routeY!==undefined)n.routeY=start.routeY+n.y-start.y;
 }
@@ -641,7 +643,7 @@ function bindEvents(){
   });
   svg.addEventListener('pointermove',e=>{
     if(marquee){marquee.end=svgPoint(e);const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);selectNodes([...marquee.base,...graph.nodes.filter(n=>touchesSelection(r,n)).map(n=>n.id)]);renderDiagram();renderInspector();return;}
-    if(dragging?.group){const p=svgPoint(e),delta=SimDiagramInteractions.constrainDelta(p.x-dragging.start.x,p.y-dragging.start.y,e.shiftKey),first=dragging.group[0];if(first){delta.dx=snapCoordinate(first.x+delta.dx)-first.x;delta.dy=snapCoordinate(first.y+delta.dy)-first.y;}SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,delta.dx,delta.dy);dragging.moved=true;queueDiagramMotion();return;}
+    if(dragging?.group){const p=svgPoint(e),delta=SimDiagramInteractions.constrainDelta(p.x-dragging.start.x,p.y-dragging.start.y,e.shiftKey),first=dragging.group[0];if(first){if(typeof snapCoordinate==='function'){delta.dx=snapCoordinate(first.x+delta.dx)-first.x;delta.dy=snapCoordinate(first.y+delta.dy)-first.y;}}SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,delta.dx,delta.dy);dragging.moved=true;queueDiagramMotion();return;}
 
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
     if(bending){const p=svgPoint(e),dx=p.x-bending.start.x,dy=p.y-bending.start.y;if(!bending.axis&&Math.hypot(dx,dy)<3/zoom)return;bending.axis??=Math.abs(dy)>Math.abs(dx)?'y':'x';setStreamBend(nodeById(bending.node),bending.axis,bending.axis==='y'?p.y:p.x);queueDiagramMotion();return;}
