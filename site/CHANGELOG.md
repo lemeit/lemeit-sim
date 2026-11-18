@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.2 — 2026-11-18
+
+- Las licencias y el historial se abren en el editor y permiten volver con el botón, Escape o el historial del navegador.
+- Administración aparece en la cabecera solo con una sesión administradora y abre el portal en otra ventana para conservar el proyecto y sus resultados.
+
 ## 0.28.1 — 2026-11-18
 
 - Los nombres de corrientes, nombres y tipos de equipos vuelven a rótulos simples sin flechas.

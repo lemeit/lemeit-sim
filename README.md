@@ -16,7 +16,15 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.28.2 — Navegación.** Volvé de las licencias y el historial sin salir del editor. Las sesiones administradoras pueden abrir Administración desde la cabecera en otra ventana y conservar el proyecto abierto.
+
 **0.28.1 — Llamadas solo para valores**. Los nombres y tipos son rótulos simples. Las llamadas instrumentales se reservan para temperatura, presión y caudal; no se dibujan cuando no hay valores para mostrar.
+
+**0.28.0 — Llamadas en el diagrama**. Nombres, tipos y valores se agrupan en referencias instrumentales con línea fina quebrada y flecha abierta hacia su corriente o equipo. Acompañan el movimiento y el cambio de tamaño; Ajustar diagrama incluye los textos.
+
+**0.27.1 — Corrientes más claras**. Energía con línea de trazos en el listado y el diagrama DWSIM, también al seleccionar. El ajuste del recorrido usa un pequeño cuadrado visible solo en la corriente seleccionada; se conservan conexiones y arrastre.
+
+**0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
 
 **0.26.2 — Identificación técnica de los motores**. Estado de motores muestra Windows 11 Home Single Language 25H2 y GNU/Linux Debian (versión pendiente de confirmar), con características declaradas del equipo principal. Estos datos descriptivos no indican disponibilidad ni se obtienen mediante detección remota. El selector conserva Motor principal y Motor alternativo; las guías siguen centradas en el uso del simulador.
 

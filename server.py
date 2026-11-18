@@ -494,7 +494,7 @@ def gateway_status():
 
 
 class Handler(SimpleHTTPRequestHandler):
-    extensions_map = {**SimpleHTTPRequestHandler.extensions_map, '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon'}
+    extensions_map = {**SimpleHTTPRequestHandler.extensions_map, '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon', '.md': 'text/plain; charset=utf-8'}
     def setup(self):
         self.request.settimeout(15)
         super().setup()
