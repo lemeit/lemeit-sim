@@ -16,7 +16,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.23.2 — Selección parcial y biblioteca compacta**, en desarrollo. El rectángulo selecciona un equipo o corriente completos al tocar cualquier parte de su cuerpo o recorrido. Arrastrar cualquier objeto de la selección, incluidos sus puertos, mueve todo el conjunto. La biblioteca y su selector de diseño ocupan menos espacio. Se conservan conexiones y condiciones físicas.
+**0.23.2 — Selección parcial y biblioteca compacta**, publicación aprobada. El rectángulo selecciona un equipo o corriente completos al tocar cualquier parte de su cuerpo o recorrido. Arrastrar cualquier objeto de la selección, incluidos sus puertos, mueve todo el conjunto. La biblioteca y su selector de diseño ocupan menos espacio. Se conservan conexiones y condiciones físicas.
 
 **0.22.1 — Selección por contorno**, integrado. El rectángulo no tiene relleno y mantiene visible el diagrama durante la selección.
 

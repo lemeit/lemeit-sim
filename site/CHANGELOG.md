@@ -8,7 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.23.2 — 2026-11-17
 
-- En desarrollo: biblioteca y selector de símbolos compactos, sin marco adicional.
+- Biblioteca y selector de símbolos compactos, sin marco adicional.
 - Selección por intersección parcial de equipos y tramos reales de corrientes, sin exigir encerrarlos por completo ni seleccionar el espacio vacío entre codos.
 - Arrastre del conjunto desde cualquier objeto seleccionado, incluidos puertos y controles, conservando conexiones y distancias. Shift sigue sumando o quitando objetos.
 
