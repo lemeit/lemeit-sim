@@ -821,9 +821,27 @@ function exportResults(kind,locale='es-AR'){
   if(kind==='xlsx')downloadLocal(stem+'.xlsx',SimproxFiles.xlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   else{
     const sheet=sheets[kind==='balances'?1:0];
-    downloadLocal(`${stem}-${sheet.name.toLowerCase()}-${locale==='es-AR'?'es-AR':'internacional'}.csv`,SimproxFiles.csv(sheet.rows,locale),'text/csv;charset=utf-8');
+    downloadLocal(`${stem}-${sheet.name.toLowerCase()}-${locale==='es-AR'?'coma':'punto'}.csv`,SimproxFiles.csv(sheet.rows,locale),'text/csv;charset=utf-8');
   }
   recordActivity('Resultados exportados',kind);closeMenus();
+}
+function bindDataExport(){
+  const dialog=$('data-export-dialog'),form=$('data-export-form'),format=form.elements.format,scope=form.elements.scope,decimal=form.elements.decimal;
+  let previousScope='streams';
+  try{decimal.value=localStorage.getItem('lemeit-export-decimal')==='point'?'point':'comma';}catch{}
+  function update(){
+    const excel=format.value==='xlsx';
+    scope.options[2].disabled=!excel;scope.options[0].disabled=excel;scope.options[1].disabled=excel;
+    if(excel){if(scope.value!=='all')previousScope=scope.value;scope.value='all';}else if(scope.value==='all')scope.value=previousScope;
+    decimal.disabled=excel;
+    $('data-export-hint').textContent=excel?'Excel conserva los valores numéricos. El punto o la coma que ves depende de la configuración de Excel.':decimal.value==='comma'?'Decimal con coma; columnas separadas por punto y coma (;).':'Decimal con punto; columnas separadas por coma (,).';
+  }
+  format.onchange=update;decimal.onchange=()=>{try{localStorage.setItem('lemeit-export-decimal',decimal.value);}catch{}update();};
+  document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>{
+    if(!result||busy){notice('Calculá el proyecto para exportar resultados vigentes.',true);return;}
+    format.value=button.dataset.export==='xlsx'?'xlsx':'csv';previousScope=button.dataset.export==='balances'?'balances':'streams';scope.value=previousScope;update();closeMenus();dialog.showModal();
+  });
+  form.onsubmit=event=>{event.preventDefault();exportResults(format.value==='xlsx'?'xlsx':scope.value,decimal.value==='comma'?'es-AR':'international');dialog.close();};
 }
 function bindDiagramExport(){
   const dialog=$('diagram-export-dialog'),form=$('diagram-export-form');
@@ -1027,7 +1045,7 @@ async function checkEngine({silent=false}={}){
   return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
-  document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export,b.dataset.csvLocale));
+  bindDataExport();
   bindDiagramExport();
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{if(busy)return;$('examples-dialog').close();$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   SimExamplesBrowser.mount({openGuide:id=>{closeMenus();SimGuide.open($('guide-dialog'),$('guide-host'),id);}});
