@@ -18,7 +18,7 @@ test('PFD y biblioteca comparten los símbolos de DWSIM y retiran la preferencia
     const {w, h} = dimensions;
     const equipment = symbols.equipment(type, w, h);
     assert.doesNotMatch(equipment, /undefined|NaN/, type);
-    assert.ok(symbols.thumbnail(type, dimensions).includes(equipment), type);
+    if(type==='EnergyStream')assert.match(symbols.thumbnail(type, dimensions),/stroke-dasharray=/);else assert.ok(symbols.thumbnail(type, dimensions).includes(equipment), type);
   }
 });
 

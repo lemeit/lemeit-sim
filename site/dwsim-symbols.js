@@ -74,6 +74,7 @@ const DwsimSymbols = (() => {
   }
 
   function thumbnail(type, {w, h}) {
+    if(type === 'EnergyStream') return '<svg class="palette-symbol dwsim dwsim-energy" viewBox="0 0 130 110" aria-hidden="true"><path class="energy-thumbnail-line" d="M5 55 H120" fill="none" stroke-dasharray="18 12"/><path d="M100 40 L120 55 L100 70" fill="none"/></svg>';
     return '<svg class="palette-symbol dwsim ' + (type === 'EnergyStream' ? 'dwsim-energy' : '') +
       '" viewBox="' + [-w * .12, -h * .15, w * 1.24, h * 1.3].join(' ') +
       '" aria-hidden="true">' + equipment(type, w, h) + '</svg>';

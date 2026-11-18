@@ -1728,3 +1728,5 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
   stroke-width: 2;
   pointer-events: none;
 }
+
+.node .bend-handle{fill:var(--spx-accent);stroke:var(--spx-surface);stroke-width:1}
