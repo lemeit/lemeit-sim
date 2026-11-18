@@ -82,3 +82,9 @@ test('Ejemplo 6 resuelto: ida y vuelta XLSX con números, unidades, formatos y a
  const info=entries['xl/worksheets/sheet4.xml'];
  assert.match(info,/<c t="inlineStr"><is><t xml:space="preserve">=1\+1<\/t>/);
 });
+
+test('CSV unificado conserva todas las secciones, valores y registros sin mezclar columnas',()=>{
+ const sheets=[{name:'Corrientes',rows:[['Corriente','Caudal [kg/s]'],['S1',1.23456789]]},{name:'Balances',rows:[['Equipo','Residuo [kg/s]'],['M1',-0.000001]]},{name:'Componentes',rows:[['Equipo','Componente','Entrada [kg/s]'],['M1','Water',1],['M1','Ethanol',2]]},{name:'Datos',rows:[['Proyecto','Prueba'],['Duración [s]',3.5]]}];
+ const rows=api.unified(sheets);assert.ok(rows.every(row=>row.length===5));assert.equal(rows.find(r=>r[0]==='Corrientes'&&r[3]==='Caudal [kg/s]')[4],1.23456789);assert.equal(rows.find(r=>r[0]==='Balances')[4],-0.000001);
+ assert.equal(rows.filter(r=>r[0]==='Componentes'&&r[3]==='Componente').length,2);assert.equal(rows.find(r=>r[3]==='Duración [s]')[4],3.5);assert.equal(rows.length,9);
+});

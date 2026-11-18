@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.31.0 — 2026-11-18
+
+- Exportar resultados como opción principal: todos los datos por defecto. Excel conserva pestañas Corrientes, Balances, Componentes y Datos; CSV completo usa una única tabla rectangular con sección, registro, objeto, campo (incluye unidad) y valor.
+- Exportaciones parciales de corrientes o balances disponibles dentro del diálogo CSV, con elección decimal conservada.
+- Se elimina el segundo rótulo de tipo bajo todos los equipos del diagrama; nombres únicos visibles y tipo disponible en Propiedades.
+- Pruebas de integridad de tabla unificada y descarga completa desde navegador.
+
 ## 0.30.1 — 2026-11-18
 
 - Las llamadas de valores sustituyen la punta abierta por un círculo hueco pequeño, anclado al cuerpo de la flecha de corriente.

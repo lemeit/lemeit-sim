@@ -278,7 +278,7 @@ function renderCallout(n,g,r,feed,exportRoutes){
   const t=TYPES[n.type],scale=symbolScale(n);
   const x=g?g.label.x:equipmentLabelX(n),y=g?g.label.y:t.h*scale+20;
   let html=`<text class="${g?'stream-label':'equipment-label'}" text-anchor="middle" x="${x}" y="${y}">${esc(n.name)}</text>`;
-  if(!g)html+=`<text class="node-kind" text-anchor="middle" x="${x}" y="${y+15}">${esc(t.short.toUpperCase())}</text>`;
+
   const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('pressure_kPa',r.pressure_Pa/1000,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('pressure_kPa',n.pressure_kPa,n,2)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
   if(reading){
     const c=calloutGeometry(n,g,exportRoutes);
@@ -818,26 +818,26 @@ function exportResults(kind,locale='es-AR'){
   const sheets=SimproxFiles.tables(graph,result),stem=exportStem();
   if(kind==='xlsx')downloadLocal(stem+'.xlsx',SimproxFiles.xlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   else{
-    const sheet=sheets[kind==='balances'?1:0];
+    const sheet=kind==='all'?{name:'Resultados',rows:SimproxFiles.unified(sheets)}:sheets[kind==='balances'?1:0];
     downloadLocal(`${stem}-${sheet.name.toLowerCase()}-${locale==='es-AR'?'coma':'punto'}.csv`,SimproxFiles.csv(sheet.rows,locale),'text/csv;charset=utf-8');
   }
   recordActivity('Resultados exportados',kind);closeMenus();
 }
 function bindDataExport(){
   const dialog=$('data-export-dialog'),form=$('data-export-form'),format=form.elements.format,scope=form.elements.scope,decimal=form.elements.decimal;
-  let previousScope='streams';
   try{decimal.value=localStorage.getItem('lemeit-export-decimal')==='point'?'point':'comma';}catch{}
   function update(){
     const excel=format.value==='xlsx';
-    scope.options[2].disabled=!excel;scope.options[0].disabled=excel;scope.options[1].disabled=excel;
-    if(excel){if(scope.value!=='all')previousScope=scope.value;scope.value='all';}else if(scope.value==='all')scope.value=previousScope;
+    for(const option of scope.options)option.disabled=excel&&option.value!=='all';
+    if(excel)scope.value='all';
     decimal.disabled=excel;
-    $('data-export-hint').textContent=excel?'Excel conserva los valores numéricos. El punto o la coma que ves depende de la configuración de Excel.':decimal.value==='comma'?'Decimal con coma; columnas separadas por punto y coma (;).':'Decimal con punto; columnas separadas por coma (,).';
+    $('data-export-hint').textContent=excel?'Excel incluye pestañas de corrientes, balances, componentes y datos. Conserva números; el separador visible depende de Excel.':decimal.value==='comma'?'Decimal con coma; columnas separadas por punto y coma (;).':'Decimal con punto; columnas separadas por coma (,).';
+    if(!excel&&scope.value==='all')$('data-export-hint').textContent+=' Tabla única con sección, registro, objeto, campo y valor.';
   }
-  format.onchange=update;decimal.onchange=()=>{try{localStorage.setItem('lemeit-export-decimal',decimal.value);}catch{}update();};
+  scope.onchange=update;format.onchange=update;decimal.onchange=()=>{try{localStorage.setItem('lemeit-export-decimal',decimal.value);}catch{}update();};
   document.querySelectorAll('[data-export]').forEach(button=>button.onclick=()=>{
     if(!result||busy){notice('Calculá el proyecto para exportar resultados vigentes.',true);return;}
-    format.value=button.dataset.export==='xlsx'?'xlsx':'csv';previousScope=button.dataset.export==='balances'?'balances':'streams';scope.value=previousScope;update();closeMenus();dialog.showModal();
+    format.value=['xlsx','all'].includes(button.dataset.export)?'xlsx':'csv';scope.value='all';update();closeMenus();dialog.showModal();
   });
   form.onsubmit=event=>{event.preventDefault();exportResults(format.value==='xlsx'?'xlsx':scope.value,decimal.value==='comma'?'es-AR':'international');dialog.close();};
 }

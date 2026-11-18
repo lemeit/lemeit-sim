@@ -23,6 +23,16 @@ const SimproxFiles=(()=>{
   for(const b of result.balances||[]){balances.push([name(b.id),b.mass_in,b.mass_out,b.mass_residual,b.heat_to_fluid_kW,b.reactive?'Sí':'No',b.energy_kind==='shaft'?'Trabajo de eje':'Calor']);for(const [compound,c] of Object.entries(b.components||{}))components.push([name(b.id),compound,c.in_kg_s,c.out_kg_s,c.residual_kg_s,b.reactive?'Consumo (+), generación (−)':'Residuo']);}
   return [{name:'Corrientes',rows:streams},{name:'Balances',rows:balances},{name:'Componentes',rows:components},{name:'Datos',rows:[['Proyecto',graph.title],['Modelo',result.model],['Motor',result.engine],['Duración [s]',result.elapsed_s],['Exportado [UTC]',new Date().toISOString()],['Origen','Simulación calculada por DWSIM; no mediciones experimentales']]}];
  }
+ // Una tabla rectangular: cada valor conserva sección, registro, objeto y unidad en el campo.
+ function unified(sheets){
+  const rows=[['Sección','Registro','Objeto','Campo','Valor']];
+  for(const sheet of sheets){
+   if(sheet.name==='Datos'){sheet.rows.forEach((row,i)=>rows.push([sheet.name,i+1,'Proyecto',row[0],row[1]]));continue;}
+   const [headers,...records]=sheet.rows;
+   records.forEach((record,i)=>headers.slice(1).forEach((field,j)=>rows.push([sheet.name,i+1,record[0],field,record[j+1]])));
+  }
+  return rows;
+ }
  const encoder=new TextEncoder();
  const crcTable=Array.from({length:256},(_,i)=>{for(let k=0;k<8;k++)i=i&1?0xedb88320^(i>>>1):i>>>1;return i>>>0;});
  function crc(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;}
@@ -63,5 +73,5 @@ const SimproxFiles=(()=>{
   });
   return zip(files);
  }
- return {csv,tables,xlsx};
+ return {csv,tables,unified,xlsx};
 })();
