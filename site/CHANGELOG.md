@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.34.1 — 2026-11-18
+
+- El pie del diagrama muestra una sola vez el estado del cálculo, a la derecha y con el color correspondiente.
+- El estado auxiliar izquierdo se oculta sin cambiar el comportamiento interno ni los cálculos DWSIM.
+
 ## 0.34.0 — 2026-11-18
 
 - El pie del diagrama reemplaza la advertencia permanente por tres estados dinámicos: **Sin resultados**, **Resultados vigentes** y **Recalcular**; durante una resolución muestra **Calculando…**.
