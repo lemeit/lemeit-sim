@@ -5,7 +5,7 @@
     "Nitrogen"
   ],
   "model": "Peng-Robinson (PR)",
-  "learning": "Expandí 1 kg/s de nitrógeno a 25 °C desde 300 hasta 100 kPa absolutos, con eficiencia isentrópica del 80 %. Compará enfriamiento, trabajo de eje producido y conservación de masa. Validado Windows; Debian requiere gateway actualizado.",
+  "learning": "Expandí 1 kg/s de nitrógeno a 25 °C desde 300 hasta 100 kPa absolutos, con eficiencia isentrópica del 80 %. Compará enfriamiento, trabajo de eje producido y conservación de masa.",
   "nodes": [
     {
       "id": "feed",

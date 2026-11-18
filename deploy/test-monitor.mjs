@@ -29,17 +29,17 @@ test('el monitor identifica el motor activo y conserva el estado de cálculo',as
   const {context,elements}=monitor({status:200,ok:true,json:async()=>({compound_count:2,compounds:['Water','Ethanol'],models:['NRTL']})});
   vm.runInContext("selectedEngine='debian';",context);
   await vm.runInContext('checkEngine({silent:true})',context);
-  assert.match(elements.get('server-details').innerHTML,/Notebook · Debian/);
+  assert.match(elements.get('server-details').innerHTML,/Motor alternativo/);
   assert.match(elements.get('server-details').innerHTML,/Servicio accesible/);
   assert.match(elements.get('server-details').innerHTML,/No se cambia de motor automáticamente/);
-  assert.ok(elements.get('connection-console').innerHTML.includes('Debian · GET /api/catalog'));
+  assert.ok(elements.get('connection-console').innerHTML.includes('Motor alternativo · GET /api/catalog'));
 });
 test('el monitor no confunde HTTP 503 con una causa confirmada',async()=>{
   const {context,elements}=monitor({status:503,ok:false,json:async()=>({error:'Servicio no disponible'})});
   await vm.runInContext('checkEngine({silent:true})',context);
   assert.match(elements.get('server-details').innerHTML,/Sin conexión verificada/);
   assert.match(elements.get('server-details').innerHTML,/puede estar apagada/);
-  assert.match(elements.get('connection-console').innerHTML,/Windows/);
+  assert.match(elements.get('connection-console').innerHTML,/Motor principal/);
 });
 test('banner ASCII inicia el historial y Acerca de no repite información',async()=>{
   const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');

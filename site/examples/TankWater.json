@@ -5,7 +5,7 @@
     "Water"
   ],
   "model": "Steam Tables (IAPWS-IF97)",
-  "learning": "Tanque líquido estacionario de 5 m³: agua a 25 °C, 300 kPa y 1 kg/s, pérdida de presión 10 kPa. Compará presión, entalpía y tiempo de residencia V/Q. No representa llenado ni vaciado. Validado Windows; Debian requiere gateway actualizado.",
+  "learning": "Tanque líquido estacionario de 5 m³: agua a 25 °C, 300 kPa y 1 kg/s, pérdida de presión 10 kPa. Compará presión, entalpía y tiempo de residencia V/Q. No representa llenado ni vaciado.",
   "nodes": [
     {
       "id": "feed",

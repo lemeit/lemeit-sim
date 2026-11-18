@@ -82,5 +82,5 @@
       "fromIndex": 1
     }
   ],
-  "learning": "Calentá una alimentación de agua y etanol (50/50 % másico, 1 kg/s, 101,325 kPa) a 86,85 °C con NRTL, y separá vapor y líquido sin imponer fracciones de reparto. Compará las composiciones de ambas fases y verificá los balances. Valores pendientes de validar con el motor Debian 10.2.15."
+  "learning": "Calentá una alimentación de agua y etanol (50/50 % másico, 1 kg/s, 101,325 kPa) a 86,85 °C con NRTL, y separá vapor y líquido sin imponer fracciones de reparto. Compará las composiciones de ambas fases y verificá los balances."
 }

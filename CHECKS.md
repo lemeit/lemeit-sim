@@ -433,3 +433,11 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
   1 kg/s. Inspector muestra 66,618 kW producidos; balance −66,618 kW hacia gas.
 - Ambas paletas, energía de salida, guía del ejemplo y Acerca de 0.26.0 verificados.
 - Catálogo y hoja de ruta sincronizados. Sin politropía ni curvas; Debian pendiente.
+
+## 0.26.1 · Guías centradas en el usuario · 17/11/2026
+
+- 164 pruebas JS y build aprobados. Guía de ejemplos y mensajes didácticos sin
+  referencias a Windows/Debian; se conservan valores y límites de modelos.
+- Selector e historial usan Motor principal / Motor alternativo; identificadores
+  internos, destinos y credenciales conservados. Documentación técnica sin borrar.
+- Wiki de uso actualizada en su repositorio con el mismo criterio, en ambos idiomas.

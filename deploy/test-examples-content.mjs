@@ -82,11 +82,11 @@ test('los reactores de conversión y equilibrio conservan sus proyectos descarga
 
 test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',()=>{
   const guide=read('ejemplos.html');
-  assert.match(guide,/casos 01–05 tienen resultados numéricos previamente contrastados/);
+  assert.match(guide,/resultados de referencia calculados con DWSIM/);
   assert.match(guide,/referencias de materia verificadas analíticamente/i);
-  assert.match(guide,/motor Windows/);
-  assert.match(guide,/sin comparación independiente con la API de escritorio/i);
-  assert.match(guide,/diez casos en Debian/);
+  assert.doesNotMatch(guide,/Windows|Debian/);
+  assert.match(guide,/no mediciones experimentales/i);
+  assert.match(guide,/modelo termodinámico/i);
 });
 
 test('cada ejercicio 01–13 conserva una resolución numerada paso a paso',()=>{

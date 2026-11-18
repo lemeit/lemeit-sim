@@ -40,7 +40,7 @@ export async function handle(request, env, assets=ASSETS) {
     }
     const endpoint=engineId==='debian'?env.DEBIAN_ENGINE_URL:env.ENGINE_URL;
     const key=engineId==='debian'?env.DEBIAN_ORIGIN_KEY:env.ORIGIN_KEY;
-    if(!endpoint||!key)return error(503,`El motor ${engineId==='debian'?'Debian':'Windows'} no está configurado.`);
+    if(!endpoint||!key)return error(503,`El motor ${engineId==='debian'?'alternativo':'principal'} no está configurado.`);
     try {
       const upstream=await fetch(endpoint+url.pathname,{method:request.method,
         headers:{'Content-Type':'application/json','X-Origin-Key':key,'Origin':url.origin,
@@ -48,7 +48,7 @@ export async function handle(request, env, assets=ASSETS) {
         body,redirect:'manual',signal:AbortSignal.timeout(55000)});
       if(!upstream.headers.get('Content-Type')?.includes('application/json'))return error(503,`El motor no está disponible. Respuesta de conexión: HTTP ${upstream.status}.`);
       return new Response(upstream.body,{status:upstream.status,headers:headers('application/json; charset=utf-8')});
-    }catch(cause){console.warn(JSON.stringify({event:'engine_connection_failed',reason:String(cause)}));return error(503,`El motor ${engineId==='debian'?'Debian':'Windows'} no está disponible. Comprobá su conexión; no se intentará calcular en otro motor.`);}
+    }catch(cause){console.warn(JSON.stringify({event:'engine_connection_failed',reason:String(cause)}));return error(503,`El motor ${engineId==='debian'?'alternativo':'principal'} no está disponible. Comprobá su conexión; no se intentará calcular en otro motor.`);}
   }
   if(!['GET','HEAD'].includes(request.method))return error(405,'Método no disponible.');
   const path=url.pathname==='/'?'/index.html':url.pathname;
