@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.1 — 2026-11-18
+
+- Los nombres de corrientes, nombres y tipos de equipos vuelven a rótulos simples sin flechas.
+- Las llamadas se dibujan únicamente cuando hay valores: temperatura, presión y caudal. Se mantiene el seguimiento del objeto y sus conexiones.
+
 ## 0.28.0 — 2026-11-18
 
 - Todas las referencias del diagrama (nombre, tipo y valores) se agrupan en llamadas instrumentales: línea fina quebrada, flecha abierta y texto alineado.
