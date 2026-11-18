@@ -1122,7 +1122,7 @@ async function checkEngine({silent=false,exclude=[]}={}){
         modelSelect.value=savedModel;
       }
       break;
-    }catch(error){lastError=(engine==='debian'?'Debian':'Windows')+': '+error.message;}
+    }catch(error){lastError=(engine==='debian'?'Debian':'Windows')+': '+error.message;debugEvent('WARN','Motor descartado en selección automática',{engine,stage:'preflight',message:error.message});}
   }
   if(generation!==engineCheckGeneration)return false;
   if(!successful){
