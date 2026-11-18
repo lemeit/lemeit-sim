@@ -217,8 +217,35 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     for(let i=1;i<g.points.length;i++){const a=g.points[i-1],b=g.points[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
     anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
   }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
-  const x=anchor.x+28,y=anchor.y-32,width=Math.max(110,Math.min(340,240));
-  return {x:x+6,y:y-8,width,anchor,line:`M${anchor.x} ${anchor.y} L${x} ${y} H${x+width}`,tip:`M${anchor.x+2} ${anchor.y-7} L${anchor.x} ${anchor.y} L${anchor.x+7} ${anchor.y-2}`};
+  const width=240,dx=g?0:n.x,dy=g?0:n.y;
+  const viewport={left:viewX-dx,top:viewY-dy,right:viewX+1000/zoom-dx,bottom:viewY+520/zoom-dy};
+  const overlap=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+  const obstacles=[];
+  for(const other of graph.nodes){
+    if(other.id===n.id)continue;
+    if(isStream(other)){
+      const points=streamGeometry(other).points;
+      for(let i=1;i<points.length;i++)obstacles.push({left:Math.min(points[i-1].x,points[i].x)-dx-5,right:Math.max(points[i-1].x,points[i].x)-dx+5,top:Math.min(points[i-1].y,points[i].y)-dy-5,bottom:Math.max(points[i-1].y,points[i].y)-dy+5,weight:3});
+    }else{const b=nodeBounds(other);obstacles.push({left:b.left-dx-10,right:b.right-dx+10,top:b.top-dy-10,bottom:b.bottom-dy+10,weight:8});}
+  }
+  // Examinar ambos lados y alturas: el resultado depende del espacio real del lienzo.
+  let best;
+  for(const distance of [32,64,96])for(const side of [1,-1])for(const vertical of [-1,1]){
+    const elbow={x:anchor.x+side*28,y:anchor.y+vertical*distance},end=elbow.x+side*width;
+    const x=Math.min(elbow.x,end)+6,y=elbow.y-8;
+    const box={left:x-4,right:x+width,top:y-14,bottom:y+5};
+    const area=(box.right-box.left)*(box.bottom-box.top);
+    let score=(area-overlap(box,viewport))*20+(distance-32)*2;
+    for(const obstacle of obstacles)score+=overlap(box,obstacle)*obstacle.weight;
+    // Favorecer el interior del área visible y evitar el rótulo simple sobre la corriente.
+    if(vertical<0)score+=overlap(box,{left:anchor.x-90,right:anchor.x+90,top:anchor.y-28,bottom:anchor.y-6})*4;
+    score+=Math.abs((box.left+box.right)/2-(viewport.left+viewport.right)/2)*.01;
+    const ux=side*28/Math.hypot(28,distance),uy=vertical*distance/Math.hypot(28,distance);
+    const tip=`M${anchor.x+ux*7-uy*3} ${anchor.y+uy*7+ux*3} L${anchor.x} ${anchor.y} L${anchor.x+ux*7+uy*3} ${anchor.y+uy*7-ux*3}`;
+    const candidate={x,y,width,anchor,side,vertical,score,line:`M${anchor.x} ${anchor.y} L${elbow.x} ${elbow.y} H${end}`,tip};
+    if(!best||score<best.score)best=candidate;
+  }
+  return best;
 }
 function renderCallout(n,g,r,feed){
   const c=calloutGeometry(n,g),t=TYPES[n.type],scale=symbolScale(n);

@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.2 — 2026-11-18
+
+- Llamadas de valores adaptativas: evalúan ambos lados y tres alturas arriba/abajo, penalizando bordes visibles y solapamientos con equipos y tramos de corrientes.
+- La flecha abierta rota hacia su anclaje real y el recorrido se recalcula durante la edición. Nombres sin llamadas; no modifica datos ni conexiones.
+- Pruebas de ambos bordes, obstáculos y seguimiento geométrico.
+
 ## 0.28.1 — 2026-11-18
 
 - Los nombres de corrientes, nombres y tipos de equipos vuelven a rótulos simples sin flechas.
