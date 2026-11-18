@@ -217,16 +217,17 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     for(let i=1;i<g.points.length;i++){const a=g.points[i-1],b=g.points[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
     anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
   }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
-  const x=anchor.x+28,y=anchor.y-32,width=Math.max(110,Math.min(340,Math.max(n.name.length,TYPES[n.type].short.length)*7+16));
+  const x=anchor.x+28,y=anchor.y-32,width=Math.max(110,Math.min(340,240));
   return {x:x+6,y:y-8,width,anchor,line:`M${anchor.x} ${anchor.y} L${x} ${y} H${x+width}`,tip:`M${anchor.x+2} ${anchor.y-7} L${anchor.x} ${anchor.y} L${anchor.x+7} ${anchor.y-2}`};
 }
 function renderCallout(n,g,r,feed){
-  const c=calloutGeometry(n,g),stream=Boolean(g);
-  let texts=`<text class="${stream?'stream-label':'equipment-label'}" x="0" y="0">${esc(n.name)}</text>`;
-  if(!stream)texts+=`<text class="node-kind" x="0" y="19">${esc(TYPES[n.type].short.toUpperCase())}</text>`;
-  const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
-  if(reading)texts+=`<text class="node-reading" x="0" y="${stream?19:36}">${reading}</text>`;
-  return `<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})">${texts}</g></g>`;
+  const c=calloutGeometry(n,g),t=TYPES[n.type],scale=symbolScale(n);
+  const x=g?g.label.x:equipmentLabelX(n),y=g?g.label.y:t.h*scale+20;
+  let html=`<text class="${g?'stream-label':'equipment-label'}" text-anchor="middle" x="${x}" y="${y}">${esc(n.name)}</text>`;
+  if(!g)html+=`<text class="node-kind" text-anchor="middle" x="${x}" y="${y+15}">${esc(t.short.toUpperCase())}</text>`;
+  const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('pressure_kPa',r.pressure_Pa/1000,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('pressure_kPa',n.pressure_kPa,n,2)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
+  if(reading)html+=`<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})"><text class="node-reading" x="0" y="0">${reading}</text></g></g>`;
+  return html;
 }
 function renderDiagram(){
   const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
@@ -496,7 +497,9 @@ function updateDiagramGeometry(){
     if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const arrow=el.querySelector('.dwsim-stream-arrow');if(arrow)arrow.setAttribute('transform',g.arrow??'scale(0)');const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
     else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
     const c=calloutGeometry(n,g),callout=el.querySelector('.diagram-callout');
-    callout.querySelector('.callout-leader').setAttribute('d',c.line);callout.querySelector('.callout-tip').setAttribute('d',c.tip);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);
+    if(callout){callout.querySelector('.callout-leader').setAttribute('d',c.line);callout.querySelector('.callout-tip').setAttribute('d',c.tip);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);}
+    const labelX=g?g.label.x:equipmentLabelX(n),labelY=g?g.label.y:t.h*s+20;
+    for(const [selector,offset] of [['.stream-label',0],['.equipment-label',0],['.node-kind',15]]){const label=el.querySelector(selector);if(label){label.setAttribute('x',labelX);label.setAttribute('y',labelY+offset);}}
     for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
   }
   svg.querySelectorAll('.snap-target').forEach(el=>el.classList.remove('snap-target'));
