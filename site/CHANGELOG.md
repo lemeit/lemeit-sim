@@ -14,6 +14,12 @@ La versión del portal es independiente de la versión del motor DWSIM.
 - El anclaje se recalcula durante el movimiento y el cambio de recorrido. Mantiene nombres simples, llamadas compactas y conexiones.
 - Regresión de alimentación y corriente vertical. Conserva las exportaciones de 0.29.0.
 
+## 0.29.1 — 2026-11-18
+
+- Las puntas de las llamadas de valores se anclan al borde del cuerpo de la flecha de su corriente, usando el mismo tramo, escala y orientación del símbolo SVG.
+- El anclaje se recalcula durante el movimiento y el cambio de recorrido. Mantiene nombres simples, llamadas compactas y conexiones.
+- Regresión de alimentación y corriente vertical. Conserva las exportaciones de 0.29.0.
+
 ## 0.29.0 — 2026-11-18
 
 - CSV para Excel con configuración argentina y CSV internacional para corrientes y balances. Conserva la precisión del motor.
