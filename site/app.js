@@ -146,7 +146,7 @@ function streamGeometry(n){
       if(!clear(inner))continue;
       const length=inner.slice(1).reduce((v,p,i)=>v+Math.abs(p.x-inner[i].x)+Math.abs(p.y-inner[i].y),0);
       const quality=typeof SimDiagramInteractions==='undefined'?0:SimDiagramInteractions.routePenalty([g.a,...inner,g.b]);
-      candidates.push({axis,mid,inner,score:length+quality+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?45:0)});
+      candidates.push({axis,mid,inner,score:length+quality+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?10000:0)});
     }
   }
   candidates.sort((a,b)=>a.score-b.score);
