@@ -16,6 +16,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.27.1 — Navegación (en desarrollo).** Volvé de las licencias y el historial sin salir del editor. Las sesiones administradoras pueden abrir Administración desde la cabecera en otra ventana y conservar el proyecto abierto.
+
 **0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
 
 **0.26.2 — Identificación técnica de los motores**. Estado de motores muestra Windows 11 Home Single Language 25H2 y GNU/Linux Debian (versión pendiente de confirmar), con características declaradas del equipo principal. Estos datos descriptivos no indican disponibilidad ni se obtienen mediante detección remota. El selector conserva Motor principal y Motor alternativo; las guías siguen centradas en el uso del simulador.
