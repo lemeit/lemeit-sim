@@ -40,7 +40,8 @@ test('monitor en las dos vistas consulta la API y muestra diferencias en una tab
    assert.match(html,/id="engine-compat-table"/);
    assert.match(html,/id="engine-compat-summary"/);
    assert.ok(html.indexOf('engine-compatibility.js')<html.indexOf('engines-monitor.js'));
-   assert.match(html,/data-portal-version="0\.33\.0"/);
+   const version=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version;
+   assert.ok(html.includes('data-portal-version="'+version+'"'));
  }
  const script=load('engines-monitor.js');
  assert.match(script,/lastStatus\[engine\]=null/);
