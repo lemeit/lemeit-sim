@@ -21,7 +21,7 @@ function monitor(routes={}){
    return handler||((url==='/api/status')?response(200,status()):response(200,{compound_count:2,compounds:['Water','Ethanol'],models:['NRTL']}));
  };
  const context=vm.createContext({structuredClone,performance,AbortSignal,URLSearchParams,location:{search:''},crypto:webcrypto,fetch,document});
- vm.runInContext(routing,context);vm.runInContext(source,context);
+ vm.runInContext(routing,context);vm.runInContext(readFileSync(new URL('../site/diagnostics-console.js',import.meta.url),'utf8'),context);vm.runInContext(source,context);
  vm.runInContext('updateControls=()=>{};recordActivity=()=>{};',context);
  return {context,elements,calls};
 }
