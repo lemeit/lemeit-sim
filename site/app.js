@@ -29,7 +29,7 @@ let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=nu
 let marquee=null;
 let gridVisible=false,gridSnap=false;
 const GRID_STEP=20;
-const snapCoordinate=value=>SimDiagramInteractions.snap(value,gridSnap,GRID_STEP);
+const snapCoordinate=value=>gridSnap&&Number.isFinite(value)?Math.round(value/GRID_STEP)*GRID_STEP:value;
 function saveCanvasPreferences(){try{localStorage.setItem('sim-canvas-preferences',JSON.stringify({gridVisible,gridSnap}));}catch{}}
 function showGrid(){return `<defs><pattern id="canvas-grid-pattern" width="${GRID_STEP}" height="${GRID_STEP}" patternUnits="userSpaceOnUse"><path d="M ${GRID_STEP} 0 L 0 0 0 ${GRID_STEP}" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width=".7"/></pattern></defs><rect x="-100000" y="-100000" width="200000" height="200000" fill="url(#canvas-grid-pattern)" pointer-events="none" aria-hidden="true"/>`;}
 function refreshCanvasButtons(){for(const [id,on] of [['view-grid',gridVisible],['view-snap',gridSnap],['diagram-grid',gridVisible]]){const button=$(id);if(button)button.setAttribute('aria-pressed',String(on));}}
