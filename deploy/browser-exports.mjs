@@ -7,6 +7,7 @@ import {inflateSync} from 'node:zlib';
 import {chromium} from 'playwright';
 
 const load=(path)=>readFile(new URL(path,import.meta.url));
+const portalVersion=JSON.parse(await load('../package.json')).version;
 const example=await load('../site/examples/MulticomponentBalance.json');
 const result=await load('./fixtures/example6-results.json');
 const catalog=await load('../site/catalog-cache.json');
@@ -75,7 +76,7 @@ test('Editor: Ejemplo 6 calculado, archivos de resultados y Acerca de tras recar
   await page.reload({waitUntil:'networkidle'});
   await page.getByText('Ayuda',{exact:true}).click();
   await page.locator('#about-button').click();
-  assert.match(await page.locator('#about-dialog').innerText(),/Versión del portal · 0\.29\.0/);
+  assert.ok((await page.locator('#about-dialog').innerText()).includes('Versión del portal · '+portalVersion));
   await page.keyboard.press('Escape');
 
   await openProject(page,example);
