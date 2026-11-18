@@ -7,6 +7,7 @@ const TYPES = {
   Mixer: {label:'Mezclador',short:'Mezclador',icon:'mixer',prefix:'M',w:120,h:100},
   Splitter: {label:'Divisor',short:'Divisor',icon:'splitter',prefix:'D',w:120,h:100},
   Separator: {label:'Separador flash',short:'Flash',icon:'separator',prefix:'V',w:130,h:110},
+  Tank: {label:'Tanque',short:'Tanque',icon:'tank',prefix:'TK',w:120,h:100},
   Compressor: {label:'Compresor',short:'Compresor',icon:'compressor',prefix:'K',w:120,h:100},
   Pump: {label:'Bomba',short:'Bomba',icon:'pump',prefix:'P',w:120,h:100},
   HeatExchanger: {label:'Intercambiador',short:'Intercambiador',icon:'heat-exchanger',prefix:'HX',w:130,h:110},
@@ -121,6 +122,7 @@ function originalEquipmentSymbol(type){
   if(type==='Splitter')return '<path d="M15 50 L60 15 H100 V85 H60 Z M0 50 H15 M100 25 H120 M100 75 H120"/>';
   if(type==='Separator')return '<path d="M35 25 C35 5 95 5 95 25 V85 C95 105 35 105 35 85 Z M0 55 H35 M95 30 H130 M95 80 H130 M35 55 H95"/><text class="symbol-sign" x="65" y="62" text-anchor="middle">V/L</text>';
   if(type==='HeatExchanger')return '<rect x="20" y="10" width="90" height="90" rx="12"/><path d="M0 30 H35 L95 80 H130 M0 80 H35 L95 30 H130"/><text class="symbol-sign" x="65" y="58" text-anchor="middle">HX</text>';
+  if(type==='Tank')return '<path d="M25 20 C25 3 95 3 95 20 V80 C95 97 25 97 25 80 Z M25 20 C25 37 95 37 95 20 M0 50 H25 M95 50 H120"/>';
   if(type==='Compressor')return '<path d="M0 50 H20 M20 15 L100 35 V65 L20 85 Z M100 50 H120 M60 75 V100"/>';
   if(type==='Pump')return '<circle cx="60" cy="50" r="40"/><path d="M0 50 H20 M100 50 H120 M40 72 L82 50 L40 28 Z"/>';
   if(type==='Valve')return '<path d="M0 50 H20 M20 25 L60 50 L20 75 Z M100 25 L60 50 L100 75 Z M100 50 H120"/>';
@@ -129,7 +131,7 @@ function originalEquipmentSymbol(type){
 }
 function paletteStreamSymbol(type){
   return type==='EnergyStream'
-    ?'<path class="palette-energy-symbol" d="M5 55 H25 L40 25 L58 85 L76 25 L92 55 H120 M103 38 L120 55 L103 72"/>'
+    ?'<g class="palette-energy-symbol"><path d="M5 55 H120" stroke-dasharray="18 12"/><path d="M100 40 L120 55 L100 70"/></g>'
     :'<path d="M5 55 H120 M100 40 L120 55 L100 70"/>';
 }
 function renderPalette(){
@@ -272,6 +274,7 @@ function renderInspector(){
   if(n.type==='MaterialStream')html+=renderStreamInspector(n,r);
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
   if(n.type==='HeatExchanger')html+=`<p class="inspector-description">Intercambiador de dos corrientes sin mezcla. Puerto 1: caliente, puerto 2: frío. Se especifica únicamente la potencia térmica transferida del caliente al frío (kW); DWSIM calcula ambas temperaturas de salida. El modelo inicial no incluye pérdidas externas ni caídas de presión.</p>${field('heat_duty_kW','Calor transferido','kW',n.heat_duty_kW,{min:0.000001})}`;
+  if(n.type==='Tank')html+=`<p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
   if(n.type==='Compressor')html+=`<p class="inspector-description">Compresión adiabática de gas: especificá presión absoluta de descarga y eficiencia isentrópica. DWSIM calcula temperatura y potencia de eje. Solo alimentación completamente vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}`;
   if(n.type==='Pump')html+=`<p class="inspector-description">Bomba de líquido con presión absoluta de salida y eficiencia. El motor calcula potencia y temperatura. No usar para alimentar con vapor.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia','%',n.efficiency_pct,{min:0.01})}`;
   if(n.type==='Valve')html+=`<p class="inspector-description">Válvula de expansión por estrangulamiento: presión absoluta de salida. La presión debe ser menor que la de entrada; DWSIM calcula temperatura y fases.</p>${field('outlet_pressure_kPa','Presión de salida','kPa abs',n.outlet_pressure_kPa,{min:0.001})}`;
@@ -303,6 +306,7 @@ function addNode(type,pos){
   if(type==='Heater'||type==='Cooler')node.outlet_C=type==='Heater'?70:25;
   if(type==='Splitter')node.split=.5;
   if(type==='HeatExchanger')node.heat_duty_kW=40;
+  if(type==='Tank')Object.assign(node,{volume_m3:5,pressure_drop_kPa:10});
   if(type==='Compressor')Object.assign(node,{outlet_pressure_kPa:300,efficiency_pct:75});
   if(type==='Pump')Object.assign(node,{outlet_pressure_kPa:500,efficiency_pct:75});
   if(type==='Valve')node.outlet_pressure_kPa=200;
@@ -389,11 +393,13 @@ async function calculate(){
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
   lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
   try{
-    if(payload.nodes.some(n=>n.type==='Compressor')){
+    const newEquipment=payload.nodes.filter(n=>['Compressor','Tank'].includes(n.type));
+    if(newEquipment.length){
       const statusResponse=await fetch('/api/status',{headers:engineHeaders(),signal:AbortSignal.timeout(10000)});
-      if(!statusResponse.ok)throw new Error('No se pudo comprobar si el motor seleccionado admite compresores. Revisá su conexión.');
+      if(!statusResponse.ok)throw new Error('No se pudo comprobar las operaciones admitidas por el motor seleccionado. Revisá su conexión.');
       const status=await statusResponse.json();
-      if(!status.supported_equipment?.includes('Compressor'))throw new Error('El gateway del motor seleccionado todavía no admite compresores. Actualizalo o elegí un motor actualizado; no se cambia de motor automáticamente.');
+      const unsupported=newEquipment.find(n=>!status.supported_equipment?.includes(n.type));
+      if(unsupported)throw new Error(`El gateway del motor seleccionado todavía no admite ${TYPES[unsupported.type].label.toLowerCase()}. Actualizalo o elegí un motor actualizado; no se cambia de motor automáticamente.`);
     }
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
@@ -720,6 +726,10 @@ function equipmentSpecificationIssues(node){
     case 'Valve':
       requireNumber('outlet_pressure_kPa','la presión absoluta de salida en kPa',0.001,1000000);
       if(node.type==='Pump'||node.type==='Compressor')requireNumber('efficiency_pct','la eficiencia isentrópica en %',0.01,100);
+      break;
+    case 'Tank':
+      requireNumber('volume_m3','el volumen útil en m³',0.000001,1000000);
+      requireNumber('pressure_drop_kPa','la pérdida de presión en kPa',0,1000000);
       break;
     case 'HeatExchanger':
       requireNumber('heat_duty_kW','la potencia térmica transferida en kW',0.000001,1000000);

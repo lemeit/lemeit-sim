@@ -11,7 +11,7 @@ const app=read('app.js');
 test('el catálogo enumera equipos que aparecen en la biblioteca',()=>{
   const types={
     Mixer:'Mixer',Splitter:'Splitter',Heater:'Heater',Cooler:'Cooler',
-    Separator:'Vessel',Compressor:'Compressor',Pump:'Pump',Valve:'Valve',HeatExchanger:'HeatExchanger',
+    Separator:'Vessel',Tank:'Tank',Compressor:'Compressor',Pump:'Pump',Valve:'Valve',HeatExchanger:'HeatExchanger',
     ConversionReactor:'ConversionReactor',EquilibriumReactor:'EquilibriumReactor'
   };
   for(const [type,engine] of Object.entries(types)){

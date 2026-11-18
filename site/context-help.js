@@ -11,6 +11,7 @@ globalThis.SimContextHelp = (() => {
     Heater: ['energia-operaciones-termicas/', 'Calentamiento y balance energético'],
     Cooler: ['energia-operaciones-termicas/', 'Enfriamiento y balance energético'],
     HeatExchanger: ['energia-operaciones-termicas/', 'Intercambiadores de calor'],
+    Tank: ['corrientes-propiedades/', 'Tanque y tiempo de residencia'],
     Compressor: ['bombas-valvulas-presion/', 'Compresión de gases y potencia de eje'],
     Pump: ['bombas-valvulas-presion/', 'Bombas y cambios de presión'],
     Valve: ['bombas-valvulas-presion/', 'Válvulas y estrangulamiento'],

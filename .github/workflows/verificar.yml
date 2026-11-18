@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run build:verified
       - name: Validar entradas del servidor
-        run: python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation test_examples test_compressor -v
+        run: python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation test_examples test_compressor test_tank -v
       - name: Preparar despliegue sin publicar
         run: npm run deploy:check
         env:

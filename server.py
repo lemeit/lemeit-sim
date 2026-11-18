@@ -20,7 +20,7 @@ GATEWAY_STARTED_AT = time.time()
 GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Valve', 'HeatExchanger'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Tank', 'Valve', 'HeatExchanger'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -268,6 +268,11 @@ def validate_graph(graph, catalog):
             if kind == 'Splitter':
                 if len(outs) != 2: raise InputError(f'{name}: conectá las dos salidas del divisor.')
                 number(node.get('split'), name + ': fracción de salida 1', .000001, .999999)
+            if kind == 'Tank':
+                if len(ins) != 1 or len(outs) != 1:
+                    raise InputError(f'{name}: conectá una entrada y una salida de materia.')
+                number(node.get('volume_m3'), name + ': volumen útil (m³)', 0.000001, 1000000)
+                number(node.get('pressure_drop_kPa'), name + ': pérdida de presión (kPa)', 0, 1000000)
             if kind in ('Pump', 'Compressor', 'Valve'):
                 if len(ins) != 1 or len(outs) != 1:
                     raise InputError(f'{name}: conectá una entrada y una salida de materia.')
@@ -357,6 +362,9 @@ def simulate(engine, graph):
             if node['type'] == 'Pump':
                 # MCP 10.2.15 interpreta PROP_PU_5 en bar, no en Pa: 500 kPa -> 5 bar.
                 props = {'CalcMode': 'OutletPressure', 'PROP_PU_1': node['efficiency_pct'], 'PROP_PU_5': node['outlet_pressure_kPa'] / 100}
+            if node['type'] == 'Tank':
+                # Propiedades CLR verificadas en MCP Windows: Volume m³ y DeltaP Pa.
+                props = {'Volume': node['volume_m3'], 'DeltaP': node['pressure_drop_kPa'] * 1000, 'IgnorePhase': False}
             if node['type'] == 'Compressor':
                 # Propiedades CLR verificadas en MCP Windows 10.2.15: POut en Pa.
                 props = {'CalcMode': 'OutletPressure', 'ProcessPath': 'Adiabatic',
@@ -377,6 +385,30 @@ def simulate(engine, graph):
         for node in graph['nodes']:
             if node['type'] == 'MaterialStream': streams[node['id']] = call('dwsim_stream_get_results', name=node['name'])
             elif not node['type'].endswith('Stream'): equipment[node['id']] = call('dwsim_unitop_get_results', name=node['name'])
+        for node in graph['nodes']:
+            if node['type'] != 'Tank': continue
+            feed = streams[next(e['from'] for e in graph['edges'] if e['to'] == node['id'] and by_id[e['from']]['type'] == 'MaterialStream')]
+            product = streams[next(e['to'] for e in graph['edges'] if e['from'] == node['id'] and by_id[e['to']]['type'] == 'MaterialStream')]
+            vapor = next((p.get('fraction') for p in feed['phases'] if p.get('name') == 'Vapor'), None)
+            if not isinstance(vapor, (int, float)) or not math.isfinite(vapor) or vapor > 1e-6:
+                raise InputError(node['name'] + ': el tanque requiere alimentación líquida sin vapor.')
+            expected_p = feed['pressure_Pa'] - node['pressure_drop_kPa'] * 1000
+            if expected_p <= 0:
+                raise InputError(node['name'] + ': la pérdida de presión debe ser menor que la presión absoluta de entrada.')
+            if not math.isclose(product['pressure_Pa'], expected_p, rel_tol=1e-5, abs_tol=1):
+                raise InputError(node['name'] + ': el motor no conservó la pérdida de presión especificada.')
+            unit = equipment[node['id']]
+            if not unit.get('calculated') or unit.get('error'):
+                raise InputError(node['name'] + ': el tanque no terminó de calcularse correctamente.')
+            residence = unit.get('properties', {}).get('Residence Time', {})
+            try: tau = float(residence['value'])
+            except (KeyError, TypeError, ValueError): raise InputError(node['name'] + ': el motor no devolvió un tiempo de residencia válido.')
+            if residence.get('units') != 's' or not math.isfinite(tau) or tau <= 0:
+                raise InputError(node['name'] + ': el tiempo de residencia del motor no está expresado en segundos válidos.')
+            expected_tau = node['volume_m3'] * feed['phases'][0]['density_kg_m3'] / feed['mass_flow_kg_s']
+            if not math.isclose(tau, expected_tau, rel_tol=1e-5, abs_tol=1e-5):
+                raise InputError(node['name'] + ': el tiempo de residencia no coincide con volumen y caudal.')
+            unit['residence_time_s'] = tau
         for node in graph['nodes']:
             if node['type'] != 'Compressor': continue
             feed = streams[next(e['from'] for e in graph['edges'] if e['to'] == node['id'] and by_id[e['from']]['type'] == 'MaterialStream')]
