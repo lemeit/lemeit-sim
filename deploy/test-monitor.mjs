@@ -22,7 +22,7 @@ function monitor(routes={}){
  };
  const context=vm.createContext({structuredClone,performance,AbortSignal,URLSearchParams,location:{search:''},crypto:webcrypto,fetch,document});
  vm.runInContext(routing,context);vm.runInContext(readFileSync(new URL('../site/diagnostics-console.js',import.meta.url),'utf8'),context);vm.runInContext(source,context);
- vm.runInContext('updateControls=()=>{};recordActivity=()=>{};',context);
+ vm.runInContext('graph=emptyProject();updateControls=()=>{};recordActivity=()=>{};',context);
  return {context,elements,calls};
 }
 const readState=context=>JSON.parse(vm.runInContext('JSON.stringify({selectedEngine,engineOnline,engineMode,connectionCheck,lastCalculation,resultValidity})',context));
