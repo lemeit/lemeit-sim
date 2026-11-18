@@ -20,7 +20,7 @@ GATEWAY_STARTED_AT = time.time()
 GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
-KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Tank', 'Valve', 'HeatExchanger'} | REACTORS
+KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Expander', 'Tank', 'Valve', 'HeatExchanger'} | REACTORS
 MODELS = ['Steam Tables (IAPWS-IF97)', "Raoult's Law", 'NRTL', 'Peng-Robinson (PR)', 'Soave-Redlich-Kwong (SRK)', 'UNIQUAC', 'UNIFAC', 'Modified UNIFAC (Dortmund)', 'Modified UNIFAC (NIST)', 'Wilson', 'Peng-Robinson 1978 (PR78)', 'Peng-Robinson / Lee-Kesler (PR/LK)', 'Lee-Kesler-Plöcker', 'Chao-Seader', 'Grayson-Streed', 'CoolProp', 'Seawater IAPWS-08', 'PC-SAFT (with Association Support) (.NET Code)']
 
 
@@ -173,7 +173,7 @@ def ports(kind):
         return {'in': ('energy', 1), 'out': ('energy', 1)}
     result = {'in': ('material', 3 if kind == 'Mixer' else 2 if kind == 'HeatExchanger' else 1), 'out': ('material', 2 if kind in ('Splitter', 'Separator', 'HeatExchanger') or kind in REACTORS else 1)}
     if kind in ('Heater', 'Compressor'): result['energy-in'] = ('energy', 1)
-    if kind == 'Cooler': result['energy-out'] = ('energy', 1)
+    if kind in ('Cooler', 'Expander'): result['energy-out'] = ('energy', 1)
     # La bomba con presión prescrita calcula su trabajo; no requiere corriente de energía.
     return result
 
@@ -273,11 +273,11 @@ def validate_graph(graph, catalog):
                     raise InputError(f'{name}: conectá una entrada y una salida de materia.')
                 number(node.get('volume_m3'), name + ': volumen útil (m³)', 0.000001, 1000000)
                 number(node.get('pressure_drop_kPa'), name + ': pérdida de presión (kPa)', 0, 1000000)
-            if kind in ('Pump', 'Compressor', 'Valve'):
+            if kind in ('Pump', 'Compressor', 'Expander', 'Valve'):
                 if len(ins) != 1 or len(outs) != 1:
                     raise InputError(f'{name}: conectá una entrada y una salida de materia.')
                 number(node.get('outlet_pressure_kPa'), name + ': presión absoluta de salida (kPa)', 0.001, 1000000)
-                if kind in ('Pump', 'Compressor'):
+                if kind in ('Pump', 'Compressor', 'Expander'):
                     number(node.get('efficiency_pct'), name + ': eficiencia (%)', 0.01, 100)
                 # La dirección de cambio de presión se comprueba en el resultado físico del motor,
                 # ya que las corrientes intermedias no especifican su presión en el JSON.
@@ -365,7 +365,7 @@ def simulate(engine, graph):
             if node['type'] == 'Tank':
                 # Propiedades CLR verificadas en MCP Windows: Volume m³ y DeltaP Pa.
                 props = {'Volume': node['volume_m3'], 'DeltaP': node['pressure_drop_kPa'] * 1000, 'IgnorePhase': False}
-            if node['type'] == 'Compressor':
+            if node['type'] in ('Compressor', 'Expander'):
                 # Propiedades CLR verificadas en MCP Windows 10.2.15: POut en Pa.
                 props = {'CalcMode': 'OutletPressure', 'ProcessPath': 'Adiabatic',
                          'POut': node['outlet_pressure_kPa'] * 1000, 'AdiabaticEfficiency': node['efficiency_pct']}
@@ -410,18 +410,29 @@ def simulate(engine, graph):
                 raise InputError(node['name'] + ': el tiempo de residencia no coincide con volumen y caudal.')
             unit['residence_time_s'] = tau
         for node in graph['nodes']:
-            if node['type'] != 'Compressor': continue
+            if node['type'] not in ('Compressor', 'Expander'): continue
+            expanding = node['type'] == 'Expander'
             feed = streams[next(e['from'] for e in graph['edges'] if e['to'] == node['id'] and by_id[e['from']]['type'] == 'MaterialStream')]
             product = streams[next(e['to'] for e in graph['edges'] if e['from'] == node['id'] and by_id[e['to']]['type'] == 'MaterialStream')]
             vapor = next((p.get('fraction') for p in feed['phases'] if p.get('name') == 'Vapor'), None)
             if not isinstance(vapor, (int, float)) or not math.isfinite(vapor) or vapor < 1 - 1e-6:
                 raise InputError(node['name'] + ': esta adaptación requiere alimentación completamente vapor; no admite líquido ni mezcla bifásica.')
-            if not product['pressure_Pa'] > feed['pressure_Pa']:
-                raise InputError(node['name'] + ': la presión de descarga debe superar la de entrada. Para expandir, usá otro equipo.')
+            if expanding and not product['pressure_Pa'] < feed['pressure_Pa']:
+                raise InputError(node['name'] + ': la presión de descarga del expansor debe ser menor que la de entrada.')
+            if not expanding and not product['pressure_Pa'] > feed['pressure_Pa']:
+                raise InputError(node['name'] + ': la presión de descarga debe superar la de entrada. Para expandir, usá el expansor.')
             if not math.isclose(product['pressure_Pa'], node['outlet_pressure_kPa'] * 1000, rel_tol=1e-5, abs_tol=1):
                 raise InputError(node['name'] + ': el motor no conservó la presión de descarga especificada.')
             if not equipment[node['id']].get('calculated') or equipment[node['id']].get('error'):
-                raise InputError(node['name'] + ': el compresor no terminó de calcularse correctamente.')
+                raise InputError(node['name'] + ': la máquina no terminó de calcularse correctamente.')
+            if expanding:
+                power = equipment[node['id']].get('properties', {}).get('Power Generated', {})
+                try: generated = float(power['value'])
+                except (KeyError, TypeError, ValueError): raise InputError(node['name'] + ': el motor no devolvió la potencia producida.')
+                fluid_drop = feed['mass_flow_kg_s'] * feed['phases'][0]['enthalpy_kJ_kg'] - product['mass_flow_kg_s'] * product['phases'][0]['enthalpy_kJ_kg']
+                if power.get('units') != 'kW' or not math.isfinite(generated) or generated <= 0 or not math.isclose(generated, fluid_drop, rel_tol=1e-5, abs_tol=1e-5):
+                    raise InputError(node['name'] + ': la potencia producida no coincide con el descenso de entalpía del gas.')
+                equipment[node['id']]['shaft_power_generated_kW'] = generated
         # Algunos paquetes pueden informar éxito sin respetar la especificación solicitada.
         for node in graph['nodes']:
             if node['type'] != 'MaterialStream' or any(e['to'] == node['id'] for e in graph['edges']): continue
@@ -462,7 +473,7 @@ def simulate(engine, graph):
                 components[compound] = {'in_kg_s': cin, 'out_kg_s': cout, 'residual_kg_s': cin - cout}
             checks.append({'id': node['id'], 'name': node['name'], 'mass_in': mass_in, 'mass_out': mass_out,
                            'mass_residual': mass_in - mass_out, 'heat_to_fluid_kW': heat, 'components': components,
-                           'reactive':node['type'] in REACTORS, 'energy_kind':'shaft' if node['type'] in ('Pump', 'Compressor') else 'heat'})
+                           'reactive':node['type'] in REACTORS, 'energy_kind':'shaft' if node['type'] in ('Pump', 'Compressor', 'Expander') else 'heat'})
         return {'streams': streams, 'equipment': equipment, 'balances': checks,
                 'elapsed_s': round(time.monotonic() - started, 2), 'engine': catalog['engine'], 'model': graph['model']}
     finally:

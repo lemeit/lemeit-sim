@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.26.0 — 2026-11-17
+
+- Expansor adiabático de gas: presión de descarga, eficiencia isentrópica y corriente de energía de salida opcional. Símbolos en ambas paletas, inspector, validación y ejemplo 16 con guía.
+- Tres eficiencias reales Windows verificadas: 60/80/90 %. Caso base nitrógeno, 300 → 100 kPa, 80 %: −39,464231 °C y 66,617946 kW producidos. Trabajo negativo hacia el gas en balances y exportaciones.
+- Se valida fase vapor de entrada, presión descendente, presión especificada y potencia nativa contra descenso de entalpía. Requiere gateway actualizado; Debian pendiente, sin cambio automático de motor.
+
 ## 0.25.0 — 2026-11-17
 
 - Energía: flecha recta de trazos verdes en biblioteca y vista previa, coherente con la corriente del lienzo.

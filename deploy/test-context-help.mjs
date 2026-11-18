@@ -9,7 +9,7 @@ const help=env.SimContextHelp;
 test('todos los objetos del editor disponen de vínculo al capítulo correspondiente',()=>{
   const app=readFileSync(new URL('../site/app.js',import.meta.url),'utf8');
   const keys=[...app.matchAll(/^  (\w+): \{label:/gm)].map(m=>m[1]);
-  assert.equal(keys.length,14);
+  assert.equal(keys.length,15);
   for(const key of keys){
     const h=help.get(key);
     assert.ok(h, 'Falta ayuda para '+key);

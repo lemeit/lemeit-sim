@@ -1,0 +1,60 @@
+"""Contrato y validaciones del expansor; no sustituyen la sonda con motor real."""
+import copy,json,unittest
+from pathlib import Path
+from server import InputError,ports,simulate,validate_graph
+ROOT=Path(__file__).parent
+CATALOG={'compounds':['Nitrogen'],'models':['Peng-Robinson (PR)'],'engine':'DWSIM 10.2.15'}
+def graph():return json.loads((ROOT/'site/examples/ExpanderNitrogen.json').read_text(encoding='utf-8'))
+class ExpanderContract(unittest.TestCase):
+ def test_material_and_optional_energy_ports(self):
+  self.assertEqual(ports('Expander'),{'in':('material',1),'out':('material',1),'energy-out':('energy',1)})
+  validate_graph(graph(),CATALOG)
+ def test_valid_without_energy_stream(self):
+  g=graph();g['nodes']=[n for n in g['nodes'] if n['id']!='power'];g['edges']=g['edges'][:2];validate_graph(g,CATALOG)
+ def test_pressure_and_efficiency_rejected(self):
+  for key,values in [('outlet_pressure_kPa',[0,-3,float('nan'),float('inf')]),('efficiency_pct',[0,101,-2,float('nan')])]:
+   for value in values:
+    with self.subTest(key=key,value=value):
+     g=graph();g['nodes'][1][key]=value
+     with self.assertRaises(InputError):validate_graph(g,CATALOG)
+ def test_energy_on_material_port_rejected(self):
+  g=graph();g['edges'][-1]['fromPort']='out'
+  with self.assertRaises(InputError):validate_graph(g,CATALOG)
+ def test_native_configuration_and_balance(self):
+  engine=Stub();r=simulate(engine,graph())
+  configured=[kw['properties'] for t,kw in engine.calls if t=='dwsim_unitop_set']
+  self.assertEqual(configured,[{'CalcMode':'OutletPressure','ProcessPath':'Adiabatic','POut':100000,'AdiabaticEfficiency':80}])
+  self.assertEqual(r['balances'][0]['energy_kind'],'shaft')
+  self.assertLess(r['balances'][0]['heat_to_fluid_kW'],0)
+  self.assertGreater(r['equipment']['expander']['shaft_power_generated_kW'],0)
+  self.assertAlmostEqual(r['balances'][0]['mass_residual'],0)
+  self.assertEqual(engine.calls[-1][0],'dwsim_flowsheet_close')
+ def test_liquid_feed_result_rejected(self):
+  engine=Stub();next(p for p in engine.result['streams']['feed']['phases'] if p['name']=='Vapor')['fraction']=.5
+  with self.assertRaisesRegex(InputError,'completamente vapor'):simulate(engine,graph())
+  self.assertEqual(engine.calls[-1][0],'dwsim_flowsheet_close')
+ def test_compression_result_rejected(self):
+  engine=Stub();engine.result['streams']['product']['pressure_Pa']=400000
+  with self.assertRaisesRegex(InputError,'debe ser menor'):simulate(engine,graph())
+ def test_ignored_pressure_result_rejected(self):
+  engine=Stub();engine.result['streams']['product']['pressure_Pa']=200000
+  with self.assertRaisesRegex(InputError,'no conservó'):simulate(engine,graph())
+ def test_native_power_must_match_enthalpy_drop(self):
+  e=Stub();e.result['equipment']['expander']['properties']['Power Generated']['value']='1'
+  with self.assertRaisesRegex(InputError,'descenso de entalpía'):simulate(e,graph())
+ def test_nonfinite_native_power_rejected(self):
+  e=Stub();e.result['equipment']['expander']['properties']['Power Generated']['value']='NaN'
+  with self.assertRaisesRegex(InputError,'descenso de entalpía'):simulate(e,graph())
+class Stub:
+ def __init__(self):
+  self.calls=[];self.result=json.loads((ROOT/'docs/validation/expander-0.26.0-windows.json').read_text(encoding='utf-8'))['cases']['80']['result']
+ def get_catalog(self):return CATALOG
+ def call(self,tool,**kw):
+  self.calls.append((tool,kw))
+  if tool=='dwsim_flowsheet_create':return {'flowsheet_id':'test'}
+  if tool=='dwsim_solve_run':return {'ok':True}
+  if tool=='dwsim_stream_get_results':return self.result['streams']['feed' if kw['name']=='Nitrogeno entrada' else 'product']
+  if tool=='dwsim_unitop_get_results':return self.result['equipment']['expander']
+  return {}
+if __name__=='__main__':unittest.main()
+
