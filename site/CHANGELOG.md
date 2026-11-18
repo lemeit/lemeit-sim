@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.33.0 — 2026-11-18
+
+- Estado de motores y Administración comparan lado a lado las operaciones que anuncian los gateways Windows y Debian (`supported_equipment`).
+- El monitor muestra explícitamente «Disponible», «No admite» o «Sin datos», conserva versiones y evita interpretar fallos de red como ausencia de una operación.
+- Se advierte si un gateway anuncia una versión anterior al portal; no se cambia de motor automáticamente.
+- Nuevo procedimiento para actualizar cada backend de forma controlada y verificar el contrato `/api/status` antes de ejecutar ejemplos.
+
 ## 0.32.0 — 2026-11-18
 
 - El lienzo permite mostrar una cuadrícula y, por separado, ajustar equipos, extremos libres y codos a pasos de 20 unidades.

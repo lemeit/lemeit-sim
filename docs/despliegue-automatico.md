@@ -88,6 +88,63 @@ scripts Windows para administrarlo. El despliegue del Worker conserva los dos
 destinos y sus secretos; no enciende equipos ni instala DWSIM.
 Ver [selección manual y operación](seleccion-manual-motores.md).
 
+
+## Compatibilidad de gateways Windows y Debian (0.33.0)
+
+**No confundir** la versión del repositorio con el proceso que continúa sirviendo la API. El portal se publica por Cloudflare Workers Builds desde `main`; los gateways locales no se reinician con un `git pull`. El monitor de **Herramientas → Estado de motores** y la sección homónima en Administración consultan cada `/api/status` con el encabezado `X-SIM-Engine` del motor correspondiente. Un fallo de consulta se muestra como «Sin datos», nunca como «No admite».
+
+### Antes de actualizar
+
+1. Guardar los proyectos abiertos y verificar que no haya un cálculo en curso. Comprobar en GitHub que la versión deseada pasó CI y que Workers Builds terminó con éxito.
+2. En cada equipo, revisar cambios locales (`git status --short`), rama y versión; no sobrescribir archivos modificados ni secretos locales.
+3. Mantener la selección del motor **manual**; nunca activar failover implícito. Actualizar un gateway por vez para poder comprobarlo y conservar el otro como alternativa.
+
+### Debian (gateway ΣIM, puerto 5910)
+
+```bash
+cd ~/lemeit-sim
+git status --short
+git pull --ff-only origin main
+python3 -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+systemctl show lemeit-sim.service -p WorkingDirectory -p ExecStart --no-pager
+sudo systemctl restart lemeit-sim.service
+systemctl is-active lemeit-sim.service
+curl --fail --silent --show-error http://127.0.0.1:5910/api/status | python3 -c '
+import json,sys
+data=json.load(sys.stdin)
+print("Gateway:",data.get("gateway_version"))
+print("Expansor:", "Expander" in data.get("supported_equipment", []))
+print("Operaciones:", ", ".join(data.get("supported_equipment", [])))
+'
+```
+
+Esperar una versión igual a `package.json` cuando el servicio ejecute ese árbol; verificar las operaciones requeridas. **No reiniciar** `dwsim-mcp.service` ni `cloudflared.service` si funcionan. Si falla, consultar `sudo journalctl -u lemeit-sim.service -n 60 --no-pager` sin divulgar tokens.
+
+### Windows (gateway ΣIM)
+
+En PowerShell, en el equipo Windows, comprobar primero que no haya cálculos en curso ni cambios locales:
+
+```powershell
+cd C:\GitHub\lemeit-sim
+git status --short
+git pull --ff-only origin main
+python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+.\stop-online.ps1
+.\start-online.ps1
+```
+
+Comprobar el endpoint local `/api/status` según el puerto configurado en `start-online.ps1` (no asumir que es igual al de Debian). Evitar imprimir claves o argumentos con tokens. **No reiniciar la PC**, DWSIM MCP ni túneles si no es necesario.
+
+### Validación cruzada
+
+1. En el portal desplegado, abrir **Herramientas → Estado de motores** y pulsar **Actualizar estado**. Deben figurar ambos servicios y la tabla de operaciones. Si hay «Sin datos», no concluir que una operación es incompatible.
+2. Comprobar que la versión real del gateway coincide con la versión esperada y que el equipo requerido figura como «Admite». Una versión diferente **no demuestra** por sí sola incompatibilidad; la lista de operaciones sí permite identificar las ausentes.
+3. Probar un ejemplo de cada operación modificada (por ejemplo, Ejemplo 16 para `Expander`) **en cada motor**, y comparar balances y resultados dentro de tolerancias.
+4. Si aparece «No admite», actualizar el gateway correspondiente. Si la operación aparece como admitida pero falla, revisar el log de diagnóstico; capacidad anunciada no equivale a ejecución correcta.
+5. Si los endpoints locales son correctos pero el portal no, revisar el gateway público, los túneles y el Worker; no copiar secretos a tickets ni GitHub.
+
+El monitor nunca instala, reinicia ni modifica servicios; las actualizaciones son acciones explícitas del administrador.
+
 ## Verificación local sin publicar
 
 ```powershell
