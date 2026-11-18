@@ -16,6 +16,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
+**0.29.0 — Exportaciones del diagrama y resultados**. Archivo ofrece CSV para Excel (Argentina), CSV internacional y un libro Excel con celdas numéricas. Exportá el diagrama completo o una selección en SVG, PNG o PDF. Esta versión está en revisión.
+
 **0.28.5 — Recorridos exteriores y llamadas compactas**. El recorrido evalúa alternativas ortogonales fuera de los equipos, respetando codos manuales válidos. Las llamadas reducen su línea horizontal y la separación inicial. No modifica conexiones ni cálculos.
 
 **0.28.1 — Llamadas solo para valores**. Los nombres y tipos son rótulos simples. Las llamadas instrumentales se reservan para temperatura, presión y caudal; no se dibujan cuando no hay valores para mostrar.

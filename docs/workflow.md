@@ -118,13 +118,42 @@ con Tab y usar arriba/abajo. Home o doble clic restablece un tamaño de trabajo.
 ↗ abre otra vista sincronizada con resultados del mismo workspace. Mantener abierta
 la principal; no se recalcula por abrir la vista. Esta función no es multiusuario.
 
-Solo se exportan resultados vigentes:
-- CSV de corrientes o de balances: UTF-8 con BOM, separador punto y coma y punto decimal.
-- Excel .xlsx: hojas Corrientes, Balances, Componentes y Datos. Celdas numéricas con
-  los valores originales, unidades en encabezados, modelo y versión del motor.
+### Exportar resultados y diagramas
 
-La exportación ocurre en el navegador, sin nuevos servicios. El formato de pantalla
-no redondea los valores exportados. Los resultados son de una simulación, no mediciones.
+En **Archivo**, los resultados vigentes se exportan como corrientes o balances:
+
+- **CSV para Excel (Argentina)** usa UTF-8 con BOM, punto y coma entre campos y
+  coma decimal. **CSV internacional** usa UTF-8, coma entre campos, punto decimal
+  y comillas en los campos que las requieren. Ambos conservan el valor numérico
+  completo y omiten separadores de millares.
+- **Excel (.xlsx)** incluye Corrientes, Balances, Componentes y Datos. Las celdas
+  son numéricas. Se ajusta la visualización con formatos y anchos de columna.
+  Excel trabaja con hasta 15 cifras significativas. El CSV conserva la
+  representación completa del valor a la salida del simulador.
+- Las cabeceras indican las unidades. Temperatura y presión absoluta se convierten
+  de K a °C y de Pa a kPa. Densidad, caudal molar, entalpía y entropía conservan la
+  escala y referencia del motor. El CSV carece de anchos de columna. Para controlar
+  la presentación de temperaturas con muchos decimales al abrir el archivo, usá Excel (.xlsx).
+
+Para el PFD, elegí **Exportar diagrama** en Archivo o **Exportar…** en la barra del
+diagrama. Podés exportar todos los objetos o seleccionar primero los equipos y
+corrientes que querés incluir. La geometría de las corrientes incluidas conserva
+sus extremos y recorridos del proyecto. Las uniones conectadas quedan limpias y
+se indican los puertos libres de los equipos. El área se calcula a partir del
+contenido y de los rótulos, incluidos los objetos que están fuera de la vista.
+
+- **SVG** conserva trazos y texto, con fondo blanco o transparente.
+- **PNG** usa un fondo blanco o transparente y escala 1× a 4×. Si supera 16.384
+  píxeles por lado o 32 millones de píxeles totales, elegí una escala menor o SVG/PDF.
+- **PDF** conserva trazos vectoriales, texto y tipografía incrustada. Se ajusta en
+  una página A4 o A3 con orientación vertical u horizontal y márgenes de 10, 15 o
+  20 mm. Para diagramas muy extensos, A3 o una selección permite conservar rótulos
+  más grandes. **Reducir solo si es necesario** mantiene como máximo la escala
+  de 96 unidades del dibujo por pulgada.
+
+La descarga se genera en el navegador en la vista web principal, la ventana
+separada y la aplicación instalada. El dibujo comparte el port SVG de símbolos
+DWSIM usado por el editor. El archivo de resultados contiene datos de simulación.
 
 ## Ventanas compactas y monitor de conexión
 

@@ -72,3 +72,14 @@ Fuente principal: https://github.com/DanWBR/dwsim10/tree/c8cdb6593f0c58d02ffe9dd
 
 Asap SemiBold, distribuida por DWSIM, se incluye bajo SIL Open Font License 1.1.
 Ver Asap-OFL.txt.
+
+## Exportación vectorial
+
+El exportador reutiliza la geometría SVG del PFD y Asap SemiBold. El SVG y el PDF
+incluyen la fuente para que los rótulos se puedan abrir fuera del portal. Se
+mantienen las licencias GPL del port y SIL OFL 1.1 de la tipografía descritas arriba.
+
+El PDF usa los paquetes de navegador publicados de [jsPDF 4.2.1](https://github.com/parallax/jsPDF/tree/v4.2.1)
+y [svg2pdf.js 2.9.0](https://github.com/yWorks/svg2pdf.js/tree/v2.9.0). Los archivos
+UMD están en `vendor/` y se sirven desde el portal. Ver `jsPDF-MIT.txt` y
+`svg2pdf-MIT.txt`. Los encabezados de los paquetes conservan sus avisos de terceros.

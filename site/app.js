@@ -53,6 +53,7 @@ function changed({physical=true}={}){
 }
 function updateControls(){
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
+  document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
   $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
@@ -226,7 +227,7 @@ function renderPalette(){
   });
 }
 // Las llamadas son decoración del objeto: no agregan puertos ni conexiones.
-function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
+function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null,exportRoutes=null){
   let anchor,tangent={x:1,y:0};
   if(g){
     let longest={length:-1};
@@ -241,7 +242,7 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
   for(const other of graph.nodes){
     if(other.id===n.id)continue;
     if(isStream(other)){
-      const points=streamGeometry(other).points;
+      const points=(exportRoutes?.get(other.id)??streamGeometry(other)).points;
       for(let i=1;i<points.length;i++)obstacles.push({left:Math.min(points[i-1].x,points[i].x)-dx-5,right:Math.max(points[i-1].x,points[i].x)-dx+5,top:Math.min(points[i-1].y,points[i].y)-dy-5,bottom:Math.max(points[i-1].y,points[i].y)-dy+5,weight:3});
     }else{const b=nodeBounds(other);obstacles.push({left:b.left-dx-10,right:b.right-dx+10,top:b.top-dy-10,bottom:b.bottom-dy+10,weight:8});}
   }
@@ -252,7 +253,7 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     const x=Math.min(elbow.x,end)+6,y=elbow.y-8;
     const box={left:x-4,right:x+width,top:y-14,bottom:y+5};
     const area=(box.right-box.left)*(box.bottom-box.top);
-    let score=(area-overlap(box,viewport))*20+(distance-20)*2;
+    let score=(exportRoutes?0:(area-overlap(box,viewport))*20)+(distance-20)*2;
     // Al cambiar el sentido u orientación del tramo, girar hacia su zona exterior.
     const preferredSide=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?1:-1):(tangent.x>=0?1:-1);
     const preferredVertical=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?-1:1):-1;
@@ -260,7 +261,7 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     for(const obstacle of obstacles)score+=overlap(box,obstacle)*obstacle.weight;
     // Favorecer el interior del área visible y evitar el rótulo simple sobre la corriente.
     if(vertical<0)score+=overlap(box,{left:anchor.x-90,right:anchor.x+90,top:anchor.y-28,bottom:anchor.y-6})*4;
-    score+=Math.abs((box.left+box.right)/2-(viewport.left+viewport.right)/2)*.01;
+    if(!exportRoutes)score+=Math.abs((box.left+box.right)/2-(viewport.left+viewport.right)/2)*.01;
     const ux=side*18/Math.hypot(18,distance),uy=vertical*distance/Math.hypot(18,distance);
     const tip=`M${anchor.x+ux*7-uy*3} ${anchor.y+uy*7+ux*3} L${anchor.x} ${anchor.y} L${anchor.x+ux*7+uy*3} ${anchor.y+uy*7-ux*3}`;
     const candidate={x,y,width,anchor,side,vertical,score,line:`M${anchor.x} ${anchor.y} L${elbow.x} ${elbow.y} H${end}`,tip};
@@ -268,37 +269,50 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
   }
   return best;
 }
-function renderCallout(n,g,r,feed){
-  const c=calloutGeometry(n,g),t=TYPES[n.type],scale=symbolScale(n);
+function renderCallout(n,g,r,feed,exportRoutes){
+  const t=TYPES[n.type],scale=symbolScale(n);
   const x=g?g.label.x:equipmentLabelX(n),y=g?g.label.y:t.h*scale+20;
   let html=`<text class="${g?'stream-label':'equipment-label'}" text-anchor="middle" x="${x}" y="${y}">${esc(n.name)}</text>`;
   if(!g)html+=`<text class="node-kind" text-anchor="middle" x="${x}" y="${y+15}">${esc(t.short.toUpperCase())}</text>`;
   const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('pressure_kPa',r.pressure_Pa/1000,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('pressure_kPa',n.pressure_kPa,n,2)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
-  if(reading)html+=`<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})"><text class="node-reading" x="0" y="0">${reading}</text></g></g>`;
+  if(reading){
+    const c=calloutGeometry(n,g,exportRoutes);
+    html+=`<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})"><text class="node-reading" x="0" y="0">${reading}</text></g></g>`;
+  }
   return html;
 }
-function renderDiagram(){
-  const svg=$('diagram');svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
+function diagramMarkup(nodes=graph.nodes,exporting=false){
+  const exportRoutes=exporting?new Map(graph.nodes.filter(isStream).map(n=>[n.id,streamGeometry(n)])):null;
   let html='';
-  [...graph.nodes].sort((a,b)=>Number(isStream(a))-Number(isStream(b))).forEach(n=>{
+  [...nodes].sort((a,b)=>Number(isStream(a))-Number(isStream(b))).forEach(n=>{
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
-    const g=isStream(n)?streamGeometry(n):null;
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${(selection?.node===n.id||selection?.nodes?.includes(n.id))?'selected':''}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}">`;
+    const g=isStream(n)?(exportRoutes?.get(n.id)??streamGeometry(n)):null;
+    const selected=!exporting&&(selection?.node===n.id||selection?.nodes?.includes(n.id));
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
     if(g){
-      html+=`<path class="stream-hit" d="${g.d}"/><path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selection?.node===n.id||selection?.nodes?.includes(n.id)?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
-    html+=renderCallout(n,g,r,feed);
+      html+=`${exporting?'':`<path class="stream-hit" d="${g.d}"/>`}<path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
+    html+=renderCallout(n,g,r,feed,exportRoutes);
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
       const label=`${p.side.endsWith('in')?'Entrada':'Salida'} ${p.medium==='energy'?'de energía':p.index+1}${n.type==='HeatExchanger'?(p.index===0?' · lado caliente':' · lado frío'):(isReactor(n)||n.type==='Separator')&&p.side==='out'?(p.index===0?' · vapor':' · líquido'):''}`;
       const connected=graph.edges.some(e=>p.side.endsWith('in')?e.to===n.id&&(e.toPort||'in')===p.side&&(e.toIndex||0)===p.index:e.from===n.id&&(e.fromPort||'out')===p.side&&(e.fromIndex||0)===p.index);
+      if(exporting){
+        if(!connected&&!isStream(n))html+=`<circle class="port export-port ${p.medium==='energy'?'energy':''}" cx="${p.x}" cy="${p.y}" r="3"><title>${label}</title></circle>`;
+        continue;
+      }
       html+=`<g class="${connected?'connected-port':''}" data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
     }
-    if(selection?.node===n.id){if(g)html+=`<rect class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" x="${g.bend.x-3}" y="${g.bend.y-3}" width="6" height="6"><title>Arrastrar para acomodar el recorrido</title></rect>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
+    if(!exporting&&selection?.node===n.id){if(g)html+=`<rect class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" x="${g.bend.x-3}" y="${g.bend.y-3}" width="6" height="6"><title>Arrastrar para acomodar el recorrido</title></rect>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';
   });
-  if(marquee){const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);html+=`<rect class="selection-marquee" x="${r.left}" y="${r.top}" width="${r.right-r.left}" height="${r.bottom-r.top}"/>`;}
-  svg.innerHTML=html;$('object-count').textContent=`${graph.nodes.length} objetos`;
+  if(!exporting&&marquee){const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);html+=`<rect class="selection-marquee" x="${r.left}" y="${r.top}" width="${r.right-r.left}" height="${r.bottom-r.top}"/>`;}
+  return html;
+}
+function renderDiagram(){
+  const svg=$('diagram');
+  svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
+  svg.innerHTML=diagramMarkup();$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
@@ -793,12 +807,60 @@ function bindDiagramWindow(){
 }
 function recordActivity(message,detail=''){activity.unshift({time:new Date().toISOString(),message,detail});activity=activity.slice(0,30);}
 function downloadLocal(filename,body,type){const blob=new Blob([body],{type}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function exportResults(kind){
+function exportStem(){return (graph.title||'sim').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,60);}
+function exportResults(kind,locale='es-AR'){
   if(!result||busy){notice('Calculá el proyecto para exportar resultados vigentes.',true);return;}
-  const sheets=SimproxFiles.tables(graph,result),stem=(graph.title||'simprox').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,60);
+  const sheets=SimproxFiles.tables(graph,result),stem=exportStem();
   if(kind==='xlsx')downloadLocal(stem+'.xlsx',SimproxFiles.xlsx(sheets),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  else{const sheet=sheets[kind==='balances'?1:0];downloadLocal(stem+'-'+sheet.name.toLowerCase()+'.csv',SimproxFiles.csv(sheet.rows),'text/csv;charset=utf-8');}
+  else{
+    const sheet=sheets[kind==='balances'?1:0];
+    downloadLocal(`${stem}-${sheet.name.toLowerCase()}-${locale==='es-AR'?'es-AR':'internacional'}.csv`,SimproxFiles.csv(sheet.rows,locale),'text/csv;charset=utf-8');
+  }
   recordActivity('Resultados exportados',kind);closeMenus();
+}
+function bindDiagramExport(){
+  const dialog=$('diagram-export-dialog'),form=$('diagram-export-form');
+  const format=form.elements.format,scope=form.elements.scope;
+  const status=$('diagram-export-status'),submit=$('diagram-export-submit');
+  const selectedNodes=()=>{
+    const ids=new Set(selection?.nodes??(selection?.node?[selection.node]:[]));
+    return graph.nodes.filter(node=>ids.has(node.id));
+  };
+  function updateOptions(){
+    for(const group of form.querySelectorAll('[data-format]')){
+      group.hidden=!group.dataset.format.split(' ').includes(format.value);
+      group.disabled=group.hidden;
+    }
+  }
+  format.onchange=updateOptions;
+  document.querySelectorAll('[data-diagram-export]').forEach(button=>button.onclick=()=>{
+    scope.options[1].disabled=!selectedNodes().length;
+    if(scope.options[1].disabled)scope.value='all';
+    status.textContent='';
+    closeMenus();
+    updateOptions();
+    if(!dialog.open)dialog.showModal();
+  });
+  form.onsubmit=async event=>{
+    event.preventDefault();
+    if(submit.disabled)return;
+    const options={format:format.value,background:form.elements.background.value,
+      scale:Number(form.elements.scale.value),paper:form.elements.paper.value,
+      orientation:form.elements.orientation.value,margin:Number(form.elements.margin.value),
+      fit:form.elements.fit.value};
+    const nodes=scope.value==='selection'?selectedNodes():graph.nodes;
+    if(!nodes.length){status.textContent='Seleccioná al menos un objeto para exportar.';return;}
+    submit.disabled=true;
+    status.textContent='Preparando diagrama…';
+    try{
+      const stem=exportStem()+(scope.value==='selection'?'-seleccion':'');
+      const blob=await SimDiagramFiles.file(diagramMarkup(nodes,true),graph.title,options);
+      downloadLocal(stem+'.'+options.format,blob,blob.type);
+      recordActivity('Diagrama exportado',options.format);
+      dialog.close();
+    }catch(error){status.textContent=error.message||'No se pudo exportar el diagrama.';}
+    finally{submit.disabled=false;}
+  };
 }
 // Revisión de especificaciones antes de enviar el proceso a DWSIM.
 // Es una verificación estructural, no un cálculo algebraico completo de grados de libertad.
@@ -958,7 +1020,8 @@ async function checkEngine({silent=false}={}){
   return generation===engineCheckGeneration&&engineOnline&&selectedEngine===engine;
 }
 function bindWorkspaceTools(){
-  document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export));
+  document.querySelectorAll('[data-export]').forEach(b=>b.onclick=()=>exportResults(b.dataset.export,b.dataset.csvLocale));
+  bindDiagramExport();
   document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{if(busy)return;$('examples-dialog').close();$('example-select').value=b.dataset.example;resetExample();closeMenus();});
   SimExamplesBrowser.mount({openGuide:id=>{closeMenus();SimGuide.open($('guide-dialog'),$('guide-host'),id);}});
   $('examples-browser-button').onclick=()=>{closeMenus();$('examples-dialog').showModal();$('examples-search').focus();};
