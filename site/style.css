@@ -1806,3 +1806,14 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .diagram-footer,.sim-shell .diagram-footer{justify-content:flex-end}
 .diagram-footer #calculation-state{display:none!important}
 .canvas-caption #recycle-caption{font-style:normal}
+
+/* Consola técnica de diagnóstico: independiente del monitor de conexión. */
+#diagnostics-dialog{width:min(920px,calc(100vw - 24px));max-height:90vh}
+#diagnostics-dialog .dialog-body{max-height:calc(90vh - 62px);overflow:auto}
+.diagnostics-console-header{display:flex;align-items:center;flex-wrap:wrap;gap:10px;justify-content:space-between;margin:15px 0 7px;font-size:12px}
+.diagnostics-console-header label{display:flex;align-items:center;gap:7px}
+.diagnostics-console-header select{font-size:12px;padding:5px 7px}
+.diagnostics-console{box-sizing:border-box;min-height:220px;max-height:48vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2;background:#11191d;color:#c4ded5;border:1px solid #42565a;border-radius:4px;padding:14px;font:11px/1.75 var(--spx-font-mono,monospace);margin:0}
+.diagnostics-status{font-size:12px;margin:7px 0}
+.diagnostics-status strong{font-weight:650}
+@media(max-width:520px){.diagnostics-console{font-size:10px;padding:9px;min-height:180px}.diagnostics-console-header{justify-content:flex-start}}
