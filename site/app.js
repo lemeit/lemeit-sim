@@ -56,7 +56,7 @@ function example(){return {version:1,title:'Mezcla de agua',compounds:['Water'],
 function notice(message,error=false){$('notice').hidden=!message;$('notice').textContent=message;$('notice').classList.toggle('error',error);}
 function persist(){try{localStorage.setItem('lemeit-process-v1',JSON.stringify(graph));}catch{/* Guardar archivo sigue disponible. */}}
 function updateResultValidity(){
-  const element=$('result-validity');if(!element)return;
+  const element=$('result-validity');if(!element||!element.dataset)return;
   const state=busy?'calculating':!hasProject?'none':result&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':'none';
   const labels={none:'Sin resultados',valid:'Resultados vigentes',stale:'Recalcular',calculating:'Calculando…'};
   const descriptions={none:'No hay un cálculo vigente para este proyecto.',valid:'Los resultados corresponden a las condiciones actuales.',stale:'Las condiciones físicas cambiaron desde el último cálculo correcto.',calculating:'El motor seleccionado está resolviendo el proceso.'};
