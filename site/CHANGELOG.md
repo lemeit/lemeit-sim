@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.30.1 — 2026-11-18
+
+- Las llamadas de valores sustituyen la punta abierta por un círculo hueco pequeño, anclado al cuerpo de la flecha de corriente.
+- El terminal sigue al anclaje durante el movimiento. Conserva recorrido adaptativo, nombres simples, exportaciones y conexiones.
+
 ## 0.30.0 — 2026-11-18
 
 - Exportar resultados abre un diálogo previo con formato, datos y separador decimal coma/punto para CSV; recuerda la elección. Excel conserva números y explica que su visualización depende de Excel. Se retiran denominaciones regionales del menú.

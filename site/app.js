@@ -269,9 +269,7 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null,exportRoutes=nul
     // Favorecer el interior del área visible y evitar el rótulo simple sobre la corriente.
     if(vertical<0)score+=overlap(box,{left:anchor.x-90,right:anchor.x+90,top:anchor.y-28,bottom:anchor.y-6})*4;
     if(!exportRoutes)score+=Math.abs((box.left+box.right)/2-(viewport.left+viewport.right)/2)*.01;
-    const ux=side*18/Math.hypot(18,distance),uy=vertical*distance/Math.hypot(18,distance);
-    const tip=`M${anchor.x+ux*7-uy*3} ${anchor.y+uy*7+ux*3} L${anchor.x} ${anchor.y} L${anchor.x+ux*7+uy*3} ${anchor.y+uy*7-ux*3}`;
-    const candidate={x,y,width,anchor,side,vertical,score,line:`M${anchor.x} ${anchor.y} L${elbow.x} ${elbow.y} H${end}`,tip};
+    const candidate={x,y,width,anchor,side,vertical,score,line:`M${anchor.x} ${anchor.y} L${elbow.x} ${elbow.y} H${end}`};
     if(!best||score<best.score)best=candidate;
   }
   return best;
@@ -284,7 +282,7 @@ function renderCallout(n,g,r,feed,exportRoutes){
   const reading=r?`${shown('temperature_C',r.temperature_K-273.15,n,2)} · ${shown('pressure_kPa',r.pressure_Pa/1000,n,2)} · ${shown('mass_flow',r.mass_flow_kg_s,n)}`:feed&&(n.flash_spec||'TP')==='TP'&&(n.flow_basis||'mass')==='mass'?`${shown('temperature_C',n.temperature_C,n,1)} · ${shown('pressure_kPa',n.pressure_kPa,n,2)} · ${shown('mass_flow',n.mass_flow,n)}`:'';
   if(reading){
     const c=calloutGeometry(n,g,exportRoutes);
-    html+=`<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><path class="callout-tip" d="${c.tip}"/><g class="callout-text" transform="translate(${c.x} ${c.y})"><text class="node-reading" x="0" y="0">${reading}</text></g></g>`;
+    html+=`<g class="diagram-callout"><path class="callout-leader" d="${c.line}"/><circle class="callout-tip" cx="${c.anchor.x}" cy="${c.anchor.y}" r="3"/><g class="callout-text" transform="translate(${c.x} ${c.y})"><text class="node-reading" x="0" y="0">${reading}</text></g></g>`;
   }
   return html;
 }
@@ -567,7 +565,7 @@ function updateDiagramGeometry(){
     if(g){for(const path of el.querySelectorAll('.stream-line,.stream-hit'))path.setAttribute('d',g.d);const arrow=el.querySelector('.dwsim-stream-arrow');if(arrow)arrow.setAttribute('transform',g.arrow??'scale(0)');const bend=el.querySelector('[data-bend]');if(bend){bend.setAttribute('x',g.bend.x-3);bend.setAttribute('y',g.bend.y-3);bend.dataset.axis=g.bend.axis;}}
     else{el.querySelector('.equipment-symbol').setAttribute('transform',`scale(${s})`);const handle=el.querySelector('[data-resize]');if(handle){handle.setAttribute('x',t.w*s+2);handle.setAttribute('y',t.h*s+2);}}
     const c=calloutGeometry(n,g),callout=el.querySelector('.diagram-callout');
-    if(callout){callout.querySelector('.callout-leader').setAttribute('d',c.line);callout.querySelector('.callout-tip').setAttribute('d',c.tip);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);}
+    if(callout){callout.querySelector('.callout-leader').setAttribute('d',c.line);const tip=callout.querySelector('.callout-tip');tip.setAttribute('cx',c.anchor.x);tip.setAttribute('cy',c.anchor.y);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);}
     const labelX=g?g.label.x:equipmentLabelX(n),labelY=g?g.label.y:t.h*s+20;
     for(const [selector,offset] of [['.stream-label',0],['.equipment-label',0],['.node-kind',15]]){const label=el.querySelector(selector);if(label){label.setAttribute('x',labelX);label.setAttribute('y',labelY+offset);}}
     for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
