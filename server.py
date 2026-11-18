@@ -224,7 +224,7 @@ def validate_graph(graph, catalog):
     recycle_shape = simple_recycle_shape(graph)
     def visit(ident):
         if ident in active:
-            if not recycle_shape: raise InputError('Recirculación no admitida. Esta versión resuelve únicamente el lazo simple Mezclador → Divisor → Mezclador, sin reacción.')
+            if not recycle_shape: raise InputError('Recirculación no admitida: solo se admiten recirculaciones con lazo simple Mezclador → Divisor → Mezclador, sin reacción.')
             return
         if ident in done: return
         active.add(ident)
