@@ -11,15 +11,21 @@ globalThis.SimEngineRouting=(()=>{
     const recirculation=[...linked.keys()].some(cycle);
     return {types,recirculation};
   }
-  function supports(status,graph){
-    if(!status||!['ready','busy'].includes(status.state)||!Array.isArray(status.supported_equipment))return false;
+  function check(status,graph){
     const need=requirements(graph);
-    return need.types.every(type=>status.supported_equipment.includes(type))
-      &&(!need.recirculation||status.supported_features?.includes('simple_material_recycle')===true);
+    if(!status||!Array.isArray(status.supported_equipment))return {compatible:false,reason:'El gateway no informó las operaciones disponibles.',missing:[],missingFeatures:[]};
+    if(status.state!=='ready')return {compatible:false,reason:status.state==='busy'?'El gateway está ocupado.':'El gateway no está listo.',missing:[],missingFeatures:[]};
+    const missing=need.types.filter(type=>!status.supported_equipment.includes(type));
+    const missingFeatures=need.recirculation&&!status.supported_features?.includes('simple_material_recycle')?['simple_material_recycle']:[];
+    const issues=[];
+    if(missing.length)issues.push('No admite: '+missing.join(', '));
+    if(missingFeatures.length)issues.push('Falta la función de recirculación simple (simple_material_recycle)');
+    return {compatible:issues.length===0,reason:issues.join('; '),missing,missingFeatures};
   }
+  function supports(status,graph){return check(status,graph).compatible;}
   function order(mode,current){
     if(ENGINES.includes(mode))return [mode];
     return current==='debian'?['debian','windows']:['windows','debian'];
   }
-  return {requirements,supports,order};
+  return {requirements,check,supports,order};
 })();

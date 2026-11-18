@@ -211,6 +211,9 @@ async function selectCalculationEngine(mode){
   if(busy||!['auto','windows','debian'].includes(mode))return;
   if(mode!=='auto'&&document.body.dataset.sessionRole!=='admin')return;
   engineMode=mode;$('engine-select').value=mode;
+  // En modo fijo, el destino solicitado es el motor seleccionado aunque esté apagado.
+  // No conservar el identificador del motor anterior después de cambiar el selector.
+  if(mode!=='auto')selectedEngine=mode;
   engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
@@ -1104,7 +1107,8 @@ async function checkEngine({silent=false,exclude=[]}={}){
       lastHttp=statusResponse.status;
       if(!statusResponse.ok)throw Error(status.error||'Gateway sin conexión');
       if(status.state!=='ready')throw Error('Gateway ocupado');
-      if(!SimEngineRouting.supports(status,graph))throw Error('Gateway sin las operaciones requeridas');
+      const compatibility=SimEngineRouting.check(status,graph);
+      if(!compatibility.compatible)throw Error(compatibility.reason||'Gateway incompatible con el proceso');
       const response=await fetch('/api/catalog',{headers:{'X-SIM-Engine':engine},signal:AbortSignal.timeout(12000),cache:'no-store'});
       lastHttp=response.status;
       const data=await readCatalogResponse(response);
