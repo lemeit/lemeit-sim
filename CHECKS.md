@@ -379,3 +379,15 @@ el portal, su versión, los motores, los túneles ni sus credenciales.
 
 - Verificada correspondencia entre los 13 nombres y sus botones Abrir caso. Los nombres son botones nativos, activables con teclado, y reutilizan la carga existente.
 - 152 pruebas aprobadas y build:verified correcto. Sin cambios de motor.
+
+## 0.23.2 · Selección parcial y biblioteca compacta · 17/11/2026
+
+- 162 pruebas JS aprobadas y build correcto, sin despliegue.
+- Casos nuevos: contacto parcial y de borde de equipos; selección de tramos
+  horizontales y verticales; no seleccionar el vacío entre codos; tolerancia
+  de trazo; arrastre del grupo desde un puerto sin reconectar ni editar extremos.
+- Navegador local: rectángulo que toca solo parte de bomba y válvula seleccionó
+  ambos equipos y dos corrientes completas. Al arrastrar la bomba se movieron
+  los cuatro objetos; distancia entre equipos conservada (560 unidades).
+- Verificados biblioteca compacta y Ayuda → Acerca de 0.23.2.
+- No se modificaron cálculos ni motores.

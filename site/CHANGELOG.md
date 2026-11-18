@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.23.2 — 2026-11-17
+
+- En desarrollo: biblioteca y selector de símbolos compactos, sin marco adicional.
+- Selección por intersección parcial de equipos y tramos reales de corrientes, sin exigir encerrarlos por completo ni seleccionar el espacio vacío entre codos.
+- Arrastre del conjunto desde cualquier objeto seleccionado, incluidos puertos y controles, conservando conexiones y distancias. Shift sigue sumando o quitando objetos.
+
 ## 0.23.1 — 2026-11-17
 
 - Selector de diseño dentro de Equipos y corrientes; siluetas DWSIM más diferenciadas y acento azul compatible con ambos temas.

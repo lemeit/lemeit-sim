@@ -443,6 +443,9 @@ function selectAllDiagram(){
 }
 function selectNodes(ids){const unique=[...new Set(ids)];selection=unique.length>1?{nodes:unique}:unique.length?{node:unique[0]}:null;}
 function nodeBounds(n){if(isStream(n)){const pts=streamGeometry(n).points;return {left:Math.min(...pts.map(p=>p.x)),right:Math.max(...pts.map(p=>p.x)),top:Math.min(...pts.map(p=>p.y)),bottom:Math.max(...pts.map(p=>p.y))};}const t=TYPES[n.type],scale=symbolScale(n);return {left:n.x,right:n.x+t.w*scale,top:n.y,bottom:n.y+t.h*scale};}
+function touchesSelection(rect,n){
+  return isStream(n)?SimDiagramInteractions.polylineIntersects(rect,streamGeometry(n).points,3/zoom):SimDiagramInteractions.intersects(rect,nodeBounds(n));
+}
 function fitDiagram(){
   const bounds=graph.nodes.map(nodeBounds);
   viewX=Math.min(0,...bounds.map(b=>b.left-45));
@@ -474,6 +477,13 @@ function bindEvents(){
     if(e.button===1||(e.button===0&&e.altKey)){e.preventDefault();panning={x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:svg.getScreenCTM().inverse()};svg.setPointerCapture(e.pointerId);return;}
     if(busy||e.button!==0)return;
     e.preventDefault();
+    // Una selección múltiple se arrastra desde cualquier parte de sus objetos,
+    // incluidos puertos y controles; Shift conserva su función de sumar/quitar.
+    const groupOwner=e.target.closest('[data-node]')?.dataset.node||e.target.closest('[data-owner]')?.dataset.owner;
+    if(!e.shiftKey&&selection?.nodes?.includes(groupOwner)){
+      dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};
+      svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;
+    }
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
     const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
@@ -486,7 +496,7 @@ function bindEvents(){
     const original=selection;marquee={start:svgPoint(e),end:svgPoint(e),base:e.shiftKey?(selection?.nodes||[selection?.node].filter(Boolean)):[],original};if(!e.shiftKey)selection=null;pending=null;svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});
   });
   svg.addEventListener('pointermove',e=>{
-    if(marquee){marquee.end=svgPoint(e);const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);selectNodes([...marquee.base,...graph.nodes.filter(n=>SimDiagramInteractions.encloses(r,nodeBounds(n))).map(n=>n.id)]);renderDiagram();renderInspector();return;}
+    if(marquee){marquee.end=svgPoint(e);const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);selectNodes([...marquee.base,...graph.nodes.filter(n=>touchesSelection(r,n)).map(n=>n.id)]);renderDiagram();renderInspector();return;}
     if(dragging?.group){const p=svgPoint(e);SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,p.x-dragging.start.x,p.y-dragging.start.y);dragging.moved=true;queueDiagramMotion();return;}
 
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
