@@ -154,7 +154,13 @@ function streamGeometry(n){
   const segment=!source&&target?{a:clean[0],b:clean[1]}:source&&!target?{a:clean.at(-2),b:clean.at(-1)}:longest;
   if(segment.a&&segment.b){
     const length=Math.hypot(segment.b.x-segment.a.x,segment.b.y-segment.a.y);
-    g.arrow=DwsimSymbols.arrowTransform({...segment,length},!source&&target?'in':source&&!target?'out':'center');
+    const position=!source&&target?'in':source&&!target?'out':'center';
+    g.arrow=DwsimSymbols.arrowTransform({...segment,length},position);
+    const ux=length?(segment.b.x-segment.a.x)/length:1,uy=length?(segment.b.y-segment.a.y)/length:0,size=Math.min(length,40);
+    const center=position==='in'?{x:segment.a.x+ux*size/2,y:segment.a.y+uy*size/2}:position==='out'?{x:segment.b.x-ux*size/2,y:segment.b.y-uy*size/2}:{x:(segment.a.x+segment.b.x)/2,y:(segment.a.y+segment.b.y)/2};
+    // Borde del cuerpo de la misma flecha SVG (x=50, y=35 en su escala 0–100).
+    g.arrowAnchor={x:center.x+uy*size*.15,y:center.y-ux*size*.15};
+    g.arrowDirection={x:ux,y:uy};
   }
   g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};g.points=clean;return g;
 }
@@ -233,7 +239,8 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null,exportRoutes=nul
     let longest={length:-1};
     for(let i=1;i<g.points.length;i++){const a=g.points[i-1],b=g.points[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length>longest.length)longest={a,b,length};}
     if(longest.a)tangent={x:longest.b.x-longest.a.x,y:longest.b.y-longest.a.y};
-    anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
+    anchor=g.arrowAnchor??(longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a);
+    tangent=g.arrowDirection??tangent;
   }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
   const width=145,dx=g?0:n.x,dy=g?0:n.y;
   const viewport={left:viewX-dx,top:viewY-dy,right:viewX+1000/zoom-dx,bottom:viewY+520/zoom-dy};
