@@ -12,8 +12,8 @@ test('movimiento individual cruza el origen en ambos ejes y conserva extremos, c
  const pump={type:'Pump',x:30,y:40,pressure_kPa:500};env.moveNode(pump,{start:{x:30,y:40},x:30,y:40},{x:-90,y:80});assert.equal(pump.x,-90);assert.equal(pump.y,80);assert.equal(pump.pressure_kPa,500);
 });
 test('ajustar incluye equipos situados a izquierda y arriba del origen',()=>{
- const env={graph:{nodes:[{left:-300,right:-180,top:-200,bottom:-100},{left:100,right:220,top:30,bottom:130}]},nodeBounds:n=>n,renderDiagram:()=>{}};
- runInNewContext(functions('fitDiagram','moveNode'),env);env.fitDiagram();assert.ok(env.viewX<=-300);assert.ok(env.viewY<=-200);assert.ok(env.viewX+1000/env.zoom>=220);assert.ok(env.viewY+520/env.zoom>=130);
+ const env={graph:{nodes:[{left:-300,right:-180,top:-200,bottom:-100},{left:100,right:220,top:30,bottom:130}]},nodeBounds:n=>n,isStream:()=>true,calloutGeometry:n=>({x:n.right,y:n.top-40,width:200}),renderDiagram:()=>{}};
+ runInNewContext(functions('fitDiagram','moveNode'),env);env.fitDiagram();assert.ok(env.viewX<=-300);assert.ok(env.viewY<=-200);assert.ok(env.viewX+1000/env.zoom>=420);assert.ok(env.viewY+520/env.zoom>=130);
 });
 test('la carga acepta coordenadas negativas y rechaza coordenadas no finitas',()=>{
  const validation=app.slice(app.indexOf('  for(const n of data.nodes)'),app.indexOf('  for(const e of data.edges)'));
