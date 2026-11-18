@@ -27,6 +27,13 @@ const TYPES = {
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 let viewX=0, viewY=0, panning=null, endpointDrag=null, resizing=null, bending=null, paintFrame=0, suppressPaletteUntil=0;
 let marquee=null;
+let gridVisible=false,gridSnap=false;
+const GRID_STEP=20;
+const snapCoordinate=value=>SimDiagramInteractions.snap(value,gridSnap,GRID_STEP);
+function saveCanvasPreferences(){try{localStorage.setItem('sim-canvas-preferences',JSON.stringify({gridVisible,gridSnap}));}catch{}}
+function showGrid(){return `<defs><pattern id="canvas-grid-pattern" width="${GRID_STEP}" height="${GRID_STEP}" patternUnits="userSpaceOnUse"><path d="M ${GRID_STEP} 0 L 0 0 0 ${GRID_STEP}" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width=".7"/></pattern></defs><rect x="-100000" y="-100000" width="200000" height="200000" fill="url(#canvas-grid-pattern)" pointer-events="none" aria-hidden="true"/>`;}
+function refreshCanvasButtons(){for(const [id,on] of [['view-grid',gridVisible],['view-snap',gridSnap],['diagram-grid',gridVisible]]){const button=$(id);if(button)button.setAttribute('aria-pressed',String(on));}}
+
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let unitSystem='engineering';
@@ -138,7 +145,8 @@ function streamGeometry(n){
       const inner=axis==='x'?[A,{x:mid,y:A.y},{x:mid,y:B.y},B]:[A,{x:A.x,y:mid},{x:B.x,y:mid},B];
       if(!clear(inner))continue;
       const length=inner.slice(1).reduce((v,p,i)=>v+Math.abs(p.x-inner[i].x)+Math.abs(p.y-inner[i].y),0);
-      candidates.push({axis,mid,inner,score:length+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?10000:0)});
+      const quality=SimDiagramInteractions.routePenalty([g.a,...inner,g.b]);
+      candidates.push({axis,mid,inner,score:length+quality+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?45:0)});
     }
   }
   candidates.sort((a,b)=>a.score-b.score);
@@ -164,7 +172,7 @@ function streamGeometry(n){
   }
   g.label=longest.a?{x:(longest.a.x+longest.b.x)/2+(longest.a.x===longest.b.x?42:0),y:(longest.a.y+longest.b.y)/2-14}:{x:g.a.x,y:g.a.y-14};g.points=clean;return g;
 }
-function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=value;}
+function setStreamBend(n,axis,value){n.routeAxis=axis;n[axis==='y'?'routeY':'routeX']=snapCoordinate(value);}
 function equipmentLabelX(n){const energyConnected=graph.edges.some(e=>(e.to===n.id&&nodeById(e.from)?.type==='EnergyStream')||(e.from===n.id&&nodeById(e.to)?.type==='EnergyStream'));return TYPES[n.type].w*symbolScale(n)/2+(energyConnected?100:0);}
 const engineHeaders=()=>({'X-SIM-Engine':selectedEngine});
 async function selectCalculationEngine(id){
@@ -317,7 +325,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
 function renderDiagram(){
   const svg=$('diagram');
   svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
-  svg.innerHTML=diagramMarkup();$('object-count').textContent=`${graph.nodes.length} objetos`;
+  svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
@@ -409,7 +417,7 @@ function addNode(type,pos){
   if(busy||!hasProject||!Object.hasOwn(TYPES,type))return;
   if(graph.nodes.length>=30)return notice('Esta versión admite hasta 30 objetos.',true);
   const t=TYPES[type];let number=1;while(graph.nodes.some(n=>n.name===`${t.short} ${number}`))number++;
-  const node={id:'n'+crypto.randomUUID().replaceAll('-','').slice(0,16),type,name:`${t.short} ${number}`,x:pos?.x??290+(graph.nodes.length%4)*45,y:pos?.y??90+(graph.nodes.length%5)*55};
+  const node={id:'n'+crypto.randomUUID().replaceAll('-','').slice(0,16),type,name:`${t.short} ${number}`,x:snapCoordinate(pos?.x??290+(graph.nodes.length%4)*45),y:snapCoordinate(pos?.y??90+(graph.nodes.length%5)*55)};
   if(type==='MaterialStream')Object.assign(node,{temperature_C:25,pressure_kPa:101.325,mass_flow:1,composition:Object.fromEntries(graph.compounds.map((c,i)=>[c,i===0?1:0]))});
   if(type==='Heater'||type==='Cooler')node.outlet_C=type==='Heater'?70:25;
   if(type==='Splitter')node.split=.5;
@@ -591,9 +599,9 @@ function fitDiagram(){
   zoom=Math.min(1,1000/width,520/height);
   renderDiagram();
 }
-function moveNode(n,start,p){
-  const dx=p.x-start.start.x,dy=p.y-start.start.y;
-  n.x=start.x+dx;n.y=start.y+dy;
+function moveNode(n,start,p,constrain=false){
+  const delta=SimDiagramInteractions.constrainDelta(p.x-start.start.x,p.y-start.start.y,constrain);
+  n.x=snapCoordinate(start.x+delta.dx);n.y=snapCoordinate(start.y+delta.dy);
   for(const [key,value] of Object.entries(start.endpoints||{}))n[key]=value+(key.endsWith('X')?n.x-start.x:n.y-start.y);
   if(isStream(n)&&start.routeX!==undefined)n.routeX=start.routeX+n.x-start.x;if(isStream(n)&&start.routeY!==undefined)n.routeY=start.routeY+n.y-start.y;
 }
@@ -633,13 +641,13 @@ function bindEvents(){
   });
   svg.addEventListener('pointermove',e=>{
     if(marquee){marquee.end=svgPoint(e);const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);selectNodes([...marquee.base,...graph.nodes.filter(n=>touchesSelection(r,n)).map(n=>n.id)]);renderDiagram();renderInspector();return;}
-    if(dragging?.group){const p=svgPoint(e);SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,p.x-dragging.start.x,p.y-dragging.start.y);dragging.moved=true;queueDiagramMotion();return;}
+    if(dragging?.group){const p=svgPoint(e),delta=SimDiagramInteractions.constrainDelta(p.x-dragging.start.x,p.y-dragging.start.y,e.shiftKey),first=dragging.group[0];if(first){delta.dx=snapCoordinate(first.x+delta.dx)-first.x;delta.dy=snapCoordinate(first.y+delta.dy)-first.y;}SimDiagramInteractions.translateNodes(graph.nodes,dragging.group,delta.dx,delta.dy);dragging.moved=true;queueDiagramMotion();return;}
 
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
     if(bending){const p=svgPoint(e),dx=p.x-bending.start.x,dy=p.y-bending.start.y;if(!bending.axis&&Math.hypot(dx,dy)<3/zoom)return;bending.axis??=Math.abs(dy)>Math.abs(dx)?'y':'x';setStreamBend(nodeById(bending.node),bending.axis,bending.axis==='y'?p.y:p.x);queueDiagramMotion();return;}
-    if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;queueDiagramMotion();return;}
+    if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;else{const delta=SimDiagramInteractions.constrainDelta(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y,e.shiftKey);endpointDrag.preview={x:snapCoordinate(endpointDrag.start.x+delta.dx),y:snapCoordinate(endpointDrag.start.y+delta.dy)};}queueDiagramMotion();return;}
     if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;queueDiagramMotion();return;}
-    if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p);dragging.moved=true;
+    if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p,e.shiftKey);dragging.moved=true;
     dragging.outside=SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     $('canvas-wrap').classList.toggle('object-drop-delete',dragging.outside);
     $('diagram-trash-zone').hidden=!dragging.outside;
@@ -1053,11 +1061,17 @@ function bindWorkspaceTools(){
     openExample:type=>{$('example-select').value=type;resetExample();closeMenus();}
   });
   $('diagram-select-all').onclick=()=>{closeMenus();selectAllDiagram();};
+  try{const prefs=JSON.parse(localStorage.getItem('sim-canvas-preferences')||'{}');gridVisible=prefs.gridVisible===true;gridSnap=prefs.gridSnap===true;}catch{}
+  $('view-grid').onclick=()=>{gridVisible=!gridVisible;saveCanvasPreferences();renderDiagram();refreshCanvasButtons();closeMenus();};
+  $('diagram-grid').onclick=()=>$('view-grid').click();
+  $('view-snap').onclick=()=>{gridSnap=!gridSnap;saveCanvasPreferences();refreshCanvasButtons();closeMenus();};
+  refreshCanvasButtons();
   $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{renderDiagnostics();$('diagnostics-dialog').showModal();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
   monitorTimer=setInterval(()=>{if($('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
+  $('diagnostics-copy').onclick=async()=>{const button=$('diagnostics-copy'),status=$('diagnostics-copy-status'),content=$('diagnostics-content').innerText;try{if(!navigator.clipboard?.writeText)throw Error('Clipboard API no disponible');await navigator.clipboard.writeText(content);status.textContent='Copiado';button.title='Diagnóstico copiado';}catch{status.textContent='No se pudo copiar. Usá Descargar diagnóstico.';button.title='Copiar diagnóstico';}};
   $('diagnostics-download').onclick=()=>downloadLocal('sim-diagnostico.txt',JSON.stringify({project:graph.title,model:graph.model,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,connectionTrace,activity},null,2),'text/plain;charset=utf-8');
   try{const p=JSON.parse(localStorage.getItem('simprox-ui')||'{}');if(Object.hasOwn(SimproxStreams.systems,p.units)){unitSystem=p.units;SimproxStreams.setSystem(unitSystem);}if(Number.isInteger(p.digits)&&p.digits>=0&&p.digits<=8)resultDigits=p.digits;document.body.classList.toggle('hide-canvas-hints',p.hints===false);}catch{}
   $('settings-button').onclick=()=>{$('settings-unit-system').value=unitSystem;$('settings-digits').value=resultDigits;$('settings-hints').checked=!document.body.classList.contains('hide-canvas-hints');$('settings-dialog').showModal();closeMenus();};
