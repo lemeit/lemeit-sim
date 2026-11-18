@@ -1773,3 +1773,8 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 @media(max-width:420px){.sim-shell :is(#diagram-export-dialog,#data-export-dialog) .diagram-export-options label{grid-template-columns:1fr;gap:4px}}
 
 .node .diagram-callout circle.callout-tip{fill:var(--spx-surface);stroke-width:1;pointer-events:none}
+
+/* Ayudas de edición: el SVG de la cuadrícula no se incluye en los archivos exportados. */
+#diagram-grid[aria-pressed="true"],#view-grid[aria-pressed="true"],#view-snap[aria-pressed="true"]{color:var(--spx-accent);background:var(--spx-accent-dim)}
+#diagnostics-dialog .dialog-copy{margin-left:auto;display:inline-grid;place-items:center;width:30px;height:30px;padding:4px;border:1px solid var(--spx-border);background:transparent;color:var(--spx-text);border-radius:4px;cursor:pointer}
+#diagnostics-dialog .dialog-copy:hover{color:var(--spx-accent)}
