@@ -83,17 +83,23 @@ test('Editor: Ejemplo 6 calculado, archivos de resultados y Acerca de tras recar
   await page.locator('#calculate-button').click();
   await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
   for(const [kind,decimal,suffix,expected] of [
-    ['csv','comma','coma.csv','941,2494715054087;44,919060011504634'],
-    ['csv','point','punto.csv','941.2494715054087,44.919060011504634'],
+    ['csv','comma','corrientes-coma.csv','941,2494715054087;44,919060011504634'],
+    ['csv','point','corrientes-punto.csv','941.2494715054087,44.919060011504634'],
     ['xlsx','point','.xlsx','<c t="n" s="1"><v>941.2494715054087</v></c>'],
   ]){
     await page.getByText('Archivo',{exact:true}).click();
-    await page.getByRole('button',{name:kind==='xlsx'?'Exportar libro Excel (.xlsx)…':'Exportar corrientes · CSV…',exact:true}).click();
+    await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
     const dialog=page.locator('#data-export-dialog');
-    if(kind==='csv')await dialog.locator('[name=decimal]').selectOption(decimal);
+    await dialog.locator('[name=format]').selectOption(kind);
+    if(kind==='csv'){await dialog.locator('[name=scope]').selectOption('streams');await dialog.locator('[name=decimal]').selectOption(decimal);}
     const file=await download(page,()=>dialog.getByRole('button',{name:'Descargar',exact:true}).click());
     assert.ok(file.name.endsWith(suffix),file.name);assert.ok(file.bytes.includes(expected),kind);
   }
+  await page.getByText('Archivo',{exact:true}).click();await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
+  const allDialog=page.locator('#data-export-dialog');await allDialog.locator('[name=format]').selectOption('csv');
+  assert.equal(await allDialog.locator('[name=scope]').inputValue(),'all');
+  const allCsv=await download(page,()=>allDialog.getByRole('button',{name:'Descargar',exact:true}).click());
+  for(const section of ['Corrientes','Balances','Componentes','Datos'])assert.ok(allCsv.bytes.toString().includes(section));
   const svg=await exportDiagram(page,'svg');
   assert.match(svg.bytes.toString(),/F1 · Base acuosa.*25.*°C/s);
 });
