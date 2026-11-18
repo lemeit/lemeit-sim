@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verificar:
-    runs-on: ubuntu-24.04 # Compatible con Chromium de Playwright 1.60.
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -25,8 +25,10 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - run: npm run build:verified
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:exports-browser
+      - name: Verificar exportaciones con Chrome
+        run: npm run test:exports-browser
+        env:
+          PLAYWRIGHT_CHANNEL: chrome
       - name: Validar entradas del servidor
         run: python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation test_examples test_compressor test_tank test_expander -v
       - name: Preparar despliegue sin publicar
