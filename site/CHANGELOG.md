@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.32.0 — 2026-11-18
+
+- El lienzo permite mostrar una cuadrícula y, por separado, ajustar equipos, extremos libres y codos a pasos de 20 unidades.
+- Shift durante el arrastre restringe el movimiento al eje horizontal o vertical. El selector conserva su comportamiento anterior.
+- Se priorizan recorridos ortogonales sin retrocesos ni segmentos diminutos y se conserva el ajuste manual de codos.
+- Diagnóstico y actividad incorpora un botón compacto para copiar el texto visible al portapapeles, con aviso de éxito o error.
+- Configuración visual guardada únicamente en el navegador; el diagrama exportado no contiene cuadrícula. Sin cambios en motores DWSIM ni resultados físicos.
+
 ## 0.31.0 — 2026-11-18
 
 - Exportar resultados como opción principal: todos los datos por defecto. Excel conserva pestañas Corrientes, Balances, Componentes y Datos; CSV completo usa una única tabla rectangular con sección, registro, objeto, campo (incluye unidad) y valor.

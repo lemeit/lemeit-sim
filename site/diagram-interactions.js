@@ -20,6 +20,19 @@ globalThis.SimDiagramInteractions=(()=>{
     return (event.key==='Delete'||event.key==='Backspace')&&
       !event.altKey&&!event.ctrlKey&&!event.metaKey&&!isEditable(event.target);
   }
+  function snap(value,enabled=true,step=20){return enabled&&Number.isFinite(value)?Math.round(value/step)*step:value;}
+  function constrainDelta(dx,dy,shift=false){return !shift?{dx,dy}:Math.abs(dx)>=Math.abs(dy)?{dx,dy:0}:{dx:0,dy};}
+  function routePenalty(points){
+    let penalty=0,previousX=0,previousY=0;
+    for(let i=1;i<points.length;i++){
+      const dx=points[i].x-points[i-1].x,dy=points[i].y-points[i-1].y;
+      if(dx&&dy)throw new Error('El recorrido debe ser ortogonal');
+      if(dx){const sign=Math.sign(dx);if(previousX&&sign!==previousX)penalty+=200;previousX=sign;}
+      if(dy){const sign=Math.sign(dy);if(previousY&&sign!==previousY)penalty+=200;previousY=sign;}
+      if(Math.abs(dx)+Math.abs(dy)<12&&Math.abs(dx)+Math.abs(dy)>0)penalty+=30;
+    }
+    return penalty;
+  }
   function selectionRect(a,b){return {left:Math.min(a.x,b.x),right:Math.max(a.x,b.x),top:Math.min(a.y,b.y),bottom:Math.max(a.y,b.y)};}
   function encloses(outer,inner){return inner.left>=outer.left&&inner.right<=outer.right&&inner.top>=outer.top&&inner.bottom<=outer.bottom;}
   function intersects(a,b){return a.left<=b.right&&a.right>=b.left&&a.top<=b.bottom&&a.bottom>=b.top;}
@@ -41,5 +54,5 @@ globalThis.SimDiagramInteractions=(()=>{
     const keysX=['x','startX','endX','routeX'],keysY=['y','startY','endY','routeY'];
     for(const n of nodes){const original=originals.find(o=>o.id===n.id);if(!original)continue;for(const key of keysX)if(Number.isFinite(original[key]))n[key]=original[key]+dx;for(const key of keysY)if(Number.isFinite(original[key]))n[key]=original[key]+dy;}
   }
-  return Object.freeze({selectionRect,encloses,intersects,polylineIntersects,translateNodes,insideCanvas,outsideCanvas,shouldRemoveAfterDrag,isEditable,isDeleteShortcut});
+  return Object.freeze({selectionRect,encloses,intersects,polylineIntersects,translateNodes,snap,constrainDelta,routePenalty,insideCanvas,outsideCanvas,shouldRemoveAfterDrag,isEditable,isDeleteShortcut});
 })();

@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.28.1](https://img.shields.io/badge/portal-0.28.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.32.0](https://img.shields.io/badge/portal-0.32.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -15,6 +15,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Versión y estado
+
+**0.32.0 — Cuadrícula y edición de corrientes**. Mostrar cuadrícula y ajustar posiciones a pasos de 20 unidades de manera independiente; Shift restringe el movimiento horizontal o vertical. El trazado penaliza retrocesos y segmentos diminutos, y Diagnóstico y actividad incorpora un botón para copiar el texto. No afecta motores ni exportaciones.
 
 **0.31.0 — Resultados completos y rótulos únicos**. Exportar resultados reúne corrientes, balances, componentes y datos: Excel por pestañas o CSV como tabla única (sección, registro, objeto, campo, valor). Exportaciones parciales disponibles en el diálogo. Cada equipo muestra un solo rótulo; el tipo permanece en Propiedades.
 
