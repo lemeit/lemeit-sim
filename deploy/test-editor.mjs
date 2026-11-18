@@ -78,3 +78,10 @@ test('divisor arriba y mezclador debajo: el recorrido evita ambos cuerpos aunque
  for(let i=1;i<data.points.length;i++){const a=data.points[i-1],b=data.points[i];for(const o of boxes){const crosses=a.x===b.x?a.x>o.left&&a.x<o.right&&Math.max(a.y,b.y)>o.top&&Math.min(a.y,b.y)<o.bottom:a.y>o.top&&a.y<o.bottom&&Math.max(a.x,b.x)>o.left&&Math.min(a.x,b.x)<o.right;assert.equal(crosses,false);}}
  assert.equal(data.bend.axis,'y');
 });
+
+test('la referencia sigue el cuerpo de la flecha de alimentación y rota con ella',()=>{
+ const run=editor();const a=run(`const n=nodeById('c1'),g=streamGeometry(n);return {g,c:calloutGeometry(n,g)};`);
+ assert.deepEqual(a.c.anchor,a.g.arrowAnchor);assert.ok(Math.hypot(a.c.anchor.x-a.g.a.x,a.c.anchor.y-a.g.a.y)<=22);
+ const b=run(`graph.edges=[];const n=nodeById('c1');Object.assign(n,{startX:100,startY:100,endX:100,endY:350});const g=streamGeometry(n);return {g,c:calloutGeometry(n,g)};`);
+ assert.deepEqual(b.c.anchor,b.g.arrowAnchor);assert.equal(b.g.arrowDirection.x,0);assert.equal(b.g.arrowDirection.y,1);assert.ok(b.c.anchor.x>100);
+});

@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.6 — 2026-11-18
+
+- Las puntas de las llamadas de valores se anclan al borde del cuerpo de la flecha de su corriente, usando el mismo tramo, escala y orientación que el símbolo SVG.
+- El anclaje se recalcula durante el movimiento y el cambio de recorrido. Mantiene nombres simples, llamadas compactas y conexiones.
+- Regresión de alimentación y corriente vertical: coincidencia entre anclaje de la referencia y cuerpo de la flecha.
+
 ## 0.28.5 — 2026-11-18
 
 - Corrientes: busca alternativas ortogonales por fuera de los equipos cuando el codo guardado cruza un cuerpo. Conserva el codo manual válido y las normales de entrada/salida.
