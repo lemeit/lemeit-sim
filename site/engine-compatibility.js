@@ -16,7 +16,8 @@ globalThis.SimEngineCompatibility=(()=>{
     ['Cooler','Enfriador'],
     ['HeatExchanger','Intercambiador'],
     ['ConversionReactor','Reactor de conversión'],
-    ['EquilibriumReactor','Reactor de equilibrio']
+    ['EquilibriumReactor','Reactor de equilibrio'],
+    ['simple_material_recycle','Recirculación simple · sin reacción']
   ].map(([type,label])=>Object.freeze({type,label})));
   const validVersion=value=>typeof value==='string'&&/^\d+\.\d+\.\d+$/.test(value);
   function compareVersions(gateway,portal){
@@ -27,7 +28,8 @@ globalThis.SimEngineCompatibility=(()=>{
   }
   function capability(status,type){
     if(!status||!Array.isArray(status.supported_equipment))return 'unknown';
-    return status.supported_equipment.includes(type)?'supported':'unsupported';
+    const capabilities=type==='simple_material_recycle'?(status.supported_features||[]):status.supported_equipment;
+    return Array.isArray(capabilities)&&capabilities.includes(type)?'supported':'unsupported';
   }
   function comparison(windows,debian){
     return OPERATIONS.map(operation=>({
