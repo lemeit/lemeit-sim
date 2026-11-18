@@ -1801,3 +1801,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .diagram-footer #result-validity[data-state='stale']::before{background:var(--spx-moderate)}
 .diagram-footer #result-validity[data-state='calculating']{color:var(--spx-accent)}
 .diagram-footer #result-validity[data-state='calculating']::before{background:var(--spx-accent)}
+
+/* Un solo estado visible de resultados en el extremo derecho del lienzo. */
+.diagram-footer,.sim-shell .diagram-footer{justify-content:flex-end}
+.diagram-footer #calculation-state{display:none!important}
