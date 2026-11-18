@@ -127,8 +127,24 @@ function streamGeometry(n){
   const endNormal=target?normalForPort(nodeById(target.to),target.toPort||'in',target.toIndex||0):{x:-travel.x,y:-travel.y};
   const routeAxis=n.routeAxis||(startNormal.y&&endNormal.y?'y':'x');
   const stub=28,A={x:g.a.x+startNormal.x*stub,y:g.a.y+startNormal.y*stub},B={x:g.b.x+endNormal.x*stub,y:g.b.y+endNormal.y*stub};
+  const obstacles=graph.nodes.filter(n=>!isStream(n)).map(n=>{const t=TYPES[n.type],s=symbolScale(n);return {left:n.x-10,right:n.x+t.w*s+10,top:n.y-10,bottom:n.y+t.h*s+10};});
+  const clear=pts=>pts.slice(1).every((b,i)=>{const a=pts[i];return obstacles.every(o=>a.x===b.x?!(a.x>o.left&&a.x<o.right&&Math.max(a.y,b.y)>o.top&&Math.min(a.y,b.y)<o.bottom):!(a.y>o.top&&a.y<o.bottom&&Math.max(a.x,b.x)>o.left&&Math.min(a.x,b.x)<o.right));});
+  const candidates=[];
+  for(const axis of [routeAxis,routeAxis==='x'?'y':'x']){
+    const requested=axis==='x'?n.routeX??(A.x+B.x)/2:n.routeY??(A.y+B.y)/2;
+    const mids=[requested,...obstacles.flatMap(o=>axis==='x'?[o.left-8,o.right+8]:[o.top-8,o.bottom+8])];
+    for(const mid of mids){
+      const inner=axis==='x'?[A,{x:mid,y:A.y},{x:mid,y:B.y},B]:[A,{x:A.x,y:mid},{x:B.x,y:mid},B];
+      if(!clear(inner))continue;
+      const length=inner.slice(1).reduce((v,p,i)=>v+Math.abs(p.x-inner[i].x)+Math.abs(p.y-inner[i].y),0);
+      candidates.push({axis,mid,inner,score:length+(axis===routeAxis?0:30)+Math.abs(mid-requested)*.1-(axis===routeAxis&&mid===requested&&(n.routeX!==undefined||n.routeY!==undefined)?10000:0)});
+    }
+  }
+  candidates.sort((a,b)=>a.score-b.score);
+  const chosen=candidates[0];
   let points;
-  if(routeAxis==='y'){const mid=n.routeY??(A.y+B.y)/2;g.mid=mid;g.bend={x:(A.x+B.x)/2,y:mid,axis:'y'};points=[g.a,A,{x:A.x,y:mid},{x:B.x,y:mid},B,g.b];}
+  if(chosen){g.mid=chosen.mid;g.bend=chosen.axis==='x'?{x:chosen.mid,y:(A.y+B.y)/2,axis:'x'}:{x:(A.x+B.x)/2,y:chosen.mid,axis:'y'};points=[g.a,...chosen.inner,g.b];}
+  else if(routeAxis==='y'){const mid=n.routeY??(A.y+B.y)/2;g.mid=mid;g.bend={x:(A.x+B.x)/2,y:mid,axis:'y'};points=[g.a,A,{x:A.x,y:mid},{x:B.x,y:mid},B,g.b];}
   else{const mid=n.routeX??(A.x+B.x)/2;g.mid=mid;g.bend={x:mid,y:(A.y+B.y)/2,axis:'x'};points=[g.a,A,{x:mid,y:A.y},{x:mid,y:B.y},B,g.b];}
   const clean=[];
   for(const p of points){if(clean.length&&p.x===clean.at(-1).x&&p.y===clean.at(-1).y)continue;while(clean.length>1){const prev=clean.at(-2),last=clean.at(-1),aligned=(prev.x===last.x&&last.x===p.x)||(prev.y===last.y&&last.y===p.y),forward=(last.x-prev.x)*(p.x-last.x)+(last.y-prev.y)*(p.y-last.y)>=0;if(!aligned||!forward)break;clean.pop();}clean.push(p);}
@@ -218,7 +234,7 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
     if(longest.a)tangent={x:longest.b.x-longest.a.x,y:longest.b.y-longest.a.y};
     anchor=longest.a?{x:(longest.a.x+longest.b.x)/2,y:(longest.a.y+longest.b.y)/2}:g.a;
   }else{const t=TYPES[n.type],scale=symbolScale(n);anchor={x:t.w*scale*.8,y:t.h*scale*.2};}
-  const width=240,dx=g?0:n.x,dy=g?0:n.y;
+  const width=145,dx=g?0:n.x,dy=g?0:n.y;
   const viewport={left:viewX-dx,top:viewY-dy,right:viewX+1000/zoom-dx,bottom:viewY+520/zoom-dy};
   const overlap=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
   const obstacles=[];
@@ -231,21 +247,21 @@ function calloutGeometry(n,g=isStream(n)?streamGeometry(n):null){
   }
   // Examinar ambos lados y alturas: el resultado depende del espacio real del lienzo.
   let best;
-  for(const distance of [32,64,96])for(const side of [1,-1])for(const vertical of [-1,1]){
-    const elbow={x:anchor.x+side*28,y:anchor.y+vertical*distance},end=elbow.x+side*width;
+  for(const distance of [20,40,80])for(const side of [1,-1])for(const vertical of [-1,1]){
+    const elbow={x:anchor.x+side*18,y:anchor.y+vertical*distance},end=elbow.x+side*width;
     const x=Math.min(elbow.x,end)+6,y=elbow.y-8;
     const box={left:x-4,right:x+width,top:y-14,bottom:y+5};
     const area=(box.right-box.left)*(box.bottom-box.top);
-    let score=(area-overlap(box,viewport))*20+(distance-32)*2;
+    let score=(area-overlap(box,viewport))*20+(distance-20)*2;
     // Al cambiar el sentido u orientación del tramo, girar hacia su zona exterior.
     const preferredSide=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?1:-1):(tangent.x>=0?1:-1);
     const preferredVertical=Math.abs(tangent.y)>Math.abs(tangent.x)?(tangent.y>0?-1:1):-1;
-    score+=(side===preferredSide?0:20)+(vertical===preferredVertical?0:20);
+    score+=(side===preferredSide?0:20)+(vertical===preferredVertical?0:80);
     for(const obstacle of obstacles)score+=overlap(box,obstacle)*obstacle.weight;
     // Favorecer el interior del área visible y evitar el rótulo simple sobre la corriente.
     if(vertical<0)score+=overlap(box,{left:anchor.x-90,right:anchor.x+90,top:anchor.y-28,bottom:anchor.y-6})*4;
     score+=Math.abs((box.left+box.right)/2-(viewport.left+viewport.right)/2)*.01;
-    const ux=side*28/Math.hypot(28,distance),uy=vertical*distance/Math.hypot(28,distance);
+    const ux=side*18/Math.hypot(18,distance),uy=vertical*distance/Math.hypot(18,distance);
     const tip=`M${anchor.x+ux*7-uy*3} ${anchor.y+uy*7+ux*3} L${anchor.x} ${anchor.y} L${anchor.x+ux*7+uy*3} ${anchor.y+uy*7-ux*3}`;
     const candidate={x,y,width,anchor,side,vertical,score,line:`M${anchor.x} ${anchor.y} L${elbow.x} ${elbow.y} H${end}`,tip};
     if(!best||score<best.score)best=candidate;

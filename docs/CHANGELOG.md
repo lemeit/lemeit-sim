@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.28.5 — 2026-11-18
+
+- Corrientes: busca alternativas ortogonales por fuera de los equipos cuando el codo guardado cruza un cuerpo. Conserva el codo manual válido y las normales de entrada/salida.
+- Regresión del caso divisor arriba y mezclador debajo con codo guardado al lado opuesto; todos los tramos quedan fuera de ambos cuerpos.
+- Llamadas compactas: línea horizontal 145 en lugar de 240, quiebre inicial 18 en lugar de 28 y distancia preferida 20 en lugar de 32. Mantiene alternativas más separadas si hay obstáculos.
+
 ## 0.28.4 — 2026-11-18
 
 - Puertos de mezclador, divisor, compresor, expansor y bomba ajustados a las caras de conexión, evitando esquinas extremas. Conserva índices y topología de proyectos.
