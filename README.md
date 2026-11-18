@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.28.2](https://img.shields.io/badge/portal-0.28.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.28.1](https://img.shields.io/badge/portal-0.28.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -16,7 +16,15 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 ## Versión y estado
 
-**0.28.2 — Llamadas adaptativas**. Las referencias de valores evalúan posiciones a izquierda, derecha, arriba y abajo para reducir salidas del área visible y cruces con equipos o corrientes. Se recalculan con la geometría; nombres sin flecha.
+**0.28.3 — Llamadas adaptativas**. Las referencias de valores evalúan posiciones a izquierda, derecha, arriba y abajo para reducir salidas del área visible y cruces con equipos o corrientes. Se conserva la navegación interna publicada y los nombres sin flecha.
+
+**0.28.1 — Llamadas solo para valores**. Los nombres y tipos son rótulos simples. Las llamadas instrumentales se reservan para temperatura, presión y caudal; no se dibujan cuando no hay valores para mostrar.
+
+**0.28.0 — Llamadas en el diagrama**. Nombres, tipos y valores se agrupan en referencias instrumentales con línea fina quebrada y flecha abierta hacia su corriente o equipo. Acompañan el movimiento y el cambio de tamaño; Ajustar diagrama incluye los textos.
+
+**0.27.1 — Corrientes más claras**. Energía con línea de trazos en el listado y el diagrama DWSIM, también al seleccionar. El ajuste del recorrido usa un pequeño cuadrado visible solo en la corriente seleccionada; se conservan conexiones y arrastre.
+
+**0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
 
 **0.26.2 — Identificación técnica de los motores**. Estado de motores muestra Windows 11 Home Single Language 25H2 y GNU/Linux Debian (versión pendiente de confirmar), con características declaradas del equipo principal. Estos datos descriptivos no indican disponibilidad ni se obtienen mediante detección remota. El selector conserva Motor principal y Motor alternativo; las guías siguen centradas en el uso del simulador.
 

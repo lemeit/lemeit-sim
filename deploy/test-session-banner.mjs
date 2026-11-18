@@ -23,3 +23,12 @@ test('administrador ve su rol y sesión administrativa',async()=>{
 test('revalidación detecta revocación sin navegación automática',async()=>{
  const h=setup();await settle();h.state.data={authenticated:false};h.timers.find(t=>t.ms===60000).f();await settle();assert.equal(h.get('session-banner').dataset.state,'expired');assert.equal(h.get('session-login').hidden,false);assert.equal(h.get('session-name').textContent,'Física <Grupo A>');
 });
+
+test('la cabecera oculta Administración tras revocar una sesión administradora',async()=>{
+ const h=setup('admin');await settle();
+ assert.equal(h.get('admin-nav-link').hidden,false);
+ h.state.data={authenticated:false};
+ h.listeners.visibilitychange();
+ await settle();
+ assert.equal(h.get('admin-nav-link').hidden,true);
+});
