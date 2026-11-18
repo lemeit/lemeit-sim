@@ -54,6 +54,9 @@ test('los cambios físicos, el cambio de motor y la ventana separada conservan l
  assert.match(app,/resultValidity:e\.data\.resultValidity|lastCalculation,resultValidity/);
  assert.match(app,/resultValidity=e\.data\.resultValidity==='stale'/);
  assert.match(html,/id="result-validity"[^>]*role="status"/);
+ assert.match(html,/id="calculation-state"[^>]*hidden[^>]*aria-hidden="true"/);
+ assert.match(css,/\.diagram-footer #calculation-state\{display:none!important\}/);
+ assert.match(css,/\.diagram-footer,\.sim-shell \.diagram-footer\{justify-content:flex-end\}/);
  assert.doesNotMatch(html,/Los cambios invalidan los resultados anteriores\./);
  assert.match(css,/#result-validity\[data-state='valid'\]/);
  assert.match(css,/#result-validity\[data-state='stale'\]/);
