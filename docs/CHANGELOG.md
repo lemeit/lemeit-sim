@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.35.0 — 2026-11-18
+
+- Nuevo Ejemplo 17, recirculación estacionaria de agua sin reacción con mezclador y divisor (60 % producto / 40 % retorno).
+- Algoritmo limitado de corte virtual, iteraciones acotadas y tolerancias de convergencia. La API anuncia `simple_material_recycle`; los gateways anteriores bloquean el cálculo en la interfaz.
+- El rótulo del lienzo distingue diagramas con/sin recirculación. Reactores de conversión y equilibrio existentes permanecen sin cambios; CSTR/PFR y lazos con reacción quedan pendientes.
+- La fórmula analítica es referencia didáctica; la validación física con motores Windows y Debian debe realizarse después de actualizar ambos backends.
+
 ## 0.34.1 — 2026-11-18
 
 - El pie del diagrama muestra una sola vez el estado del cálculo, a la derecha y con el color correspondiente.
