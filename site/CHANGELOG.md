@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.34.0 — 2026-11-18
+
+- El pie del diagrama reemplaza la advertencia permanente por tres estados dinámicos: **Sin resultados**, **Resultados vigentes** y **Recalcular**; durante una resolución muestra **Calculando…**.
+- Los cambios físicos posteriores a un cálculo correcto invalidan los resultados; cambios exclusivamente visuales (mover equipos, codos, zoom, cuadrícula) no lo hacen.
+- Abrir o crear otro proyecto restaura **Sin resultados**. Cambiar el motor después de calcular exige volver a ejecutar el cálculo en el motor elegido.
+- Se sincroniza la vigencia de resultados en la ventana separada, sin modificar resultados DWSIM ni formatos de exportación.
+
 ## 0.33.0 — 2026-11-18
 
 - Estado de motores y Administración comparan lado a lado las operaciones que anuncian los gateways Windows y Debian (`supported_equipment`).

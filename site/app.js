@@ -36,6 +36,7 @@ function refreshCanvasButtons(){for(const [id,on] of [['view-grid',gridVisible],
 
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
+let resultValidity='none'; // none | stale | valid; solo resultados calculados pueden quedar obsoletos.
 let unitSystem='engineering';
 let selectedEngine='windows',engineCheckGeneration=0; // Selección explícita; no se realiza failover.
 let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
@@ -54,11 +55,20 @@ function example(){return {version:1,title:'Mezcla de agua',compounds:['Water'],
 
 function notice(message,error=false){$('notice').hidden=!message;$('notice').textContent=message;$('notice').classList.toggle('error',error);}
 function persist(){try{localStorage.setItem('lemeit-process-v1',JSON.stringify(graph));}catch{/* Guardar archivo sigue disponible. */}}
+function updateResultValidity(){
+  const element=$('result-validity');if(!element||!element.dataset)return;
+  const state=busy?'calculating':!hasProject?'none':result&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':'none';
+  const labels={none:'Sin resultados',valid:'Resultados vigentes',stale:'Recalcular',calculating:'Calculando…'};
+  const descriptions={none:'No hay un cálculo vigente para este proyecto.',valid:'Los resultados corresponden a las condiciones actuales.',stale:'Las condiciones físicas cambiaron desde el último cálculo correcto.',calculating:'El motor seleccionado está resolviendo el proceso.'};
+  element.dataset.state=state;element.textContent=labels[state];element.title=descriptions[state];
+}
 function changed({physical=true}={}){
-  if(physical){revision++;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent='Cambios pendientes de calcular';}
+  if(physical){revision++;if(resultValidity==='valid')resultValidity='stale';result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);
 }
 function updateControls(){
+  updateResultValidity();
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
   $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
@@ -179,6 +189,7 @@ async function selectCalculationEngine(id){
   if(busy||!['windows','debian'].includes(id))return;
   selectedEngine=id;engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   const element=$('engine-select');element.value=id;
+  if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   $('calculation-state').textContent='Comprobá el motor elegido antes de calcular';
   updateControls();paintConnection();
@@ -508,7 +519,8 @@ async function calculate(){
 
   const selectedIsReady=await checkEngine(); // Verificación inmediata sin conmutación automática.
   if(!selectedIsReady)return notice('El motor seleccionado no está disponible. No se utilizará otro automáticamente.',true);
-  notice('');busy=true;document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
+  notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
+  if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now();let calculationHttp=null;
   lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'running',message:'Cálculo iniciado · solicitud enviada al motor.'});renderServerDetails();
@@ -524,9 +536,9 @@ async function calculate(){
     const response=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json',...engineHeaders()},body:JSON.stringify(payload)});calculationHttp=response.status;const data=await response.json();
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
-    lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
+    lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
   }catch(error){lastCalculation={time:new Date().toISOString(),engine:selectedEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
-  finally{busy=false;renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
+  finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);}
 }
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
@@ -555,6 +567,7 @@ function loadGraph(data){
   const ids=new Set();
   for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y))throw new Error('El archivo tiene objetos inválidos.');if(n.routeAxis!==undefined&&!['x','y'].includes(n.routeAxis))throw new Error('Recorrido de corriente inválido.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const [key,allowed] of Object.entries({flash_spec:['TP','PH','PS','PV','TV'],flow_basis:['mass','molar'],composition_basis:['mass','molar']}))if(n[key]!==undefined&&!allowed.includes(n[key]))throw new Error('Especificación de corriente inválida.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
+  resultValidity='none';lastCalculation=null;
   graph=structuredClone(data);if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
@@ -790,7 +803,7 @@ function bindPanelResize(){
 
 function publishWorkspace(physical=true){
   if(!workspaceChannel||applyingWorkspace||!hasProject)return;
-  workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation});
+  workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity});
 }
 function toolIcon(name){
   const paths={new:'M6 3h8l4 4v14H6z M14 3v5h5 M9 14h6 M12 11v6',open:'M3 7h7l2 3h9l-3 10H3z M3 7V4h7l2 3h6v3',save:'M4 3h14l3 3v15H3V3z M7 3v6h10V3 M7 21v-8h10v8',library:'M4 5h3v15H4z M10 5h3v15h-3z M16 5l3-1 4 15-3 1z',focus:'M9 3H3v6 M15 3h6v6 M21 15v6h-6 M9 21H3v-6',panels:'M3 4h18v16H3z M8 4v16 M16 4v16',popout:'M14 3h7v7 M21 3l-11 11 M10 5H4v15h15v-6',fullscreen:'M8 3H3v5 M16 3h5v5 M21 16v5h-5 M8 21H3v-5',fit:'M3 3h6 M3 3v6 M15 3h6v6 M21 15v6h-6 M9 21H3v-6 M8 8h8v8H8z',run:'M7 4l14 8-14 8z'};
@@ -811,7 +824,7 @@ function bindDiagramWindow(){
     if(e.data?.type==='request'){publishWorkspace(false);return;}
     if(e.data?.type!=='state'||dragging||endpointDrag||resizing||bending)return;
     const previous={viewX,viewY,zoom,selection,result};applyingWorkspace=true;
-    try{loadGraph(e.data.graph);viewX=previous.viewX;viewY=previous.viewY;zoom=previous.zoom;selection=previous.selection&&nodeById(previous.selection.node)?previous.selection:null;if(!e.data.physical){result=e.data.result??null;lastCalculation=e.data.lastCalculation??lastCalculation;if(result)renderResults();else{$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';}}renderDiagram();renderInspector();}catch{notice('No se pudo sincronizar el diagrama recibido.',true);}finally{applyingWorkspace=false;}
+    try{loadGraph(e.data.graph);viewX=previous.viewX;viewY=previous.viewY;zoom=previous.zoom;selection=previous.selection&&nodeById(previous.selection.node)?previous.selection:null;resultValidity=e.data.resultValidity==='stale'?'stale':e.data.resultValidity==='valid'&&e.data.result?'valid':'none';if(!e.data.physical){result=e.data.result??null;lastCalculation=e.data.lastCalculation??lastCalculation;if(result)renderResults();else{$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';}}updateResultValidity();renderDiagram();renderInspector();}catch{notice('No se pudo sincronizar el diagrama recibido.',true);}finally{applyingWorkspace=false;}
   };
   $('diagram-add').innerHTML='<option value="">Agregar…</option>'+Object.entries(TYPES).map(([type,t])=>`<option value="${type}">${esc(t.label)}</option>`).join('');$('diagram-add').onchange=e=>{if(e.target.value)addNode(e.target.value,{x:viewX+300/zoom,y:viewY+180/zoom});e.target.value='';};
   const separateURL=new URL(location.href);separateURL.search='';separateURL.searchParams.set('diagram','1');separateURL.searchParams.set('workspace',workspaceId);$('diagram-popout').href=separateURL.href;
@@ -1080,7 +1093,7 @@ function bindWorkspaceTools(){
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
   $('unit-calculator-button').onclick=()=>{closeMenus();SimUnitCalculator.open(graph);};
   document.querySelectorAll('a[href="ejemplos.html"]').forEach(link=>link.onclick=e=>{e.preventDefault();closeMenus();document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());SimGuide.open($('guide-dialog'),$('guide-host'));});
-  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();graph=emptyProject();hasProject=false;selection=pending=result=null;$('project-title').value=graph.title;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados';renderDiagram();renderInspector();renderCompounds();closeMenus();};
+  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();graph=emptyProject();hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;$('project-title').value=graph.title;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados';renderDiagram();renderInspector();renderCompounds();closeMenus();};
   const dock=$('results-panel');$('results-close').onclick=()=>{if(document.body.classList.contains('results-window'))window.close();else dock.hidden=true;};$('view-results').onclick=()=>{dock.hidden=false;closeMenus();};
   const resultURL=new URL(location.href);resultURL.search='';resultURL.searchParams.set('results','1');resultURL.searchParams.set('workspace',workspaceId);$('results-popout').href=resultURL.href;
   $('results-popout').onclick=e=>{e.preventDefault();const opened=window.open(resultURL.href,'simprox-results-'+workspaceId,'popup,width=1100,height=650,resizable=yes,scrollbars=yes');if(!opened)notice('Permití la ventana emergente para separar los resultados.');};$('view-results-popout').onclick=()=>$('results-popout').click();

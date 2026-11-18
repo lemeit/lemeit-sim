@@ -1791,3 +1791,13 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #engine-compat-table .compat-supported{color:var(--spx-good)}
 #engine-compat-table .compat-unsupported{color:var(--spx-moderate)}
 #engine-compat-table .compat-unknown{color:var(--spx-text-dim)}
+
+/* Estado de vigencia de resultados: solo cambia al modificar condiciones físicas o calcular. */
+.diagram-footer #result-validity{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-weight:600}
+.diagram-footer #result-validity::before{content:'';width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--spx-text-dim)}
+.diagram-footer #result-validity[data-state='valid']{color:var(--spx-good)}
+.diagram-footer #result-validity[data-state='valid']::before{background:var(--spx-good)}
+.diagram-footer #result-validity[data-state='stale']{color:var(--spx-moderate)}
+.diagram-footer #result-validity[data-state='stale']::before{background:var(--spx-moderate)}
+.diagram-footer #result-validity[data-state='calculating']{color:var(--spx-accent)}
+.diagram-footer #result-validity[data-state='calculating']::before{background:var(--spx-accent)}
