@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.35.1 — 2026-11-18
+
+- Herramientas → Diagnóstico se convierte en consola técnica con eventos estructurados, filtro de advertencias/errores, tiempos, motor, versión y HTTP.
+- Se diferencian explícitamente la comprobación de conexión, validación de capacidades, solicitud POST, respuesta del backend y fallo previo al envío; sin inventar pasos internos de DWSIM.
+- Reporte JSON descargable o copiable con metadatos limitados y sin cuerpos de solicitud, credenciales ni rutas privadas. Registro limitado a 100 eventos locales; se pierde al recargar.
+- Solo afecta al frontend: no modifica la selección manual de motores, ecuaciones, gateways ni los resultados de simulación.
+
 ## 0.35.0 — 2026-11-18
 
 - Nuevo Ejemplo 17, recirculación estacionaria de agua sin reacción con mezclador y divisor (60 % producto / 40 % retorno).
