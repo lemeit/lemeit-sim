@@ -7,7 +7,7 @@ function fixture(){
   const store=new Map(),elements=new Map(),messages=[];
   const get=id=>{if(!elements.has(id))elements.set(id,{onclick:null,addEventListener(){},showModal(){},close(){},replaceChildren(){},textContent:'',append(){}});return elements.get(id)};
   const current={version:1,title:'Mi proceso',compounds:['Water'],model:'Steam Tables (IAPWS-IF97)',nodes:[],edges:[]};
-  const context=vm.createContext({localStorage:{getItem:key=>store.get(key)||null,setItem:(key,val)=>store.set(key,val)},document:{getElementById:get},crypto:{randomUUID:()=>String(store.size+1)},structuredClone,Date,window:{confirm:()=>true}});
+  const context=vm.createContext({localStorage:{getItem:key=>store.get(key)||null,setItem:(key,val)=>store.set(key,val)},document:{getElementById:get,createElement:()=>({className:'',textContent:'',type:'',onclick:null,append(){}})},crypto:{randomUUID:()=>String(store.size+1)},structuredClone,Date,window:{confirm:()=>true}});
   vm.runInContext(moduleSource,context);
   const library=vm.runInContext('SimProjectLibrary',context);
   library.bind({getGraph:()=>current,hasProject:()=>true,loadGraph:g=>Object.assign(current,g),notice:m=>messages.push(m),closeMenus(){}});
