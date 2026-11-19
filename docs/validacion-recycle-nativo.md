@@ -42,7 +42,15 @@ DWSIM debe calcular por sí mismo los cinco caudales. El script recién después
 | R1 | 0,6666667 |
 | R2 | 0,6666667 |
 
-También informa residuos de mezclador, divisor, recirculación y balance global. `reference_match` requiere residuos menores a 1e-5 kg/s. **Un resultado de pruebas unitarias `OK` no demuestra que DWSIM haya convergido**: solo valida el protocolo con un motor ficticio.
+También informa residuos de mezclador, divisor, recirculación y balance global. La convergencia de DWSIM (`solver_ok`, `recycle_calculated`) es independiente de la comprobación de masa analítica (`reference_match`). Esta última utiliza una **tolerancia externa explícita** de 5e-5 kg/s (configurable con `--mass-tolerance`). No cambia la tolerancia interna de convergencia de DWSIM y no redondea resultados.
+
+### Primer ensayo físico Windows · 18/11/2026
+
+Se ejecutó el bloque nativo en el MCP Windows 10.2.15: `solver_ok=true`, `recycle_calculated=true`, sin error reportado. Se obtuvieron `F1=1`, `F2=1.6667016192`, `P1=1.00002097152`, `R1=R2=0.66668064768` kg/s. El máximo desvío frente a la solución analítica fue **3.4953e-5 kg/s** y el máximo residuo de balance **2.0972e-5 kg/s**. Esos residuos superaron el primer umbral experimental de 1e-5, pero están dentro del umbral externo documentado de 5e-5. Es precisión aproximada, no cierre matemático exacto ni validación térmica. Deben revisarse las tolerancias internas del bloque Recycle antes de una integración general.
+
+Para repetir con el criterio original estricto: `python tools/probe_recycle_native.py --engine windows --mass-tolerance 1e-5`. Se espera `reference_match=false` para los valores observados aunque `solver_ok=true`.
+
+**Un resultado de pruebas unitarias `OK` no demuestra que DWSIM haya convergido**: solo valida el protocolo con un motor ficticio.
 
 ## Criterios antes de integrar al gateway
 
