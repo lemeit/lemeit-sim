@@ -11,3 +11,11 @@
 .exercise-note-row {display:flex;gap:8px;align-items:flex-start;margin:8px 0}
 .exercise-note-row textarea {flex:1;min-width:0}
 #exercise-dialog {width:min(650px,calc(100vw - 30px));max-width:650px}
+
+.local-project-list{display:grid;gap:9px;max-height:min(60vh,490px);overflow-y:auto;padding-block:8px}
+.local-project-entry{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--spx-border,#aaa);padding:10px;border-radius:5px}
+.local-project-info{display:grid;gap:4px;min-width:0;overflow-wrap:anywhere}
+.local-project-info small{opacity:.7}
+.local-project-actions,.local-project-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.local-project-controls{padding:12px 0}
+#local-project-dialog{width:min(720px,calc(100vw - 28px));max-width:720px}
