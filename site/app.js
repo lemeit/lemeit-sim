@@ -549,7 +549,9 @@ async function calculate(){
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
-  const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;let calculationHttp=null,simulationRequested=false,transportFailed=false;
+  const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;
+   // El backend recibe solo el modelo físico; los metadatos didácticos son locales.
+   delete payload.learning;delete payload.exercise;delete payload.annotations;let calculationHttp=null,simulationRequested=false,transportFailed=false;
   lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
