@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.39.0 — 2026-11-19
+
+- Unificación del título del proyecto y ejercicio: el editor didáctico reutiliza el nombre del proyecto y no crea otro título.
+- Biblioteca de proyectos locales con lista, apertura, borrado, guardado y copia independiente; no es almacenamiento en la nube.
+- Se conserva «Recuperar último proyecto» y la exportación/importación JSON para trasladar proyectos entre dispositivos.
+
 ## 0.38.1 — 2026-11-19
 
 - Ajuste del ancho del botón «Ejercicio y notas…» en la barra superior: ya no se recorta el texto.
