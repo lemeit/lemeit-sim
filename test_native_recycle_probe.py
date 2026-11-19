@@ -32,6 +32,20 @@ class NativeRecycleProbeTests(unittest.TestCase):
         result=native_probe(FakeEngine(bad=True))
         self.assertFalse(result['reference_match'])
         self.assertGreater(abs(result['residuals_kg_s']['recycle']), .1)
+    def test_windows_observed_values_with_explicit_tolerance(self):
+        observed={'F1':1.0,'F2':1.6667016192,'P1':1.00002097152,
+                  'R1':0.66668064768,'R2':0.66668064768}
+        class ObservedEngine(FakeEngine):
+            def call(self,tool,**kwargs):
+                if tool=='dwsim_stream_get_results':
+                    return {'mass_flow_kg_s':observed[kwargs['name']]}
+                return super().call(tool,**kwargs)
+        m=ObservedEngine()
+        result=native_probe(m)
+        self.assertTrue(result['reference_match'])
+        self.assertLess(result['max_balance_residual_kg_s'],5e-5)
+        self.assertGreater(result['max_deviation_kg_s'],1e-5)
+        self.assertFalse(native_probe(ObservedEngine(),mass_tolerance_kg_s=1e-5)['reference_match'])
     def test_failure_closes_flowsheet(self):
         m=FakeEngine(fails=True)
         with self.assertRaisesRegex(RuntimeError, 'No convergence'):
