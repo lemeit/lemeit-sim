@@ -59,7 +59,9 @@ def native_probe(engine, timeout_s=30, mass_tolerance_kg_s=5e-5):
         max_deviation=max(abs(x) for x in deviations.values())
         max_residual=max(abs(x) for x in residuals.values())
         finite=all(math.isfinite(x) for x in flows.values())
-        reference_match=(finite and max_deviation<=mass_tolerance_kg_s
+        reference_match=(finite and recycle.get('calculated') is True
+                         and not recycle.get('error')
+                         and max_deviation<=mass_tolerance_kg_s
                          and max_residual<=mass_tolerance_kg_s)
         return {'method':'DWSIM native Recycle', 'solver_ok':solved['ok'],
                 'recycle_calculated':recycle.get('calculated'),
