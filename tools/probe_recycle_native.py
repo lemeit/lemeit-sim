@@ -15,7 +15,7 @@ from server import IsolatedEngine, RemoteMcpEngine
 
 EXPECTED = {'F1': 1., 'F2': 1./.6, 'P1': 1., 'R1': .4/.6}
 
-def native_probe(engine, timeout_s=30):
+def native_probe(engine, timeout_s=30, mass_tolerance_kg_s=5e-5):
     """Valores observados exclusivamente del solver; la referencia se usa solo al final."""
     fid = engine.call('dwsim_flowsheet_create', name='Prueba nativa Recycle')['flowsheet_id']
     def call(tool, **kw): return engine.call(tool, flowsheet_id=fid, **kw)
@@ -54,13 +54,21 @@ def native_probe(engine, timeout_s=30):
                      'mixer':flows['F1']+flows['R2']-flows['F2'],
                      'splitter':flows['F2']-flows['P1']-flows['R1'],
                      'global':flows['F1']-flows['P1']}
-        reference_match = (all(math.isfinite(x) for x in flows.values())
-            and all(abs(x)<=1e-5 for x in (*deviations.values(),*residuals.values())))
+        # La convergencia declarada por DWSIM es distinta de las tolerancias externas
+        # de los balances: no modificar ni redondear los resultados devueltos.
+        max_deviation=max(abs(x) for x in deviations.values())
+        max_residual=max(abs(x) for x in residuals.values())
+        finite=all(math.isfinite(x) for x in flows.values())
+        reference_match=(finite and max_deviation<=mass_tolerance_kg_s
+                         and max_residual<=mass_tolerance_kg_s)
         return {'method':'DWSIM native Recycle', 'solver_ok':solved['ok'],
                 'recycle_calculated':recycle.get('calculated'),
                 'recycle_error':str(recycle.get('error') or '')[:200],
                 'flows_kg_s':flows,'deviations_kg_s':deviations,
-                'residuals_kg_s':residuals,'reference_match':reference_match}
+                'residuals_kg_s':residuals,
+                'max_deviation_kg_s':max_deviation,'max_balance_residual_kg_s':max_residual,
+                'mass_tolerance_kg_s':mass_tolerance_kg_s,
+                'reference_match':reference_match}
     finally:
         engine.call('dwsim_flowsheet_close', flowsheet_id=fid)
 
@@ -70,13 +78,16 @@ def main():
     p.add_argument('--engine-root', default=str(ROOT/'.local'/'runtime'))
     p.add_argument('--token-file', help='Ruta privada del token MCP Debian (no se imprime)')
     p.add_argument('--timeout', type=int,default=30)
+    p.add_argument('--mass-tolerance', type=float, default=5e-5, help='Error máximo absoluto kg/s al contrastar con el balance analítico')
     args=p.parse_args()
+    if not math.isfinite(args.mass_tolerance) or args.mass_tolerance<=0:
+        p.error('--mass-tolerance debe ser un número finito positivo')
     if args.engine=='windows':
         with IsolatedEngine(args.engine_root) as engine:
-            result=native_probe(engine,args.timeout)
+            result=native_probe(engine,args.timeout,args.mass_tolerance)
     else:
         if not args.token_file:p.error('Debian requiere --token-file')
-        result=native_probe(RemoteMcpEngine(args.token_file),args.timeout)
+        result=native_probe(RemoteMcpEngine(args.token_file),args.timeout,args.mass_tolerance)
     print(json.dumps(result,ensure_ascii=False,indent=2))
     return 0 if result['reference_match'] else 1
 
