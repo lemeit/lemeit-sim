@@ -14,6 +14,10 @@ Sitio: https://sim.lemeit.ar · Identidad propia ΣIM, inspirada en tecnología 
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
+## Ejercicios 18 y 19 · Recirculación
+
+Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
+
 ## Versión y estado
 
 **0.32.0 — Cuadrícula y edición de corrientes**. Mostrar cuadrícula y ajustar posiciones a pasos de 20 unidades de manera independiente; Shift restringe el movimiento horizontal o vertical. El trazado penaliza retrocesos y segmentos diminutos, y Diagnóstico y actividad incorpora un botón para copiar el texto. No afecta motores ni exportaciones.

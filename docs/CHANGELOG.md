@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.37.0 — 2026-11-19
+
+- Nuevos ejemplos 18 (70/30) y 19 (50/50) de recirculación estacionaria simple de agua: archivos JSON editables, casos del navegador y resolución en la guía.
+- Inspirados en el tutorial oficial de DWSIM, pero limitados a Mixer–Splitter: no se presenta el circuito completo con Heater y Recycle nativo como calculable sin validar.
+- Resultados de referencia de materia exclusivamente analíticos, con ejecución en los gateways pendiente; sin cambios de solver ni publicación de capacidades nuevas.
+
 ## 0.36.2 — 2026-11-18
 
 - Corregidos los controles del diálogo Herramientas → Diagnóstico: etiqueta Eventos sin cortes de palabra, selector alineado y botones que se acomodan en pantallas pequeñas.

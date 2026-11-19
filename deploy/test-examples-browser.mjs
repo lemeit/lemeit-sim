@@ -8,9 +8,9 @@ test('búsqueda exacta por número y búsqueda de texto sin acentos respetan el 
  assert.ok(matches(row,'13'));assert.ok(matches(row,'INTERCAMBIADOR','energia'));assert.ok(matches(row,'actividad guiada'));
  assert.equal(matches(row,'1'),false);assert.equal(matches(row,'13','reacciones'),false);assert.ok(matches({number:'07',category:'reacciones',text:'Reactor de conversión'},'conversion'));assert.ok(matches({number:'07',category:'reacciones',text:'Reactor'},'7'));
 });
-test('los diecisiete casos tienen resolución propia y ya no forman un desplegable largo',()=>{
+test('los diecinueve casos tienen resolución propia y ya no forman un desplegable largo',()=>{
  const html=readFileSync(new URL('../site/index.html',import.meta.url),'utf8');const browser=html.slice(html.indexOf('<dialog id="examples-dialog"'));
- const ids=[...browser.matchAll(/data-example="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,17);assert.equal(new Set(ids).size,17);
+ const ids=[...browser.matchAll(/data-example="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,19);assert.equal(new Set(ids).size,19);
  for(const id of ids)assert.ok(browser.includes('data-example-guide="'+id+'"'));
  const header=html.slice(0,html.indexOf('</header>'));assert.doesNotMatch(header,/data-example=/);assert.match(header,/aria-haspopup="dialog">Ejemplos/);
 });
