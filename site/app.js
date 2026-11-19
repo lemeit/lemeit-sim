@@ -608,7 +608,7 @@ function loadGraph(data){
   SimExerciseEditor.validate(data);
   SimProjectLibrary.resetActive();
   resultValidity='none';lastCalculation=null;
-  graph=structuredClone(data);if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
+  graph=structuredClone(data);if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
