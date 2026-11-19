@@ -18,7 +18,6 @@ const SimExerciseEditor=(()=>{
   }
   function sync(){
     const g=getGraph();
-    $('exercise-title').value=g.exercise?.title||'';
     $('exercise-statement').value=g.exercise?.statement||g.learning||'';
     $('exercise-instructions').value=g.exercise?.instructions||'';
     $('exercise-observations').value=g.exercise?.observations||'';
@@ -39,7 +38,7 @@ const SimExerciseEditor=(()=>{
     $('exercise-form').addEventListener('submit',e=>{
       e.preventDefault();
       const g=getGraph();
-      g.exercise={title:$('exercise-title').value.slice(0,120),statement:$('exercise-statement').value.slice(0,4000),instructions:$('exercise-instructions').value.slice(0,4000),observations:$('exercise-observations').value.slice(0,4000)};
+      g.exercise={statement:$('exercise-statement').value.slice(0,4000),instructions:$('exercise-instructions').value.slice(0,4000),observations:$('exercise-observations').value.slice(0,4000)};
       // Compatibilidad con ejemplos anteriores que utilizan learning.
       g.learning=g.exercise.statement;
       nonPhysical();$('exercise-dialog').close();
