@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "title": "18 · Recirculación 70/30 · agua",
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "nodes": [
+    {
+      "id": "fresh",
+      "type": "MaterialStream",
+      "name": "F1 · Agua fresca",
+      "x": 70,
+      "y": 177,
+      "temperature_C": 26.850000000000023,
+      "pressure_kPa": 101.325,
+      "mass_flow": 1,
+      "composition": {
+        "Water": 1
+      }
+    },
+    {
+      "id": "m1",
+      "type": "Mixer",
+      "name": "M1 · Mezclador",
+      "x": 315,
+      "y": 190
+    },
+    {
+      "id": "mixed",
+      "type": "MaterialStream",
+      "name": "F2 · Caudal total",
+      "x": 450,
+      "y": 215
+    },
+    {
+      "id": "d1",
+      "type": "Splitter",
+      "name": "D1 · Divisor 70-30",
+      "x": 640,
+      "y": 190,
+      "split": 0.7
+    },
+    {
+      "id": "product",
+      "type": "MaterialStream",
+      "name": "P1 · Producto neto",
+      "x": 850,
+      "y": 162
+    },
+    {
+      "id": "recycle",
+      "type": "MaterialStream",
+      "name": "R1 · Recirculación",
+      "x": 510,
+      "y": 398,
+      "routeAxis": "y",
+      "routeY": 400
+    }
+  ],
+  "edges": [
+    {
+      "from": "fresh",
+      "to": "m1",
+      "toIndex": 0
+    },
+    {
+      "from": "m1",
+      "to": "mixed"
+    },
+    {
+      "from": "mixed",
+      "to": "d1"
+    },
+    {
+      "from": "d1",
+      "to": "product",
+      "fromIndex": 0
+    },
+    {
+      "from": "d1",
+      "to": "recycle",
+      "fromIndex": 1
+    },
+    {
+      "from": "recycle",
+      "to": "m1",
+      "toIndex": 1
+    }
+  ],
+  "learning": "18 · Adaptación calculable del reparto 70/30 del tutorial oficial DWSIM. Solo Mixer + Splitter, sin el calentador H-1 ni el bloque Recycle nativo. Los valores de caudal son referencias analíticas; debe verificarse la ejecución en un gateway actualizado. Agua pura, T fresca 300 K, presión 101,325 kPa abs, caudal fresco 1 kg/s; producto 70 %, reciclado 30 %. Referencia de materia: total 1.428571 kg/s, retorno 0.428571 kg/s y producto 1,000000 kg/s. Guía: ejemplos.html#Recycle7030."
+}
