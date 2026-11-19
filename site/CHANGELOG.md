@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.38.1 — 2026-11-19
+
+- Ajuste del ancho del botón «Ejercicio y notas…» en la barra superior: ya no se recorta el texto.
+
 ## 0.38.0 — 2026-11-19
 
 - Editor de ejercicios: título, enunciado, consignas y observaciones editables y persistidos en el JSON del proceso.
