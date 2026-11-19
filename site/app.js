@@ -93,7 +93,7 @@ function updateControls(){
   updateResultValidity();
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
-  $('project-title').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
@@ -355,6 +355,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
     if(!exporting&&selection?.node===n.id){if(g)html+=`<rect class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" x="${g.bend.x-3}" y="${g.bend.y-3}" width="6" height="6"><title>Arrastrar para acomodar el recorrido</title></rect>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';
   });
+  html+=SimExerciseEditor.markup(graph,exporting);
   if(!exporting&&marquee){const r=SimDiagramInteractions.selectionRect(marquee.start,marquee.end);html+=`<rect class="selection-marquee" x="${r.left}" y="${r.top}" width="${r.right-r.left}" height="${r.bottom-r.top}"/>`;}
   return html;
 }
@@ -548,7 +549,9 @@ async function calculate(){
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
-  const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;let calculationHttp=null,simulationRequested=false,transportFailed=false;
+  const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;
+   // El backend recibe solo el modelo físico; los metadatos didácticos son locales.
+   delete payload.learning;delete payload.exercise;delete payload.annotations;let calculationHttp=null,simulationRequested=false,transportFailed=false;
   lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
@@ -602,6 +605,7 @@ function loadGraph(data){
   const ids=new Set();
   for(const n of data.nodes){if(!n||!Object.hasOwn(TYPES,n.type)||typeof n.id!=='string'||!/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(n.id)||ids.has(n.id)||typeof n.name!=='string'||!n.name.trim()||n.name.length>45||!Number.isFinite(n.x)||!Number.isFinite(n.y))throw new Error('El archivo tiene objetos inválidos.');if(n.routeAxis!==undefined&&!['x','y'].includes(n.routeAxis))throw new Error('Recorrido de corriente inválido.');if(n.orientation!==undefined&&!['auto','right','left','up','down'].includes(n.orientation))throw new Error('Dirección de corriente inválida.');if(n.scale!==undefined&&(!Number.isFinite(n.scale)||n.scale<.5||n.scale>3))throw new Error('Tamaño de símbolo inválido.');for(const [key,allowed] of Object.entries({flash_spec:['TP','PH','PS','PV','TV'],flow_basis:['mass','molar'],composition_basis:['mass','molar']}))if(n[key]!==undefined&&!allowed.includes(n[key]))throw new Error('Especificación de corriente inválida.');for(const k of ['startX','startY','endX','endY','routeX','routeY'])if(n[k]!==undefined&&(!Number.isFinite(n[k])))throw new Error('Extremo de corriente inválido.');ids.add(n.id);}
   for(const e of data.edges){if(!e||!ids.has(e.from)||!ids.has(e.to))throw new Error('El archivo tiene conexiones inválidas.');const a=data.nodes.find(n=>n.id===e.from),b=data.nodes.find(n=>n.id===e.to);if(isStream(a)===isStream(b))throw new Error('Cada conexión debe unir una corriente y un equipo.');}
+  SimExerciseEditor.validate(data);
   resultValidity='none';lastCalculation=null;
   graph=structuredClone(data);if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
@@ -770,6 +774,7 @@ function bindEvents(){
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
+  SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
   if(!await checkEngine()){

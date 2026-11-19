@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.38.0 — 2026-11-19
+
+- Editor de ejercicios: título, enunciado, consignas y observaciones editables y persistidos en el JSON del proceso.
+- Anotaciones sobre el diagrama arrastrables y editables; separadas de los nodos físicos, conservan el estado de cálculo.
+- Importación de proyectos con campos didácticos y anotaciones validadas; los casos anteriores siguen siendo compatibles.
+
 ## 0.37.0 — 2026-11-19
 
 - Nuevos ejemplos 18 (70/30) y 19 (50/50) de recirculación estacionaria simple de agua: archivos JSON editables, casos del navegador y resolución en la guía.
