@@ -1,0 +1,13 @@
+/* Componentes didácticos discretos: no alteran los símbolos DWSIM. */
+.exercise-note {cursor:grab;user-select:none}
+.exercise-note:active {cursor:grabbing}
+.exercise-note rect {fill:#fff9df;stroke:#a89252;stroke-width:1.2}
+.exercise-note text {fill:#292519;font:13px Arial,sans-serif;pointer-events:none}
+.exercise-note:focus rect {stroke:#88671d;stroke-width:2.2}
+.exercise-form-body {display:grid;gap:14px;max-height:min(72vh,680px);overflow-y:auto}
+.exercise-form-body label {display:grid;gap:5px;font-weight:600}
+.exercise-form-body input,.exercise-form-body textarea {box-sizing:border-box;width:100%;padding:9px;border:1px solid #999;border-radius:5px;background:var(--input-background,#fff);color:var(--text-color,inherit);font:inherit;font-weight:400}
+.exercise-note-heading {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.exercise-note-row {display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.exercise-note-row textarea {flex:1;min-width:0}
+#exercise-dialog {width:min(650px,calc(100vw - 30px));max-width:650px}
