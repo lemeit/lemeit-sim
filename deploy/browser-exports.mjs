@@ -88,14 +88,14 @@ test('Editor: Ejemplo 6 calculado, archivos de resultados y Acerca de tras recar
     ['xlsx','point','.xlsx','<c t="n" s="1"><v>941.2494715054087</v></c>'],
   ]){
     await page.getByText('Archivo',{exact:true}).click();
-    await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
+    await page.getByRole('button',{name:'Exportar tablas · Excel / CSV…',exact:true}).click();
     const dialog=page.locator('#data-export-dialog');
     await dialog.locator('[name=format]').selectOption(kind);
     if(kind==='csv'){await dialog.locator('[name=scope]').selectOption('streams');await dialog.locator('[name=decimal]').selectOption(decimal);}
     const file=await download(page,()=>dialog.getByRole('button',{name:'Descargar',exact:true}).click());
     assert.ok(file.name.endsWith(suffix),file.name);assert.ok(file.bytes.includes(expected),kind);
   }
-  await page.getByText('Archivo',{exact:true}).click();await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
+  await page.getByText('Archivo',{exact:true}).click();await page.getByRole('button',{name:'Exportar tablas · Excel / CSV…',exact:true}).click();
   const allDialog=page.locator('#data-export-dialog');await allDialog.locator('[name=format]').selectOption('csv');
   assert.equal(await allDialog.locator('[name=scope]').inputValue(),'all');
   const allCsv=await download(page,()=>allDialog.getByRole('button',{name:'Descargar',exact:true}).click());
