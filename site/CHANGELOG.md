@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.42.3 — 2026-11-20
+
+- Compacta tipografía y alturas de las tablas en reportes de una sola hoja para dar mayor superficie al diagrama del proceso.
+- Medición del ancho real del texto en celdas y abreviación de cabeceras y descripciones: ninguna etiqueta debe exceder los márgenes de impresión.
+- Valores residuales numéricos cercanos a cero se indican como ≈ 0 en la lámina, conservando datos íntegros en CSV y Excel.
+- Reserva un mínimo del 46 % del espacio de contenidos para el diagrama; prueba visual de regresión con cuatro tablas en A4 horizontal.
+
 ## 0.42.2 — 2026-11-20
 
 - Biblioteca nube: «Cambiar alumno…» mantiene activa la clase, permite ingresar con otro alias o crear una identidad nueva y conserva los proyectos separados.
