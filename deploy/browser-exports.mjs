@@ -88,14 +88,14 @@ test('Editor: Ejemplo 6 calculado, archivos de resultados y Acerca de tras recar
     ['xlsx','point','.xlsx','<c t="n" s="1"><v>941.2494715054087</v></c>'],
   ]){
     await page.getByText('Archivo',{exact:true}).click();
-    await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
+    await page.getByRole('button',{name:'Exportar tablas · Excel / CSV…',exact:true}).click();
     const dialog=page.locator('#data-export-dialog');
     await dialog.locator('[name=format]').selectOption(kind);
     if(kind==='csv'){await dialog.locator('[name=scope]').selectOption('streams');await dialog.locator('[name=decimal]').selectOption(decimal);}
     const file=await download(page,()=>dialog.getByRole('button',{name:'Descargar',exact:true}).click());
     assert.ok(file.name.endsWith(suffix),file.name);assert.ok(file.bytes.includes(expected),kind);
   }
-  await page.getByText('Archivo',{exact:true}).click();await page.getByRole('button',{name:'Exportar resultados…',exact:true}).click();
+  await page.getByText('Archivo',{exact:true}).click();await page.getByRole('button',{name:'Exportar tablas · Excel / CSV…',exact:true}).click();
   const allDialog=page.locator('#data-export-dialog');await allDialog.locator('[name=format]').selectOption('csv');
   assert.equal(await allDialog.locator('[name=scope]').inputValue(),'all');
   const allCsv=await download(page,()=>allDialog.getByRole('button',{name:'Descargar',exact:true}).click());
@@ -215,4 +215,33 @@ test('Rótulo editable en SVG y balances incorporados al PDF',async t=>{
   });
   const regularPages=[...withoutBalances.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)];
   assert.equal(regularPages.length,1,'El rótulo no agrega páginas extra por sí solo');
+});
+
+
+test('Archivo ordenado y vista previa de reporte Oficio con rótulo y tablas',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ await page.getByText('Archivo',{exact:true}).click();
+ const fileMenu=page.locator('#file-menu .menu-panel');
+ // Las tres formas de almacenamiento llevan nombres explícitos.
+ await page.getByRole('button',{name:'Reporte PDF · diagrama y balances…'}).click();
+ const dlg=page.locator('#diagram-export-dialog');
+ assert.equal(await dlg.locator('[name=format]').inputValue(),'pdf');
+ await dlg.locator('[name=paper]').selectOption('oficio');
+ await dlg.locator('[name=orientation]').selectOption('landscape');
+ await dlg.locator('[name=balances]').uncheck(); // sin cálculo previo
+ await dlg.locator('[name=streams]').uncheck();
+ await dlg.locator('[name=equipment]').check();
+ await dlg.locator('#diagram-export-preview').click();
+ await dlg.locator('#diagram-print-preview:not([hidden]) img').waitFor();
+ const img=await dlg.locator('#diagram-preview-image').getAttribute('src');
+ assert.ok(img.includes('data:image/svg+xml'));
+ assert.ok(decodeURIComponent(img).includes('ΣIM'));
+ assert.ok((await dlg.locator('#diagram-preview-caption').textContent()).includes('OFICIO'));
+ const pdf=await download(page,()=>dlg.getByRole('button',{name:'Descargar',exact:true}).click());
+ assert.match(pdf.bytes.toString('latin1'),/^%PDF-/);
+ assert.ok([...pdf.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)].length>=2);
+ await page.getByText('Archivo',{exact:true}).click();
+ await page.getByRole('button',{name:'Exportar imagen · SVG / PNG…'}).click();
+ assert.equal(await dlg.locator('[name=format]').inputValue(),'svg');
 });

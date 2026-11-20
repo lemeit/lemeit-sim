@@ -1872,3 +1872,19 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #diagram-export-dialog .report-export-option{display:flex!important;align-items:center;justify-content:flex-start;gap:9px;min-width:0}
 #diagram-export-dialog .report-export-option input{width:15px;height:15px;flex:0 0 auto;accent-color:var(--spx-accent)}
 @media(max-width:600px){#report-dialog .report-fields{grid-template-columns:1fr}.command-bar .cloud-user-label{max-width:100px}}
+
+/* Archivo agrupado: los títulos no son acciones y distinguen nube, exportación y copia local. */
+.app-header .menu-panel .menu-section-label{display:block;margin:6px 9px 3px;color:var(--spx-text-dim);font-size:9px;font-weight:700;letter-spacing:.075em;pointer-events:none}
+.app-header .menu-panel .menu-section-label:first-child{margin-top:4px}
+.app-header .menu-panel [hidden]{display:none!important}
+/* Un solo color neutral para los iconos; el acento se reserva para foco y operaciones activas. */
+.command-bar .file-tools .cloud-toolbar-button{color:var(--spx-text)}
+.command-bar .file-tools .cloud-toolbar-button:hover:not(:disabled),.command-bar .file-tools .cloud-toolbar-button:focus-visible{color:var(--spx-accent)}
+#report-dialog .dialog-actions{margin:0;padding:12px 20px 18px;border-top:1px solid var(--spx-border);display:flex;justify-content:flex-end}
+#report-dialog .dialog-actions .primary-button{min-height:36px;padding:8px 18px;margin:0 2px 0 0}
+#diagram-export-dialog .diagram-print-preview{margin:10px auto;padding:12px;background:var(--spx-surface-2);border:1px solid var(--spx-border);border-radius:5px;width:100%;min-width:0;box-sizing:border-box}
+#diagram-export-dialog .diagram-print-preview img{display:block;max-width:100%;max-height:45dvh;width:auto;height:auto;object-fit:contain;margin:0 auto;background:#fff;box-shadow:0 1px 8px #0002}
+#diagram-export-dialog .diagram-print-preview .mini{margin:8px 0 0;color:var(--spx-text-dim)}
+#diagram-export-dialog #diagram-export-preview{padding:7px 14px;min-height:32px;margin-right:auto;border:1px solid var(--spx-border);background:var(--spx-surface);color:var(--spx-text);border-radius:4px;cursor:pointer}
+#diagram-export-dialog #diagram-export-preview:hover{background:var(--spx-surface-2);border-color:var(--spx-accent)}
+#diagram-export-dialog .diagram-print-preview[hidden]{display:none!important}
