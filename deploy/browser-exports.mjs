@@ -191,13 +191,14 @@ test('Editor: SVG completo fuera del viewport, selección, PNG transparente y PD
 test('Rótulo editable en SVG y balances incorporados al PDF',async t=>{
   const page=await browserPage(t);
   await openProject(page,example);
-  await page.locator('#report-open').click();
+  await page.locator('#exercise-open').click();
+  await page.locator('#project-tab-report').click();
   await page.locator('#report-student').fill('Alumno Ejemplo');
   await page.locator('#report-studentId').fill('EST-007');
   await page.locator('#report-subject').fill('Fisica 5');
   await page.locator('#report-institution').fill('Escuela de prueba');
-  await page.locator('#report-form button[type=submit]').click();
-  assert.equal(await page.locator('#report-dialog').evaluate(el=>el.open),false);
+  await page.locator('#exercise-form button[type=submit]').click();
+  assert.equal(await page.locator('#exercise-dialog').evaluate(el=>el.open),false);
   const drawing=await exportDiagram(page,'svg');
   const source=drawing.bytes.toString();
   for(const value of ['Alumno Ejemplo','EST-007','Fisica 5','Escuela de prueba','ENUNCIADO'])assert.ok(source.includes(value),value);
@@ -284,4 +285,42 @@ test('Lámina A4: tablas compactas sin texto fuera de márgenes y diagrama con p
   assert.ok(measured.tiny,'Residuos numéricos próximos a cero usan formato compacto');
   assert.ok(measured.smallFonts>25,'El reporte aplica tipografía reducida a las tablas');
   assert.ok(measured.views[0]>measured.views[1],'La lámina se conserva horizontal');
+});
+
+
+test('Ficha integrada: actividad, notas y rótulo comparten un guardado; cancelar no modifica el proyecto',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ await page.locator('#exercise-open').click();
+ const editor=page.locator('#exercise-dialog');
+ await editor.locator('#exercise-statement').fill('Enunciado original de prueba');
+ await editor.locator('#project-tab-notes').click();
+ await editor.locator('#exercise-new-note').click();
+ assert.equal(await editor.locator('.exercise-note-row').count(),1);
+ await editor.locator('#project-tab-report').click();
+ await editor.locator('#report-student').fill('Alumno 1');
+ await editor.locator('#project-editor-cancel').click();
+ await page.locator('#exercise-open').click();
+ assert.equal(await editor.locator('#exercise-statement').inputValue(), '');
+ await editor.locator('#project-tab-notes').click();
+ assert.equal(await editor.locator('.exercise-note-row').count(),0);
+ await editor.locator('#project-tab-report').click();
+ assert.equal(await editor.locator('#report-student').inputValue(), '');
+ await editor.locator('#project-tab-activity').click();
+ await editor.locator('#exercise-statement').fill('Trabajo integrado');
+ await editor.locator('#project-tab-notes').click();
+ await editor.locator('#exercise-new-note').click();
+ await editor.locator('#project-tab-report').click();
+ await editor.locator('#report-student').fill('Alumno 2');
+ await editor.getByRole('button',{name:'Guardar cambios'}).click();
+ assert.equal(await editor.evaluate(el=>el.open),false);
+ await page.locator('#exercise-open').click();
+ assert.equal(await editor.locator('#exercise-statement').inputValue(),'Trabajo integrado');
+ await editor.locator('#project-tab-notes').click();
+ assert.equal(await editor.locator('.exercise-note-row').count(),1);
+ await editor.locator('#project-tab-report').click();
+ assert.equal(await editor.locator('#report-student').inputValue(),'Alumno 2');
+ await editor.locator('#project-editor-report').click();
+ assert.equal(await page.locator('#diagram-export-dialog').evaluate(el=>el.open),true);
+ assert.equal(await page.locator('#diagram-export-form [name=format]').inputValue(),'pdf');
 });
