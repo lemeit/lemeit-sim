@@ -11,6 +11,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 - Biblioteca nube: «Cambiar alumno…» mantiene activa la clase, permite ingresar con otro alias o crear una identidad nueva y conserva los proyectos separados.
 - Para evitar mezclar alumnos se cierra el proyecto abierto, se desvincula la identidad de la sesión y se limpia el último borrador del navegador.
 - API segura para liberar la identidad individual sin borrar alumnos ni proyectos D1; pruebas de cambio y recuperación de trabajos.
+- El rótulo de reportes y diagramas muestra automáticamente el modelo termodinámico configurado para el proceso.
 
 ## 0.42.1 — 2026-11-20
 
