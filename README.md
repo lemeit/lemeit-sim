@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.35.0](https://img.shields.io/badge/portal-0.40.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.35.0](https://img.shields.io/badge/portal-0.41.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -434,3 +434,7 @@ anglosajonas, distingue temperatura de diferencia de temperatura, y permite
 fracciones másicas/molares, caudales y presiones parciales. La concentración por
 p/(RT) solo se muestra si se solicita una estimación de gas ideal.
 CSV/Excel mantienen las unidades canónicas que declaran sus cabeceras.
+
+### Rótulo técnico y reporte PDF
+
+La barra junto a Guardar ofrece iconos de nube para abrir la biblioteca y guardar; muestra el alias del alumno y su clase. «Rótulo…» permite completar alumno, ID, materia, grupo, institución, docente, lámina y revisión; el título y enunciado se toman del proyecto. En Exportar diagrama se puede incluir el rótulo en SVG, PNG o PDF, y agregar una hoja de balances al PDF después de calcular. Editar estos datos no invalida el resultado físico.
