@@ -1981,3 +1981,8 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #diagram .node.explorer-current{opacity:1;filter:drop-shadow(0 0 4px var(--spx-accent))}
 #diagram .node.explorer-current .equipment-symbol,#diagram .node.explorer-current .stream-line{stroke:var(--spx-accent);stroke-width:2.5}
 @media(max-width:650px){.process-explorer-panel .explorer-content{grid-template-columns:1fr}.command-bar #process-explorer-open{padding:5px 7px}}
+
+.command-bar .zoom-controls #diagram-pan{width:auto;padding-inline:8px}
+#diagram-pan[aria-pressed="true"]{color:var(--spx-accent);background:var(--spx-accent-dim)}
+#diagram.pan-mode,#diagram.pan-mode *{cursor:grab}
+#diagram.panning,#diagram.panning *{cursor:grabbing}
