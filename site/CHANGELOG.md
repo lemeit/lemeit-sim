@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.43.3 — 2026-11-20
+
+- Se elimina definitivamente el botón fantasma junto a «Calcular» (resto obsoleto de «Rótulo»).
+- La barra del simulador muestra una pequeña luz de estado: pulsación durante el cálculo, verde al completarse, rojo ante error y advertencia cuando el proceso requiere recalcularse. El pie del diagrama refleja los mismos estados.
+- La cuota por sesión de alumno pasa de 4 a 12 cálculos/minuto para permitir ejercicios iterativos sin quitar la protección contra abuso; administración conserva su tratamiento anterior.
+- Pruebas de regresión para la cuota y el indicador de cálculo en navegador.
+
 ## 0.43.2 — 2026-11-20
 
 - Edición de anotaciones directamente sobre el diagrama: doble clic abre editor superpuesto, Ctrl+Enter guarda, Esc descarta, Supr elimina la nota seleccionada.
