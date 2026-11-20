@@ -167,6 +167,17 @@ export async function authRoute(request,env){
   await env.SIM_AUTH_DB.prepare('INSERT INTO classes(id,label,code_digest,active,created_at,expires_at,code_encrypted) VALUES(?,?,?,1,?,?,?)').bind(id,label,await digest(env.SIM_SESSION_SECRET,'code:'+code),created,expires,encrypted).run();
   return json({id,label,code,expires_at:expires},201);
  }
+ if(path==='/api/auth/renew-class'){
+   const id=typeof body.id==='string'?body.id:'';
+   const hours=Number(body.hours);
+   if(!/^[a-f0-9-]{36}$/.test(id)||!Number.isInteger(hours)||hours<1||hours>720)return json({error:'Clase o duración inválida.'},422);
+   const existing=await env.SIM_AUTH_DB.prepare('SELECT id,label FROM classes WHERE id=?').bind(id).first();
+   if(!existing)return json({error:'Clase no encontrada.'},404);
+   const code=randomClassCode(),expires=now()+hours*3600,encrypted=await encryptClassCode(env,id,code);
+   await env.SIM_AUTH_DB.prepare('UPDATE classes SET active=1,expires_at=?,code_digest=?,code_encrypted=? WHERE id=?').bind(expires,await digest(env.SIM_SESSION_SECRET,'code:'+code),encrypted,id).run();
+   // No cambia el ID de clase: mantiene alumnos y proyectos asociados.
+   return json({id,label:existing.label,code,expires_at:expires});
+ }
  if(path==='/api/auth/disable-class'){
   if(typeof body.id!=='string')return json({error:'ID inválido.'},422);
   await env.SIM_AUTH_DB.prepare('UPDATE classes SET active=0 WHERE id=?').bind(body.id).run();
