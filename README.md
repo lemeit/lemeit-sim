@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.46.2](https://img.shields.io/badge/portal-0.46.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.47.0](https://img.shields.io/badge/portal-0.47.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -439,39 +439,39 @@ CSV/Excel mantienen las unidades canónicas que declaran sus cabeceras.
 
 La barra junto a Guardar ofrece iconos de nube para abrir la biblioteca y guardar; muestra el alias del alumno y su clase. «Rótulo…» permite completar alumno, ID, materia, grupo, institución, docente, lámina y revisión; el título y enunciado se toman del proyecto. En Exportar diagrama se puede incluir el rótulo en SVG, PNG o PDF, y agregar una hoja de balances al PDF después de calcular. Editar estos datos no invalida el resultado físico.
 
-### Archivo y presentación de láminas (0.46.2)
+### Archivo y presentación de láminas (0.47.0)
 
 Archivo distingue Proyecto, Mis proyectos (nube), Exportar y presentar, y Copias en esta computadora. «Guardar en la nube» conserva el proyecto del alumno; «Descargar copia del proyecto (.json)» genera un respaldo local. «Reporte PDF · diagrama y balances» abre directamente el formulario de lámina, con tamaño A4, A3 u Oficio, márgenes, orientación, vista previa, rótulo opcional compacto en la esquina inferior derecha y tablas opcionales de equipos, corrientes, balances y componentes. Los resultados numéricos requieren un cálculo vigente; la tabla de equipos puede exportarse sin calcular.
 
-### Una sola lámina de reporte (0.46.2)
+### Una sola lámina de reporte (0.47.0)
 
 El reporte PDF distribuye diagrama, tablas seleccionadas y rótulo dentro de una única hoja A4, A3 u Oficio. La orientación automática analiza la proporción del diagrama, o se puede forzar horizontal/vertical. La vista previa muestra el resultado completo. Si demasiadas tablas impedirían una presentación legible, la exportación pide reducir la selección en lugar de generar hojas adicionales o cortar datos.
 
-### Cambiar de alumno (0.46.2)
+### Cambiar de alumno (0.47.0)
 
 Desde Archivo → Abrir biblioteca en la nube, «Cambiar alumno…» libera la identidad de alumno sin cerrar el acceso a la clase. Luego se puede iniciar sesión con otro alias o registrar una identidad nueva. Antes de cambiar, guardar el proyecto actual: el cambio cierra el proyecto abierto y elimina el borrador del navegador para evitar mezclar trabajos entre usuarios. Los proyectos ya guardados en D1 se conservan.
 
-### Ajustes de legibilidad en reportes A4 (0.46.2)
+### Ajustes de legibilidad en reportes A4 (0.47.0)
 
 Los reportes priorizan el espacio del diagrama y reducen los altos de tablas. Las celdas miden su texto para no invadir márgenes; números prácticamente cero se muestran con ≈ 0 por legibilidad, sin modificar los valores almacenados en los resultados ni exportados en Excel o CSV. Si un reporte es demasiado grande, ΣIM ofrece reducir tablas o elegir un papel mayor.
 
-### Ficha integral del proyecto (0.46.2)
+### Ficha integral del proyecto (0.47.0)
 
 La barra de ΣIM ofrece «Editar proyecto…» y el menú Proyecto da acceso a «Editar ficha y actividad…» o «Preparar reporte PDF…». En la ficha se integran tres pestañas: Actividad (enunciado, consignas, observaciones), Anotaciones del diagrama y Datos del informe (autor, ID, clase, institución y rótulo). Un solo «Guardar cambios» persiste estos metadatos no físicos junto con el proyecto; «Cancelar» descarta los cambios pendientes. «Preparar reporte PDF…» guarda esos datos y abre el mismo generador de reportes que se utiliza en Archivo. No modifica el motor ni la estructura de proyectos cloud.
 
-### Enunciado, consignas y observaciones en el reporte (0.46.2)
+### Enunciado, consignas y observaciones en el reporte (0.47.0)
 
 Al preparar un Reporte PDF, la opción «Incluir actividad: enunciado, consignas y observaciones» aparece activada por defecto. ΣIM toma el contenido guardado en Editar proyecto → Actividad e incluye esas tres secciones en la propia lámina si pueden leerse claramente. Si son demasiado extensas, mantiene el diagrama y las tablas en la primera hoja y agrega el texto íntegro en un anexo paginado. La vista previa informa cuándo habrá anexos. No se alteran los resultados físicos ni los datos guardados en la nube.
 
-### Edición de anotaciones sobre el diagrama (0.46.2)
+### Edición de anotaciones sobre el diagrama (0.47.0)
 
 Con un proyecto abierto, elegí «Texto» en la barra y hacé clic en una posición del diagrama para insertar una anotación. Doble clic sobre una nota existente permite modificarla directamente. Ctrl+Enter confirma, Esc cancela, arrastrar mueve, Supr elimina la nota seleccionada. Editar proyecto → Anotaciones sigue permitiendo administrar todos los textos en conjunto. Estos cambios no alteran las condiciones físicas ni invalidan los resultados.
 
-### Estado y cuota de simulaciones (0.46.2)
+### Estado y cuota de simulaciones (0.47.0)
 
 El botón Calcular presenta una luz de estado: neutra antes del primer cálculo, animada mientras DWSIM resuelve, verde cuando el cálculo terminó bien, roja si hubo error y de advertencia si los resultados quedaron desactualizados. Los resultados vigentes siguen indicándose al pie del diagrama. Para las clases se permiten hasta 12 solicitudes de cálculo por minuto por sesión (antes 4), manteniendo la limitación de seguridad del servidor.
 
-### Explorar resultados paso a paso (0.46.2)
+### Explorar resultados paso a paso (0.47.0)
 
 El botón Calcular vuelve a mostrar el símbolo triangular ▶, y una luz separada expresa el estado del cálculo. Una vez que DWSIM devuelve resultados vigentes, «Explorar proceso…» permite recorrer corrientes y equipos conectados mediante Anterior/Siguiente; el editor destaca cada elemento y muestra valores reales de las corrientes y balances. El recorrido es didáctico y no ejecuta unidades individualmente ni genera nuevas solicitudes de cálculo; en procesos con reciclo se informa expresamente que las iteraciones internas del motor no se representan. Ante cambios físicos o recálculo el explorador se cierra.
 
@@ -486,3 +486,7 @@ Mantené presionada la barra espaciadora y arrastrá con clic para mover la vist
 ### Ecuaciones y balances en el explorador
 
 Usá «Anterior» y «Siguiente» en la parte superior del explorador para cambiar de etapa. En cada equipo, «Ecuaciones y balances» interpreta el resultado vigente de DWSIM. Muestra entradas, salidas y diferencias por componente, distingue el consumo o generación por reacción y explica las tolerancias de cierre. Los datos faltantes se indican de forma explícita.
+
+### Barra de herramientas y paneles
+
+La barra agrupa Archivo, Proyecto, Diagrama, Simulación y Vista. Las opciones completas están en los menús; Texto se inserta desde Diagrama y los datos del rótulo se editan desde Proyecto. La distribución inicial muestra balances y corrientes a la derecha. Abajo figuran el modelo, la duración del último cálculo disponible y su estado. En Ver podés mostrar, ocultar, separar o restablecer paneles.

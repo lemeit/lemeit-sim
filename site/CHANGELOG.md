@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.47.0 — 2026-11-20
+
+- Espacio y arrastre funcionan después de usar un botón de la barra.
+- Barra por categorías con iconos accesibles y acciones equivalentes en Archivo, Proyecto, Diagrama, Simulación y Ver.
+- Distribución inicial con balances y corrientes a la derecha. La franja inferior muestra modelo, duración y estado. Los paneles se pueden acoplar, redimensionar, mover, dejar flotantes o abrir en otra ventana.
+
 ## 0.46.2 — 2026-11-20
 
 - El desplazamiento con trackpad se activa al mantener Espacio y arrastrar con clic. Se retira el botón de la barra.

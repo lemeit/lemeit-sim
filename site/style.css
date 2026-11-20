@@ -1989,3 +1989,33 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 
 #diagram.pan-mode,#diagram.pan-mode *{cursor:grab}
 #diagram.panning,#diagram.panning *{cursor:grabbing}
+
+/* Barra por categorías y distribución de lectura. */
+.sim-shell .app-header{position:relative;z-index:2000}
+.sim-shell .command-bar{height:auto;min-height:36px;flex:0 0 auto;flex-wrap:wrap;gap:4px 8px}
+.command-bar .command-group{display:flex;align-items:center;gap:3px;min-width:0}
+.command-bar .command-group+.command-group{border-inline-start:1px solid var(--spx-border);padding-inline-start:8px}
+.command-bar .project-tools{flex:1 1 150px}
+.command-bar .project-tools #exercise-open,.command-bar #report-label-tool,.command-bar .diagram-export-tool{width:28px;min-width:28px;padding:4px}
+.command-bar .command-group svg{display:block;margin-inline:auto}
+.command-bar .zoom-controls{margin-left:auto}
+.command-bar #diagram-add{display:block}
+.command-bar #diagram-grid[aria-pressed="true"],.command-bar #diagram-focus[aria-pressed="true"],.command-bar #diagram-library[aria-pressed="true"],.menu-panel button[aria-pressed="true"]{background:var(--spx-accent-dim);color:var(--spx-accent)}
+#menu-diagram-add{box-sizing:border-box;width:100%;font:inherit;color:inherit;background:var(--spx-surface);border:1px solid var(--spx-border);padding:6px}
+body.diagram-focus .command-bar .project-tools{display:none}
+body.diagram-focus.diagram-library .sim-cad-workspace>.sim-cad-slot:has(.equipment-panel){display:flex!important;position:absolute;inset:0 auto 0 0;width:186px;z-index:4}
+.sim-shell .diagram-footer{justify-content:flex-start;flex-wrap:wrap;gap:4px 12px}
+.diagram-footer #result-validity{margin-inline-start:auto}
+.diagram-footer :is(#canvas-model,#canvas-run-time){font-size:10px;color:var(--spx-text-dim)}
+footer .cloud-user-label{max-width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#results-panel:is([data-sim-cad-mode="left"],[data-sim-cad-mode="right"]) .results-heading{flex-wrap:wrap;gap:6px;justify-content:flex-start}
+#results-panel:is([data-sim-cad-mode="left"],[data-sim-cad-mode="right"]) .results-heading>div:first-of-type{flex:1 0 100%}
+#results-panel:is([data-sim-cad-mode="left"],[data-sim-cad-mode="right"]) .results-tools{margin:0}
+#results-panel:is([data-sim-cad-mode="left"],[data-sim-cad-mode="right"]) .balance-grid{display:block;margin:0 0 10px}
+#results-panel:is([data-sim-cad-mode="left"],[data-sim-cad-mode="right"]) .balance-card+.balance-card{margin-top:8px}
+#results-panel .table-wrap{max-width:100%;overflow-x:auto}
+@media(max-width:760px){
+ .app-header .app-menus{overflow-x:auto;min-width:0}
+ .command-bar .zoom-controls{margin-left:0}
+ .command-bar .command-group+.command-group{padding-inline-start:4px}
+}

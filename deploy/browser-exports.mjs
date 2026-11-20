@@ -552,6 +552,7 @@ test('Desplazar el lienzo con la rueda presionada o manteniendo Espacio',async t
  assert.notEqual(moved,initial);
  assert.deepEqual(moved.split(' ').slice(2),initial.split(' ').slice(2));
  assert.deepEqual(await snapshot(),original);
+ await page.locator('#zoom-in').focus();
  await page.keyboard.down('Space');
  assert.equal(await diagram.evaluate(svg=>svg.classList.contains('pan-mode')),true);
  await drag('left');
@@ -559,6 +560,7 @@ test('Desplazar el lienzo con la rueda presionada o manteniendo Espacio',async t
  assert.deepEqual(await snapshot(),original);
  await page.keyboard.up('Space');
  assert.equal(await diagram.evaluate(svg=>svg.classList.contains('pan-mode')),false);
+ assert.deepEqual((await view()).split(' ').slice(2),initial.split(' ').slice(2));
  assert.deepEqual(await snapshot(),original);
  const panned=await view();
  await page.locator('#fit-button').click();
@@ -591,4 +593,43 @@ test('Puertos visibles sin selección en todos los equipos y rotulados en el fla
  assert.deepEqual(await flash.locator('.flash-port-label').allTextContents(),['Alimentación','Vapor','Líquido']);
  assert.match(await flash.locator('[data-port="out"][data-index="0"]').getAttribute('aria-label'),/Vapor, libre/);
  assert.match(await flash.locator('[data-port="out"][data-index="1"]').getAttribute('aria-label'),/Líquido, conectado/);
+});
+
+test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la derecha',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
+ assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
+   ['Archivo','Proyecto','Diagrama','Simulación','Vista']);
+ for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
+   assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
+ }
+ await page.locator('#project-edit-menu summary').click();
+ await page.getByRole('button',{name:'Datos del rótulo…',exact:true}).click();
+ assert.equal(await page.locator('#project-section-report').isVisible(),true);
+ await page.keyboard.press('Escape');
+ await page.locator('#diagram-menu summary').click();
+ await page.locator('#diagram-menu').getByRole('button',{name:'Insertar texto en el diagrama',exact:true}).click();
+ assert.equal(await page.locator('#diagram-note-insert').getAttribute('aria-pressed'),'true');
+ await page.keyboard.press('Escape');
+ const results=page.locator('#results-panel');
+ assert.equal(await results.getAttribute('data-sim-cad-mode'),'right');
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ assert.equal(await page.locator('#canvas-model').isVisible(),true);
+ assert.equal(await page.locator('#canvas-run-time').isVisible(),true);
+ assert.equal(await results.locator('#results > :first-child').getAttribute('class'),'balance-grid');
+ const position=results.locator('.sim-cad-position');
+ await position.selectOption('bottom');
+ assert.equal(await results.getAttribute('data-sim-cad-mode'),'bottom');
+ await position.selectOption('float');
+ assert.equal(await results.getAttribute('data-sim-cad-mode'),'float');
+ const heading=results.locator('.results-heading');
+ await heading.focus();
+ const left=await results.evaluate(el=>el.getBoundingClientRect().left);
+ await page.keyboard.press('ArrowRight');
+ assert.ok(await results.evaluate(el=>el.getBoundingClientRect().left)>left);
+ await page.locator('#view-menu summary').click();
+ await page.locator('#view-reset-layout').click();
+ assert.equal(await results.getAttribute('data-sim-cad-mode'),'right');
 });

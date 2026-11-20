@@ -8,11 +8,11 @@ const env={document:{addEventListener(){}}};
 runInNewContext(src,env);
 const dock=env.SimDockLayout;
 
-test('el layout inicial acopla biblioteca a izquierda, inspector a derecha, resultados abajo',()=>{
+test('el layout inicial acopla biblioteca a izquierda, inspector a derecha, resultados a derecha',()=>{
  const state=dock.recover(null,1280,800);
  assert.equal(state.equipment.mode,'left');
  assert.equal(state.inspector.mode,'right');
- assert.equal(state.results.mode,'bottom');
+ assert.equal(state.results.mode,'right');
  assert.equal(state.equipment.lastDock,'left');
 });
 test('reconoce posiciones previas válidas sin permitir geometrías fuera de pantalla',()=>{

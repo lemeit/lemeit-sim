@@ -7,7 +7,8 @@ globalThis.SimDockLayout=(()=>{
   const EDGES=['left','right','top','bottom'];
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
-  const DEFAULT={equipment:'left',inspector:'right',results:'bottom'};
+  const DEFAULT={equipment:'left',inspector:'right',results:'right'};
+  const DEFAULT_SIZES={left:186,right:336,top:200,bottom:160};
   const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
   const safe=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
   function fit(b,vw,vh){
@@ -50,9 +51,14 @@ globalThis.SimDockLayout=(()=>{
     if(!workspace||!diagram||IDS.some(id=>!elements[id]))return;
     let saved={};
     try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch{}
+    // La versión anterior persistía la disposición inicial aunque no se hubiera editado.
+    const oldDefault=saved.equipment?.mode==='left'&&saved.inspector?.mode==='right'&&
+      saved.results?.mode==='bottom'&&saved.results.lastDock==='bottom'&&saved.sizes?.right===265&&
+      saved.sizes?.left===186&&saved.sizes?.bottom===160&&saved.sizes?.top===200;
+    if(!saved.revision&&oldDefault)saved={};
     const panels=recover(saved,innerWidth,innerHeight);
     for(const id of IDS)panels[id].el=elements[id];
-    const sizes={left:186,right:265,top:200,bottom:160,...saved.sizes};
+    const sizes={...DEFAULT_SIZES,...saved.sizes};
     const slots={};
     for(const edge of EDGES){
       const slot=document.createElement('section');
@@ -71,6 +77,7 @@ globalThis.SimDockLayout=(()=>{
       const value=Object.fromEntries(IDS.map(id=>[id,{mode:panels[id].mode,
         lastDock:panels[id].lastDock,box:panels[id].box}]));
       value.sizes=sizes;
+      value.revision=1;
       try{localStorage.setItem(KEY,JSON.stringify(value));}catch{}
     }
     function store(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,120);}
@@ -210,7 +217,7 @@ globalThis.SimDockLayout=(()=>{
       };
       handle.addEventListener('pointerup',finish);
       handle.addEventListener('pointercancel',finish);
-      handle.addEventListener('dblclick',()=>{setSize(edge,edge==='left'?186:edge==='right'?265:edge==='bottom'?160:200);store();});
+      handle.addEventListener('dblclick',()=>{setSize(edge,DEFAULT_SIZES[edge]);store();});
       handle.addEventListener('keydown',e=>{
         if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
         e.preventDefault();
@@ -221,7 +228,7 @@ globalThis.SimDockLayout=(()=>{
     for(const id of IDS){
       const el=elements[id],p=panels[id];
       p.el=el;
-      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Corrientes y balances'}[id];
+      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Balances y corrientes'}[id];
       const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
       heading.classList.add('sim-cad-heading');heading.tabIndex=0;
       if(id!=='results')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
@@ -269,10 +276,7 @@ globalThis.SimDockLayout=(()=>{
         apply(p);
       });
       el.addEventListener('pointerdown',()=>{if(activeMode(p)==='float')el.style.zIndex=String(++z);});
-      // Ocultar y recuperar resultados desde Ver debe actualizar el espacio ocupado.
-      if(id==='results'){
-        new MutationObserver(updateSlots).observe(el,{attributes:true,attributeFilter:['hidden']});
-      }
+      new MutationObserver(updateSlots).observe(el,{attributes:true,attributeFilter:['hidden']});
       apply(p,false);
     }
     const menu=document.querySelector('#view-menu>.menu-panel');
@@ -282,7 +286,7 @@ globalThis.SimDockLayout=(()=>{
     reset.id='view-reset-layout';menu?.append(reset);
     reset.addEventListener('click',()=>{
       for(const id of IDS)place(panels[id],'reset');
-      Object.assign(sizes,{left:186,right:265,top:200,bottom:160});
+      Object.assign(sizes,DEFAULT_SIZES);
       updateSlots();store();
       document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));
     });
