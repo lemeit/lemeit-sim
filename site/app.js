@@ -961,7 +961,7 @@ function bindDiagramExport(){
     }
     return {format:format.value,background:form.elements.background.value,
       titleBlock:form.elements.titleBlock.checked,tables,
-      report:graph.report||{},exercise:graph.exercise||{},identity:SimCloudProjects.identity(),
+      report:graph.report||{},exercise:graph.exercise||{},identity:SimCloudProjects.identity(),model:graph.model||'',
       scale:Number(form.elements.scale.value),paper:form.elements.paper.value,
       orientation:form.elements.orientation.value,margin:Number(form.elements.margin.value),
       fit:form.elements.fit.value};
