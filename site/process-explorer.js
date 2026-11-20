@@ -133,6 +133,8 @@ const SimProcessExplorer=(()=>{
     panel.hidden=!active;
     $('process-explorer-open').disabled=!context?.isValid?.()||!steps.length;
     $('process-explorer-open').setAttribute('aria-pressed',String(active));
+    const menuButton=document.querySelector('[data-toolbar-action="process-explorer-open"]');
+    if(menuButton)menuButton.disabled=$('process-explorer-open').disabled;
     if(!active){emphasize();return;}
     const {graph,result}=context.getData(),step=steps[position],node=graph.nodes.find(n=>n.id===step.id);
     if(!node){close();return;}
