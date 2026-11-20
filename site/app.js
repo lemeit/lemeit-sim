@@ -960,7 +960,7 @@ function bindDiagramExport(){
       if(requested.components)tables.push(sheets[2]);
     }
     return {format:format.value,background:form.elements.background.value,
-      titleBlock:form.elements.titleBlock.checked,tables,
+      titleBlock:form.elements.titleBlock.checked,tables,includeActivity:isPdf&&form.elements.activity.checked,
       report:graph.report||{},exercise:graph.exercise||{},identity:SimCloudProjects.identity(),model:(resultValidity==='valid'&&result?.model)||graph.model||'',
       scale:Number(form.elements.scale.value),paper:form.elements.paper.value,
       orientation:form.elements.orientation.value,margin:Number(form.elements.margin.value),
@@ -972,6 +972,7 @@ function bindDiagramExport(){
     format.value=report?'pdf':'svg';
     if(report){
       form.elements.titleBlock.checked=true;
+      form.elements.activity.checked=true;
       form.elements.equipment.checked=true;
       form.elements.balances.checked=true;
       form.elements.streams.checked=true;
@@ -992,7 +993,8 @@ function bindDiagramExport(){
       const svg=SimDiagramFiles.preview(diagramMarkup(nodes,true),graph.title,options);
       previewImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
       const sections=options.tables?.filter(t=>t.rows.length>1).map(t=>t.name)||[];
-      previewCaption.textContent=options.format==='pdf'?'Vista previa de la hoja completa ('+options.paper.toUpperCase()+'). '+(sections.length?'Tablas incluidas en esta misma hoja: '+sections.join(', ')+'.':'Sin tablas adicionales.'):'Vista previa de la imagen ('+options.format.toUpperCase()+').';
+      const annex=options.format==='pdf'&&svg.includes('data-activity-annex="true"');
+      previewCaption.textContent=options.format==='pdf'?'Vista previa de la lámina ('+options.paper.toUpperCase()+'). '+(sections.length?'Tablas incluidas: '+sections.join(', ')+'. ':'Sin tablas adicionales. ')+(annex?'El enunciado, las consignas y las observaciones se incluirán completos en un anexo del PDF.':'La actividad seleccionada queda integrada cuando hay espacio.'):'Vista previa de la imagen ('+options.format.toUpperCase()+').';
       previewBox.hidden=false;status.textContent='';
       previewBox.scrollIntoView({block:'nearest',behavior:'smooth'});
     }catch(error){status.textContent=error.message;}

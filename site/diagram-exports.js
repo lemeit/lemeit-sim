@@ -171,7 +171,15 @@ const SimDiagramFiles=(()=>{
     for(const text of svg.querySelectorAll('text'))text.setAttribute('font-weight','bold');
     const page=pdf.internal.pageSize;
     await pdf.svg(svg,{x:0,y:0,width:page.getWidth(),height:page.getHeight()});
-    // Las tablas forman parte del mismo SVG de la lámina y no generan páginas adicionales.
+    // Para una ficha extensa, anexar el texto completo sin recortarlo ni reducir el diagrama.
+    if(svg.dataset.activityAnnex==='true'){
+      const annexes=SimSheetLayout.activityAnnexes(title,{...options,resolvedOrientation});
+      for(const annex of annexes){
+        pdf.addPage();
+        for(const item of annex.querySelectorAll('text'))item.setAttribute('font-weight','bold');
+        await pdf.svg(annex,{x:0,y:0,width:page.getWidth(),height:page.getHeight()});
+      }
+    }
     return pdf.output('blob');
   }
 
