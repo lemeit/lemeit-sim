@@ -47,7 +47,9 @@ const SimExerciseEditor=(()=>{
   }
   function open(tab='activity'){
     if(!getGraph()?.compounds?.length)return;
-    sync();showTab(tab);$('exercise-dialog').showModal();
+    sync();showTab(tab);
+    for(const menu of document.querySelectorAll('.app-menu[open]'))menu.open=false;
+    $('exercise-dialog').showModal();
   }
   function save(){
     const g=getGraph();
