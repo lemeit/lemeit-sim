@@ -93,7 +93,7 @@ function updateControls(){
   updateResultValidity();
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
-  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('local-projects-save').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
