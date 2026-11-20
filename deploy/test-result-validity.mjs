@@ -11,7 +11,7 @@ assert.ok(start>0&&end>start);
 function setup(){
   const elements=Object.fromEntries(['result-validity','results','result-meta','calculation-state'].map(id=>[id,{dataset:{},textContent:'',innerHTML:''}]));
   const ctx=vm.createContext({
-    result:null,resultValidity:'none',hasProject:true,busy:false,revision:0,
+    result:null,resultValidity:'none',hasProject:true,busy:false,revision:0,lastCalculation:null,
     blankResults:'<p>Sin resultados</p>',$:id=>elements[id],
     persist:()=>{},renderDiagram:()=>{},publishWorkspace:()=>{}
   });
@@ -22,10 +22,12 @@ test('el pie muestra el estado correcto, con texto y descripción accesible',()=
  const {ctx,elements}=setup(),indicator=elements['result-validity'];
  ctx.updateResultValidity();assert.equal(indicator.textContent,'Sin resultados');
  ctx.result={streams:{}};ctx.resultValidity='valid';ctx.updateResultValidity();
- assert.equal(indicator.textContent,'Resultados vigentes');assert.equal(indicator.dataset.state,'valid');
+ assert.equal(indicator.textContent,'Cálculo correcto');assert.equal(indicator.dataset.state,'valid');
  ctx.busy=true;ctx.updateResultValidity();assert.equal(indicator.textContent,'Calculando…');
  ctx.busy=false;ctx.result=null;ctx.resultValidity='stale';ctx.updateResultValidity();
  assert.equal(indicator.textContent,'Recalcular');assert.equal(indicator.dataset.state,'stale');
+ ctx.resultValidity='none';ctx.lastCalculation={state:'failed',message:'Error de cálculo'};ctx.updateResultValidity();
+ assert.equal(indicator.textContent,'Cálculo fallido');assert.equal(indicator.dataset.state,'failed');
  ctx.hasProject=false;ctx.updateResultValidity();assert.equal(indicator.textContent,'Sin resultados');
 });
 test('cambios visuales conservan vigencia y datos; cambios físicos la invalidan',()=>{

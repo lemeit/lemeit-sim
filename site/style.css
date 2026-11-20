@@ -1936,3 +1936,18 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .sim-shell #exercise-dialog .project-editor-actions .primary-button{order:2}
 .sim-shell #exercise-dialog .project-editor-actions #project-editor-report{order:3}
 @media(max-width:600px){.sim-shell #exercise-dialog .report-fields{grid-template-columns:1fr}.sim-shell #exercise-dialog .project-editor-actions{justify-content:flex-end}.sim-shell #exercise-dialog #project-editor-report{margin-left:0!important}}
+
+/* Estado visible del cálculo: neutro, animado en ejecución, verde al finalizar y rojo en error. */
+.command-bar #calculate-button{width:auto;min-width:99px;gap:7px;white-space:nowrap;opacity:1}
+.command-bar #calculate-button .calculation-lamp{box-sizing:border-box;display:inline-block;width:9px;height:9px;min-width:9px;border-radius:50%;border:1px solid var(--spx-border);background:var(--spx-text-dim);box-shadow:none}
+.command-bar #calculate-button[data-state="calculating"] .calculation-lamp{background:var(--spx-accent);border-color:var(--spx-accent);animation:sim-calculation-pulse .85s ease-in-out infinite}
+.command-bar #calculate-button[data-state="valid"] .calculation-lamp{background:var(--spx-good);border-color:var(--spx-good);box-shadow:0 0 0 2px color-mix(in srgb,var(--spx-good),transparent 83%)}
+.command-bar #calculate-button[data-state="failed"] .calculation-lamp{background:#bd3941;border-color:#bd3941}
+.command-bar #calculate-button[data-state="stale"] .calculation-lamp{background:var(--spx-moderate,#a57933);border-color:var(--spx-moderate,#a57933)}
+.command-bar #calculate-button[data-state="valid"]{color:var(--spx-good)}
+.command-bar #calculate-button[data-state="failed"]{color:#bd3941}
+.diagram-footer #result-validity[data-state="failed"]{color:#bd3941}
+.diagram-footer #result-validity[data-state="failed"]::before{background:#bd3941}
+.diagram-footer #result-validity[data-state="calculating"]::before{animation:sim-calculation-pulse .85s ease-in-out infinite}
+@keyframes sim-calculation-pulse{0%,100%{opacity:.4;transform:scale(.82)}50%{opacity:1;transform:scale(1.2)}}
+@media(prefers-reduced-motion:reduce){.command-bar #calculate-button .calculation-lamp,.diagram-footer #result-validity::before{animation:none!important}}
