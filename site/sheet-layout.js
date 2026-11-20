@@ -21,7 +21,7 @@ const SimSheetLayout=(()=>{
  function compact(svg,title,options){
    if(!options.titleBlock)return svg;
    const view=svg.viewBox.baseVal,{x,y}=view,w=view.width,h=view.height;
-   const W=Math.max(w,540),right=x+W,top=y+h+12,bw=350,bh=75,bx=right-bw;
+   const W=Math.max(w,540),right=x+W,top=y+h+12,bw=350,bh=95,bx=right-bw;
    svg.setAttribute('viewBox',[x,y,W,h+bh+20].join(' '));
    svg.setAttribute('width',W);svg.setAttribute('height',h+bh+20);
    const group=el('g'),d=identityFields(title,options);
@@ -33,6 +33,7 @@ const SimSheetLayout=(()=>{
    field(group,bx+185,top+45,'GRUPO / ID',d.group+' · '+d.studentId,24);
    field(group,bx+7,top+66,'INSTITUCIÓN',d.institution,25);
    field(group,bx+185,top+66,'LÁMINA / REV.',d.sheet+' · '+d.revision,24);
+   field(group,bx+7,top+84,'ENUNCIADO',options.exercise?.statement||'',50);
    svg.append(group);return svg;
  }
  function sheet(source,title,options){
