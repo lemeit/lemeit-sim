@@ -108,9 +108,10 @@ const SimDiagramFiles=(()=>{
       t.textContent=textValue(value);
       group.append(t);
     };
-    const label=(tx,ty,name,value,max=60)=>{
+    const label=(tx,ty,name,value,max=28)=>{
       line(tx,ty,name.toUpperCase(),8,'bold');
-      line(tx,ty+15,textValue(value).slice(0,max),11);
+      const text=textValue(value);
+      line(tx,ty+15,text.length>max?text.slice(0,Math.max(0,max-1))+'…':text,11);
     };
     const student=report.student||identity.student_name||'';
     const klass=report.className||identity.class_name||'';
@@ -119,12 +120,12 @@ const SimDiagramFiles=(()=>{
     line(x+10,baseline+15,'ΣIM  ·  DIAGRAMA DE PROCESO',11,'bold');
     line(x+width*.57,baseline+15,(report.sheet?'LÁMINA '+report.sheet:'')+(report.revision?'   REV. '+report.revision:''),9);
     const cols=[x+10,x+width*.34,x+width*.68];
-    label(cols[0],baseline+35,'Proyecto',project,42);
-    label(cols[1],baseline+35,'Alumno / autor',student,34);
+    label(cols[0],baseline+35,'Proyecto',project,28);
+    label(cols[1],baseline+35,'Alumno / autor',student,28);
     label(cols[2],baseline+35,'ID',report.studentId,25);
-    label(cols[0],baseline+67,'Clase / grupo',klass+(report.group?' · '+report.group:''),42);
-    label(cols[1],baseline+67,'Materia',report.subject,34);
-    label(cols[2],baseline+67,'Institución / docente',(report.institution||'')+(report.teacher?' · '+report.teacher:''),32);
+    label(cols[0],baseline+67,'Clase / grupo',klass+(report.group?' · '+report.group:''),28);
+    label(cols[1],baseline+67,'Materia',report.subject,28);
+    label(cols[2],baseline+67,'Institución / docente',(report.institution||'')+(report.teacher?' · '+report.teacher:''),25);
     label(x+10,baseline+99,'Enunciado',exercise.statement||'',Math.max(40,Math.floor((width-22)/6)));
     svg.append(group);
     return svg;
