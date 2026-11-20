@@ -2,7 +2,7 @@
 'use strict';
 const SimCloudProjects=(()=>{
   const $=id=>document.getElementById(id);
-  let getGraph,hasProject,loadGraph,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false,pendingSave=false;
+  let getGraph,hasProject,loadGraph,clearWorkspace,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false,pendingSave=false;
   const api=async(path,method='GET',payload)=>{
     const options={method,credentials:'same-origin',cache:'no-store'};
     if(method!=='GET')Object.assign(options,{headers:{'Content-Type':'application/json'},body:JSON.stringify(payload||{})});
@@ -27,6 +27,7 @@ const SimCloudProjects=(()=>{
     me=data;updateIdentity();
     if(!me.authenticated)throw Error('Iniciá una sesión de clase antes de usar la biblioteca.');
     $('cloud-identification').hidden=!student()||identified();
+    $('cloud-switch-student').hidden=!identified();
     $('cloud-identify-message').textContent='';
     $('cloud-library-body').hidden=!available();
     $('cloud-project-save').disabled=!identified()||!hasProject();
@@ -48,6 +49,24 @@ const SimCloudProjects=(()=>{
     $('cloud-project-dialog').showModal();
     try{await refreshIdentity();if(available())await list();}
     catch(error){status(error.message);}
+  }
+  async function switchStudent(){
+    if(!identified())return;
+    if(working){status('Todavía se está guardando un proyecto. Intentá nuevamente cuando termine.');return;}
+    if(!window.confirm('¿Cambiar de alumno? Guardá primero los cambios pendientes. Se cerrará el proyecto abierto y se limpiará el borrador de este navegador para no mezclar trabajos.'))return;
+    const button=$('cloud-switch-student');button.disabled=true;
+    try{
+      await api('/api/auth/release-student','POST',{});
+      resetActive();pendingSave=false;clearWorkspace();
+      me={...me,student_name:null};updateIdentity();
+      $('cloud-project-list').replaceChildren();$('cloud-project-count').textContent='';
+      $('cloud-identify-form').reset();$('cloud-identify-password').value='';
+      $('cloud-identify-action').value='login';
+      await refreshIdentity();
+      status('Ingresá con otro alumno o elegí «Crear identidad nueva».');
+      $('cloud-identify-alias').focus();
+    }catch(error){status('No fue posible cambiar de alumno: '+error.message);}
+    finally{button.disabled=false;}
   }
   function requestClass(){
     const id=$('cloud-class-select').value;
@@ -119,7 +138,7 @@ const SimCloudProjects=(()=>{
     timer=setTimeout(()=>{timer=null;void save(false,true);},1800);
   }
   function bind(options){
-    ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
+    ({getGraph,hasProject,loadGraph,clearWorkspace,notice,closeMenus}=options);
     $('cloud-projects-open').onclick=open;
     $('cloud-open-toolbar').onclick=open;
     $('cloud-save-toolbar').onclick=()=>$('cloud-save-menu').click();
@@ -139,6 +158,7 @@ const SimCloudProjects=(()=>{
     $('cloud-project-save').onclick=()=>void save();
     $('cloud-project-copy').onclick=()=>void save(true);
     $('cloud-class-select').onchange=()=>void list();
+    $('cloud-switch-student').onclick=()=>void switchStudent();
     $('cloud-project-dialog').addEventListener('close',()=>{pendingSave=false;});
     $('cloud-identify-form').onsubmit=async event=>{
       event.preventDefault();
