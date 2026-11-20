@@ -1888,3 +1888,10 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #diagram-export-dialog #diagram-export-preview{padding:7px 14px;min-height:32px;margin-right:auto;border:1px solid var(--spx-border);background:var(--spx-surface);color:var(--spx-text);border-radius:4px;cursor:pointer}
 #diagram-export-dialog #diagram-export-preview:hover{background:var(--spx-surface-2);border-color:var(--spx-accent)}
 #diagram-export-dialog .diagram-print-preview[hidden]{display:none!important}
+
+/* Cambio de identidad en la misma clase: botón secundario, sin sobresalir del diálogo. */
+#cloud-project-dialog .cloud-identity-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#cloud-project-dialog .cloud-identity-row p{margin:6px 0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+#cloud-project-dialog #cloud-switch-student{padding:6px 10px;min-height:31px;border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface);color:var(--spx-text);font:inherit;cursor:pointer}
+#cloud-project-dialog #cloud-switch-student:hover{background:var(--spx-surface-2);border-color:var(--spx-accent)}
+#cloud-project-dialog #cloud-switch-student[hidden]{display:none!important}

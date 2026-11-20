@@ -123,6 +123,12 @@ export async function authRoute(request,env){
   await ok(env.SIM_AUTH_DB,actor);
   const s=await issue(env,role,classId);return json({ok:true,role,expires_at:now()+s.lifetime},200,{'Set-Cookie':sessionCookie(s.raw,s.lifetime)});
  }
+ if(path==='/api/auth/release-student'){
+   const s=await sessionFor(request,env);
+   if(!s||s.role!=='student'||!s.class_id)return json({error:'Se requiere acceso vigente a una clase.'},403);
+   await env.SIM_AUTH_DB.prepare('UPDATE sessions SET student_id=NULL WHERE session_digest=? AND class_id=? AND role=?').bind(s.session_digest,s.class_id,'student').run();
+   return json({ok:true});
+ }
  if(path==='/api/auth/student-identity'){
    const s=await sessionFor(request,env);
    if(!s||s.role!=='student'||!s.class_id)return json({error:'Se requiere acceso vigente a una clase.'},403);

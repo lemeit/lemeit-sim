@@ -23,3 +23,19 @@ test('botones de cierre y campos de nube tienen estilos específicos',()=>{
  assert.match(css,/#cloud-project-dialog \.exercise-form-body :is\(select,input\):focus-visible/);
  assert.match(css,/#cloud-project-dialog \[hidden\]\{display:none!important\}/);
 });
+
+test('Cambiar alumno conserva la clase pero reinicia el espacio local',()=>{
+ const html=file('index.html'),cloud=file('cloud-projects.js'),app=file('app.js');
+ assert.match(html,/id="cloud-switch-student"/);
+ assert.match(cloud,/api\/auth\/release-student/);
+ assert.match(cloud,/clearWorkspace\(\)/);
+ assert.match(app,/removeItem\('lemeit-process-v1'\)/);
+ assert.match(app,/clearWorkspace:\(\)=>clearLoadedProject\(true\)/);
+});
+
+test('el rótulo de exportación indica el modelo termodinámico tomado del proyecto',()=>{
+ const app=file('app.js'),layout=file('sheet-layout.js');
+ assert.match(app,/resultValidity==='valid'&&result\?\.model/);
+ assert.match(layout,/MODELO TERMODINÁMICO/);
+ assert.match(layout,/model:options\.model\|\|''/);
+});
