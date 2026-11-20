@@ -1,34 +1,32 @@
-/* Datos editables del rótulo: metadatos del proyecto, no condiciones físicas. */
+/* Datos del informe en el editor integrado; no alteran el cálculo físico. */
 'use strict';
 const SimProjectReport=(()=>{
  const FIELDS=['student','studentId','className','subject','group','institution','teacher','sheet','revision'];
  const $=id=>document.getElementById(id);
- let getGraph,changed,getIdentity;
+ let getGraph,getIdentity;
  function valid(report){
    if(report===undefined)return;
    if(!report||typeof report!=='object'||Array.isArray(report))throw Error('Datos del rótulo inválidos.');
    for(const field of FIELDS)if(report[field]!==undefined&&(typeof report[field]!=='string'||report[field].length>100))throw Error('Campo del rótulo inválido: '+field);
  }
- function open(){
-   const graph=getGraph();if(!graph?.compounds?.length)return;
-   const report=graph.report||{},who=getIdentity?.()||{};
+ function sync(){
+   const graph=getGraph(),report=graph.report||{},who=getIdentity?.()||{};
    for(const field of FIELDS){
-     const el=$('report-'+field);
-     el.value=report[field]??(field==='student'?(who.student_name||''):field==='className'?(who.class_name||''):'');
+     const value=report[field]??(field==='student'?who.student_name||'':field==='className'?who.class_name||'':'');
+     $('report-'+field).value=value;
    }
    $('report-project-name').textContent=graph.title||'Sin título';
    $('report-statement-preview').textContent=graph.exercise?.statement||graph.learning||'Sin enunciado';
-   $('report-dialog').showModal();
+ }
+ function save(){
+   const report={};
+   for(const field of FIELDS)report[field]=$('report-'+field).value.trim().slice(0,100);
+   getGraph().report=report;
  }
  function bind(options){
-   ({getGraph,changed,getIdentity}=options);
-   $('report-open').onclick=open;
-   $('report-form').onsubmit=event=>{
-     event.preventDefault();
-     const graph=getGraph(),report={};
-     for(const field of FIELDS)report[field]=$('report-'+field).value.trim().slice(0,100);
-     graph.report=report;changed();$('report-dialog').close();
-   };
+   ({getGraph,getIdentity}=options);
+   // Atajo de compatibilidad: abre la misma ficha, en la pestaña Rótulo.
+   $('report-open').onclick=()=>SimExerciseEditor.open('report');
  }
- return {bind,open,valid};
+ return {bind,sync,save,valid};
 })();
