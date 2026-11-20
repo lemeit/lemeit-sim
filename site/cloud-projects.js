@@ -16,13 +16,15 @@ const SimCloudProjects=(()=>{
   const identified=()=>student()&&!!me.student_name;
   const available=()=>me?.role==='admin'||identified();
   const status=message=>{$('cloud-project-status').textContent=message;};
+  const identity=()=>me?{student_name:me.student_name||'',class_name:me.class_name||'',role:me.role}:{};
+  const updateIdentity=()=>{const label=$('cloud-user-label');if(!label)return;label.textContent=me?.role==='admin'?'Administrador':me?.student_name?me.student_name+' · '+(me.class_name||'Clase'):me?.class_name?me.class_name+' · sin identificar':'Sin identificar';label.title='Identidad de esta sesión';};
   function resetActive(){
     active=null;revision=null;version++;dirty=false;
     if(timer)clearTimeout(timer);timer=null;
   }
   async function refreshIdentity(){
     const data=await api('/api/auth/me');
-    me=data;
+    me=data;updateIdentity();
     if(!me.authenticated)throw Error('Iniciá una sesión de clase antes de usar la biblioteca.');
     $('cloud-identification').hidden=!student()||identified();
     $('cloud-identify-message').textContent='';
@@ -119,6 +121,9 @@ const SimCloudProjects=(()=>{
   function bind(options){
     ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
     $('cloud-projects-open').onclick=open;
+    $('cloud-open-toolbar').onclick=open;
+    $('cloud-save-toolbar').onclick=()=>$('cloud-save-menu').click();
+    void api('/api/auth/me').then(data=>{me=data;updateIdentity();}).catch(()=>{});
     $('cloud-save-menu').onclick=async()=>{
       closeMenus();
       if(!hasProject())return notice('Primero creá o abrí un proyecto.',true);
@@ -146,7 +151,7 @@ const SimCloudProjects=(()=>{
           password:$('cloud-identify-password').value
         });
         $('cloud-identify-password').value='';
-        me={...me,student_name:result.student_name};
+        me={...me,student_name:result.student_name};updateIdentity();
         $('cloud-identification').hidden=true;
         $('cloud-library-body').hidden=false;
         const shouldSave=pendingSave;
@@ -162,5 +167,5 @@ const SimCloudProjects=(()=>{
       finally{button.disabled=false;button.textContent='Continuar';}
     };
   }
-  return {bind,open,onChange,resetActive};
+  return {bind,open,onChange,resetActive,identity};
 })();

@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.41.0 — 2026-11-20
+
+- Accesos rápidos a biblioteca y guardado en la nube junto al botón de guardar del editor; identidad del alumno o clase visible en la barra.
+- Rótulo técnico editable con alumno, ID, clase, grupo, materia, institución, docente, número de lámina y revisión, guardado como metadato no físico del proyecto.
+- Las exportaciones SVG, PNG y PDF permiten incluir el rótulo con título y enunciado existentes; el PDF ofrece añadir una hoja con balances cuando existen resultados vigentes.
+- Validación de metadatos del rótulo y prueba real con Chrome de exportaciones.
+
 ## 0.40.1 — 2026-11-20
 
 - Se retira información técnica innecesaria del diálogo de proyectos de estudiantes.
