@@ -6,7 +6,7 @@ import {handle} from './worker.mjs';
 test('recorrido real con SQLite: administrador crea clase, alumno entra y no puede administrar',async()=>{
  const db=new DatabaseSync(':memory:');
  try{
-  for(const f of ['0001_class_access.sql','0002_calculation_quotas.sql','0003_recoverable_class_codes.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
+  for(const f of ['0001_class_access.sql','0002_calculation_quotas.sql','0003_recoverable_class_codes.sql','0004_student_projects.sql'])db.exec(readFileSync(new URL('../migrations/'+f,import.meta.url),'utf8'));
   const d1={prepare(sql){return {bind(...params){return {async first(){return db.prepare(sql).get(...params)||null},async run(){db.prepare(sql).run(...params);return {success:true}},async all(){return {results:db.prepare(sql).all(...params)}}}},async all(){return {results:db.prepare(sql).all()}}}}};
   const env={SIM_AUTH_DB:d1,SIM_SESSION_SECRET:'integration-session-secret-not-for-production',SIM_ADMIN_PASSWORD:'integration-admin-password-not-for-production'};
   const post=(name,body,cookie='')=>handle(new Request('https://sim.test/api/auth/'+name,{method:'POST',headers:{Origin:'https://sim.test','Content-Type':'application/json',Cookie:cookie},body:JSON.stringify(body)}),env);
