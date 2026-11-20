@@ -36,18 +36,62 @@ const SimSheetLayout=(()=>{
    field(group,bx+7,top+84,'ENUNCIADO',options.exercise?.statement||'',50);
    svg.append(group);return svg;
  }
+ function effectiveOrientation(source,options){
+   if(options.orientation!=='auto')return options.orientation;
+   const box=source.viewBox.baseVal;
+   return box.width/Math.max(1,box.height)>1.3?'landscape':'portrait';
+ }
+ const compactNumber=value=>{
+   if(typeof value==='number')return Number.isFinite(value)?Number(value.toPrecision(4)).toLocaleString('es-AR',{maximumSignificantDigits:4}):'—';
+   return clean(value);
+ };
+ function tableHeight(table){return 15+19+15*(table.rows.length-1)+9;}
+ function drawTable(root,table,x,y,width){
+   const rows=table.rows,n=rows[0].length,first=Math.max(60,width*(n>4?.2:.3)),other=(width-first)/Math.max(1,n-1);
+   const widths=Array.from({length:n},(_,i)=>i===0?first:other);
+   text(root,x+4,y+10,table.name.toUpperCase(),9,true,50);
+   y+=15;
+   const headers=rows[0].map(v=>clean(v).replace(/\s*\[(.*?)\]/g,' ($1)').replace('Residuo o consumo neto','Residuo / consumo').replace('Tipo de transferencia','Transferencia').replace('Entalpía','H').replace('Entropía','S').replace('Temperatura','Temp.').replace('Densidad','Dens.'));
+   const drawRow=(values,rowHeight,heading)=>{
+     let cursor=x;
+     for(let i=0;i<n;i++){
+       const box=attr(el('rect'),{x:cursor,y,width:widths[i],height:rowHeight,fill:heading?'#edf0f2':'#fff',stroke:'#b3bbc1','stroke-width':.45});
+       root.append(box);
+       const font=heading?6.4:7.3,maxChars=Math.max(4,Math.floor((widths[i]-7)/(font*.51)));
+       text(root,cursor+3,y+rowHeight*.68,compactNumber(values[i]),font,heading,maxChars);
+       cursor+=widths[i];
+     }
+     y+=rowHeight;
+   };
+   drawRow(headers,19,true);
+   for(const row of rows.slice(1))drawRow(row,15,false);
+   return y+9;
+ }
  function sheet(source,title,options){
-   const {width,height}=size(options),margin=Math.max(8,Number(options.margin)||15)*72/25.4;
+   const orientation=effectiveOrientation(source,options);
+   const {width,height}=size({...options,orientation}),margin=Math.max(8,Number(options.margin)||15)*72/25.4;
    const paper=attr(el('svg'),{viewBox:[0,0,width,height].join(' '),width,height});
-   rectangle(paper,0,0,width,height); // blanco para imprimir / previsualizar
+   rectangle(paper,0,0,width,height);
    rectangle(paper,margin,margin,width-2*margin,height-2*margin,'none');
-   const contentTop=margin+10,blockH=options.titleBlock?72:0;
-   const contentH=height-2*margin-25-blockH,contentW=width-2*margin-20;
-   const view=source.viewBox.baseVal,scale=Math.min(contentW/view.width,contentH/view.height);
-   const dx=margin+10+(contentW-view.width*scale)/2,dy=contentTop+(contentH-view.height*scale)/2;
+   const blockH=options.titleBlock?72:0;
+   const tables=(options.tables||[]).filter(table=>Array.isArray(table?.rows)&&table.rows.length>1);
+   const totalTableH=tables.reduce((sum,table)=>sum+tableHeight(table),0);
+   const top=margin+10,bottom=height-margin-12-blockH;
+   const regionH=bottom-top,regionW=width-2*margin-20;
+   const gap=tables.length?12:0;
+   // Una sola hoja: si las tablas requieren demasiado espacio, rechazar en lugar de
+   // agregar páginas u ocultar resultados numéricos.
+   if(totalTableH>regionH-105-gap)throw new Error('Las tablas seleccionadas no entran de forma legible en una sola hoja. Desmarcá alguna tabla o elegí A3/Oficio.');
+   const diagramH=regionH-totalTableH-gap;
+   const view=source.viewBox.baseVal;
+   const scale=Math.min(regionW/view.width,diagramH/view.height);
+   if(!(scale>0))throw new Error('El diagrama no tiene dimensiones válidas para imprimir.');
+   const dx=margin+10+(regionW-view.width*scale)/2,dy=top+(diagramH-view.height*scale)/2;
    const group=attr(el('g'),{transform:'translate('+dx+' '+dy+') scale('+scale+') translate('+(-view.x)+' '+(-view.y)+')'});
    for(const child of [...source.childNodes])if(child.nodeName.toLowerCase()!=='title')group.append(child.cloneNode(true));
    paper.append(group);
+   let tableY=top+diagramH+gap;
+   for(const table of tables)tableY=drawTable(paper,table,margin+10,tableY,regionW);
    if(options.titleBlock){
      const d=identityFields(title,options);
      const bw=Math.min(320,width-2*margin),bx=width-margin-bw,by=height-margin-65;
@@ -60,5 +104,6 @@ const SimSheetLayout=(()=>{
    }
    return paper;
  }
- return {compact,sheet,size};
+
+ return {compact,sheet,size,effectiveOrientation};
 })();
