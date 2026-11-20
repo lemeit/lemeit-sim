@@ -355,7 +355,9 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
         if(!connected&&!isStream(n))html+=`<circle class="port export-port ${p.medium==='energy'?'energy':''}" cx="${p.x}" cy="${p.y}" r="3"><title>${label}</title></circle>`;
         continue;
       }
-      html+=`<g class="${connected?'connected-port':''}" data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${label}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${label}</title></g>`;
+      const flashLabel=n.type==='Separator'?(p.side==='in'?'Alimentación':p.index===0?'Vapor':'Líquido'):'';
+      const flashText=flashLabel?`<text class="flash-port-label" x="${p.x}" y="${p.y}" dx="${p.side==='in'?-12:12}" dy=".35em" text-anchor="${p.side==='in'?'end':'start'}" aria-hidden="true">${flashLabel}</text>`:'';
+      html+=`<g class="${connected?'connected-port':''}" data-port="${p.side}" data-index="${p.index}" data-owner="${n.id}" tabindex="0" role="button" aria-label="${esc(n.name)}: ${flashLabel||label}, ${connected?'conectado':'libre'}"><circle class="port-target" cx="${p.x}" cy="${p.y}" r="13"/><circle class="port ${p.medium==='energy'?'energy':''} ${pending?.node===n.id&&pending.side===p.side&&pending.index===p.index?'pending':''}" cx="${p.x}" cy="${p.y}" r="5"/><title>${flashLabel||label}${connected?' · conectado':' · libre'}</title>${flashText}</g>`;
     }
     if(!exporting&&selection?.node===n.id){if(g)html+=`<rect class="bend-handle" data-bend="${n.id}" data-axis="${g.bend.axis}" x="${g.bend.x-3}" y="${g.bend.y-3}" width="6" height="6"><title>Arrastrar para acomodar el recorrido</title></rect>`;else html+=`<rect class="resize-handle" data-resize="${n.id}" x="${t.w*scale+2}" y="${t.h*scale+2}" width="14" height="14"><title>Arrastrar para cambiar el tamaño del símbolo</title></rect>`;}
     html+='</g>';
@@ -369,7 +371,7 @@ function renderDiagram(){
   svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
   svg.innerHTML=(gridVisible?showGrid():'')+diagramMarkup();refreshCanvasButtons();if($('recycle-caption'))$('recycle-caption').textContent=diagramHasRecirculation(graph)?'CON RECIRCULACIÓN':'SIN RECIRCULACIÓN';$('object-count').textContent=`${graph.nodes.length} objetos`;
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
-  $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
+  $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá el extremo de una corriente a un punto de conexión. Los puertos libres tienen un borde marcado.';
   $('connection-hint').classList.toggle('active',!!pending);
   updateControls();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.emphasize();
 }
@@ -637,7 +639,10 @@ function updateDiagramGeometry(){
     if(callout){callout.querySelector('.callout-leader').setAttribute('d',c.line);const tip=callout.querySelector('.callout-tip');tip.setAttribute('cx',c.anchor.x);tip.setAttribute('cy',c.anchor.y);callout.querySelector('.callout-text').setAttribute('transform',`translate(${c.x} ${c.y})`);}
     const labelX=g?g.label.x:equipmentLabelX(n),labelY=g?g.label.y:t.h*s+20;
     for(const [selector,offset] of [['.stream-label',0],['.equipment-label',0],['.node-kind',15]]){const label=el.querySelector(selector);if(label){label.setAttribute('x',labelX);label.setAttribute('y',labelY+offset);}}
-    for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}}
+    for(const p of portList(n)){const port=el.querySelector(`[data-port="${p.side}"][data-index="${p.index}"]`);for(const circle of port?.querySelectorAll('circle')||[]){circle.setAttribute('cx',g?p.x+n.x:p.x);circle.setAttribute('cy',g?p.y+n.y:p.y);}
+      const label=port?.querySelector('.flash-port-label');
+      if(label){label.setAttribute('x',p.x);label.setAttribute('y',p.y);}
+    }
   }
   svg.querySelectorAll('.snap-target').forEach(el=>el.classList.remove('snap-target'));
   if(endpointDrag?.snap){const {unit,p}=endpointDrag.snap;svg.querySelector(`[data-owner="${unit.id}"][data-port="${p.side}"][data-index="${p.index}"]`)?.classList.add('snap-target');}
@@ -680,20 +685,20 @@ function endpointCandidate(drag){
 }
 function bindEvents(){
   const svg=$('diagram');
-  const panButton=$('diagram-pan');
-  const setPanMode=enabled=>{
-    panButton.setAttribute('aria-pressed',String(enabled));
-    svg.classList.toggle('pan-mode',enabled);
+  let spaceHeld=false;
+  const setSpaceHeld=held=>{
+    spaceHeld=held;
+    svg.classList.toggle('pan-mode',held);
+    if(!held&&panning?.viaSpace)endPan();
   };
-  panButton.onclick=()=>setPanMode(!svg.classList.contains('pan-mode'));
   $('canvas-wrap').addEventListener('pointerdown',e=>{
     if(!svg.contains(e.target)||!e.isPrimary||panning||dragging||marquee||resizing||bending||endpointDrag)return;
-    if(e.button!==1&&!(e.button===0&&(e.altKey||svg.classList.contains('pan-mode'))))return;
+    if(e.button!==1&&!(e.button===0&&(e.altKey||spaceHeld)))return;
     const matrix=svg.getScreenCTM();
     if(!matrix)return;
     e.preventDefault();
     e.stopPropagation();
-    panning={pointerId:e.pointerId,x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:matrix.inverse()};
+    panning={pointerId:e.pointerId,viaSpace:e.button===0&&!e.altKey&&spaceHeld,x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:matrix.inverse()};
     svg.setPointerCapture(e.pointerId);
     svg.classList.add('panning');
     svg.focus({preventScroll:true});
@@ -763,6 +768,15 @@ function bindEvents(){
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
     if(visualChange){changed({physical:false});renderInspector();}else renderDiagram();
   };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+  document.addEventListener('keydown',e=>{
+    if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey)return;
+    if(e.target.closest?.('input,textarea,select,button,summary,a[href],dialog,[data-port],[data-node]')
+      ||SimDiagramInteractions.isEditable(e.target))return;
+    e.preventDefault();
+    if(!e.repeat)setSpaceHeld(true);
+  });
+  window.addEventListener('keyup',e=>{if(e.code==='Space')setSpaceHeld(false);});
+  window.addEventListener('blur',()=>setSpaceHeld(false));
   svg.addEventListener('keydown',e=>{
     if(busy)return;
     if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='a'){e.preventDefault();selectAllDiagram();return;}
@@ -774,7 +788,7 @@ function bindEvents(){
   });
   document.addEventListener('keydown',e=>{
     if(SimDiagramInteractions.isEditable(e.target)||e.target.closest?.('dialog'))return;
-    if(e.key==='Escape'&&(panning||svg.classList.contains('pan-mode'))){endPan();setPanMode(false);return;}
+    if(e.key==='Escape'&&(panning||spaceHeld)){endPan();setSpaceHeld(false);return;}
     if(e.key==='Escape'){selection=null;marquee=null;pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();renderInspector();}
     if(SimDiagramInteractions.isDeleteShortcut(e)&&hasProject&&selection&&!busy){e.preventDefault();removeSelected();}
   });

@@ -521,7 +521,7 @@ test('Explorador: diferencia cero de datos faltantes en los balances',async t=>{
  assert.match(text,/Ethanol · entrada − salida\s+Sin dato de DWSIM − Sin dato de DWSIM/);
  assert.match(text,/Residuo energético bajo el supuesto adiabático\s+Sin dato de DWSIM/);
 });
-test('Desplazar el lienzo con la rueda presionada o con el modo de arrastre',async t=>{
+test('Desplazar el lienzo con la rueda presionada o manteniendo Espacio',async t=>{
  const page=await browserPage(t);
  await page.reload({waitUntil:'networkidle'});
  await page.getByText('Ayuda',{exact:true}).click();
@@ -529,7 +529,8 @@ test('Desplazar el lienzo con la rueda presionada o con el modo de arrastre',asy
  assert.match(await page.locator('#about-dialog').innerText(),new RegExp('Versión del portal · '+portalVersion));
  await page.keyboard.press('Escape');
  await openProject(page,example);
- const diagram=page.locator('#diagram'), pan=page.locator('#diagram-pan');
+ const diagram=page.locator('#diagram');
+ assert.equal(await page.locator('#diagram-pan').count(),0);
  await page.locator('#fit-button').click();
  await diagram.focus();
  await page.keyboard.press('Control+a');
@@ -551,15 +552,43 @@ test('Desplazar el lienzo con la rueda presionada o con el modo de arrastre',asy
  assert.notEqual(moved,initial);
  assert.deepEqual(moved.split(' ').slice(2),initial.split(' ').slice(2));
  assert.deepEqual(await snapshot(),original);
- await pan.click();
- assert.equal(await pan.getAttribute('aria-pressed'),'true');
+ await page.keyboard.down('Space');
+ assert.equal(await diagram.evaluate(svg=>svg.classList.contains('pan-mode')),true);
  await drag('left');
  assert.notEqual(await view(),moved);
  assert.deepEqual(await snapshot(),original);
- await page.keyboard.press('Escape');
- assert.equal(await pan.getAttribute('aria-pressed'),'false');
+ await page.keyboard.up('Space');
+ assert.equal(await diagram.evaluate(svg=>svg.classList.contains('pan-mode')),false);
  assert.deepEqual(await snapshot(),original);
  const panned=await view();
  await page.locator('#fit-button').click();
  assert.notEqual(await view(),panned);
+});
+
+test('Puertos visibles sin selección en todos los equipos y rotulados en el flash',async t=>{
+ const page=await browserPage(t);
+ await page.reload({waitUntil:'networkidle'});
+ await page.getByText('Ayuda',{exact:true}).click();
+ await page.locator('#about-button').click();
+ assert.ok((await page.locator('#about-dialog').innerText()).includes('Versión del portal · '+portalVersion));
+ await page.keyboard.press('Escape');
+ const project=JSON.parse(await load('../site/examples/FlashDrum.json'));
+ project.edges=project.edges.filter(e=>e.to!=='vapor');
+ const equipmentTypes=await page.locator('#diagram-add option').evaluateAll(options=>
+   options.map(option=>option.value).filter(type=>type&&!['MaterialStream','EnergyStream'].includes(type)));
+ for(const [i,type] of equipmentTypes.entries()){
+   if(project.nodes.some(node=>node.type===type))continue;
+   project.nodes.push({id:'unit'+i,type,name:type,x:180+(i%6)*210,y:530+Math.floor(i/6)*155});
+ }
+ await openProject(page,Buffer.from(JSON.stringify(project)));
+ const units=page.locator('#diagram .equipment-node');
+ assert.equal(await units.count(),equipmentTypes.length);
+ assert.deepEqual(await units.evaluateAll(elements=>elements.filter(unit=>{
+   const ports=[...unit.querySelectorAll('.port')];
+   return ports.length<2||ports.some(p=>Number(getComputedStyle(p).opacity)<=0);
+ }).map(unit=>unit.getAttribute('aria-label'))),[]);
+ const flash=page.locator('#diagram [data-node="flash"]');
+ assert.deepEqual(await flash.locator('.flash-port-label').allTextContents(),['Alimentación','Vapor','Líquido']);
+ assert.match(await flash.locator('[data-port="out"][data-index="0"]').getAttribute('aria-label'),/Vapor, libre/);
+ assert.match(await flash.locator('[data-port="out"][data-index="1"]').getAttribute('aria-label'),/Líquido, conectado/);
 });

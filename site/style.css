@@ -933,7 +933,7 @@ footer.site-footer{font-family:var(--spx-font-sans)}.footer-wordmark{font-family
 
 .node.stream-node .stream-label{pointer-events:all;cursor:move;paint-order:stroke;stroke:var(--spx-surface);stroke-width:5px;stroke-linejoin:round}
 .stream-node [data-port]{cursor:crosshair}
-.node:not(.selected):not(:hover) .port{opacity:0}
+.stream-node:not(.selected):not(:hover) .port{opacity:0}
 .node:not(.selected):not(:hover) .port.pending{opacity:1}
 
 .palette-symbol{width:26px;height:26px;flex-shrink:0}
@@ -1746,8 +1746,12 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #information-dialog pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
 #information-dialog .dialog-actions{margin:0;padding:12px 20px}
 
-.node .connected-port .port{opacity:0}
+.stream-node .connected-port .port{opacity:0}
 .node:hover .connected-port .port,.node.selected .connected-port .port,.node .connected-port:focus .port,.node .connected-port.snap-target .port{opacity:1}
+.equipment-node [data-port] .port{opacity:1;stroke-width:2.5;vector-effect:non-scaling-stroke}
+.equipment-node .connected-port .port{opacity:.65;stroke-width:1.5}
+.equipment-node [data-port]:is(:hover,:focus-visible,.snap-target) .port{opacity:1;stroke-width:4}
+#diagram .flash-port-label{fill:var(--spx-text);stroke:var(--spx-surface);stroke-width:3;paint-order:stroke;font-size:12px;font-weight:600;pointer-events:none}
 
 /* El SVG se mide con la tipografía real y una paleta de impresión estable. */
 .diagram-export-stage{position:fixed;inset:0 auto auto 0;width:0;height:0;overflow:hidden;pointer-events:none;
@@ -1983,7 +1987,5 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #diagram .node.explorer-current .equipment-symbol,#diagram .node.explorer-current .stream-line{stroke:var(--spx-accent);stroke-width:2.5}
 @media(max-width:650px){.process-explorer-panel .explorer-content{grid-template-columns:1fr}.command-bar #process-explorer-open{padding:5px 7px}}
 
-.command-bar .zoom-controls #diagram-pan{width:auto;padding-inline:8px}
-#diagram-pan[aria-pressed="true"]{color:var(--spx-accent);background:var(--spx-accent-dim)}
 #diagram.pan-mode,#diagram.pan-mode *{cursor:grab}
 #diagram.panning,#diagram.panning *{cursor:grabbing}
