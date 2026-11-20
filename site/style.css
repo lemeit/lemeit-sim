@@ -1856,3 +1856,19 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #cloud-project-dialog .exercise-form-body :is(select,input):focus-visible{border-color:var(--spx-accent);box-shadow:inset 0 0 0 1px var(--spx-accent)}
 #cloud-project-dialog .exercise-form-body input{padding-right:10px}
 #cloud-project-dialog [hidden]{display:none!important}
+
+/* Identidad visual ΣIM: acciones de nube y autor de sesión, sin ensanchar iconos. */
+.command-bar .file-tools .cloud-toolbar-button{width:30px;min-width:30px;height:27px;padding:5px;color:var(--spx-accent);border:1px solid transparent}
+.command-bar .file-tools .cloud-toolbar-button:hover:not(:disabled){background:var(--spx-accent-dim);border-color:var(--spx-border)}
+.command-bar .file-tools .cloud-toolbar-button svg{width:17px;height:17px;display:block;pointer-events:none}
+.command-bar .cloud-user-label{max-width:165px;flex:0 1 auto;min-width:65px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;border:1px solid var(--spx-border);border-radius:4px;padding:4px 7px;color:var(--spx-text-dim);background:var(--spx-surface)}
+.command-bar #report-open{width:auto;min-width:max-content;padding:4px 9px;white-space:nowrap;border-color:var(--spx-border);background:var(--spx-surface)}
+#report-dialog{width:min(660px,calc(100vw - 30px));max-width:660px}
+#report-dialog .report-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin:16px 0}
+#report-dialog .report-fields label{display:grid;gap:5px;margin:0;min-width:0}
+#report-dialog .report-fields input{box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:34px;padding:7px 9px;color:var(--spx-text);background:var(--spx-surface);border:1px solid var(--spx-border);border-radius:4px}
+#report-dialog .report-fields input:focus-visible{outline:2px solid var(--spx-accent);outline-offset:-2px}
+#report-dialog #report-statement-preview{overflow-wrap:anywhere}
+#diagram-export-dialog .report-export-option{display:flex!important;align-items:center;justify-content:flex-start;gap:9px;min-width:0}
+#diagram-export-dialog .report-export-option input{width:15px;height:15px;flex:0 0 auto;accent-color:var(--spx-accent)}
+@media(max-width:600px){#report-dialog .report-fields{grid-template-columns:1fr}.command-bar .cloud-user-label{max-width:100px}}
