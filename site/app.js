@@ -777,7 +777,7 @@ async function init(){
   SimproxTheme.init();graph=emptyProject();
   SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram});
   SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
-  SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
+  SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,changed:()=>changed({physical:false}),getIdentity:()=>SimCloudProjects.identity()});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
@@ -801,6 +801,17 @@ function renderNewProject(){
   const matches=(catalog?.compounds||[]).filter(c=>!draftCompounds.includes(c)&&c.toLowerCase().includes(query));
   $('new-component-list').innerHTML=matches.slice(0,35).map(c=>`<button type="button" class="compound-option" data-new-add="${esc(c)}">+ ${esc(c)}</button>`).join('');
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
+}
+function clearLoadedProject(clearLocalDraft=false){
+  graph=emptyProject();
+  SimProjectLibrary.resetActive();
+  SimCloudProjects.resetActive();
+  hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;
+  $('project-title').value=graph.title;
+  $('results').innerHTML=blankResults;
+  $('result-meta').textContent='Sin resultados';
+  if(clearLocalDraft){try{localStorage.removeItem('lemeit-process-v1');}catch{}}
+  renderDiagram();renderInspector();renderCompounds();updateControls();closeMenus();
 }
 function bindProjectEvents(){
   const menus=[...document.querySelectorAll('.app-menu')];
@@ -1227,7 +1238,7 @@ function bindWorkspaceTools(){
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
   $('unit-calculator-button').onclick=()=>{closeMenus();SimUnitCalculator.open(graph);};
   document.querySelectorAll('a[href="ejemplos.html"]').forEach(link=>link.onclick=e=>{e.preventDefault();closeMenus();document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());SimGuide.open($('guide-dialog'),$('guide-host'));});
-  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();graph=emptyProject();SimProjectLibrary.resetActive();SimCloudProjects.resetActive();hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;$('project-title').value=graph.title;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados';renderDiagram();renderInspector();renderCompounds();closeMenus();};
+  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
   const dock=$('results-panel');$('results-close').onclick=()=>{if(document.body.classList.contains('results-window'))window.close();else dock.hidden=true;};$('view-results').onclick=()=>{dock.hidden=false;closeMenus();};
   const resultURL=new URL(location.href);resultURL.search='';resultURL.searchParams.set('results','1');resultURL.searchParams.set('workspace',workspaceId);$('results-popout').href=resultURL.href;
   $('results-popout').onclick=e=>{e.preventDefault();const opened=window.open(resultURL.href,'simprox-results-'+workspaceId,'popup,width=1100,height=650,resizable=yes,scrollbars=yes');if(!opened)notice('Permití la ventana emergente para separar los resultados.');};$('view-results-popout').onclick=()=>$('results-popout').click();
