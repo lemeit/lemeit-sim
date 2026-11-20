@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.43.1 — 2026-11-20
+
+- El reporte PDF permite incluir enunciado, consignas y observaciones de «Editar proyecto → Actividad» con una casilla habilitada por defecto.
+- El texto completo se integra a la lámina A4 cuando cabe sin reducir demasiado el diagrama; si es extenso se agrega un anexo de actividad paginado y sin truncamientos.
+- La vista previa indica si la actividad entra en la lámina o se adjunta como anexo; la exportación SVG/PNG conserva su funcionamiento anterior.
+
 ## 0.43.0 — 2026-11-20
 
 - Editor de proyecto integrado: **Actividad / Anotaciones / Datos del informe** en un solo diálogo con pestañas, guardado conjunto, cancelación y acceso al generador de PDF.
