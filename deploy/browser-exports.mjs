@@ -245,3 +245,42 @@ test('Archivo ordenado y vista previa de reporte Oficio con rótulo y tablas',as
  await page.getByRole('button',{name:'Exportar imagen · SVG / PNG…'}).click();
  assert.equal(await dlg.locator('[name=format]').inputValue(),'svg');
 });
+
+
+test('Lámina A4: tablas compactas sin texto fuera de márgenes y diagrama con prioridad visual',async t=>{
+  const page=await browserPage(t);
+  const measured=await page.evaluate(()=>{
+    const ns='http://www.w3.org/2000/svg',shape=document.createElementNS(ns,'svg');
+    shape.setAttribute('viewBox','0 0 540 190');
+    shape.setAttribute('width','540');shape.setAttribute('height','190');
+    const line=document.createElementNS(ns,'path');
+    line.setAttribute('d','M20 65 H520');line.setAttribute('stroke','#345');line.setAttribute('fill','none');shape.append(line);
+    const tables=[
+      {name:'Equipos',rows:[['Equipo','Tipo','Entradas','Salidas'],['Reactor','ConversionReactor',1,2]]},
+      {name:'Corrientes',rows:[['Corriente','Caudal (kg/s)','Temp. (°C)','Presión (kPa)','H (kJ/kg)','S (kJ/(kg K))','Dens. (kg/m³)','Caudal molar (mol/s)'],['Alimentación',1,500,101.33,1189,3.583,.1893,83.26],['Producto vapor',1,500,101.33,1064,3.883,.2272,69.39],['Producto líquido',-2e-16,500,101.33,1064,3.883,.2272,-1.54e-14]]},
+      {name:'Balances',rows:[['Equipo','Entrada (kg/s)','Salida (kg/s)','Residuo masa (kg/s)','Energía hacia fluido (kW)','Reactivo','Transferencia'],['Reactor',1,1,0,-6837,'Sí','Calor']]},
+      {name:'Componentes',rows:[['Equipo','Componente','Entrada (kg/s)','Salida (kg/s)','Residuo o consumo neto (kg/s)','Interpretación'],['Reactor','Hydrogen',.1119,.05595,.05595,'Consumo (+), generación (-)'],['Reactor','Oxygen',.8881,.444,.4441,'Consumo (+), generación (-)'],['Reactor','Water',0,.5,-.5,'Consumo (+), generación (-)']]}
+    ];
+    const options={paper:'a4',orientation:'landscape',margin:15,titleBlock:true,tables,report:{student:'Alumno de prueba',subject:'Física'}};
+    const sheet=SimSheetLayout.sheet(shape,'Formación de agua',options);
+    sheet.style.position='absolute';sheet.style.left='-10000px';document.body.append(sheet);
+    const box=sheet.viewBox.baseVal;
+    const texts=[...sheet.querySelectorAll('text')];
+    const errors=texts.filter(node=>{
+      const r=node.getBBox();
+      return r.x<38||r.x+r.width>box.width-36||r.y+r.height>box.height-35;
+    }).map(node=>node.textContent);
+    const fontSizes=[...sheet.querySelectorAll('text')].map(t=>Number(t.getAttribute('font-size')||0));
+    const chart=sheet.querySelector('g[transform]');
+    const match=chart.getAttribute('transform').match(/scale\(([\d.]+)\)/);
+    const chartScale=Number(match?.[1]||0);
+    const tiny=sheet.textContent.includes('≈ 0');
+    sheet.remove();
+    return {errors,chartScale,tiny,smallFonts:fontSizes.filter(x=>x<=6.1).length,views:[box.width,box.height]};
+  });
+  assert.deepEqual(measured.errors,[],'Ningún texto puede salir de los márgenes impresos');
+  assert.ok(measured.chartScale>.5,'El diagrama no debe quedar reducido a una miniatura');
+  assert.ok(measured.tiny,'Residuos numéricos próximos a cero usan formato compacto');
+  assert.ok(measured.smallFonts>25,'El reporte aplica tipografía reducida a las tablas');
+  assert.ok(measured.views[0]>measured.views[1],'La lámina se conserva horizontal');
+});
