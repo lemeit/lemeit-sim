@@ -2,10 +2,11 @@
 'use strict';
 const SimCloudProjects=(()=>{
   const $=id=>document.getElementById(id);
-  let getGraph,hasProject,loadGraph,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false;
+  let getGraph,hasProject,loadGraph,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false,pendingSave=false;
   const api=async(path,method='GET',payload)=>{
     const options={method,credentials:'same-origin',cache:'no-store'};
     if(method!=='GET')Object.assign(options,{headers:{'Content-Type':'application/json'},body:JSON.stringify(payload||{})});
+    options.signal=AbortSignal.timeout(12000);
     const response=await fetch(path,options);
     const data=await response.json();
     if(!response.ok)throw Error(data.error||'No se pudo acceder a la nube.');
@@ -24,6 +25,7 @@ const SimCloudProjects=(()=>{
     me=data;
     if(!me.authenticated)throw Error('Iniciá una sesión de clase antes de usar la biblioteca.');
     $('cloud-identification').hidden=!student()||identified();
+    $('cloud-identify-message').textContent='';
     $('cloud-library-body').hidden=!available();
     $('cloud-project-save').disabled=!identified()||!hasProject();
     $('cloud-project-copy').disabled=!identified()||!hasProject();
@@ -55,7 +57,7 @@ const SimCloudProjects=(()=>{
     try{
       const {projects}=await api('/api/projects'+requestClass());
       const target=$('cloud-project-list');target.replaceChildren();
-      $('cloud-project-count').textContent=projects.length+' proyecto(s) guardado(s) en Cloudflare D1';
+      $('cloud-project-count').textContent=projects.length+' proyecto(s) guardado(s)';
       if(!projects.length)target.textContent='Todavía no hay proyectos en este espacio.';
       for(const p of projects){
         const row=document.createElement('div');row.className='local-project-entry';
@@ -83,7 +85,7 @@ const SimCloudProjects=(()=>{
         }));
         row.append(info,controls);target.append(row);
       }
-      status('La nube conserva los proyectos aunque se borren los datos de este navegador.');
+      status('Tus proyectos están disponibles desde cualquier computadora.');
     }catch(error){status(error.message);}
   }
   async function save(copy=false,quiet=false){
@@ -101,9 +103,9 @@ const SimCloudProjects=(()=>{
         data=await api('/api/projects/'+active,'PUT',{graph,revision});
         if(currentGeneration===version)revision=data.revision;
       }
-      if(!quiet){status('Proyecto guardado en la nube.');await list();}
+      if(!quiet){status('Proyecto guardado en la nube.');notice('Proyecto guardado en la nube.');if($('cloud-project-dialog').open)await list();}
       else status('Guardado automáticamente en la nube.');
-    }catch(error){status('No se pudo guardar: '+error.message+' Descargá el JSON como respaldo.');dirty=false;}
+    }catch(error){status('No se pudo guardar: '+error.message+' Descargá el JSON como respaldo.');if(!$('cloud-project-dialog').open)notice('No se pudo guardar en la nube: '+error.message,true);dirty=false;}
     finally{
       working=false;
       if(dirty&&currentGeneration===version){dirty=false;onChange();}
@@ -117,12 +119,26 @@ const SimCloudProjects=(()=>{
   function bind(options){
     ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
     $('cloud-projects-open').onclick=open;
+    $('cloud-save-menu').onclick=async()=>{
+      closeMenus();
+      if(!hasProject())return notice('Primero creá o abrí un proyecto.',true);
+      if(!identified()){
+        pendingSave=true;
+        await open();
+        if(identified()){pendingSave=false;await save();}
+        else status('Identificate para guardar tu proyecto.');
+        return;
+      }
+      await save();
+    };
     $('cloud-project-save').onclick=()=>void save();
     $('cloud-project-copy').onclick=()=>void save(true);
     $('cloud-class-select').onchange=()=>void list();
+    $('cloud-project-dialog').addEventListener('close',()=>{pendingSave=false;});
     $('cloud-identify-form').onsubmit=async event=>{
       event.preventDefault();
-      const button=$('cloud-identify-submit');button.disabled=true;status('Verificando identidad…');
+      const button=$('cloud-identify-submit'),message=$('cloud-identify-message');
+      button.disabled=true;button.textContent='Ingresando…';message.textContent='Comprobando tus datos…';
       try{
         const result=await api('/api/auth/student-identity','POST',{
           action:$('cloud-identify-action').value,
@@ -130,10 +146,20 @@ const SimCloudProjects=(()=>{
           password:$('cloud-identify-password').value
         });
         $('cloud-identify-password').value='';
-        await refreshIdentity();await list();
-        status('Identidad vinculada: '+result.student_name+'. Los proyectos se guardarán bajo esta cuenta.');
-      }catch(error){status(error.message);}
-      finally{button.disabled=false;}
+        me={...me,student_name:result.student_name};
+        $('cloud-identification').hidden=true;
+        $('cloud-library-body').hidden=false;
+        const shouldSave=pendingSave;
+        pendingSave=false;
+        $('cloud-project-dialog').close();
+        notice('Ingresaste como '+result.student_name+'. Ya podés guardar y abrir tus proyectos.');
+        if(shouldSave)await save();
+      }catch(error){
+        const explanation=error.name==='TimeoutError'?'No se recibió respuesta. Comprobá la conexión e intentá nuevamente.':error.message;
+        message.textContent=explanation;
+        status(explanation);
+      }
+      finally{button.disabled=false;button.textContent='Continuar';}
     };
   }
   return {bind,open,onChange,resetActive};
