@@ -981,7 +981,7 @@ function bindDiagramExport(){
       const svg=SimDiagramFiles.preview(diagramMarkup(nodes,true),graph.title,options);
       previewImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
       const sections=options.tables?.filter(t=>t.rows.length>1).map(t=>t.name)||[];
-      previewCaption.textContent=options.format==='pdf'?'Vista previa de la primera lámina ('+options.paper.toUpperCase()+'). '+(sections.length?'El PDF agregará tablas: '+sections.join(', ')+'.':'Sin tablas adicionales.'):'Vista previa de la imagen ('+options.format.toUpperCase()+').';
+      previewCaption.textContent=options.format==='pdf'?'Vista previa de la hoja completa ('+options.paper.toUpperCase()+'). '+(sections.length?'Tablas incluidas en esta misma hoja: '+sections.join(', ')+'.':'Sin tablas adicionales.'):'Vista previa de la imagen ('+options.format.toUpperCase()+').';
       previewBox.hidden=false;status.textContent='';
       previewBox.scrollIntoView({block:'nearest',behavior:'smooth'});
     }catch(error){status.textContent=error.message;}

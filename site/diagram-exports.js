@@ -161,7 +161,8 @@ const SimDiagramFiles=(()=>{
   async function pdf(svg,fontData,title,options){
     const {paper,orientation,margin,fit}=options;
     await loadPdf();
-    const pdf=new window.jspdf.jsPDF({orientation,unit:'pt',format:paper==='oficio'?[612.28,935.43]:paper,compress:true,putOnlyUsedFonts:true});
+    const resolvedOrientation=Number(svg.getAttribute('width'))>Number(svg.getAttribute('height'))?'landscape':'portrait';
+    const pdf=new window.jspdf.jsPDF({orientation:resolvedOrientation,unit:'pt',format:paper==='oficio'?[612.28,935.43]:paper,compress:true,putOnlyUsedFonts:true});
     const fontName='DWSIM Asap';
     pdf.addFileToVFS('Asap-SemiBold.ttf',fontData);
     pdf.addFont('Asap-SemiBold.ttf',fontName,'bold');
@@ -170,9 +171,7 @@ const SimDiagramFiles=(()=>{
     for(const text of svg.querySelectorAll('text'))text.setAttribute('font-weight','bold');
     const page=pdf.internal.pageSize;
     await pdf.svg(svg,{x:0,y:0,width:page.getWidth(),height:page.getHeight()});
-    if(Array.isArray(options.tables)){
-      for(const table of options.tables)if(table?.rows?.length>1)addBalancesPage(pdf,table.rows,{title:(table.name||'Resultados')+' · '+title,report:options.report,identity:options.identity});
-    }else if(Array.isArray(options.balances)&&options.balances.length>1)addBalancesPage(pdf,options.balances,{title,report:options.report,identity:options.identity});
+    // Las tablas forman parte del mismo SVG de la lámina y no generan páginas adicionales.
     return pdf.output('blob');
   }
 

@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.42.1 — 2026-11-20
+
+- Unifica diagrama y tablas seleccionadas en **una sola hoja PDF** A4/A3/Oficio; orientación automática por proporción del diagrama y reservas para rótulo inferior derecho.
+- La vista previa muestra también las tablas dentro de la hoja, no páginas adicionales; si hay demasiadas para un diseño legible, advierte al usuario que reduzca la selección o amplíe el papel.
+- El PDF deja de generar páginas sucesivas de balances en reportes simples.
+
 ## 0.42.0 — 2026-11-20
 
 - Archivo reorganizado en Proyecto, Mis proyectos en nube, Exportar y presentar y Copias en esta computadora; distingue guardar nube de descargar JSON.
