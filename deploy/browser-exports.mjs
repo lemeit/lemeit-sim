@@ -14,14 +14,14 @@ const catalog=await load('../site/catalog-cache.json');
 const csp="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; script-src 'self'; connect-src 'self'; base-uri 'none'";
 const types={html:'text/html',css:'text/css',js:'text/javascript',svg:'image/svg+xml',json:'application/json',ttf:'font/ttf',png:'image/png'};
 
-async function browserPage(t){
+async function browserPage(t, simulationResult=result){
   const server=createServer(async (request,response)=>{
     const path=new URL(request.url,'http://localhost').pathname;
     response.setHeader('Content-Security-Policy',csp);
     try{
       if(path==='/api/catalog'||path==='/api/simulate'||path==='/api/status'){
         response.setHeader('Content-Type','application/json');
-        response.end(path.endsWith('/catalog')?catalog:path.endsWith('/simulate')?result:JSON.stringify({gateway_version:'0.35.0',state:'ready',supported_equipment:['MaterialStream','EnergyStream','Mixer','Splitter','Heater','Cooler','Separator','Pump','Compressor','Expander','Tank','Valve','HeatExchanger','ConversionReactor','EquilibriumReactor'],supported_features:['simple_material_recycle'],started_at:'2026-11-18T16:00:00Z',uptime_s:100}));
+        response.end(path.endsWith('/catalog')?catalog:path.endsWith('/simulate')?simulationResult:JSON.stringify({gateway_version:'0.35.0',state:'ready',supported_equipment:['MaterialStream','EnergyStream','Mixer','Splitter','Heater','Cooler','Separator','Pump','Compressor','Expander','Tank','Valve','HeatExchanger','ConversionReactor','EquilibriumReactor'],supported_features:['simple_material_recycle'],started_at:'2026-11-18T16:00:00Z',uptime_s:100}));
       }else if(/^\/[a-zA-Z0-9_./-]+$/.test(path)){
         response.setHeader('Content-Type',types[path.split('.').at(-1)]??'application/octet-stream');
         response.end(await load('../site'+path));
@@ -466,8 +466,19 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  await panel.locator('#process-explorer-next').click();
  assert.notEqual(await panel.locator('#process-explorer-title').textContent(),first);
  assert.equal(await page.locator('#diagram .explorer-current').count(),1);
+ const interpretation=panel.locator('#process-explorer-interpretation');
+ while(!await interpretation.isVisible()&&await panel.locator('#process-explorer-next').isEnabled()){
+   await panel.locator('#process-explorer-next').click();
+ }
+ await interpretation.locator('summary').click();
+ assert.match(await interpretation.innerText(),/Mezcla adiabática/);
+ assert.match(await interpretation.innerText(),/Water · entrada − salida\s+0,83 kg\/s − 0,83 kg\/s/);
+ assert.match(await interpretation.innerText(),/ΔḢ · salida − entrada/);
+ assert.match(await interpretation.innerText(),/Dentro de tolerancia/);
  assert.equal(requests,1,'Explorar nunca vuelve a enviar la simulación');
- await panel.locator('#process-explorer-back').click();
+ while(await panel.locator('#process-explorer-back').isEnabled()){
+   await panel.locator('#process-explorer-back').click();
+ }
  assert.equal(await panel.locator('#process-explorer-title').textContent(),first);
  await panel.locator('#process-explorer-close').click();
  assert.equal(await panel.isVisible(),false);
@@ -478,4 +489,24 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  await page.locator('#confirm-close-project').click();
  assert.equal(await panel.isVisible(),false,'El explorador se cierra con el proyecto');
  assert.equal(await explore.isDisabled(),true);
+});
+
+test('Explorador: diferencia cero de datos faltantes en los balances',async t=>{
+ const partial=JSON.parse(result);
+ delete partial.balances.find(b=>b.id==='m1').components.Ethanol;
+ partial.streams.f1.phases.find(p=>p.name==='Mixture').enthalpy_kJ_kg=null;
+ const page=await browserPage(t,JSON.stringify(partial));
+ await openProject(page,example);
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ await page.locator('#process-explorer-open').click();
+ const interpretation=page.locator('#process-explorer-interpretation');
+ while(!await interpretation.isVisible()&&await page.locator('#process-explorer-next').isEnabled()){
+   await page.locator('#process-explorer-next').click();
+ }
+ await interpretation.locator('summary').click();
+ const text=await interpretation.innerText();
+ assert.match(text,/Residuo global\s+0 kg\/s/);
+ assert.match(text,/Ethanol · entrada − salida\s+Sin dato de DWSIM − Sin dato de DWSIM/);
+ assert.match(text,/Residuo energético bajo el supuesto adiabático\s+Sin dato de DWSIM/);
 });
