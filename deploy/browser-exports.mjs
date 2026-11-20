@@ -475,6 +475,17 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  assert.match(await interpretation.innerText(),/Water · entrada − salida\s+0,83 kg\/s − 0,83 kg\/s/);
  assert.match(await interpretation.innerText(),/ΔḢ · salida − entrada/);
  assert.match(await interpretation.innerText(),/Dentro de tolerancia/);
+ const next=panel.locator('#process-explorer-next');
+ const analysis=interpretation.locator('#process-explorer-analysis');
+ assert.ok(await analysis.evaluate(el=>el.scrollHeight>el.clientHeight));
+ assert.ok(await next.evaluate(button=>{
+   const {x,y,width,height,bottom}=button.getBoundingClientRect();
+   return bottom<document.querySelector('#process-explorer-summary').getBoundingClientRect().top
+     && document.elementFromPoint(x+width/2,y+height/2)===button;
+ }));
+ const current=await panel.locator('#process-explorer-title').textContent();
+ await next.click();
+ assert.notEqual(await panel.locator('#process-explorer-title').textContent(),current);
  assert.equal(requests,1,'Explorar nunca vuelve a enviar la simulación');
  while(await panel.locator('#process-explorer-back').isEnabled()){
    await panel.locator('#process-explorer-back').click();

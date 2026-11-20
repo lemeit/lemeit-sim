@@ -1974,6 +1974,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .process-explorer-panel .explorer-reading span{color:var(--spx-text-dim)}
 .process-explorer-panel .explorer-reading strong{text-align:right;font-weight:600;overflow-wrap:anywhere}
 .process-explorer-panel .explorer-actions{justify-content:flex-end}
+#process-explorer-analysis{max-block-size:min(24dvh,15rem);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .process-explorer-panel .explorer-actions button{padding:6px 12px;min-width:84px;min-height:31px;border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface);color:var(--spx-text);cursor:pointer}
 .process-explorer-panel .explorer-actions button:disabled{opacity:.45;cursor:not-allowed}
 .process-explorer-panel .explorer-actions button:not(:disabled):hover{border-color:var(--spx-accent)}
