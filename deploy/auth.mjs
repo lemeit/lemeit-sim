@@ -45,10 +45,10 @@ async function sessionFor(request,env){
   if(!configured(env))return null;
   const raw=cookie(request);if(!raw)return null;
   const key=await digest(env.SIM_SESSION_SECRET,'session:'+raw);
-  const result=await env.SIM_AUTH_DB.prepare('SELECT s.role,s.class_id,s.expires_at,c.active,c.label AS class_name,c.expires_at AS class_expires FROM sessions s LEFT JOIN classes c ON c.id=s.class_id WHERE s.session_digest=?').bind(key).first();
+  const result=await env.SIM_AUTH_DB.prepare('SELECT s.role,s.class_id,s.student_id,s.expires_at,c.active,c.label AS class_name,c.expires_at AS class_expires,st.alias AS student_name FROM sessions s LEFT JOIN classes c ON c.id=s.class_id LEFT JOIN students st ON st.id=s.student_id AND st.class_id=s.class_id WHERE s.session_digest=?').bind(key).first();
   if(!result||result.expires_at<=now())return null;
   if(result.role==='student'&&(!result.active||result.class_expires<=now()))return null;
-  return {role:result.role,class_id:result.class_id,class_name:result.role==='student'?result.class_name:null,class_expires_at:result.role==='student'?result.class_expires:null,expires_at:result.role==='student'?Math.min(result.expires_at,result.class_expires):result.expires_at,session_digest:key};
+  return {role:result.role,class_id:result.class_id,class_name:result.role==='student'?result.class_name:null,class_expires_at:result.role==='student'?result.class_expires:null,student_id:result.role==='student'?result.student_id:null,student_name:result.role==='student'?result.student_name:null,expires_at:result.role==='student'?Math.min(result.expires_at,result.class_expires):result.expires_at,session_digest:key};
 }
 async function actorKey(request,env,kind){
  const ip=request.headers.get('CF-Connecting-IP')||'unknown';
@@ -90,7 +90,7 @@ export async function authRoute(request,env){
  if(!configured(env))return json({error:'Acceso sin configurar. Contactá al administrador.'},503);
  const u=new URL(request.url),path=u.pathname;
  if(path==='/api/auth/me'&&request.method==='GET'){
-  const s=await sessionFor(request,env);return json({authenticated:!!s,role:s?.role||null,class_name:s?.class_name||null,class_expires_at:s?.class_expires_at||null,expires_at:s?.expires_at||null,server_time:now()});
+  const s=await sessionFor(request,env);return json({authenticated:!!s,role:s?.role||null,class_name:s?.class_name||null,class_expires_at:s?.class_expires_at||null,expires_at:s?.expires_at||null,server_time:now(),...(s?.student_id?{student_name:s.student_name}:{} )});
  }
  if(!sameOrigin(request))return json({error:'Origen o formato de solicitud no autorizado.'},403);
  if(path==='/api/auth/logout'&&request.method==='POST'){
@@ -123,6 +123,39 @@ export async function authRoute(request,env){
   await ok(env.SIM_AUTH_DB,actor);
   const s=await issue(env,role,classId);return json({ok:true,role,expires_at:now()+s.lifetime},200,{'Set-Cookie':sessionCookie(s.raw,s.lifetime)});
  }
+ if(path==='/api/auth/student-identity'){
+   const s=await sessionFor(request,env);
+   if(!s||s.role!=='student'||!s.class_id)return json({error:'Se requiere acceso vigente a una clase.'},403);
+   const alias=typeof body.alias==='string'?body.alias.trim().replace(/\s+/g,' '):'';
+   const password=typeof body.password==='string'?body.password:'';
+   const action=body.action;
+   if(!/^[\p{L}\p{N} ._-]{2,40}$/u.test(alias)||password.length<10||password.length>128||!['register','login'].includes(action))
+     return json({error:'Usá un alias de 2 a 40 caracteres y una clave personal de al menos 10 caracteres.'},422);
+   const key=alias.toLocaleLowerCase('es-AR');
+   const actor=await actorKey(request,env,'student-account');
+   const accountKey=await digest(env.SIM_SESSION_SECRET,'student-account:'+s.class_id+':'+key);
+   if(await limited(env.SIM_AUTH_DB,actor)||await limited(env.SIM_AUTH_DB,accountKey))
+     return json({error:'Demasiados intentos; probá nuevamente en 15 minutos.'},429);
+   const row=await env.SIM_AUTH_DB.prepare('SELECT id,secret_digest,alias FROM students WHERE class_id=? AND alias_key=?').bind(s.class_id,key).first();
+   let id;
+   if(action==='register'){
+     if(row)return json({error:'Ese alias ya está utilizado en esta clase. Ingresá con su clave o elegí otro.'},409);
+     id=crypto.randomUUID();
+     const secret=await digest(env.SIM_SESSION_SECRET,'student-secret:'+id+':'+password);
+     const inserted=await env.SIM_AUTH_DB.prepare('INSERT OR IGNORE INTO students(id,class_id,alias,alias_key,secret_digest,created_at) VALUES(?,?,?,?,?,?)').bind(id,s.class_id,alias,key,secret,now()).run();
+     if(!inserted.meta?.changes)return json({error:'Ese alias ya existe en esta clase.'},409);
+   }else{
+     const testDigest=await digest(env.SIM_SESSION_SECRET,'student-secret:'+(row?.id||'missing')+':'+password);
+     if(!row||testDigest!==row.secret_digest){
+       await failed(env.SIM_AUTH_DB,actor);await failed(env.SIM_AUTH_DB,accountKey);
+       return json({error:'Alias o clave personal incorrectos.'},401);
+     }
+     id=row.id;
+   }
+   await ok(env.SIM_AUTH_DB,actor);await ok(env.SIM_AUTH_DB,accountKey);
+   await env.SIM_AUTH_DB.prepare('UPDATE sessions SET student_id=? WHERE session_digest=? AND class_id=? AND role=?').bind(id,s.session_digest,s.class_id,'student').run();
+   return json({ok:true,student_name:row?.alias||alias});
+ }
  const s=await sessionFor(request,env);
  if(s?.role!=='admin')return json({error:'Se requiere acceso de administrador.'},403);
  if(path==='/api/auth/create-class'){
@@ -133,6 +166,17 @@ export async function authRoute(request,env){
   const encrypted=await encryptClassCode(env,id,code);
   await env.SIM_AUTH_DB.prepare('INSERT INTO classes(id,label,code_digest,active,created_at,expires_at,code_encrypted) VALUES(?,?,?,1,?,?,?)').bind(id,label,await digest(env.SIM_SESSION_SECRET,'code:'+code),created,expires,encrypted).run();
   return json({id,label,code,expires_at:expires},201);
+ }
+ if(path==='/api/auth/renew-class'){
+   const id=typeof body.id==='string'?body.id:'';
+   const hours=Number(body.hours);
+   if(!/^[a-f0-9-]{36}$/.test(id)||!Number.isInteger(hours)||hours<1||hours>720)return json({error:'Clase o duración inválida.'},422);
+   const existing=await env.SIM_AUTH_DB.prepare('SELECT id,label FROM classes WHERE id=?').bind(id).first();
+   if(!existing)return json({error:'Clase no encontrada.'},404);
+   const code=randomClassCode(),expires=now()+hours*3600,encrypted=await encryptClassCode(env,id,code);
+   await env.SIM_AUTH_DB.prepare('UPDATE classes SET active=1,expires_at=?,code_digest=?,code_encrypted=? WHERE id=?').bind(expires,await digest(env.SIM_SESSION_SECRET,'code:'+code),encrypted,id).run();
+   // No cambia el ID de clase: mantiene alumnos y proyectos asociados.
+   return json({id,label:existing.label,code,expires_at:expires});
  }
  if(path==='/api/auth/disable-class'){
   if(typeof body.id!=='string')return json({error:'ID inválido.'},422);

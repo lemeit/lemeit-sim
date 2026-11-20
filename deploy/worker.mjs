@@ -1,4 +1,5 @@
 import {authorize,authRoute,authorizeCalculation} from './auth.mjs';
+import {projectRoute} from './projects.mjs';
 // Los archivos estáticos se incorporan al publicar. Ninguna credencial va en ASSETS.
 const ASSETS = /* ASSETS */ {};
 const CSP = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
@@ -17,6 +18,7 @@ export async function handle(request, env, assets=ASSETS) {
   if(url.pathname.startsWith('/api/')) {
     const gate=await authorize(request,env);
     if(!gate.ok)return gate.response;
+    if(url.pathname==='/api/projects'||url.pathname.startsWith('/api/projects/'))return projectRoute(request,env,gate.session);
     const catalog=url.pathname==='/api/catalog'&&request.method==='GET';
     const status=url.pathname==='/api/status'&&request.method==='GET';
     const calculate=url.pathname==='/api/simulate'&&request.method==='POST';

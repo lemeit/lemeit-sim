@@ -17,8 +17,10 @@ const assets=await collect(path.join(root,'site'));
 const auth=(await readFile(path.join(root,'deploy/auth.mjs'),'utf8'))
   .replaceAll('export async function ','async function ')
   .replace('export {configured};','');
+const projects=(await readFile(path.join(root,'deploy/projects.mjs'),'utf8')).replace('export async function projectRoute','async function projectRoute');
 const source=(await readFile(path.join(root,'deploy/worker.mjs'),'utf8'))
    .replace("import {authorize,authRoute,authorizeCalculation} from './auth.mjs';",auth)
+   .replace("import {projectRoute} from './projects.mjs';",projects)
   .replace('/* ASSETS */ {}',JSON.stringify(assets));
 await mkdir(path.join(root,'.build'),{recursive:true});
 await writeFile(path.join(root,'.build/worker.mjs'),source);

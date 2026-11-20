@@ -43,5 +43,5 @@ test('el único título editable es el título del proyecto',()=>{
  assert.match(html,/id="project-title"/);
  assert.doesNotMatch(exercise,/\$\('exercise-title'\)/);
  assert.match(app,/delete graph\.exercise\.title/);
- assert.match(html,/Mis proyectos \(este navegador\)/);
+ assert.match(html,/Biblioteca de este navegador/);
 });
