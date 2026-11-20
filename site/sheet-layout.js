@@ -42,31 +42,75 @@ const SimSheetLayout=(()=>{
    const box=source.viewBox.baseVal;
    return box.width/Math.max(1,box.height)>1.3?'landscape':'portrait';
  }
+ // Tablas más compactas: medición real del texto para evitar invadir columnas.
+ const tableMetric={heading:12,row:10.5,caption:12,gap:4};
  const compactNumber=value=>{
-   if(typeof value==='number')return Number.isFinite(value)?Number(value.toPrecision(4)).toLocaleString('es-AR',{maximumSignificantDigits:4}):'—';
-   return clean(value);
+   if(typeof value!=='number')return clean(value);
+   if(!Number.isFinite(value))return '—';
+   if(value!==0&&Math.abs(value)<1e-9)return '≈ 0';
+   return Number(value.toPrecision(4)).toLocaleString('es-AR',{maximumSignificantDigits:4});
  };
- function tableHeight(table){return 15+19+15*(table.rows.length-1)+9;}
+ const headerName=value=>clean(value)
+   .replace(/\s*\[(.*?)\]/g,' ($1)')
+   .replace('Residuo o consumo neto','Residuo / consumo')
+   .replace('Tipo de transferencia','Transferencia')
+   .replace('Caudal molar','Molar')
+   .replace('Caudal','Flujo')
+   .replace('Entalpía','H')
+   .replace('Entropía','S')
+   .replace('Temperatura','Temp.')
+   .replace('Densidad','Dens.')
+   .replace('Interpretación','Balance')
+   .replace('Energía hacia fluido','Energía')
+   .replace('Presión','Pres.');
+ const shortValue=(value,heading)=>{
+   const text=compactNumber(value);
+   if(heading)return headerName(text);
+   if(text.startsWith('Consumo (+), generación'))return 'Consumo (+) / gen. (−)';
+   return text;
+ };
+ const measuring=document.createElement('canvas').getContext('2d');
+ function cellText(root,x,y,value,width,font,heading){
+   const t=attr(el('text'),{x,y,fill:'#20252a','font-family':'Arial, sans-serif','font-size':font,'font-weight':heading?'bold':'normal'});
+   const full=shortValue(value,heading);
+   let fitted=full;
+   const available=Math.max(4,width-6);
+   if(measuring){
+     measuring.font=(heading?'bold ':'')+font+'px Arial';
+     if(measuring.measureText(fitted).width>available){
+       let low=0,high=[...full].length;
+       const chars=[...full];
+       while(low<high){
+         const mid=Math.ceil((low+high)/2),candidate=chars.slice(0,mid).join('')+'…';
+         if(measuring.measureText(candidate).width<=available)low=mid;
+         else high=mid-1;
+       }
+       fitted=low?chars.slice(0,low).join('')+'…':'…';
+     }
+   }
+   t.textContent=fitted;root.append(t);
+ }
+ function tableHeight(table){return tableMetric.caption+tableMetric.heading+tableMetric.row*(table.rows.length-1)+tableMetric.gap;}
  function drawTable(root,table,x,y,width){
-   const rows=table.rows,n=rows[0].length,first=Math.max(60,width*(n>4?.2:.3)),other=(width-first)/Math.max(1,n-1);
+   const rows=table.rows,n=rows[0].length;
+   const first=Math.min(width*.28,Math.max(50,width*(n>=7?.17:n>=5?.21:.28)));
+   const other=(width-first)/Math.max(1,n-1);
    const widths=Array.from({length:n},(_,i)=>i===0?first:other);
-   text(root,x+4,y+10,table.name.toUpperCase(),9,true,50);
-   y+=15;
-   const headers=rows[0].map(v=>clean(v).replace(/\s*\[(.*?)\]/g,' ($1)').replace('Residuo o consumo neto','Residuo / consumo').replace('Tipo de transferencia','Transferencia').replace('Entalpía','H').replace('Entropía','S').replace('Temperatura','Temp.').replace('Densidad','Dens.'));
-   const drawRow=(values,rowHeight,heading)=>{
+   text(root,x+2,y+8,table.name.toUpperCase(),7.8,true,50);
+   y+=tableMetric.caption;
+   const drawRow=(values,height,heading)=>{
      let cursor=x;
      for(let i=0;i<n;i++){
-       const box=attr(el('rect'),{x:cursor,y,width:widths[i],height:rowHeight,fill:heading?'#edf0f2':'#fff',stroke:'#b3bbc1','stroke-width':.45});
-       root.append(box);
-       const font=heading?6.4:7.3,maxChars=Math.max(4,Math.floor((widths[i]-7)/(font*.51)));
-       text(root,cursor+3,y+rowHeight*.68,compactNumber(values[i]),font,heading,maxChars);
+       root.append(attr(el('rect'),{x:cursor,y,width:widths[i],height,fill:heading?'#edf0f2':'#fff',stroke:'#b3bbc1','stroke-width':.4}));
+       const font=heading?5.6:6.1;
+       cellText(root,cursor+3,y+height*.71,values[i],widths[i],font,heading);
        cursor+=widths[i];
      }
-     y+=rowHeight;
+     y+=height;
    };
-   drawRow(headers,19,true);
-   for(const row of rows.slice(1))drawRow(row,15,false);
-   return y+9;
+   drawRow(rows[0],tableMetric.heading,true);
+   for(const row of rows.slice(1))drawRow(row,tableMetric.row,false);
+   return y+tableMetric.gap;
  }
  function sheet(source,title,options){
    const orientation=effectiveOrientation(source,options);
@@ -82,7 +126,8 @@ const SimSheetLayout=(()=>{
    const gap=tables.length?12:0;
    // Una sola hoja: si las tablas requieren demasiado espacio, rechazar en lugar de
    // agregar páginas u ocultar resultados numéricos.
-   if(totalTableH>regionH-105-gap)throw new Error('Las tablas seleccionadas no entran de forma legible en una sola hoja. Desmarcá alguna tabla o elegí A3/Oficio.');
+   const minDiagramH=regionH*.46;
+   if(totalTableH>regionH-minDiagramH-gap)throw new Error('Las tablas seleccionadas dejan demasiado poco espacio al diagrama. Desmarcá alguna tabla o elegí A3/Oficio.');
    const diagramH=regionH-totalTableH-gap;
    const view=source.viewBox.baseVal;
    const scale=Math.min(regionW/view.width,diagramH/view.height);
