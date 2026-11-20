@@ -85,7 +85,7 @@ const SimExerciseEditor=(()=>{
   function startEdit(id){
     if(!canEdit?.()||!findNote(id))return;
     if(editor)clearEditor(true);
-    placing=false;$('diagram-note-insert').setAttribute('aria-pressed','false');
+    placing=false;$('canvas-wrap').classList.remove('note-insert-mode');$('diagram-note-insert').setAttribute('aria-pressed','false');
     const group=getSVG().querySelector('[data-exercise-note="'+id+'"]');
     if(!group)return;
     select(id,false);
@@ -110,7 +110,7 @@ const SimExerciseEditor=(()=>{
     if(!canEdit?.()||notes(getGraph()).length>=20){placing=false;$('diagram-note-insert').setAttribute('aria-pressed','false');return;}
     const note={id:'note-'+crypto.randomUUID().slice(0,8),x:Math.round(point.x),y:Math.round(point.y),text:'Nueva anotación'};
     getGraph().annotations=[...notes(getGraph()),note];
-    placing=false;$('diagram-note-insert').setAttribute('aria-pressed','false');
+    placing=false;$('canvas-wrap').classList.remove('note-insert-mode');$('diagram-note-insert').setAttribute('aria-pressed','false');
     nonPhysical();startEdit(note.id);
   }
   function removeNote(id){
@@ -159,14 +159,16 @@ const SimExerciseEditor=(()=>{
       dragged={id:note.id,x:note.x,y:note.y,start:p,moved:false,pointerId:e.pointerId};
       // Capturar sobre SVG, pero mover solo el grupo actual. Re-renderizar
       // en cada paso rompe el pointer capture y hace saltar la anotación.
-      svg.setPointerCapture(e.pointerId);
     },true);
     svg.addEventListener('pointermove',e=>{
       if(!dragged||e.pointerId!==dragged.pointerId)return;
       e.stopImmediatePropagation();
       const p=getPoint(e),dx=p.x-dragged.start.x,dy=p.y-dragged.start.y;
-      if(!dragged.moved&&Math.hypot(dx,dy)<3)return;
-      dragged.moved=true;
+      if(!dragged.moved){
+        if(Math.hypot(dx,dy)<3)return;
+        dragged.moved=true;
+        svg.setPointerCapture(e.pointerId);
+      }
       const note=findNote(dragged.id);if(!note)return;
       note.x=Math.round(dragged.x+dx);note.y=Math.round(dragged.y+dy);
       const el=svg.querySelector('[data-exercise-note="'+note.id+'"]');
@@ -205,6 +207,12 @@ const SimExerciseEditor=(()=>{
       }
     },true);
   }
+  function reset(){
+    if(editor)clearEditor(false);
+    selectedId=null;placing=false;dragged=null;draftNotes=null;
+    $('canvas-wrap')?.classList.remove('note-insert-mode');
+    $('diagram-note-insert')?.setAttribute('aria-pressed','false');
+  }
   function validate(g){
     if(g.exercise!==undefined){
       if(!g.exercise||typeof g.exercise!=='object')throw Error('Enunciado inválido.');
@@ -220,5 +228,5 @@ const SimExerciseEditor=(()=>{
       }
     }
   }
-  return {markup,bind,validate,open};
+  return {markup,bind,validate,open,reset};
 })();
