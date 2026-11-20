@@ -88,7 +88,7 @@ function updateResultValidity(){
     button.setAttribute('aria-busy',String(busy));}
 }
 function changed({physical=true}={}){
-  if(physical){SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  if(physical){if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
   updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
@@ -371,7 +371,7 @@ function renderDiagram(){
   $('zoom-label').textContent=`${Math.round(zoom*100)} %`;
   $('connection-hint').textContent=pending?'Ahora seleccioná un puerto de entrada compatible. Esc cancela.':'Arrastrá un extremo de la corriente al puerto de un equipo. Seleccioná la línea para editarla.';
   $('connection-hint').classList.toggle('active',!!pending);
-  updateControls();SimProcessExplorer.emphasize();
+  updateControls();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.emphasize();
 }
 function field(key,label,unit,value,options={}){
   return `<label class="field"><span class="field-label"><span>${esc(label)}</span><span>${esc(unit)}</span></span><input data-field="${key}" type="${options.text?'text':'number'}" value="${esc(value??'')}" ${options.text?'maxlength="45"':'step="any" '+(options.min!==undefined?`min="${options.min}"`:'')} required></label>`;
@@ -551,7 +551,7 @@ async function calculate(){
   debugEvent('INFO','Validación previa',{engine:selectedEngine,objects:graph.nodes.length,connections:graph.edges.length,model:graph.model});
   const selectedIsReady=await checkEngine(); // Selección previa al POST; sin reenvío ambiguo.
   if(!selectedIsReady){debugEvent('ERROR','Motor no disponible · cálculo no enviado',{engine:selectedEngine,stage:'preflight'});return notice(engineMode==='auto'?'No hay un motor disponible y compatible con el proceso.':'El motor fijado no está disponible o no es compatible; elegí Automático.',true);}
-  SimProcessExplorer.invalidate();
+  if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
@@ -606,7 +606,7 @@ function updateCompound(name,remove){
   changed();renderCompounds();renderInspector();
 }
 function loadGraph(data){
-  SimProcessExplorer.invalidate();
+  if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
   const ids=new Set();
@@ -811,7 +811,7 @@ function renderNewProject(){
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
 }
 function clearLoadedProject(clearLocalDraft=false){
-  SimProcessExplorer.invalidate();
+  if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   SimExerciseEditor.reset();
   graph=emptyProject();
   SimProjectLibrary.resetActive();
