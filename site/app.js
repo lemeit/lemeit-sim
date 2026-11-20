@@ -96,6 +96,7 @@ function updateControls(){
   $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('report-open').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
+  $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
   $('engine-select').disabled=busy;
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
@@ -608,6 +609,7 @@ function loadGraph(data){
   SimExerciseEditor.validate(data);SimProjectReport.valid(data.report);
   SimProjectLibrary.resetActive();if(typeof SimCloudProjects!=='undefined')SimCloudProjects.resetActive();
   resultValidity='none';lastCalculation=null;
+  SimExerciseEditor.reset();
   graph=structuredClone(data);if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
@@ -775,7 +777,7 @@ function bindEvents(){
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
-  SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram});
+  SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram,canEdit:()=>hasProject&&!busy});
   SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
@@ -803,6 +805,7 @@ function renderNewProject(){
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
 }
 function clearLoadedProject(clearLocalDraft=false){
+  SimExerciseEditor.reset();
   graph=emptyProject();
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();

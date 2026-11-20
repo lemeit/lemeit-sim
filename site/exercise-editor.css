@@ -19,3 +19,12 @@
 .local-project-actions,.local-project-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .local-project-controls{padding:12px 0}
 #local-project-dialog{width:min(720px,calc(100vw - 28px));max-width:720px}
+
+/* Edición de texto en el diagrama: misma estética y selección que los demás objetos. */
+.exercise-note.is-selected rect{stroke:var(--spx-accent,#bd3343);stroke-width:2;stroke-dasharray:4 2}
+.exercise-note.is-selected text{pointer-events:none}
+#canvas-wrap.note-insert-mode #diagram{cursor:crosshair}
+#diagram-note-insert{width:auto;min-width:44px;padding:4px 9px;border:1px solid var(--spx-border);font-size:11px;white-space:nowrap}
+#diagram-note-insert[aria-pressed=true]{border-color:var(--spx-accent);background:var(--spx-accent-dim);color:var(--spx-accent)}
+.diagram-note-editor{position:absolute;z-index:15;box-sizing:border-box;min-width:155px;max-width:min(350px,90%);padding:2px;background:var(--spx-surface,#fff);border:1px solid var(--spx-accent);border-radius:4px;box-shadow:0 3px 12px #0003}
+.diagram-note-editor textarea{display:block;box-sizing:border-box;width:100%;min-height:64px;padding:8px;resize:vertical;border:0;outline:0;background:var(--spx-surface,#fff);color:var(--spx-text,#222);font:13px/1.4 Arial,sans-serif}

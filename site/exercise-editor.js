@@ -1,8 +1,8 @@
 /* Metadatos didácticos y notas gráficas: no se envían a DWSIM. */
 'use strict';
 const SimExerciseEditor=(()=>{
-  let getGraph,nonPhysical,getSVG,getPoint,render;
-  let dragged=null,draftNotes=null;
+  let getGraph,nonPhysical,getSVG,getPoint,render,canEdit;
+  let dragged=null,draftNotes=null,selectedId=null,placing=false,editor=null;
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function notes(g){return Array.isArray(g.annotations)?g.annotations:[];}
@@ -13,7 +13,7 @@ const SimExerciseEditor=(()=>{
       const lines=String(n.text||'').slice(0,400).split(/\r?\n/).slice(0,7);
       const width=Math.min(320,Math.max(110,...lines.map(l=>l.length*7+24)));
       const height=20+lines.length*18;
-      return '<g class="exercise-note" transform="translate('+x+' '+y+')"'+(exporting?'':' data-exercise-note="'+esc(n.id)+'" role="button" tabindex="0" aria-label="Anotación: '+esc(n.text)+'"')+'><rect width="'+width+'" height="'+height+'" rx="5"/>'+lines.map((line,i)=>'<text x="12" y="'+(21+i*18)+'">'+esc(line.slice(0,65))+'</text>').join('')+'</g>';
+      return '<g class="exercise-note'+(!exporting&&selectedId===n.id?' is-selected':'')+'" transform="translate('+x+' '+y+')"'+(exporting?'':' data-exercise-note="'+esc(n.id)+'" role="button" tabindex="0" aria-label="Anotación: '+esc(n.text)+'"')+'><rect width="'+width+'" height="'+height+'" rx="5"/>'+lines.map((line,i)=>'<text x="12" y="'+(21+i*18)+'">'+esc(line.slice(0,65))+'</text>').join('')+'</g>';
     }).join('');
   }
   function renderNotes(){
@@ -47,6 +47,7 @@ const SimExerciseEditor=(()=>{
   }
   function open(tab='activity'){
     if(!getGraph()?.compounds?.length)return;
+    if(editor)clearEditor(true);
     sync();showTab(tab);
     for(const menu of document.querySelectorAll('.app-menu[open]'))menu.open=false;
     $('exercise-dialog').showModal();
@@ -60,8 +61,66 @@ const SimExerciseEditor=(()=>{
     nonPhysical();
     $('exercise-dialog').close();
   }
+  const findNote=id=>notes(getGraph()).find(n=>n.id===id);
+  function select(id,focus=false){
+    selectedId=id;
+    getSVG().querySelectorAll('[data-exercise-note]').forEach(el=>{
+      const current=el.dataset.exerciseNote===id;
+      el.classList.toggle('is-selected',current);
+      if(focus&&current)el.focus({preventScroll:true});
+    });
+    $('diagram').classList.toggle('note-is-selected',!!id);
+  }
+  function clearEditor(commit=false){
+    if(!editor)return;
+    const active=editor;editor=null;
+    const value=active.textarea.value.slice(0,400);
+    active.container.remove();
+    if(commit&&findNote(active.id)&&findNote(active.id).text!==value){
+      findNote(active.id).text=value;
+      nonPhysical();
+    }
+    select(active.id,false);
+  }
+  function startEdit(id){
+    if(!canEdit?.()||!findNote(id))return;
+    if(editor)clearEditor(true);
+    placing=false;$('canvas-wrap').classList.remove('note-insert-mode');$('diagram-note-insert').setAttribute('aria-pressed','false');
+    const group=getSVG().querySelector('[data-exercise-note="'+id+'"]');
+    if(!group)return;
+    select(id,false);
+    const note=findNote(id),wrap=$('canvas-wrap'),box=group.getBoundingClientRect(),canvas=wrap.getBoundingClientRect();
+    const container=document.createElement('div');container.className='diagram-note-editor';
+    const textarea=document.createElement('textarea');textarea.value=note.text||'';textarea.maxLength=400;textarea.rows=3;
+    textarea.setAttribute('aria-label','Editar texto de anotación');
+    textarea.setAttribute('title','Ctrl + Enter: guardar · Esc: cancelar');
+    container.style.left=Math.max(0,box.left-canvas.left+wrap.scrollLeft)+'px';
+    container.style.top=Math.max(0,box.top-canvas.top+wrap.scrollTop)+'px';
+    container.style.width=Math.max(155,Math.min(350,box.width+50))+'px';
+    container.append(textarea);wrap.append(container);
+    editor={id,container,textarea};
+    textarea.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){e.preventDefault();e.stopPropagation();clearEditor(false);getSVG().focus({preventScroll:true});}
+      if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();clearEditor(true);getSVG().focus({preventScroll:true});}
+    });
+    textarea.addEventListener('blur',()=>{if(editor?.textarea===textarea)clearEditor(true);});
+    textarea.focus({preventScroll:true});textarea.select();
+  }
+  function insertAt(point){
+    if(!canEdit?.()||notes(getGraph()).length>=20){placing=false;$('diagram-note-insert').setAttribute('aria-pressed','false');return;}
+    const note={id:'note-'+crypto.randomUUID().slice(0,8),x:Math.round(point.x),y:Math.round(point.y),text:'Nueva anotación'};
+    getGraph().annotations=[...notes(getGraph()),note];
+    placing=false;$('canvas-wrap').classList.remove('note-insert-mode');$('diagram-note-insert').setAttribute('aria-pressed','false');
+    nonPhysical();startEdit(note.id);
+  }
+  function removeNote(id){
+    if(!findNote(id)||!canEdit?.())return;
+    if(editor?.id===id)clearEditor(false);
+    getGraph().annotations=notes(getGraph()).filter(n=>n.id!==id);
+    selectedId=null;nonPhysical();getSVG().focus({preventScroll:true});
+  }
   function bind(options){
-    ({getGraph,nonPhysical,getSVG,getPoint,render}=options);
+    ({getGraph,nonPhysical,getSVG,getPoint,render,canEdit}=options);
     $('exercise-open').addEventListener('click',()=>open('activity'));
     $('project-editor-menu').addEventListener('click',()=>open('activity'));
     $('project-report-menu').addEventListener('click',()=>{$('report-pdf-menu').click();});
@@ -74,30 +133,85 @@ const SimExerciseEditor=(()=>{
       draftNotes.push({id:'note-'+crypto.randomUUID().slice(0,8),x:70,y:70+draftNotes.length*38,text:'Nueva anotación'});
       renderNotes();
     });
+    $('diagram-note-insert').addEventListener('click',()=>{
+      if(!canEdit?.())return;
+      if(editor)clearEditor(true);
+      placing=!placing;
+      $('diagram-note-insert').setAttribute('aria-pressed',String(placing));
+      $('canvas-wrap').classList.toggle('note-insert-mode',placing);
+      if(placing)getSVG().focus({preventScroll:true});
+    });
     const svg=getSVG();
     svg.addEventListener('pointerdown',e=>{
-      const el=e.target.closest('[data-exercise-note]');if(!el||e.button!==0)return;
+      if(e.button!==0)return;
+      if(placing){
+        e.preventDefault();e.stopImmediatePropagation();
+        $('canvas-wrap').classList.remove('note-insert-mode');
+        insertAt(getPoint(e));return;
+      }
+      const el=e.target.closest('[data-exercise-note]');
+      if(!el||!canEdit?.())return;
       e.preventDefault();e.stopImmediatePropagation();
-      const g=getGraph(),note=notes(g).find(n=>n.id===el.dataset.exerciseNote);if(!note)return;
-      const p=getPoint(e);dragged={id:note.id,x:note.x,y:note.y,start:p,moved:false};
-      svg.setPointerCapture(e.pointerId);
+      if(editor)clearEditor(true);
+      const note=findNote(el.dataset.exerciseNote);if(!note)return;
+      select(note.id,true);
+      const p=getPoint(e);
+      dragged={id:note.id,x:note.x,y:note.y,start:p,moved:false,pointerId:e.pointerId};
+      // Capturar sobre SVG, pero mover solo el grupo actual. Re-renderizar
+      // en cada paso rompe el pointer capture y hace saltar la anotación.
     },true);
     svg.addEventListener('pointermove',e=>{
-      if(!dragged)return;
-      e.stopImmediatePropagation();const p=getPoint(e),note=notes(getGraph()).find(n=>n.id===dragged.id);
-      if(!note)return;note.x=Math.round(dragged.x+p.x-dragged.start.x);note.y=Math.round(dragged.y+p.y-dragged.start.y);
-      dragged.moved=true;render();
+      if(!dragged||e.pointerId!==dragged.pointerId)return;
+      e.stopImmediatePropagation();
+      const p=getPoint(e),dx=p.x-dragged.start.x,dy=p.y-dragged.start.y;
+      if(!dragged.moved){
+        if(Math.hypot(dx,dy)<3)return;
+        dragged.moved=true;
+        svg.setPointerCapture(e.pointerId);
+      }
+      const note=findNote(dragged.id);if(!note)return;
+      note.x=Math.round(dragged.x+dx);note.y=Math.round(dragged.y+dy);
+      const el=svg.querySelector('[data-exercise-note="'+note.id+'"]');
+      if(el)el.setAttribute('transform','translate('+note.x+' '+note.y+')');
     },true);
     for(const type of ['pointerup','pointercancel'])svg.addEventListener(type,e=>{
-      if(!dragged)return;e.stopImmediatePropagation();
-      const moved=dragged.moved;dragged=null;
-      if(moved)nonPhysical();else open();
+      if(!dragged||e.pointerId!==dragged.pointerId)return;
+      e.stopImmediatePropagation();
+      const moved=dragged.moved,original=dragged;
+      dragged=null;
+      if(type==='pointercancel'&&moved){
+        const note=findNote(original.id);if(note){note.x=original.x;note.y=original.y;}
+        render();select(original.id,false);
+      }else if(moved)nonPhysical();
+      else select(original.id,true);
+    },true);
+    svg.addEventListener('dblclick',e=>{
+      const group=e.target.closest('[data-exercise-note]');if(!group)return;
+      e.preventDefault();e.stopImmediatePropagation();startEdit(group.dataset.exerciseNote);
     },true);
     svg.addEventListener('keydown',e=>{
-      const el=e.target.closest('[data-exercise-note]');if(!el)return;
-      if(e.key==='Enter'){e.preventDefault();open();}
-      if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();const g=getGraph();g.annotations=notes(g).filter(n=>n.id!==el.dataset.exerciseNote);nonPhysical();}
+      const el=e.target.closest('[data-exercise-note]');
+      const id=el?.dataset.exerciseNote||selectedId;
+      if(!id||!findNote(id))return;
+      if(e.key==='Enter'&&el){e.preventDefault();e.stopImmediatePropagation();startEdit(id);return;}
+      if((e.key==='Delete'||e.key==='Backspace')&&!e.ctrlKey&&!e.metaKey){
+        e.preventDefault();e.stopImmediatePropagation();removeNote(id);return;
+      }
+      if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();select(null);}
     },true);
+    // La aplicación también escucha Escape y Supr a nivel documento.
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&placing){
+        placing=false;$('canvas-wrap').classList.remove('note-insert-mode');
+        $('diagram-note-insert').setAttribute('aria-pressed','false');
+      }
+    },true);
+  }
+  function reset(){
+    if(editor)clearEditor(false);
+    selectedId=null;placing=false;dragged=null;draftNotes=null;
+    $('canvas-wrap')?.classList.remove('note-insert-mode');
+    $('diagram-note-insert')?.setAttribute('aria-pressed','false');
   }
   function validate(g){
     if(g.exercise!==undefined){
@@ -114,5 +228,5 @@ const SimExerciseEditor=(()=>{
       }
     }
   }
-  return {markup,bind,validate,open};
+  return {markup,bind,validate,open,reset};
 })();

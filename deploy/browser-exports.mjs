@@ -382,3 +382,46 @@ test('Reporte PDF incluye enunciado, consignas y observaciones completos sin tru
  assert.match(pdf.bytes.toString('latin1'),/^%PDF-/);
  assert.equal([...pdf.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)].length,1,'Actividad corta en una sola A4');
 });
+
+
+test('Anotaciones: insertar texto en el diagrama, editar con doble clic, arrastrar, cancelar y Supr',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const tool=page.locator('#diagram-note-insert');
+ assert.equal(await tool.isDisabled(),false);
+ await tool.click();
+ assert.equal(await tool.getAttribute('aria-pressed'),'true');
+ await page.locator('#diagram').click({position:{x:320,y:300}});
+ const editor=page.locator('.diagram-note-editor textarea');
+ await editor.waitFor();
+ await editor.fill('Anotación escrita sobre el diagrama');
+ await editor.press('Control+Enter');
+ assert.equal(await editor.count(),0);
+ const note=page.locator('#diagram [data-exercise-note]').last();
+ assert.equal(await note.count(),1);
+ assert.match(await note.textContent(),/Anotación escrita sobre el diagrama/);
+ await note.dblclick();
+ await editor.waitFor();
+ await editor.fill('Versión temporal que se cancela');
+ await editor.press('Escape');
+ assert.match(await note.textContent(),/Anotación escrita sobre el diagrama/);
+ await note.dblclick();
+ await editor.fill('Anotación corregida directamente');
+ await editor.press('Control+Enter');
+ assert.match(await note.textContent(),/Anotación corregida directamente/);
+ const oldTransform=await note.getAttribute('transform');
+ const box=await note.boundingBox();
+ await page.mouse.move(box.x+18,box.y+15);
+ await page.mouse.down();
+ await page.mouse.move(box.x+85,box.y+45,{steps:5});
+ await page.mouse.up();
+ assert.notEqual(await note.getAttribute('transform'),oldTransform);
+ await page.locator('#exercise-open').click();
+ await page.locator('#project-tab-notes').click();
+ assert.match(await page.locator('#exercise-note-list').textContent().catch(()=>''),/Anotación|/);
+ assert.equal(await page.locator('#exercise-note-list textarea').last().inputValue(),'Anotación corregida directamente');
+ await page.locator('#project-editor-cancel').click();
+ await note.click();
+ await page.keyboard.press('Delete');
+ assert.equal(await page.locator('#diagram [data-exercise-note]').count(),0);
+});
