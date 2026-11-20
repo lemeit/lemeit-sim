@@ -609,6 +609,7 @@ function loadGraph(data){
   SimExerciseEditor.validate(data);SimProjectReport.valid(data.report);
   SimProjectLibrary.resetActive();if(typeof SimCloudProjects!=='undefined')SimCloudProjects.resetActive();
   resultValidity='none';lastCalculation=null;
+  SimExerciseEditor.reset();
   graph=structuredClone(data);if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
@@ -804,6 +805,7 @@ function renderNewProject(){
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
 }
 function clearLoadedProject(clearLocalDraft=false){
+  SimExerciseEditor.reset();
   graph=emptyProject();
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();
