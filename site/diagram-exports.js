@@ -170,7 +170,8 @@ const SimDiagramFiles=(()=>{
     for(const text of svg.querySelectorAll('text'))text.setAttribute('font-weight','bold');
     const page=pdf.internal.pageSize;
     await pdf.svg(svg,{x:0,y:0,width:page.getWidth(),height:page.getHeight()});
-    if(Array.isArray(options.balances)&&options.balances.length>1)addBalancesPage(pdf,options.balances,{title,report:options.report,identity:options.identity});
+    if(Array.isArray(options.tables))for(const table of options.tables)if(table?.rows?.length>1)addBalancesPage(pdf,table.rows,{title:(table.name||'Resultados')+' · '+title,report:options.report,identity:options.identity});
+    else if(Array.isArray(options.balances)&&options.balances.length>1)addBalancesPage(pdf,options.balances,{title,report:options.report,identity:options.identity});
     return pdf.output('blob');
   }
 
@@ -185,8 +186,8 @@ const SimDiagramFiles=(()=>{
   }
   function preview(markup,title,options){
     const source=snapshot(markup,title,'white',true);
-    const sheet=SimSheetLayout.sheet(source,title,options);
-    return new XMLSerializer().serializeToString(sheet);
+    const diagram=options.format==='pdf'?SimSheetLayout.sheet(source,title,options):SimSheetLayout.compact(source,title,options);
+    return new XMLSerializer().serializeToString(diagram);
   }
   return {file,preview,pngSize,pdfLayout};
 })();
