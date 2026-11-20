@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.44.0 — 2026-11-20
+
+- El botón «Calcular» recupera el triángulo Play y conserva una luz pequeña y diferenciada para indicar cálculo en curso, resultado correcto, advertencia o error.
+- Nuevo explorador didáctico «Explorar proceso…», disponible solo con resultados vigentes: recorre corrientes y equipos mediante Anterior/Siguiente, destacando el elemento en el diagrama y mostrando resultados de DWSIM reales.
+- El recorrido sigue las dependencias de conexión cuando es posible; para reciclos advierte que no representa las iteraciones ni la secuencia interna de resolución del motor.
+- Explorar no hace nuevas solicitudes de simulación y se cierra al invalidar, recalcular, cambiar o cerrar el proyecto; pruebas Chrome.
+
 ## 0.43.3 — 2026-11-20
 
 - Se elimina definitivamente el botón fantasma junto a «Calcular» (resto obsoleto de «Rótulo»).
