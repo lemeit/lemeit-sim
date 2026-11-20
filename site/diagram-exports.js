@@ -84,6 +84,87 @@ const SimDiagramFiles=(()=>{
     }finally{stage.remove();}
   }
 
+
+  const textValue=value=>String(value??'').replace(/[\r\n\t]+/g,' ').trim().slice(0,120);
+  function addTitleBlock(svg,project,options){
+    if(!options.titleBlock)return svg;
+    const report=options.report||{},identity=options.identity||{},exercise=options.exercise||{};
+    const view=svg.viewBox.baseVal;
+    const x=view.x,y=view.y,w=view.width,h=view.height;
+    const width=Math.max(w,480),extra=104;
+    const baseline=y+h+10;
+    svg.setAttribute('viewBox',[x,y,width,h+extra].join(' '));
+    svg.setAttribute('width',String(width));
+    svg.setAttribute('height',String(h+extra));
+    const group=element('g');
+    const rect=(rx,ry,rw,rh,fill='#fff')=>{
+      const e=element('rect');
+      for(const [key,val] of Object.entries({x:rx,y:ry,width:rw,height:rh,fill,stroke:'#555','stroke-width':'1'}))e.setAttribute(key,String(val));
+      group.append(e);
+    };
+    const line=(tx,ty,value,size=11,weight='normal')=>{
+      const t=element('text');
+      for(const [key,val] of Object.entries({x:tx,y:ty,fill:'#20252a','font-size':size,'font-family':'Arial, sans-serif','font-weight':weight}))t.setAttribute(key,String(val));
+      t.textContent=textValue(value);
+      group.append(t);
+    };
+    const label=(tx,ty,name,value,max=60)=>{
+      line(tx,ty,name.toUpperCase(),8,'bold');
+      line(tx,ty+15,textValue(value).slice(0,max),11);
+    };
+    const student=report.student||identity.student_name||'';
+    const klass=report.className||identity.class_name||'';
+    rect(x,baseline,width,90);
+    rect(x,baseline,width,21,'#f3f5f7');
+    line(x+10,baseline+15,'ΣIM  ·  DIAGRAMA DE PROCESO',11,'bold');
+    line(x+width*.57,baseline+15,(report.sheet?'LÁMINA '+report.sheet:'')+(report.revision?'   REV. '+report.revision:''),9);
+    const cols=[x+10,x+width*.34,x+width*.68];
+    label(cols[0],baseline+35,'Proyecto',project,42);
+    label(cols[1],baseline+35,'Alumno / autor',student,34);
+    label(cols[2],baseline+35,'ID',report.studentId,25);
+    label(cols[0],baseline+67,'Clase / grupo',klass+(report.group?' · '+report.group:''),42);
+    label(cols[1],baseline+67,'Materia',report.subject,34);
+    label(cols[2],baseline+67,'Institución / docente',(report.institution||'')+(report.teacher?' · '+report.teacher:''),32);
+    svg.append(group);
+    return svg;
+  }
+  function addBalancesPage(pdf,rows,{title,report,identity}){
+    if(!Array.isArray(rows)||rows.length<2)return;
+    pdf.addPage();
+    const page=pdf.internal.pageSize,W=page.getWidth(),H=page.getHeight(),margin=36;
+    const fontName='DWSIM Asap';
+    pdf.setFont(fontName,'bold');pdf.setTextColor(30,37,42);pdf.setFontSize(13);
+    pdf.text('ΣIM  ·  BALANCES DEL PROCESO',margin,margin+8);
+    pdf.setFontSize(9);
+    pdf.text(textValue(title),margin,margin+25);
+    const owner=textValue(report?.student||identity?.student_name||'');
+    const cls=textValue(report?.className||identity?.class_name||'');
+    pdf.text([owner,cls].filter(Boolean).join('  ·  ').slice(0,115),margin,margin+40);
+    const available=W-2*margin,headers=rows[0],widths=[.17,.14,.14,.16,.15,.11,.13].map(v=>available*v);
+    let y=margin+58;
+    const headerHeight=35,rowHeight=27;
+    const drawRow=(values,heading)=>{
+      const height=heading?headerHeight:rowHeight;
+      if(y+height>H-margin){pdf.addPage();y=margin;}
+      let x=margin;
+      for(let i=0;i<widths.length;i++){
+        pdf.setDrawColor(150,155,160);pdf.setLineWidth(.4);
+        pdf.rect(x,y,widths[i],height);
+        pdf.setFontSize(heading?7:7.5);pdf.setFont(fontName,'bold');
+        const content=String(values[i]??'');
+        const formatted=typeof values[i]==='number'?Number.isFinite(values[i])?Number(values[i].toPrecision(6)).toString():'—':content;
+        const wrapped=pdf.splitTextToSize(formatted,widths[i]-8).slice(0,heading?3:2);
+        pdf.text(wrapped,x+4,y+11,{baseline:'alphabetic'});
+        x+=widths[i];
+      }
+      y+=height;
+    };
+    drawRow(headers,true);
+    for(const row of rows.slice(1))drawRow(row,false);
+    pdf.setFontSize(8);pdf.setFont(fontName,'bold');
+    if(y+18<H-margin)pdf.text('Resultados calculados por DWSIM. No son mediciones experimentales.',margin,y+18);
+  }
+
   function svgText(svg,fontData){
     const style=element('style');
     style.textContent=`@font-face{font-family:"DWSIM Asap";src:url(data:font/ttf;base64,${fontData}) format("truetype");font-weight:600}`;
@@ -132,13 +213,14 @@ const SimDiagramFiles=(()=>{
     const layout=pdfLayout(Number(svg.getAttribute('width')),Number(svg.getAttribute('height')),
       page.getWidth(),page.getHeight(),margin*72/25.4,fit);
     await pdf.svg(svg,layout);
+    if(Array.isArray(arguments[3]?.balances)&&arguments[3].balances.length>1)addBalancesPage(pdf,arguments[3].balances,{title,report:arguments[3].report,identity:arguments[3].identity});
     return pdf.output('blob');
   }
 
   async function file(markup,title,options){
     const fontData=await loadFont();
     await document.fonts.load('600 12px "DWSIM Asap"');
-    const svg=snapshot(markup,title,options.format==='pdf'?'white':options.background,options.format==='pdf');
+    const svg=addTitleBlock(snapshot(markup,title,options.format==='pdf'?'white':options.background,options.format==='pdf'),title,options);
     if(options.format==='png')return png(svg,fontData,options.scale);
     if(options.format==='pdf')return pdf(svg,fontData,title,options);
     return new Blob([svgText(svg,fontData)],{type:'image/svg+xml'});
