@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.46.2 — 2026-11-20
+
+- El desplazamiento con trackpad se activa al mantener Espacio y arrastrar con clic. Se retira el botón de la barra.
+- Puertos visibles en todos los equipos, con énfasis en las conexiones libres. El flash rotula Alimentación, Vapor y Líquido en los puntos de anclaje.
+
 ## 0.46.1 — 2026-11-20
 
 - «Anterior» y «Siguiente» quedan arriba en el explorador. El contenido de ecuaciones y balances tiene desplazamiento propio.
