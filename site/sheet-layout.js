@@ -21,7 +21,7 @@ const SimSheetLayout=(()=>{
  function compact(svg,title,options){
    if(!options.titleBlock)return svg;
    const view=svg.viewBox.baseVal,{x,y}=view,w=view.width,h=view.height;
-   const W=Math.max(w,540),right=x+W,top=y+h+12,bw=350,bh=111,bx=right-bw;
+   const W=Math.max(w,540),right=x+W,top=y+h+12,bw=350,bh=124,bx=right-bw;
    svg.setAttribute('viewBox',[x,y,W,h+bh+20].join(' '));
    svg.setAttribute('width',W);svg.setAttribute('height',h+bh+20);
    const group=el('g'),d=identityFields(title,options);
