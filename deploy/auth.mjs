@@ -208,7 +208,8 @@ export async function authorizeCalculation(env,session){
   const row=await env.SIM_AUTH_DB.prepare(
    'INSERT INTO calculation_usage(session_digest,window_start,requests) VALUES(?,?,1) ON CONFLICT(session_digest,window_start) DO UPDATE SET requests=requests+1 RETURNING requests'
   ).bind(session.session_digest,window).first();
-  if(!row||row.requests>4)return {ok:false,response:json({error:'Límite de 4 cálculos por minuto por sesión. Probá en el próximo minuto.'},429)};
+  const maxPerMinute=12; // Cuota por alumno: protege los motores sin interrumpir la práctica habitual.
+  if(!row||row.requests>maxPerMinute)return {ok:false,response:json({error:'Se alcanzó el máximo de '+maxPerMinute+' cálculos por minuto para esta sesión. Podés continuar en el próximo minuto.'},429)};
   return {ok:true};
  }catch{
   return {ok:false,response:json({error:'No se pudo comprobar la cuota de cálculo.'},503)};
