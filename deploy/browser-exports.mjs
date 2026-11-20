@@ -267,6 +267,7 @@ test('Lámina A4: tablas compactas sin texto fuera de márgenes y diagrama con p
     const box=sheet.viewBox.baseVal;
     const texts=[...sheet.querySelectorAll('text')];
     const errors=texts.filter(node=>{
+      if(!node.textContent.trim())return false;
       const r=node.getBBox();
       return r.x<38||r.x+r.width>box.width-36||r.y+r.height>box.height-35;
     }).map(node=>node.textContent);
