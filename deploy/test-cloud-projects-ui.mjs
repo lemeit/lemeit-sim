@@ -35,7 +35,7 @@ test('Cambiar alumno conserva la clase pero reinicia el espacio local',()=>{
 
 test('el rótulo de exportación indica el modelo termodinámico tomado del proyecto',()=>{
  const app=file('app.js'),layout=file('sheet-layout.js');
- assert.match(app,/model:graph\.model\|\|''/);
+ assert.match(app,/resultValidity==='valid'&&result\?\.model/);
  assert.match(layout,/MODELO TERMODINÁMICO/);
  assert.match(layout,/model:options\.model\|\|''/);
 });
