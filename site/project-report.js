@@ -25,8 +25,7 @@ const SimProjectReport=(()=>{
  }
  function bind(options){
    ({getGraph,getIdentity}=options);
-   // Atajo de compatibilidad: abre la misma ficha, en la pestaña Rótulo.
-   $('report-open').onclick=()=>SimExerciseEditor.open('report');
+   // La ficha y el rótulo se editan desde «Editar proyecto»; no hay botón duplicado.
  }
  return {bind,sync,save,valid};
 })();
