@@ -330,3 +330,55 @@ test('Ficha integrada: actividad, notas y rótulo comparten un guardado; cancela
  assert.equal(await page.locator('#diagram-export-dialog').evaluate(el=>el.open),true);
  assert.equal(await page.locator('#diagram-export-form [name=format]').inputValue(),'pdf');
 });
+
+
+test('Reporte PDF incluye enunciado, consignas y observaciones completos sin truncar',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ await page.locator('#exercise-open').click();
+ await page.locator('#exercise-statement').fill('Enunciado: calcular un balance de materia de prueba.');
+ await page.locator('#exercise-instructions').fill('Consigna 1: identificar las corrientes.\nConsigna 2: analizar el caudal final.');
+ await page.locator('#exercise-observations').fill('Observación del estudiante: cierre de masa correcto.');
+ await page.locator('#exercise-form').getByRole('button',{name:'Guardar cambios'}).click();
+ const layout=await page.evaluate(()=>{
+   const shape=document.createElementNS('http://www.w3.org/2000/svg','svg');
+   shape.setAttribute('viewBox','0 0 560 180');
+   shape.setAttribute('width','560');shape.setAttribute('height','180');
+   const options={paper:'a4',orientation:'landscape',margin:15,titleBlock:true,includeActivity:true,tables:[],
+     exercise:{statement:'Balance de materia breve',instructions:'Identificar entradas y salidas',observations:'Balance cerrado'}};
+   const short=SimSheetLayout.sheet(shape,'Caso didáctico',options);
+   const shortText=short.textContent;
+   const huge='Párrafo largo de prueba con distintas operaciones de balance. '.repeat(140);
+   const longOptions={...options,exercise:{statement:huge,instructions:'Consigna final A',observations:'Observación final B'}};
+   const long=SimSheetLayout.sheet(shape,'Caso didáctico',longOptions);
+   const annex=SimSheetLayout.activityAnnexes('Caso didáctico',{...longOptions,resolvedOrientation:'landscape'});
+   return {shortText,inline:short.dataset.activityAnnex,longAnnex:long.dataset.activityAnnex,
+     pages:annex.length,fullText:annex.map(p=>p.textContent).join(' ')};
+ });
+ assert.match(layout.shortText,/Balance de materia breve/);
+ assert.match(layout.shortText,/Identificar entradas y salidas/);
+ assert.match(layout.shortText,/Balance cerrado/);
+ assert.equal(layout.inline,'false');
+ assert.equal(layout.longAnnex,'true');
+ assert.ok(layout.pages>=2,'El texto didáctico extenso requiere un anexo paginado');
+ assert.match(layout.fullText,/Consigna final A/);
+ assert.match(layout.fullText,/Observación final B/);
+ assert.ok(layout.fullText.includes('operaciones de balance'),'No pierde el contenido largo');
+
+ await page.getByText('Archivo',{exact:true}).click();
+ await page.locator('#report-pdf-menu').click();
+ const dialog=page.locator('#diagram-export-dialog');
+ await dialog.locator('[name=equipment]').uncheck();
+ await dialog.locator('[name=balances]').uncheck();
+ await dialog.locator('[name=streams]').uncheck();
+ assert.equal(await dialog.locator('[name=activity]').isChecked(),true);
+ await dialog.locator('#diagram-export-preview').click();
+ await dialog.locator('#diagram-print-preview:not([hidden]) img').waitFor();
+ const preview=decodeURIComponent((await dialog.locator('#diagram-preview-image').getAttribute('src')).split(',')[1]);
+ assert.ok(preview.includes('Enunciado: calcular un balance de materia de prueba.'));
+ assert.ok(preview.includes('Consigna 1: identificar las corrientes.'));
+ assert.ok(preview.includes('Observación del estudiante: cierre de masa correcto.'));
+ const pdf=await download(page,()=>dialog.getByRole('button',{name:'Descargar',exact:true}).click());
+ assert.match(pdf.bytes.toString('latin1'),/^%PDF-/);
+ assert.equal([...pdf.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)].length,1,'Actividad corta en una sola A4');
+});
