@@ -91,7 +91,7 @@ const SimDiagramFiles=(()=>{
     const report=options.report||{},identity=options.identity||{},exercise=options.exercise||{};
     const view=svg.viewBox.baseVal;
     const x=view.x,y=view.y,w=view.width,h=view.height;
-    const width=Math.max(w,480),extra=104;
+    const width=Math.max(w,560),extra=134;
     const baseline=y+h+10;
     svg.setAttribute('viewBox',[x,y,width,h+extra].join(' '));
     svg.setAttribute('width',String(width));
@@ -114,7 +114,7 @@ const SimDiagramFiles=(()=>{
     };
     const student=report.student||identity.student_name||'';
     const klass=report.className||identity.class_name||'';
-    rect(x,baseline,width,90);
+    rect(x,baseline,width,120);
     rect(x,baseline,width,21,'#f3f5f7');
     line(x+10,baseline+15,'ΣIM  ·  DIAGRAMA DE PROCESO',11,'bold');
     line(x+width*.57,baseline+15,(report.sheet?'LÁMINA '+report.sheet:'')+(report.revision?'   REV. '+report.revision:''),9);
@@ -125,6 +125,7 @@ const SimDiagramFiles=(()=>{
     label(cols[0],baseline+67,'Clase / grupo',klass+(report.group?' · '+report.group:''),42);
     label(cols[1],baseline+67,'Materia',report.subject,34);
     label(cols[2],baseline+67,'Institución / docente',(report.institution||'')+(report.teacher?' · '+report.teacher:''),32);
+    label(x+10,baseline+99,'Enunciado',exercise.statement||'',Math.max(40,Math.floor((width-22)/6)));
     svg.append(group);
     return svg;
   }
@@ -200,7 +201,8 @@ const SimDiagramFiles=(()=>{
     return {x:(pageWidth-width*scale)/2,y:(pageHeight-height*scale)/2,width:width*scale,height:height*scale};
   }
 
-  async function pdf(svg,fontData,title,{paper,orientation,margin,fit}){
+  async function pdf(svg,fontData,title,options){
+    const {paper,orientation,margin,fit}=options;
     await loadPdf();
     const pdf=new window.jspdf.jsPDF({orientation,unit:'pt',format:paper,compress:true,putOnlyUsedFonts:true});
     const fontName='DWSIM Asap';
@@ -213,7 +215,7 @@ const SimDiagramFiles=(()=>{
     const layout=pdfLayout(Number(svg.getAttribute('width')),Number(svg.getAttribute('height')),
       page.getWidth(),page.getHeight(),margin*72/25.4,fit);
     await pdf.svg(svg,layout);
-    if(Array.isArray(arguments[3]?.balances)&&arguments[3].balances.length>1)addBalancesPage(pdf,arguments[3].balances,{title,report:arguments[3].report,identity:arguments[3].identity});
+    if(Array.isArray(options.balances)&&options.balances.length>1)addBalancesPage(pdf,options.balances,{title,report:options.report,identity:options.identity});
     return pdf.output('blob');
   }
 
