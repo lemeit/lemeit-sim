@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.43.0 — 2026-11-20
+
+- Editor de proyecto integrado: **Actividad / Anotaciones / Datos del informe** en un solo diálogo con pestañas, guardado conjunto, cancelación y acceso al generador de PDF.
+- Nuevo menú **Proyecto** y botón «Editar proyecto…» en la barra. Se eliminan los dos accesos visibles separados de rótulo y ejercicio sin modificar la estructura de datos guardada.
+- Pulido visual de diálogos: botones compactos, márgenes y barra de acciones comunes, formularios en columnas, foco discreto y mejor distribución del espacio.
+- Los cambios de anotaciones en la ficha se preparan como borrador hasta guardar; cancelar no altera metadatos del proceso.
+
 ## 0.42.3 — 2026-11-20
 
 - Compacta tipografía y alturas de las tablas en reportes de una sola hoja para dar mayor superficie al diagrama del proceso.
