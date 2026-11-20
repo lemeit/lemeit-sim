@@ -134,6 +134,7 @@ const SimCloudProjects=(()=>{
     $('cloud-project-save').onclick=()=>void save();
     $('cloud-project-copy').onclick=()=>void save(true);
     $('cloud-class-select').onchange=()=>void list();
+    $('cloud-project-dialog').addEventListener('close',()=>{pendingSave=false;});
     $('cloud-identify-form').onsubmit=async event=>{
       event.preventDefault();
       const button=$('cloud-identify-submit'),message=$('cloud-identify-message');
@@ -148,9 +149,11 @@ const SimCloudProjects=(()=>{
         me={...me,student_name:result.student_name};
         $('cloud-identification').hidden=true;
         $('cloud-library-body').hidden=false;
+        const shouldSave=pendingSave;
+        pendingSave=false;
         $('cloud-project-dialog').close();
         notice('Ingresaste como '+result.student_name+'. Ya podés guardar y abrir tus proyectos.');
-        if(pendingSave){pendingSave=false;await save();}
+        if(shouldSave)await save();
       }catch(error){
         const explanation=error.name==='TimeoutError'?'No se recibió respuesta. Comprobá la conexión e intentá nuevamente.':error.message;
         message.textContent=explanation;
