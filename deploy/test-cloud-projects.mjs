@@ -61,6 +61,17 @@ test('clase → identidad individual → CRUD nube; aislamiento, admin y renovac
   const correct=await f.api('/api/auth/student-identity','POST',{action:'login',alias:'Alumno A',password:'clave-Alumno-A-123'},aliceNew);
   assert.equal(correct.status,200);
   const recovered=await f.api('/api/projects/'+project.id,'GET',null,aliceNew);assert.equal(recovered.status,200);
+  const released=await f.api('/api/auth/release-student','POST',{},aliceNew);assert.equal(released.status,200);
+  const anonymousAfterSwitch=await f.api('/api/projects','GET',null,aliceNew);assert.equal(anonymousAfterSwitch.status,403);
+  const classStillActive=await f.api('/api/auth/me','GET',null,aliceNew);
+  const state=await classStillActive.json();assert.equal(state.authenticated,true);assert.equal(state.role,'student');assert.equal(state.student_name,undefined);
+  const another=await f.api('/api/auth/student-identity','POST',{action:'login',alias:'Alumno B',password:'clave-Alumno-B-123'},aliceNew);
+  assert.equal(another.status,200);
+  const blocked=await f.api('/api/projects/'+project.id,'GET',null,aliceNew);assert.equal(blocked.status,404);
+  await f.api('/api/auth/release-student','POST',{},aliceNew);
+  const reentered=await f.api('/api/auth/student-identity','POST',{action:'login',alias:'Alumno A',password:'clave-Alumno-A-123'},aliceNew);
+  assert.equal(reentered.status,200);
+  const recoveredAgain=await f.api('/api/projects/'+project.id,'GET',null,aliceNew);assert.equal(recoveredAgain.status,200);
   const deleted=await f.api('/api/projects/'+project.id,'DELETE',{},aliceNew);assert.equal(deleted.status,200);
   const gone=await f.api('/api/projects/'+project.id,'GET',null,aliceNew);assert.equal(gone.status,404);
  }finally{f.close();}
