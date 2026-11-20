@@ -209,7 +209,7 @@ test('Rótulo editable en SVG y balances incorporados al PDF',async t=>{
   const pdfSource=withBalances.bytes.toString('latin1');
   assert.match(pdfSource,/^%PDF-/);
   const pageObjects=[...pdfSource.matchAll(/\/Type \/Page\b/g)];
-  assert.ok(pageObjects.length>=2,'El PDF contiene el diagrama y al menos una hoja de balances');
+  assert.equal(pageObjects.length,1,'El PDF reúne diagrama y balances en una única lámina');
   const withoutBalances=await exportDiagram(page,'pdf',async dialog=>{
     await dialog.locator('[name=balances]').uncheck();
   });
@@ -240,7 +240,7 @@ test('Archivo ordenado y vista previa de reporte Oficio con rótulo y tablas',as
  assert.ok((await dlg.locator('#diagram-preview-caption').textContent()).includes('OFICIO'));
  const pdf=await download(page,()=>dlg.getByRole('button',{name:'Descargar',exact:true}).click());
  assert.match(pdf.bytes.toString('latin1'),/^%PDF-/);
- assert.ok([...pdf.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)].length>=2);
+ assert.equal([...pdf.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)].length,1,'Oficio debe reunir diagrama y tablas en una lámina');
  await page.getByText('Archivo',{exact:true}).click();
  await page.getByRole('button',{name:'Exportar imagen · SVG / PNG…'}).click();
  assert.equal(await dlg.locator('[name=format]').inputValue(),'svg');
