@@ -93,7 +93,7 @@ function updateControls(){
   updateResultValidity();
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
-  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('report-open').disabled=!hasProject;$('save-button').disabled=!hasProject;$('save-project-toolbar').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('report-open').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
@@ -913,44 +913,92 @@ function bindDiagramExport(){
   const dialog=$('diagram-export-dialog'),form=$('diagram-export-form');
   const format=form.elements.format,scope=form.elements.scope;
   const status=$('diagram-export-status'),submit=$('diagram-export-submit');
+  const previewBox=$('diagram-print-preview'),previewImg=$('diagram-preview-image'),previewCaption=$('diagram-preview-caption');
   const selectedNodes=()=>{
     const ids=new Set(selection?.nodes??(selection?.node?[selection.node]:[]));
     return graph.nodes.filter(node=>ids.has(node.id));
   };
+  const nodesForExport=()=>scope.value==='selection'?selectedNodes():graph.nodes;
   function updateOptions(){
     for(const group of form.querySelectorAll('[data-format]')){
       group.hidden=!group.dataset.format.split(' ').includes(format.value);
       group.disabled=group.hidden;
     }
+    previewBox.hidden=true;previewImg.removeAttribute('src');
   }
-  format.onchange=updateOptions;
-  document.querySelectorAll('[data-diagram-export]').forEach(button=>button.onclick=()=>{
-    scope.options[1].disabled=!selectedNodes().length;
-    if(scope.options[1].disabled)scope.value='all';
-    status.textContent='';
-    closeMenus();
-    updateOptions();
-    if(!dialog.open)dialog.showModal();
-  });
-  form.onsubmit=async event=>{
-    event.preventDefault();
-    if(submit.disabled)return;
-    const options={format:format.value,background:form.elements.background.value, titleBlock:form.elements.titleBlock.checked, balances:form.elements.balances.checked&&resultValidity==='valid'?SimproxFiles.tables(graph,result)[1].rows:null, report:graph.report||{}, exercise:graph.exercise||{}, identity:SimCloudProjects.identity(),
+  function equipmentRows(){
+    const table=[['Equipo','Tipo','Entradas','Salidas']];
+    for(const node of graph.nodes.filter(n=>!['MaterialStream','EnergyStream'].includes(n.type))){
+      const ins=graph.edges.filter(e=>e.to===node.id).length;
+      const outs=graph.edges.filter(e=>e.from===node.id).length;
+      table.push([node.name,node.type,ins,outs]);
+    }
+    return table;
+  }
+  function optionsForExport(){
+    const isPdf=format.value==='pdf';
+    const requested={equipment:isPdf&&form.elements.equipment.checked,balances:isPdf&&form.elements.balances.checked,streams:isPdf&&form.elements.streams.checked,components:isPdf&&form.elements.components.checked};
+    const wantsResults=requested.balances||requested.streams||requested.components;
+    if(wantsResults&&resultValidity!=='valid')throw new Error('Para incluir tablas de resultados, primero calculá el proyecto y verificá que los resultados estén vigentes.');
+    const tables=[];
+    if(requested.equipment)tables.push({name:'Equipos',rows:equipmentRows()});
+    if(wantsResults){
+      const sheets=SimproxFiles.tables(graph,result);
+      if(requested.streams)tables.push(sheets[0]);
+      if(requested.balances)tables.push(sheets[1]);
+      if(requested.components)tables.push(sheets[2]);
+    }
+    return {format:format.value,background:form.elements.background.value,
+      titleBlock:form.elements.titleBlock.checked,tables,
+      report:graph.report||{},exercise:graph.exercise||{},identity:SimCloudProjects.identity(),
       scale:Number(form.elements.scale.value),paper:form.elements.paper.value,
       orientation:form.elements.orientation.value,margin:Number(form.elements.margin.value),
       fit:form.elements.fit.value};
-    const nodes=scope.value==='selection'?selectedNodes():graph.nodes;
+  }
+  function openExport(report=false){
+    scope.options[1].disabled=!selectedNodes().length;
+    if(report||scope.options[1].disabled)scope.value='all';
+    format.value=report?'pdf':'svg';
+    if(report){
+      form.elements.titleBlock.checked=true;
+      form.elements.equipment.checked=true;
+      form.elements.balances.checked=true;
+      form.elements.streams.checked=true;
+    }
+    $('diagram-export-title').textContent=report?'Reporte PDF · diagrama y tablas':'Exportar diagrama';
+    status.textContent='';closeMenus();updateOptions();
+    if(!dialog.open)dialog.showModal();
+  }
+  format.onchange=updateOptions;
+  for(const element of form.querySelectorAll('select,input'))element.addEventListener('change',()=>{previewBox.hidden=true;previewImg.removeAttribute('src');});
+  document.querySelectorAll('[data-diagram-export]').forEach(button=>button.onclick=()=>openExport());
+  $('report-pdf-menu').onclick=()=>openExport(true);
+  $('diagram-export-preview').onclick=()=>{
+    const nodes=nodesForExport();
     if(!nodes.length){status.textContent='Seleccioná al menos un objeto para exportar.';return;}
-    if(form.elements.balances.checked&&resultValidity!=='valid'&&format.value==='pdf'){status.textContent='Para agregar balances, primero calculá el proyecto y verificá que los resultados estén vigentes.';return;}
-    submit.disabled=true;
-    status.textContent='Preparando diagrama…';
+    try{
+      const options=optionsForExport();
+      const svg=SimDiagramFiles.preview(diagramMarkup(nodes,true),graph.title,options);
+      previewImg.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      const sections=options.tables?.filter(t=>t.rows.length>1).map(t=>t.name)||[];
+      previewCaption.textContent=options.format==='pdf'?'Vista previa de la primera lámina ('+options.paper.toUpperCase()+'). '+(sections.length?'El PDF agregará tablas: '+sections.join(', ')+'.':'Sin tablas adicionales.'):'Vista previa de la imagen ('+options.format.toUpperCase()+').';
+      previewBox.hidden=false;status.textContent='';
+      previewBox.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }catch(error){status.textContent=error.message;}
+  };
+  form.onsubmit=async event=>{
+    event.preventDefault();if(submit.disabled)return;
+    const nodes=nodesForExport();
+    if(!nodes.length){status.textContent='Seleccioná al menos un objeto para exportar.';return;}
+    let options;try{options=optionsForExport();}catch(error){status.textContent=error.message;return;}
+    submit.disabled=true;status.textContent='Preparando archivo…';
     try{
       const stem=exportStem()+(scope.value==='selection'?'-seleccion':'');
       const blob=await SimDiagramFiles.file(diagramMarkup(nodes,true),graph.title,options);
       downloadLocal(stem+'.'+options.format,blob,blob.type);
       recordActivity('Diagrama exportado',options.format);
       dialog.close();
-    }catch(error){status.textContent=error.message||'No se pudo exportar el diagrama.';}
+    }catch(error){status.textContent=error.message||'No se pudo exportar el archivo.';}
     finally{submit.disabled=false;}
   };
 }
