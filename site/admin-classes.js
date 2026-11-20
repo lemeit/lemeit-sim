@@ -28,6 +28,20 @@ async function listClasses(){
     codeCell.append(value,copy);
    }else{codeCell.textContent=active?'Anterior · no recuperable':'—';codeCell.className='class-code-unavailable';if(active)codeCell.title='Este código fue creado antes del guardado cifrado. Creá uno nuevo para volver a compartirlo.';}
 
+   const renew=document.createElement('button');renew.type='button';renew.textContent='Renovar clave';
+   renew.addEventListener('click',async()=>{
+    if(!confirm('¿Renovar el código de «'+entry.label+'» por 30 días? Los proyectos y alumnos se conservarán. El código anterior dejará de funcionar.'))return;
+    renew.disabled=true;
+    try{
+      const renewed=await classApi('renew-class',{id:entry.id,hours:720});
+      $class('class-code-value').textContent=renewed.code;
+      $class('class-code-detail').textContent=entry.label+' · nuevo código válido hasta '+classDate(renewed.expires_at)+'. Los proyectos existentes se conservan.';
+      $class('class-new-code').hidden=false;
+      await listClasses();
+    }catch(error){message.textContent=error.message;}
+    finally{renew.disabled=false;}
+   });
+   action.append(renew);
    if(active){
     const button=document.createElement('button');button.type='button';button.textContent='Desactivar';
     button.addEventListener('click',async()=>{
