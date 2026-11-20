@@ -112,6 +112,77 @@ const SimSheetLayout=(()=>{
    for(const row of rows.slice(1))drawRow(row,tableMetric.row,false);
    return y+tableMetric.gap;
  }
+
+ const activitySections=options=>{
+   if(!options.includeActivity)return [];
+   const exercise=options.exercise||{};
+   return [['ENUNCIADO',exercise.statement],['CONSIGNAS',exercise.instructions],['OBSERVACIONES',exercise.observations]]
+     .filter(([,value])=>typeof value==='string'&&value.trim());
+ };
+ function wrapActivity(value,maxWidth,fontSize=8){
+   const ctx=measuring;if(ctx)ctx.font=fontSize+'px Arial';
+   const lines=[];
+   for(const paragraph of String(value).replace(/\r\n?/g,'\n').split('\n')){
+     if(!paragraph.trim()){lines.push('');continue;}
+     let line='';
+     for(const word of paragraph.split(/(\s+)/).filter(Boolean)){
+       if(!ctx||ctx.measureText(line+word).width<=maxWidth){line+=word;continue;}
+       if(line.trim()){lines.push(line.trimEnd());line='';}
+       for(const char of [...word]){
+         if(ctx&&ctx.measureText(line+char).width>maxWidth&&line){lines.push(line);line='';}
+         line+=char;
+       }
+     }
+     lines.push(line.trimEnd());
+   }
+   return lines;
+ }
+ function activityLayout(options,width){
+   return activitySections(options).map(([label,value])=>{
+     const lines=wrapActivity(value,width-12);
+     return {label,lines,height:15+Math.max(1,lines.length)*11+5};
+   });
+ }
+ function drawActivity(root,sections,x,y){
+   for(const section of sections){
+     text(root,x+3,y+8,section.label,8,true,40);y+=15;
+     for(const line of section.lines){
+       const item=attr(el('text'),{x:x+5,y:y+8,fill:'#20252a','font-family':'Arial, sans-serif','font-size':8});
+       item.textContent=line;root.append(item);y+=11;
+     }
+     y+=5;
+   }
+   return y;
+ }
+ function activityAnnexes(title,options){
+   if(!options.includeActivity)return [];
+   const orientation=options.resolvedOrientation||options.orientation||'portrait';
+   const {width,height}=size({...options,orientation}),margin=Math.max(8,Number(options.margin)||15)*72/25.4;
+   const left=margin+10,regionW=width-2*margin-20,top=margin+18,end=height-margin-22;
+   const sections=activityLayout(options,regionW);
+   if(!sections.length)return [];
+   const pages=[];
+   let paper,y;
+   const fresh=()=>{
+     paper=attr(el('svg'),{viewBox:'0 0 '+width+' '+height,width,height});
+     rectangle(paper,0,0,width,height);rectangle(paper,margin,margin,width-2*margin,height-2*margin,'none');
+     text(paper,left,margin+14,'ΣIM · ACTIVIDAD DEL PROYECTO',11,true,64);
+     text(paper,left,margin+28,title,8,false,90);
+     y=top+29;pages.push(paper);
+   };
+   fresh();
+   for(const section of sections){
+     if(y+30>end)fresh();
+     text(paper,left+3,y+8,section.label,8,true,40);y+=15;
+     for(const line of section.lines){
+       if(y+12>end){fresh();text(paper,left+3,y+8,section.label+' (continuación)',8,true,46);y+=15;}
+       const item=attr(el('text'),{x:left+5,y:y+8,fill:'#20252a','font-family':'Arial, sans-serif','font-size':8});
+       item.textContent=line;paper.append(item);y+=11;
+     }
+     y+=5;
+   }
+   return pages;
+ }
  function sheet(source,title,options){
    const orientation=effectiveOrientation(source,options);
    const {width,height}=size({...options,orientation}),margin=Math.max(8,Number(options.margin)||15)*72/25.4;
@@ -124,11 +195,16 @@ const SimSheetLayout=(()=>{
    const top=margin+10,bottom=height-margin-12-blockH;
    const regionH=bottom-top,regionW=width-2*margin-20;
    const gap=tables.length?12:0;
+   const activities=activityLayout(options,regionW);
+   const activityH=activities.reduce((total,section)=>total+section.height,0);
+   const activityInline=activityH>0&&(totalTableH+gap+activityH+10<=regionH*.54);
+   const reservedActivityH=activityInline?activityH+10:0;
+   paper.dataset.activityAnnex=String(activityH>0&&!activityInline);
    // Una sola hoja: si las tablas requieren demasiado espacio, rechazar en lugar de
    // agregar páginas u ocultar resultados numéricos.
    const minDiagramH=regionH*.46;
    if(totalTableH>regionH-minDiagramH-gap)throw new Error('Las tablas seleccionadas dejan demasiado poco espacio al diagrama. Desmarcá alguna tabla o elegí A3/Oficio.');
-   const diagramH=regionH-totalTableH-gap;
+   const diagramH=regionH-totalTableH-gap-reservedActivityH;
    const view=source.viewBox.baseVal;
    const scale=Math.min(regionW/view.width,diagramH/view.height);
    if(!(scale>0))throw new Error('El diagrama no tiene dimensiones válidas para imprimir.');
@@ -137,6 +213,7 @@ const SimSheetLayout=(()=>{
    for(const child of [...source.childNodes])if(child.nodeName.toLowerCase()!=='title')group.append(child.cloneNode(true));
    paper.append(group);
    let tableY=top+diagramH+gap;
+   if(activityInline)tableY=drawActivity(paper,activities,margin+10,tableY)+10;
    for(const table of tables)tableY=drawTable(paper,table,margin+10,tableY,regionW);
    if(options.titleBlock){
      const d=identityFields(title,options);
@@ -152,5 +229,5 @@ const SimSheetLayout=(()=>{
    return paper;
  }
 
- return {compact,sheet,size,effectiveOrientation};
+ return {compact,sheet,size,effectiveOrientation,activityAnnexes,activityLayout,wrapActivity};
 })();
