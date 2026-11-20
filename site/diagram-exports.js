@@ -92,18 +92,18 @@ const SimDiagramFiles=(()=>{
     const page=pdf.internal.pageSize,W=page.getWidth(),H=page.getHeight(),margin=36;
     const fontName='DWSIM Asap';
     pdf.setFont(fontName,'bold');pdf.setTextColor(30,37,42);pdf.setFontSize(13);
-    pdf.text('ΣIM  ·  BALANCES DEL PROCESO',margin,margin+8);
+    pdf.text('ΣIM  ·  TABLAS DEL PROCESO',margin,margin+8);
     pdf.setFontSize(9);
     pdf.text(textValue(title),margin,margin+25);
     const owner=textValue(report?.student||identity?.student_name||'');
     const cls=textValue(report?.className||identity?.class_name||'');
     pdf.text([owner,cls].filter(Boolean).join('  ·  ').slice(0,115),margin,margin+40);
-    const available=W-2*margin,headers=rows[0],widths=[.17,.14,.14,.16,.15,.11,.13].map(v=>available*v);
+    const available=W-2*margin,headers=rows[0],count=headers.length,widths=Array.from({length:count},()=>available/count);
     let y=margin+58;
     const headerHeight=35,rowHeight=27;
     const drawRow=(values,heading)=>{
       const height=heading?headerHeight:rowHeight;
-      if(y+height>H-margin){pdf.addPage();y=margin;}
+      if(y+height>H-margin){pdf.addPage();y=margin;drawRow(headers,true);}
       let x=margin;
       for(let i=0;i<widths.length;i++){
         pdf.setDrawColor(150,155,160);pdf.setLineWidth(.4);
