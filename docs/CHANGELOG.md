@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.42.0 — 2026-11-20
+
+- Archivo reorganizado en Proyecto, Mis proyectos en nube, Exportar y presentar y Copias en esta computadora; distingue guardar nube de descargar JSON.
+- Acceso directo Reporte PDF · diagrama y balances, con tablas seleccionables de equipos, corrientes, balances y componentes.
+- Lámina PDF A4, A3 u Oficio (216 × 330 mm), márgenes y orientación configurables, rótulo compacto abajo a la derecha y vista previa antes de descargar.
+- Rótulo de imágenes SVG/PNG también compacto; controles del editor de rótulo ajustados; iconos de nube neutros salvo foco y hover.
+
 ## 0.41.0 — 2026-11-20
 
 - Accesos rápidos a biblioteca y guardado en la nube junto al botón de guardar del editor; identidad del alumno o clase visible en la barra.
