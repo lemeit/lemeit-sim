@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.35.0](https://img.shields.io/badge/portal-0.42.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.35.0](https://img.shields.io/badge/portal-0.42.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -439,10 +439,14 @@ CSV/Excel mantienen las unidades canónicas que declaran sus cabeceras.
 
 La barra junto a Guardar ofrece iconos de nube para abrir la biblioteca y guardar; muestra el alias del alumno y su clase. «Rótulo…» permite completar alumno, ID, materia, grupo, institución, docente, lámina y revisión; el título y enunciado se toman del proyecto. En Exportar diagrama se puede incluir el rótulo en SVG, PNG o PDF, y agregar una hoja de balances al PDF después de calcular. Editar estos datos no invalida el resultado físico.
 
-### Archivo y presentación de láminas (0.42.1)
+### Archivo y presentación de láminas (0.42.2)
 
 Archivo distingue Proyecto, Mis proyectos (nube), Exportar y presentar, y Copias en esta computadora. «Guardar en la nube» conserva el proyecto del alumno; «Descargar copia del proyecto (.json)» genera un respaldo local. «Reporte PDF · diagrama y balances» abre directamente el formulario de lámina, con tamaño A4, A3 u Oficio, márgenes, orientación, vista previa, rótulo opcional compacto en la esquina inferior derecha y tablas opcionales de equipos, corrientes, balances y componentes. Los resultados numéricos requieren un cálculo vigente; la tabla de equipos puede exportarse sin calcular.
 
-### Una sola lámina de reporte (0.42.1)
+### Una sola lámina de reporte (0.42.2)
 
 El reporte PDF distribuye diagrama, tablas seleccionadas y rótulo dentro de una única hoja A4, A3 u Oficio. La orientación automática analiza la proporción del diagrama, o se puede forzar horizontal/vertical. La vista previa muestra el resultado completo. Si demasiadas tablas impedirían una presentación legible, la exportación pide reducir la selección en lugar de generar hojas adicionales o cortar datos.
+
+### Cambiar de alumno (0.42.2)
+
+Desde Archivo → Abrir biblioteca en la nube, «Cambiar alumno…» libera la identidad de alumno sin cerrar el acceso a la clase. Luego se puede iniciar sesión con otro alias o registrar una identidad nueva. Antes de cambiar, guardar el proyecto actual: el cambio cierra el proyecto abierto y elimina el borrador del navegador para evitar mezclar trabajos entre usuarios. Los proyectos ya guardados en D1 se conservan.
