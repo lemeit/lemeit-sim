@@ -2,7 +2,7 @@
 'use strict';
 const SimCloudProjects=(()=>{
   const $=id=>document.getElementById(id);
-  let getGraph,hasProject,loadGraph,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false;
+  let getGraph,hasProject,loadGraph,notice,closeMenus,me=null,active=null,revision=null,version=0,timer=null,working=false,dirty=false,pendingSave=false;
   const api=async(path,method='GET',payload)=>{
     const options={method,credentials:'same-origin',cache:'no-store'};
     if(method!=='GET')Object.assign(options,{headers:{'Content-Type':'application/json'},body:JSON.stringify(payload||{})});
@@ -103,9 +103,9 @@ const SimCloudProjects=(()=>{
         data=await api('/api/projects/'+active,'PUT',{graph,revision});
         if(currentGeneration===version)revision=data.revision;
       }
-      if(!quiet){status('Proyecto guardado en la nube.');await list();}
+      if(!quiet){status('Proyecto guardado en la nube.');notice('Proyecto guardado en la nube.');if($('cloud-project-dialog').open)await list();}
       else status('Guardado automáticamente en la nube.');
-    }catch(error){status('No se pudo guardar: '+error.message+' Descargá el JSON como respaldo.');dirty=false;}
+    }catch(error){status('No se pudo guardar: '+error.message+' Descargá el JSON como respaldo.');if(!$('cloud-project-dialog').open)notice('No se pudo guardar en la nube: '+error.message,true);dirty=false;}
     finally{
       working=false;
       if(dirty&&currentGeneration===version){dirty=false;onChange();}
@@ -119,6 +119,18 @@ const SimCloudProjects=(()=>{
   function bind(options){
     ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
     $('cloud-projects-open').onclick=open;
+    $('cloud-save-menu').onclick=async()=>{
+      closeMenus();
+      if(!hasProject())return notice('Primero creá o abrí un proyecto.',true);
+      if(!identified()){
+        pendingSave=true;
+        await open();
+        if(identified()){pendingSave=false;await save();}
+        else status('Identificate para guardar tu proyecto.');
+        return;
+      }
+      await save();
+    };
     $('cloud-project-save').onclick=()=>void save();
     $('cloud-project-copy').onclick=()=>void save(true);
     $('cloud-class-select').onchange=()=>void list();
@@ -137,7 +149,8 @@ const SimCloudProjects=(()=>{
         $('cloud-identification').hidden=true;
         $('cloud-library-body').hidden=false;
         $('cloud-project-dialog').close();
-        notice('Ingresaste como '+result.student_name+'. Abrí «Mis proyectos · nube» para continuar con tus trabajos.');
+        notice('Ingresaste como '+result.student_name+'. Ya podés guardar y abrir tus proyectos.');
+        if(pendingSave){pendingSave=false;await save();}
       }catch(error){
         const explanation=error.name==='TimeoutError'?'No se recibió respuesta. Comprobá la conexión e intentá nuevamente.':error.message;
         message.textContent=explanation;
