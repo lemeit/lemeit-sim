@@ -314,8 +314,15 @@ HTTP en 5901 esté iniciado. Los cálculos se serializan y tienen 45 s de límit
   ni capacidad para una clase completa hasta realizar pruebas de carga.
 
 Las condiciones se envían al servidor para calcular. No se guardan ejercicios en
-la nube: Guardar descarga JSON; Abrir restaura el proceso. Existe guardado local
-automático en el navegador; borrar datos del sitio lo elimina.
+la nube: Archivo → Mis proyectos · nube guarda cada proyecto en Cloudflare D1 con
+una identidad individual por clase (alias y clave personal). Una vez guardado,
+los cambios posteriores se sincronizan automáticamente mientras la sesión está
+activa. Desde otro navegador se recuperan con el mismo código de clase y las
+credenciales individuales. El administrador puede consultar trabajos por clase.
+Guardar/abrir JSON permanece como respaldo, y la biblioteca local del navegador
+sigue disponible por separado. Borrar los datos del navegador no elimina los
+proyectos de D1. Renovar el código de clase conserva la identidad de la clase,
+los alumnos y los proyectos.
 
 ## Encender y detener el cálculo online en Windows
 
