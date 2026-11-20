@@ -23,3 +23,12 @@ test('botones de cierre y campos de nube tienen estilos específicos',()=>{
  assert.match(css,/#cloud-project-dialog \.exercise-form-body :is\(select,input\):focus-visible/);
  assert.match(css,/#cloud-project-dialog \[hidden\]\{display:none!important\}/);
 });
+
+test('Cambiar alumno conserva la clase pero reinicia el espacio local',()=>{
+ const html=file('index.html'),cloud=file('cloud-projects.js'),app=file('app.js');
+ assert.match(html,/id="cloud-switch-student"/);
+ assert.match(cloud,/api\/auth\/release-student/);
+ assert.match(cloud,/clearWorkspace\(\)/);
+ assert.match(app,/removeItem\('lemeit-process-v1'\)/);
+ assert.match(app,/clearWorkspace:\(\)=>clearLoadedProject\(true\)/);
+});
