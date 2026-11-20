@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.45.0 — 2026-11-20
+
+- Ecuaciones por operación unitaria con balances globales y por componente a partir de los resultados vigentes de DWSIM.
+- Interpretación de entalpía, calor y trabajo de eje con tolerancias explícitas, diferencias por reacción y aviso de datos faltantes.
+
 ## 0.44.0 — 2026-11-20
 
 - El botón «Calcular» recupera el triángulo Play y conserva una luz pequeña y diferenciada para indicar cálculo en curso, resultado correcto, advertencia o error.

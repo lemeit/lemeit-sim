@@ -4,7 +4,10 @@
 const SimProcessExplorer=(()=>{
   const $=id=>document.getElementById(id);
   let context=null,steps=[],position=0,visible=false,hadRecycle=false;
-  const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?Number(v.toPrecision(digits)).toLocaleString('es-AR',{maximumSignificantDigits:digits})+(unit?' '+unit:''):'—';
+  const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
+    maximumSignificantDigits:digits,
+    notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
+  })+(unit?' '+unit:''):'—';
   const isStream=n=>n.type==='MaterialStream'||n.type==='EnergyStream';
   function order(graph){
     const nodes=graph.nodes.filter(n=>!n.diagramOnly);
@@ -37,6 +40,86 @@ const SimProcessExplorer=(()=>{
     const output=document.createElement('strong');output.textContent=value;
     element.append(name,output);return element;
   }
+  const operations={
+    Mixer:['Σ(ṁh)ₑ = ṁₛhₛ','Mezcla adiabática en régimen estacionario. La entalpía de las alimentaciones se suma ponderada por sus caudales.'],
+    Splitter:['ṁⱼ = fⱼ · ṁₑ','Cada salida lleva su fracción fⱼ del caudal de entrada y conserva la composición de la alimentación.'],
+    Separator:['ṁₑwₖ,ₑ = Σⱼ ṁⱼwₖ,ⱼ','El equilibrio de fases determina la composición de cada salida del flash.'],
+    Heater:['Q̇ = ΔḢ','El calor aportado aumenta el flujo de entalpía.'],
+    Cooler:['Q̇ = ΔḢ','El calor retirado se expresa con signo negativo hacia el fluido.'],
+    HeatExchanger:['ΔḢ caliente + ΔḢ fría ≈ 0','El calor se intercambia entre las dos corrientes. El cierre global supone un equipo sin intercambio térmico con el ambiente.'],
+    Valve:['hₛ ≈ hₑ','El estrangulamiento es isoentálpico si se desprecian calor, trabajo y cambios de energía cinética y potencial.'],
+    Tank:['τ = Vρₑ / ṁₑ','El tiempo de residencia del líquido relaciona el inventario másico con el caudal de alimentación. El balance es estacionario.'],
+    Pump:['Ẇ hacia el fluido ≈ ΔḢ','La bomba aporta trabajo de eje al líquido, bajo la aproximación adiabática.'],
+    Compressor:['Ẇ hacia el fluido ≈ ΔḢ','La compresión adiabática consume trabajo de eje.'],
+    Expander:['Ẇ generado ≈ −ΔḢ','La expansión adiabática produce trabajo de eje al disminuir el flujo de entalpía.'],
+    ConversionReactor:['ṅₖ,ₛ − ṅₖ,ₑ = Σᵣ νₖ,ᵣ ξ̇ᵣ','La estequiometría y la conversión especificada determinan el cambio de caudal molar por especie.'],
+    EquilibriumReactor:['ṅₖ,ₛ − ṅₖ,ₑ = Σᵣ νₖ,ᵣ ξ̇ᵣ','La estequiometría y el equilibrio químico determinan el cambio de caudal molar por especie.']
+  };
+  const unavailable='Sin dato de DWSIM';
+  const value=(v,unit)=>Number.isFinite(v)?toNumber(v,unit,8):unavailable;
+  const mixture=stream=>stream?.phases?.find(phase=>phase.name==='Mixture');
+  function enthalpyFlow(ids,streams){
+    const terms=ids.map(id=>{
+      const state=streams?.[id], h=mixture(state)?.enthalpy_kJ_kg;
+      return Number.isFinite(h)&&Number.isFinite(state.mass_flow_kg_s)?state.mass_flow_kg_s*h:NaN;
+    });
+    return terms.length?terms.reduce((sum,term)=>sum+term,0):NaN;
+  }
+  function paragraph(parent,text){
+    const p=document.createElement('p');
+    p.textContent=text;
+    parent.append(p);
+  }
+  function appendClosure(parent,label,inlet,outlet,residual,unit,floor){
+    parent.append(row(label,value(residual,unit)));
+    if(![inlet,outlet,residual].every(Number.isFinite))return;
+    const tolerance=Math.max(floor,1e-6*Math.max(Math.abs(inlet),Math.abs(outlet)));
+    paragraph(parent,(Math.abs(residual)<=tolerance?'Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').');
+  }
+  function explain(parent,node,graph,result,balance){
+    const operation=operations[node.type];
+    if(operation)for(const line of operation)paragraph(parent,line);
+    const material=new Set(graph.nodes.filter(n=>n.type==='MaterialStream').map(n=>n.id));
+    const inlets=graph.edges.filter(e=>e.to===node.id&&material.has(e.from)).map(e=>e.from);
+    const outlets=graph.edges.filter(e=>e.from===node.id&&material.has(e.to)).map(e=>e.to);
+    const hIn=enthalpyFlow(inlets,result.streams),hOut=enthalpyFlow(outlets,result.streams);
+    const reactive=Boolean(balance?.reactive||['ConversionReactor','EquilibriumReactor'].includes(node.type));
+    const shaft=['Pump','Compressor','Expander'].includes(node.type);
+    paragraph(parent,'ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ. Se desprecia la variación de energía cinética y potencial.');
+    parent.append(row('ΔḢ · salida − entrada',value(hOut,'kW')+' − '+value(hIn,'kW')+' = '+value(hOut-hIn,'kW')));
+    parent.append(row(shaft?'Trabajo de eje hacia el fluido deducido por entalpía':reactive?'Calor del reactor informado por DWSIM':'Potencia térmica deducida por diferencia de entalpía',value(balance?.heat_to_fluid_kW,'kW')));
+    if(node.type==='Expander')parent.append(row('Potencia de eje generada por DWSIM',value(result.equipment?.[node.id]?.shaft_power_generated_kW,'kW')));
+    if(node.type==='Tank')parent.append(row('Tiempo de residencia de DWSIM',value(result.equipment?.[node.id]?.residence_time_s,'s')));
+    if(node.type==='Valve'){
+      parent.append(row('hₑ → hₛ',value(mixture(result.streams?.[inlets[0]])?.enthalpy_kJ_kg,'kJ/kg')+' → '+value(mixture(result.streams?.[outlets[0]])?.enthalpy_kJ_kg,'kJ/kg')));
+    }
+    if(node.type==='Splitter'){
+      const feed=result.streams?.[inlets[0]]?.mass_flow_kg_s;
+      for(const id of outlets){
+        const discharge=result.streams?.[id]?.mass_flow_kg_s;
+        const fraction=Number.isFinite(feed)&&feed>0&&Number.isFinite(discharge)?discharge/feed:NaN;
+        parent.append(row(graph.nodes.find(n=>n.id===id).name+' · fⱼ = ṁⱼ / ṁₑ',value(discharge,'kg/s')+' / '+value(feed,'kg/s')+' = '+value(fraction)));
+      }
+    }
+    if(reactive)paragraph(parent,'El calor informado incluye el efecto de la reacción; ΔḢ se muestra por separado.');
+    if(['Mixer','HeatExchanger','Valve'].includes(node.type)){
+      appendClosure(parent,'Residuo energético bajo el supuesto adiabático',hIn,hOut,hOut-hIn,'kW',1e-4);
+    }
+    paragraph(parent,'Balance global estacionario · Σṁₑ − Σṁₛ');
+    parent.append(row('Entrada − salida',value(balance?.mass_in,'kg/s')+' − '+value(balance?.mass_out,'kg/s')));
+    appendClosure(parent,'Residuo global',balance?.mass_in,balance?.mass_out,balance?.mass_residual,'kg/s',1e-8);
+    paragraph(parent,'Por componente · ṁₖ = ṁ · wₖ, donde wₖ es la fracción másica global.');
+    if(reactive)paragraph(parent,'La diferencia entrada − salida indica consumo (+) o generación neta (−).');
+    const compounds=graph.compounds??Object.keys(balance?.components??{});
+    if(!compounds.length)paragraph(parent,unavailable);
+    for(const compound of compounds){
+      const values=balance?.components?.[compound];
+      parent.append(row(compound+' · entrada − salida',value(values?.in_kg_s,'kg/s')+' − '+value(values?.out_kg_s,'kg/s')));
+      if(reactive)parent.append(row('Consumo o generación neta',value(values?.residual_kg_s,'kg/s')));
+      else appendClosure(parent,'Residuo del componente',values?.in_kg_s,values?.out_kg_s,values?.residual_kg_s,'kg/s',1e-8);
+    }
+    paragraph(parent,'Tolerancia didáctica de cierre: el mayor valor entre 10⁻⁶ veces el mayor flujo absoluto y un mínimo de 10⁻⁸ kg/s para materia o 10⁻⁴ kW para energía.');
+  }
   function emphasize(){
     const svg=$('diagram');if(!svg)return;
     svg.querySelectorAll('[data-node]').forEach(el=>{
@@ -58,23 +141,23 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-type').textContent=step.stream?'Corriente calculada':'Operación unitaria';
     const body=$('process-explorer-readings');body.replaceChildren();
     const details=$('process-explorer-connections');details.replaceChildren();
+    const interpretation=$('process-explorer-interpretation');
+    interpretation.hidden=step.stream;
+    interpretation.open=false;
+    const analysis=$('process-explorer-analysis');
+    analysis.replaceChildren();
     if(step.stream){
-      const state=result.streams?.[step.id],mixture=state?.phases?.find(p=>p.name==='Mixture')||state?.phases?.[0];
+      const state=result.streams?.[step.id];
       if(state){
-        body.append(row('Caudal másico',toNumber(state.mass_flow_kg_s,'kg/s')),
-          row('Temperatura',toNumber(state.temperature_K-273.15,'°C')),
-          row('Presión absoluta',toNumber(state.pressure_Pa/1000,'kPa')),
-          row('Caudal molar',toNumber(state.molar_flow_mol_s,'mol/s')),
-          row('Entalpía específica',toNumber(mixture?.enthalpy_kJ_kg,'kJ/kg')));
+        body.append(row('Caudal másico',value(state.mass_flow_kg_s,'kg/s')),
+          row('Temperatura',value(Number.isFinite(state.temperature_K)?state.temperature_K-273.15:NaN,'°C')),
+          row('Presión absoluta',value(Number.isFinite(state.pressure_Pa)?state.pressure_Pa/1000:NaN,'kPa')),
+          row('Caudal molar',value(state.molar_flow_mol_s,'mol/s')),
+          row('Entalpía específica',value(mixture(state)?.enthalpy_kJ_kg,'kJ/kg')));
       }
     }else{
       const bal=result.balances?.find(b=>b.id===step.id),equipment=result.equipment?.[step.id];
-      if(bal){
-        body.append(row('Entrada de materia',toNumber(bal.mass_in,'kg/s')),
-          row('Salida de materia',toNumber(bal.mass_out,'kg/s')),
-          row('Residuo másico',toNumber(bal.mass_residual,'kg/s')),
-          row(bal.energy_kind==='shaft'?'Trabajo de eje al fluido':'Potencia térmica neta',toNumber(bal.heat_to_fluid_kW,'kW')));
-      }
+      explain(analysis,node,graph,result,bal);
       if(equipment&&typeof equipment==='object'){
         const preferred=[['residence_time_s','Tiempo de residencia','s'],['shaft_power_generated_kW','Potencia generada','kW'],['outlet_temperature_C','Temperatura de descarga','°C'],['pressure_drop_kPa','Pérdida de presión','kPa']];
         for(const [key,label,unit] of preferred)if(Number.isFinite(equipment[key]))body.append(row(label,toNumber(equipment[key],unit)));
