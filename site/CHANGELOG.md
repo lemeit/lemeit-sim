@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.40.0 — 2026-11-20
+
+- Primera biblioteca persistente de proyectos por alumno y clase en Cloudflare D1: guardado explícito, reapertura desde cualquier navegador y actualizaciones automáticas con control de revisión.
+- Identidad individual por alias y clave personal; cada alumno accede exclusivamente a sus proyectos. Administración puede consultar proyectos por clase sin editarlos.
+- Renovación de códigos de clase conservando el identificador de clase, los alumnos y los proyectos asociados.
+- Migración 0004_student_projects.sql requerida antes de publicar la versión 0.40.0.
+
 ## 0.39.0 — 2026-11-19
 
 - Unificación del título del proyecto y ejercicio: el editor didáctico reutiliza el nombre del proyecto y no crea otro título.
