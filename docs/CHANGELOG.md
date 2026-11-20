@@ -10,6 +10,9 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 - Se retira información técnica innecesaria del diálogo de proyectos de estudiantes.
 - Al identificar un alumno correctamente, el diálogo se cierra y muestra confirmación en el simulador; los fallos aparecen junto al formulario y la espera tiene tiempo máximo.
+- Archivo ofrece «Guardar proyecto en nube» directamente; si hace falta, solicita la identidad primero.
+- Se rediseñan los controles de cierre de las ventanas con mayor tamaño, contraste y foco visible, respetando la identidad visual de ΣIM.
+- Se ajusta el selector del formulario de identidad para evitar bordes y recuadros recortados.
 
 ## 0.40.0 — 2026-11-20
 
