@@ -440,3 +440,41 @@ test('Calcular: sin botón fantasma y con luz de progreso y resultado verde',asy
  assert.match(await status.textContent(),/Cálculo correcto/);
  assert.equal(await button.locator('.calculation-lamp').count(),1,'La luz permanece tras calcular');
 });
+
+
+test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrientes y estados',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const calc=page.locator('#calculate-button');
+ assert.equal(await calc.locator('.calculate-play').count(),1);
+ assert.equal(await calc.locator('.calculation-lamp').count(),1);
+ assert.equal(await page.locator('#process-explorer-open').isDisabled(),true);
+ let requests=0;
+ page.on('request',req=>{if(new URL(req.url()).pathname==='/api/simulate')requests++;});
+ await calc.click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ assert.equal(requests,1);
+ const explore=page.locator('#process-explorer-open');
+ assert.equal(await explore.isDisabled(),false);
+ await explore.click();
+ const panel=page.locator('#process-explorer-panel');
+ assert.equal(await panel.isVisible(),true);
+ assert.match(await panel.locator('#process-explorer-counter').textContent(),/Etapa 1 de/);
+ assert.equal(await page.locator('#diagram .explorer-current').count(),1);
+ assert.ok((await panel.locator('.explorer-reading').count())>0);
+ const first=await panel.locator('#process-explorer-title').textContent();
+ await panel.locator('#process-explorer-next').click();
+ assert.notEqual(await panel.locator('#process-explorer-title').textContent(),first);
+ assert.equal(await page.locator('#diagram .explorer-current').count(),1);
+ assert.equal(requests,1,'Explorar nunca vuelve a enviar la simulación');
+ await panel.locator('#process-explorer-back').click();
+ assert.equal(await panel.locator('#process-explorer-title').textContent(),first);
+ await panel.locator('#process-explorer-close').click();
+ assert.equal(await panel.isVisible(),false);
+ assert.equal(await page.locator('#diagram .explorer-muted').count(),0);
+ await explore.click();
+ await page.locator('#close-project-button').click();
+ await page.locator('#confirm-close-project').click();
+ assert.equal(await panel.isVisible(),false,'El explorador se cierra con el proyecto');
+ assert.equal(await explore.isDisabled(),true);
+});
