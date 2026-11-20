@@ -680,8 +680,35 @@ function endpointCandidate(drag){
 }
 function bindEvents(){
   const svg=$('diagram');
+  const panButton=$('diagram-pan');
+  const setPanMode=enabled=>{
+    panButton.setAttribute('aria-pressed',String(enabled));
+    svg.classList.toggle('pan-mode',enabled);
+  };
+  panButton.onclick=()=>setPanMode(!svg.classList.contains('pan-mode'));
+  $('canvas-wrap').addEventListener('pointerdown',e=>{
+    if(!svg.contains(e.target)||!e.isPrimary||panning||dragging||marquee||resizing||bending||endpointDrag)return;
+    if(e.button!==1&&!(e.button===0&&(e.altKey||svg.classList.contains('pan-mode'))))return;
+    const matrix=svg.getScreenCTM();
+    if(!matrix)return;
+    e.preventDefault();
+    e.stopPropagation();
+    panning={pointerId:e.pointerId,x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:matrix.inverse()};
+    svg.setPointerCapture(e.pointerId);
+    svg.classList.add('panning');
+    svg.focus({preventScroll:true});
+  },true);
+  function endPan(){
+    if(!panning)return;
+    const {pointerId}=panning;
+    panning=null;
+    svg.classList.remove('panning');
+    if(svg.hasPointerCapture(pointerId))svg.releasePointerCapture(pointerId);
+  }
+  svg.addEventListener('lostpointercapture',e=>{
+    if(panning?.pointerId===e.pointerId)endPan();
+  });
   svg.addEventListener('pointerdown',e=>{
-    if(e.button===1||(e.button===0&&e.altKey)){e.preventDefault();panning={x:e.clientX,y:e.clientY,vx:viewX,vy:viewY,matrix:svg.getScreenCTM().inverse()};svg.setPointerCapture(e.pointerId);return;}
     if(busy||e.button!==0)return;
     e.preventDefault();
     // Una selección múltiple se arrastra desde cualquier parte de sus objetos,
@@ -709,7 +736,14 @@ function bindEvents(){
     if(resizing){const n=nodeById(resizing.node),p=svgPoint(e),t=TYPES[n.type];n.scale=Math.max(.5,Math.min(3,resizing.scale+((p.x-resizing.start.x)/t.w+(p.y-resizing.start.y)/t.h)/2));queueDiagramMotion();return;}
     if(bending){const p=svgPoint(e),dx=p.x-bending.start.x,dy=p.y-bending.start.y;if(!bending.axis&&Math.hypot(dx,dy)<3/zoom)return;bending.axis??=Math.abs(dy)>Math.abs(dx)?'y':'x';setStreamBend(nodeById(bending.node),bending.axis,bending.axis==='y'?p.y:p.x);queueDiagramMotion();return;}
     if(endpointDrag){endpointDrag.preview=svgPoint(e);if(Math.hypot(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y)>3/zoom)endpointDrag.moved=true;endpointDrag.snap=endpointCandidate(endpointDrag);if(endpointDrag.snap)endpointDrag.preview=endpointDrag.snap.q;else{const delta=SimDiagramInteractions.constrainDelta(endpointDrag.preview.x-endpointDrag.start.x,endpointDrag.preview.y-endpointDrag.start.y,e.shiftKey);endpointDrag.preview={x:snapCoordinate(endpointDrag.start.x+delta.dx),y:snapCoordinate(endpointDrag.start.y+delta.dy)};}queueDiagramMotion();return;}
-    if(panning){const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;viewX=panning.vx-m.a*dx-m.c*dy;viewY=panning.vy-m.b*dx-m.d*dy;queueDiagramMotion();return;}
+    if(panning){
+      if(panning.pointerId!==e.pointerId)return;
+      const m=panning.matrix,dx=e.clientX-panning.x,dy=e.clientY-panning.y;
+      viewX=panning.vx-m.a*dx-m.c*dy;
+      viewY=panning.vy-m.b*dx-m.d*dy;
+      svg.setAttribute('viewBox',`${viewX} ${viewY} ${1000/zoom} ${520/zoom}`);
+      return;
+    }
     if(!dragging)return;const p=svgPoint(e);moveNode(nodeById(dragging.node),dragging,p,e.shiftKey);dragging.moved=true;
     dragging.outside=SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     $('canvas-wrap').classList.toggle('object-drop-delete',dragging.outside);
@@ -717,12 +751,13 @@ function bindEvents(){
     queueDiagramMotion();
   });
   const endDrag=e=>{
-    const hadGesture=endpointDrag||dragging||resizing||bending||panning;
+    if(panning){if(panning.pointerId===e.pointerId)endPan();return;}
+    const hadGesture=endpointDrag||dragging||resizing||bending;
     if(marquee){if(e.type==='pointercancel')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
     if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type!=='pointercancel'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
     const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     const visualChange=dragging?.moved||resizing||bending;
-    dragging=null;resizing=null;bending=null;panning=null;
+    dragging=null;resizing=null;bending=null;
     $('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;
     if(deleteDrag){removeSelected();notice('Objeto eliminado del diagrama. También podés seleccionar y pulsar Supr.');return;}
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
@@ -739,6 +774,7 @@ function bindEvents(){
   });
   document.addEventListener('keydown',e=>{
     if(SimDiagramInteractions.isEditable(e.target)||e.target.closest?.('dialog'))return;
+    if(e.key==='Escape'&&(panning||svg.classList.contains('pan-mode'))){endPan();setPanMode(false);return;}
     if(e.key==='Escape'){selection=null;marquee=null;pending=null;endpointDrag=null;dragging=null;resizing=null;bending=null;$('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;renderDiagram();renderInspector();}
     if(SimDiagramInteractions.isDeleteShortcut(e)&&hasProject&&selection&&!busy){e.preventDefault();removeSelected();}
   });
