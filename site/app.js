@@ -79,13 +79,16 @@ function notice(message,error=false){$('notice').hidden=!message;$('notice').tex
 function persist(){try{localStorage.setItem('lemeit-process-v1',JSON.stringify(graph));}catch{/* Guardar archivo sigue disponible. */}}
 function updateResultValidity(){
   const element=$('result-validity');if(!element||!element.dataset)return;
-  const state=busy?'calculating':!hasProject?'none':result&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':'none';
-  const labels={none:'Sin resultados',valid:'Resultados vigentes',stale:'Recalcular',calculating:'Calculando…'};
-  const descriptions={none:'No hay un cálculo vigente para este proyecto.',valid:'Los resultados corresponden a las condiciones actuales.',stale:'Las condiciones físicas cambiaron desde el último cálculo correcto.',calculating:'El motor seleccionado está resolviendo el proceso.'};
+  const state=busy?'calculating':!hasProject?'none':result&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':lastCalculation?.state==='failed'?'failed':'none';
+  const labels={none:'Sin resultados',valid:'Cálculo correcto',stale:'Recalcular',calculating:'Calculando…',failed:'Cálculo fallido'};
+  const descriptions={none:'Todavía no se calculó este proyecto.',valid:'DWSIM terminó correctamente. Los resultados corresponden a las condiciones actuales.',stale:'Las condiciones físicas cambiaron desde el último cálculo correcto.',calculating:'El motor seleccionado está resolviendo el proceso.',failed:lastCalculation?.message||'No se pudo resolver el proceso.'};
   element.dataset.state=state;element.textContent=labels[state];element.title=descriptions[state];
+  const button=$('calculate-button');if(button){button.dataset.state=state;button.title='Resolver con DWSIM · '+descriptions[state];
+    const label=button.querySelector('.calculate-label');if(label)label.textContent=busy?'Calculando…':'Calcular';
+    button.setAttribute('aria-busy',String(busy));}
 }
 function changed({physical=true}={}){
-  if(physical){revision++;if(resultValidity==='valid')resultValidity='stale';result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  if(physical){revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
   updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
@@ -93,7 +96,7 @@ function updateControls(){
   updateResultValidity();
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
-  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('report-open').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   if($('diagram-add'))$('diagram-add').disabled=!hasProject||busy;
   $('diagram-note-insert').disabled=!hasProject||busy;
@@ -547,7 +550,7 @@ async function calculate(){
   debugEvent('INFO','Validación previa',{engine:selectedEngine,objects:graph.nodes.length,connections:graph.edges.length,model:graph.model});
   const selectedIsReady=await checkEngine(); // Selección previa al POST; sin reenvío ambiguo.
   if(!selectedIsReady){debugEvent('ERROR','Motor no disponible · cálculo no enviado',{engine:selectedEngine,stage:'preflight'});return notice(engineMode==='auto'?'No hay un motor disponible y compatible con el proceso.':'El motor fijado no está disponible o no es compatible; elegí Automático.',true);}
-  notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculate-button').textContent='Calculando…';$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
+  notice('');busy=true;updateResultValidity();document.body.classList.add('calculating');$('calculate-button').disabled=true;$('calculation-state').textContent='DWSIM está resolviendo el proceso…';
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;
@@ -577,7 +580,7 @@ async function calculate(){
     debugEvent('OK','Resultados verificados',{engine:selectedEngine,streams:Object.keys(data.streams||{}).length,equipment:Object.keys(data.equipment||{}).length,ms:Math.round(performance.now()-started)});
     lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
   }catch(error){transportFailed=simulationRequested&&(calculationHttp===503||/fetch|NetworkError|Failed to fetch|timeout/i.test(error.message));debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:simulationRequested?'POST enviado o conexión interrumpida':'validación local antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection(simulationRequested?'POST /api/simulate':'Preflight /api/status',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
-  finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();$('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';publishWorkspace(false);if(transportFailed&&engineMode==='auto')void checkEngine({silent:true,exclude:[calculationEngine]});}
+  finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();publishWorkspace(false);if(transportFailed&&engineMode==='auto')void checkEngine({silent:true,exclude:[calculationEngine]});}
 }
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
@@ -871,7 +874,7 @@ function toolIcon(name){
 function bindDiagramWindow(){
   const focus=$('diagram-focus');
   for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Separar diagrama'],['fit-button','fit','Ajustar diagrama'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
-  $('calculate-button').innerHTML=toolIcon('run')+'<span>Calcular</span>';
+  updateResultValidity();
   const setFocus=enabled=>{document.body.classList.toggle('diagram-focus',enabled);focus.innerHTML=toolIcon(enabled?'panels':'focus');focus.setAttribute('aria-label',enabled?'Volver a paneles':'Solo diagrama');focus.title=enabled?'Volver a paneles':'Solo diagrama';focus.setAttribute('aria-pressed',String(enabled));};
   $('diagram-library').onclick=()=>{const visible=document.body.classList.toggle('diagram-library');$('diagram-library').setAttribute('aria-pressed',String(visible));};
   $('view-focus').onclick=()=>focus.click();$('view-library').onclick=()=>{setFocus(true);$('diagram-library').click();};$('view-popout').onclick=()=>$('diagram-popout').click();$('view-fullscreen').onclick=()=>$('diagram-fullscreen').click();
