@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.42.2 — 2026-11-20
+
+- Biblioteca nube: «Cambiar alumno…» mantiene activa la clase, permite ingresar con otro alias o crear una identidad nueva y conserva los proyectos separados.
+- Para evitar mezclar alumnos se cierra el proyecto abierto, se desvincula la identidad de la sesión y se limpia el último borrador del navegador.
+- API segura para liberar la identidad individual sin borrar alumnos ni proyectos D1; pruebas de cambio y recuperación de trabajos.
+
 ## 0.42.1 — 2026-11-20
 
 - Unifica diagrama y tablas seleccionadas en **una sola hoja PDF** A4/A3/Oficio; orientación automática por proporción del diagrama y reservas para rótulo inferior derecho.
