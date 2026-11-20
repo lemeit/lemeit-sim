@@ -186,3 +186,33 @@ test('Editor: SVG completo fuera del viewport, selección, PNG transparente y PD
   });
   assert.match(limits,/Reducí la escala/);
 });
+
+
+test('Rótulo editable en SVG y balances incorporados al PDF',async t=>{
+  const page=await browserPage(t);
+  await openProject(page,example);
+  await page.locator('#report-open').click();
+  await page.locator('#report-student').fill('Alumno Ejemplo');
+  await page.locator('#report-studentId').fill('EST-007');
+  await page.locator('#report-subject').fill('Fisica 5');
+  await page.locator('#report-institution').fill('Escuela de prueba');
+  await page.locator('#report-form button[type=submit]').click();
+  assert.equal(await page.locator('#report-dialog').evaluate(el=>el.open),false);
+  const drawing=await exportDiagram(page,'svg');
+  const source=drawing.bytes.toString();
+  for(const value of ['Alumno Ejemplo','EST-007','Fisica 5','Escuela de prueba','ENUNCIADO'])assert.ok(source.includes(value),value);
+  await page.locator('#calculate-button').click();
+  await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+  const withBalances=await exportDiagram(page,'pdf',async dialog=>{
+    await dialog.locator('[name=balances]').check();
+  });
+  const pdfSource=withBalances.bytes.toString('latin1');
+  assert.match(pdfSource,/^%PDF-/);
+  const pageObjects=[...pdfSource.matchAll(/\/Type \/Page\b/g)];
+  assert.ok(pageObjects.length>=2,'El PDF contiene el diagrama y al menos una hoja de balances');
+  const withoutBalances=await exportDiagram(page,'pdf',async dialog=>{
+    await dialog.locator('[name=balances]').uncheck();
+  });
+  const regularPages=[...withoutBalances.bytes.toString('latin1').matchAll(/\/Type \/Page\b/g)];
+  assert.equal(regularPages.length,1,'El rótulo no agrega páginas extra por sí solo');
+});
