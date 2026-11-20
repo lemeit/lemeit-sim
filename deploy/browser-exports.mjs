@@ -425,3 +425,18 @@ test('Anotaciones: insertar texto en el diagrama, editar con doble clic, arrastr
  await page.keyboard.press('Delete');
  assert.equal(await page.locator('#diagram [data-exercise-note]').count(),0);
 });
+
+
+test('Calcular: sin botón fantasma y con luz de progreso y resultado verde',async t=>{
+ const page=await browserPage(t);
+ assert.equal(await page.locator('#report-open').count(),0,'No debe existir el antiguo botón vacío');
+ assert.equal(await page.locator('#calculate-button .calculation-lamp').count(),1);
+ await openProject(page,example);
+ const button=page.locator('#calculate-button'),status=page.locator('#result-validity');
+ await button.click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid',{timeout:12000});
+ assert.equal(await button.getAttribute('data-state'),'valid');
+ assert.equal(await status.getAttribute('data-state'),'valid');
+ assert.match(await status.textContent(),/Cálculo correcto/);
+ assert.equal(await button.locator('.calculation-lamp').count(),1,'La luz permanece tras calcular');
+});
