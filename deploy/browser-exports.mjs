@@ -473,6 +473,7 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  assert.equal(await panel.isVisible(),false);
  assert.equal(await page.locator('#diagram .explorer-muted').count(),0);
  await explore.click();
+ await page.getByText('Archivo',{exact:true}).click();
  await page.locator('#close-project-button').click();
  await page.locator('#confirm-close-project').click();
  assert.equal(await panel.isVisible(),false,'El explorador se cierra con el proyecto');
