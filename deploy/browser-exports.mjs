@@ -600,7 +600,7 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
  assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
-   ['Archivo','Proyecto','Diagrama','Simulación','Vista']);
+   ['Archivo','Proyecto','Diagrama','Simulación','Vista','Portal']);
  for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
    assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
  }
@@ -654,4 +654,33 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await page.locator('#view-menu summary').click();
  await page.locator('#view-reset-layout').click();
  assert.equal(await results.getAttribute('data-sim-cad-mode'),'right');
+});
+
+test('La barra abre los menús completos y permite insertar equipos y corrientes',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
+ const triggers=toolbar.locator('[data-toolbar-menu]');
+ assert.equal(await triggers.count(),7);
+ for(const trigger of await triggers.all()){
+   const menu=page.locator('#'+await trigger.getAttribute('aria-controls'));
+   await trigger.click();
+   assert.equal(await trigger.getAttribute('aria-expanded'),'true');
+   assert.equal(await menu.locator('.menu-panel').isVisible(),true);
+   await page.keyboard.press('Escape');
+   assert.equal(await trigger.getAttribute('aria-expanded'),'false');
+ }
+ const nodes=page.locator('#diagram .node');
+ const count=await nodes.count();
+ await toolbar.locator('#toolbar-equipment summary').click();
+ const equipment=toolbar.locator('#toolbar-equipment .menu-panel');
+ await equipment.getByRole('button',{name:'Separador flash',exact:true}).click();
+ assert.equal(await nodes.count(),count+1);
+ await toolbar.locator('#toolbar-streams summary').click();
+ const streams=toolbar.locator('#toolbar-streams .menu-panel');
+ assert.equal(await streams.getByRole('button').count(),2);
+ await streams.getByRole('button',{name:'Corriente de materia',exact:true}).click();
+ assert.equal(await nodes.count(),count+2);
+ await toolbar.getByRole('button',{name:'Ejemplos',exact:true}).click();
+ assert.equal(await page.locator('#examples-dialog').isVisible(),true);
 });

@@ -98,7 +98,8 @@ function updateControls(){
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
   $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
-  for(const id of ['diagram-add','menu-diagram-add'])$(id).disabled=!hasProject||busy;
+  $('diagram-add').disabled=!hasProject||busy;
+  document.querySelectorAll('[data-insert-type]').forEach(button=>button.disabled=!hasProject||busy);
   $('report-label-tool').disabled=!hasProject;
   $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
@@ -932,8 +933,31 @@ function clearLoadedProject(clearLocalDraft=false){
 }
 function bindProjectEvents(){
   const menus=[...document.querySelectorAll('.app-menu')];
-  let hoveredMenu=null;
-  function openMenu(menu,hover=false){hoveredMenu=hover?menu:null;const open=menu.open;closeMenus();if(!open){menu.open=true;const panel=menu.querySelector('.menu-panel'),r=menu.querySelector('summary').getBoundingClientRect();panel.style.position='fixed';panel.style.top=(r.bottom+3)+'px';panel.style.left=Math.max(6,Math.min(r.left,innerWidth-panel.offsetWidth-6))+'px';panel.style.right='auto';panel.style.maxHeight=Math.max(80,innerHeight-r.bottom-12)+'px';}}
+  let hoveredMenu=null,menuAnchor=null;
+  function openMenu(menu,hover=false,anchor=menu.querySelector('summary')){
+    hoveredMenu=hover?menu:null;
+    const close=menu.open&&menuAnchor===anchor;
+    closeMenus();
+    if(close)return;
+    menuAnchor=anchor;
+    menu.open=true;
+    const panel=menu.querySelector('.menu-panel'),r=anchor.getBoundingClientRect();
+    panel.style.position='fixed';
+    panel.style.top=(r.bottom+3)+'px';
+    panel.style.left=Math.max(6,Math.min(r.left,innerWidth-panel.offsetWidth-6))+'px';
+    panel.style.right='auto';
+    panel.style.maxHeight=Math.max(80,innerHeight-r.bottom-12)+'px';
+  }
+  for(const trigger of document.querySelectorAll('[data-toolbar-menu]')){
+    const menu=$(trigger.dataset.toolbarMenu);
+    trigger.addEventListener('click',()=>{
+      openMenu(menu,false,trigger);
+      if(menu.open)menu.querySelector('button:not([disabled]):not([hidden]),select:not([disabled]),a[href]')?.focus();
+    });
+    new MutationObserver(()=>{
+      trigger.setAttribute('aria-expanded',String(menu.open&&menuAnchor===trigger));
+    }).observe(menu,{attributeFilter:['open']});
+  }
   for(const [index,menu] of menus.entries()){
     const summary=menu.querySelector('summary');
     summary.addEventListener('click',e=>{e.preventDefault();if(e.detail>0&&hoveredMenu===menu&&menu.open){hoveredMenu=null;return;}openMenu(menu);});
@@ -942,8 +966,8 @@ function bindProjectEvents(){
     menu.querySelector('.menu-panel').addEventListener('click',e=>{if(e.target.closest('a'))closeMenus();});
     menu.querySelector('.menu-panel').addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key)||['SELECT','INPUT'].includes(e.target.tagName))return;e.preventDefault();const items=[...menu.querySelectorAll('button:not([disabled]):not([hidden]),a[href]')],current=items.indexOf(document.activeElement);items[(current+(e.key==='ArrowDown'?1:-1)+items.length)%items.length]?.focus();});
   }
-  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.app-menu'))closeMenus();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const active=menus.find(menu=>menu.open);closeMenus();active?.querySelector('summary').focus();}});
+  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.app-menu,[data-toolbar-menu]'))closeMenus();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const active=menus.find(menu=>menu.open);closeMenus();if(active)menuAnchor?.focus();}});
   window.addEventListener('resize',closeMenus);
   $('open-project-toolbar').onclick=()=>$('open-button').click();$('save-project-toolbar').onclick=()=>$('save-button').click();
   $('new-project-button').onclick=newProject;$('new-project-toolbar').onclick=newProject;
@@ -979,7 +1003,14 @@ function publishWorkspace(physical=true){
   workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity});
 }
 function toolIcon(name){
-  const paths={grid:'M4 4h16v16H4z M4 9h16 M4 15h16 M9 4v16 M15 4v16',
+  const paths={chevron:'M7 10l5 5 5-5',
+    equipment:'M7 3h10v3l2 3v6l-2 3v3H7v-3l-2-3V9l2-3z M7 6h10 M7 18h10 M2 12h3 M19 12h3',
+    streams:'M3 8h17 M16 4l4 4-4 4 M3 16h17 M16 12l4 4-4 4',
+    settings:'M4 6h16 M4 12h16 M4 18h16 M8 4v4 M15 10v4 M10 16v4',
+    help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4 M12 17h.01',
+    examples:'M3 5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z M12 6v13',
+    theme:'M20 15a8 8 0 1 1-11-11 8 8 0 0 0 11 11z',
+    grid:'M4 4h16v16H4z M4 9h16 M4 15h16 M9 4v16 M15 4v16',
     text:'M4 7V4h16v3 M12 4v16 M8 20h8',
     label:'M3 4h18v16H3z M3 14h18 M11 14v6 M14 17h4',
     edit:'M4 4h12v5 M4 4v16h8 M8 9h4 M8 13h2 M12 18l6-6 3 3-6 6h-3z',
@@ -992,6 +1023,7 @@ function toolIcon(name){
 function bindDiagramWindow(){
   const focus=$('diagram-focus');
   for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Abrir diagrama en otra ventana'],['fit-button','fit','Encuadrar todo el proceso'],['diagram-grid','grid','Mostrar cuadrícula'],['diagram-note-insert','text','Insertar texto en el diagrama'],['report-label-tool','label','Datos del rótulo'],['exercise-open','edit','Editar ficha y actividad'],['zoom-in','zoomIn','Acercar'],['zoom-out','zoomOut','Alejar'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
+  for(const control of document.querySelectorAll('[data-tool-icon]'))control.innerHTML=toolIcon(control.dataset.toolIcon);
   const exportButton=document.querySelector('.command-bar .diagram-export-tool');
   exportButton.innerHTML=toolIcon('export');
   exportButton.setAttribute('aria-label','Exportar diagrama');
@@ -1032,10 +1064,21 @@ function bindDiagramWindow(){
     const previous={viewX,viewY,zoom,selection,result};applyingWorkspace=true;
     try{loadGraph(e.data.graph);viewX=previous.viewX;viewY=previous.viewY;zoom=previous.zoom;selection=previous.selection&&nodeById(previous.selection.node)?previous.selection:null;resultValidity=e.data.resultValidity==='stale'?'stale':e.data.resultValidity==='valid'&&e.data.result?'valid':'none';if(!e.data.physical){result=e.data.result??null;lastCalculation=e.data.lastCalculation??lastCalculation;if(result)renderResults();else{$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';}}updateResultValidity();renderDiagram();renderInspector();}catch{notice('No se pudo sincronizar el diagrama recibido.',true);}finally{applyingWorkspace=false;}
   };
-  for(const id of ['diagram-add','menu-diagram-add']){
-    const select=$(id);
-    select.insertAdjacentHTML('beforeend',Object.entries(TYPES).map(([type,t])=>`<option value="${type}">${esc(t.label)}</option>`).join(''));
-    select.onchange=()=>{if(select.value)addNode(select.value,{x:viewX+300/zoom,y:viewY+180/zoom});select.value='';closeMenus();};
+  const insertAtView=type=>{
+    if(type)addNode(type,{x:viewX+300/zoom,y:viewY+180/zoom});
+    closeMenus();
+  };
+  const select=$('diagram-add');
+  select.insertAdjacentHTML('beforeend',Object.entries(TYPES).map(([type,t])=>`<option value="${type}">${esc(t.label)}</option>`).join(''));
+  select.onchange=()=>{insertAtView(select.value);select.value='';};
+  for(const panel of document.querySelectorAll('[data-insert-group]')){
+    const streams=panel.dataset.insertGroup==='streams';
+    panel.innerHTML=Object.entries(TYPES).filter(([type])=>type.endsWith('Stream')===streams)
+      .map(([type,t])=>`<button type="button" data-insert-type="${type}">${DwsimSymbols.thumbnail(type,t)}<span>${esc(t.label)}</span></button>`).join('');
+    panel.addEventListener('click',e=>{
+      const button=e.target.closest('[data-insert-type]');
+      if(button&&!button.disabled){insertAtView(button.dataset.insertType);$('diagram').focus({preventScroll:true});}
+    });
   }
   const separateURL=new URL(location.href);separateURL.search='';separateURL.searchParams.set('diagram','1');separateURL.searchParams.set('workspace',workspaceId);$('diagram-popout').href=separateURL.href;
   $('diagram-popout').onclick=e=>{e.preventDefault();const opened=window.open(separateURL.href,'lemeit-diagram-'+workspaceId,'popup,width=1280,height=850,resizable=yes,scrollbars=yes');if(!opened)notice('Permití la ventana emergente para separar el diagrama.');};
