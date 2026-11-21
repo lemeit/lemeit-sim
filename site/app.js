@@ -24,6 +24,23 @@ const TYPES = {
   AbsorptionColumn: {label:'Columna de absorción',short:'Absorción',prefix:'ABS-',w:67.5,h:225,diagramOnly:true},
   ReliefValve: {label:'Válvula de seguridad',short:'PSV',prefix:'PSV-',w:80,h:80,diagramOnly:true},
 };
+const STREAM_GROUPS=[['Corrientes',['MaterialStream','EnergyStream']]];
+const EQUIPMENT_GROUPS=[
+  ['Mezcla y división',['Mixer','Splitter']],
+  ['Separación y almacenamiento',['Separator','RigorousColumn','AbsorptionColumn','Tank']],
+  ['Presión y transporte',['Pump','Compressor','Expander','Valve','ReliefValve']],
+  ['Intercambio térmico',['HeatExchanger','Heater','Cooler']],
+  ['Reacción',['ConversionReactor','EquilibriumReactor','CSTR','PFR','Polymerization']]
+];
+function objectButtons(groups,inToolbar=false){
+  const heading=inToolbar?'menu-section-label':'palette-group';
+  const typeAttribute=inToolbar?'data-insert-type':'data-type';
+  return groups.map(([label,types])=>`<p class="${heading}">${label}</p>`+types.map(type=>{
+    const object=TYPES[type];
+    const name=esc(object.label);
+    return `<button type="button" class="palette-item" ${typeAttribute}="${type}" title="Agregar ${name}">${DwsimSymbols.thumbnail(type,object)}<span>${name}</span></button>`;
+  }).join('')).join('');
+}
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
 function diagramHasRecirculation(g){
   const links=new Map(g.nodes.map(n=>[n.id,[]]));
@@ -237,7 +254,7 @@ async function selectCalculationEngine(mode){
 }
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
 function renderPalette(){
-  $('palette').innerHTML=Object.entries(TYPES).map(([type,t],i)=>`${i===0?'<p class="palette-group">CORRIENTES</p>':i===2?'<p class="palette-group">OPERACIONES</p>':''}<button class="palette-item" data-type="${type}" title="Agregar ${esc(t.label.toLowerCase())}">${DwsimSymbols.thumbnail(type,t)}<span>${t.label}</span></button>`).join('');
+  $('palette').innerHTML=objectButtons([...STREAM_GROUPS,...EQUIPMENT_GROUPS]);
   if($('palette').dataset.bound)return;
   $('palette').dataset.bound='true';
   $('palette').addEventListener('click',e=>{if(performance.now()<suppressPaletteUntil||dragging||endpointDrag||resizing||bending)return;const b=e.target.closest('button[data-type]');if(b){suppressPaletteUntil=performance.now()+300;addNode(b.dataset.type);}});
@@ -944,7 +961,9 @@ function bindProjectEvents(){
     const panel=menu.querySelector('.menu-panel'),r=anchor.getBoundingClientRect();
     panel.style.position='fixed';
     panel.style.top=(r.bottom+3)+'px';
-    panel.style.left=Math.max(6,Math.min(r.left,innerWidth-panel.offsetWidth-6))+'px';
+    const width=panel.getBoundingClientRect().width;
+    const left=r.left+width<=innerWidth-6?r.left:r.right-width;
+    panel.style.left=Math.max(6,Math.min(left,innerWidth-width-6))+'px';
     panel.style.right='auto';
     panel.style.maxHeight=Math.max(80,innerHeight-r.bottom-12)+'px';
   }
@@ -1005,7 +1024,6 @@ function publishWorkspace(physical=true){
 function toolIcon(name){
   const paths={chevron:'M7 10l5 5 5-5',
     equipment:'M8 8h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 8z M10 8V4h5 M8 18v3 M16 18v3 M2 21h20',
-    streams:'M3 7h17 M16 3l4 4-4 4 M3 17h17 M16 13l4 4-4 4',
     settings:'M4 6h16 M4 12h16 M4 18h16 M8 4v4 M15 10v4 M10 16v4',
     help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4 M12 17h.01',
     examples:'M3 5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z M12 6v13',
@@ -1024,6 +1042,7 @@ function bindDiagramWindow(){
   const focus=$('diagram-focus');
   for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Abrir diagrama en otra ventana'],['fit-button','fit','Encuadrar todo el proceso'],['diagram-grid','grid','Mostrar cuadrícula'],['diagram-note-insert','text','Insertar texto en el diagrama'],['report-label-tool','label','Datos del rótulo'],['exercise-open','edit','Editar ficha y actividad'],['zoom-in','zoomIn','Acercar'],['zoom-out','zoomOut','Alejar'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
   for(const control of document.querySelectorAll('[data-tool-icon]'))control.innerHTML=toolIcon(control.dataset.toolIcon);
+  $('toolbar-streams').querySelector('summary').innerHTML=DwsimSymbols.thumbnail('MaterialStream',TYPES.MaterialStream);
   const exportButton=document.querySelector('.command-bar .diagram-export-tool');
   exportButton.innerHTML=toolIcon('export');
   exportButton.setAttribute('aria-label','Exportar diagrama');
@@ -1072,9 +1091,7 @@ function bindDiagramWindow(){
   select.insertAdjacentHTML('beforeend',Object.entries(TYPES).map(([type,t])=>`<option value="${type}">${esc(t.label)}</option>`).join(''));
   select.onchange=()=>{insertAtView(select.value);select.value='';};
   for(const panel of document.querySelectorAll('[data-insert-group]')){
-    const streams=panel.dataset.insertGroup==='streams';
-    panel.innerHTML=Object.entries(TYPES).filter(([type])=>type.endsWith('Stream')===streams)
-      .map(([type,t])=>`<button type="button" data-insert-type="${type}">${DwsimSymbols.thumbnail(type,t)}<span>${esc(t.label)}</span></button>`).join('');
+    panel.innerHTML=objectButtons(panel.dataset.insertGroup==='streams'?STREAM_GROUPS:EQUIPMENT_GROUPS,true);
     panel.addEventListener('click',e=>{
       const button=e.target.closest('[data-insert-type]');
       if(button&&!button.disabled){insertAtView(button.dataset.insertType);$('diagram').focus({preventScroll:true});}

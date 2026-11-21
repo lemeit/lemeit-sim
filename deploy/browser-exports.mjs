@@ -671,6 +671,20 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
    }
  }
  await page.setViewportSize({width:1280,height:720});
+ for(const width of [420,1280]){
+   await page.setViewportSize({width,height:720});
+   for(const picker of await toolbar.locator('.toolbar-object-picker').all()){
+     await picker.locator('summary').click();
+     assert.ok(await picker.evaluate(element=>{
+       const button=element.querySelector('summary').getBoundingClientRect();
+       const menu=element.querySelector('.menu-panel').getBoundingClientRect();
+       const anchor=button.left+menu.width<=innerWidth-6?button.left:button.right-menu.width;
+       const left=Math.max(6,Math.min(anchor,innerWidth-menu.width-6));
+       return Math.abs(menu.left-left)<1&&Math.abs(menu.top-button.bottom-3)<1;
+     }));
+     await page.keyboard.press('Escape');
+   }
+ }
  const triggers=toolbar.locator('[data-toolbar-menu]');
  assert.equal(await triggers.count(),7);
  for(const trigger of await triggers.all()){
@@ -685,11 +699,26 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
  const count=await nodes.count();
  await toolbar.locator('#toolbar-equipment summary').click();
  const equipment=toolbar.locator('#toolbar-equipment .menu-panel');
+ assert.ok(await equipment.locator('[data-insert-type]').first().evaluate(row=>{
+   const icon=row.querySelector('svg').getBoundingClientRect();
+   const label=row.querySelector('span').getBoundingClientRect();
+   return icon.right<label.left&&label.top>=icon.top&&label.bottom<=icon.bottom;
+ }));
+ assert.deepEqual(await equipment.locator('.menu-section-label').allTextContents(),
+   ['Mezcla y división','Separación y almacenamiento','Presión y transporte','Intercambio térmico','Reacción']);
+ assert.deepEqual(await equipment.locator('[data-insert-type]').evaluateAll(items=>items.map(item=>item.dataset.insertType)),
+   await page.locator('#palette [data-type]:not([data-type$="Stream"])').evaluateAll(items=>items.map(item=>item.dataset.type)));
  await equipment.getByRole('button',{name:'Separador flash',exact:true}).click();
  assert.equal(await nodes.count(),count+1);
  await toolbar.locator('#toolbar-streams summary').click();
  const streams=toolbar.locator('#toolbar-streams .menu-panel');
  assert.equal(await streams.getByRole('button').count(),2);
+ for(const type of ['MaterialStream','EnergyStream']){
+   const palette=page.locator(`#palette [data-type="${type}"] svg`);
+   const picker=streams.locator(`[data-insert-type="${type}"] svg`);
+   const icon=svg=>svg.evaluate(el=>({markup:el.innerHTML,stroke:getComputedStyle(el).stroke,fill:getComputedStyle(el).fill}));
+   assert.deepEqual(await icon(picker),await icon(palette));
+ }
  await streams.getByRole('button',{name:'Corriente de materia',exact:true}).click();
  assert.equal(await nodes.count(),count+2);
  await toolbar.getByRole('button',{name:'Ejemplos',exact:true}).click();
