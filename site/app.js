@@ -1004,8 +1004,8 @@ function publishWorkspace(physical=true){
 }
 function toolIcon(name){
   const paths={chevron:'M7 10l5 5 5-5',
-    equipment:'M7 3h10v3l2 3v6l-2 3v3H7v-3l-2-3V9l2-3z M7 6h10 M7 18h10 M2 12h3 M19 12h3',
-    streams:'M3 8h17 M16 4l4 4-4 4 M3 16h17 M16 12l4 4-4 4',
+    equipment:'M8 8h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 8z M10 8V4h5 M8 18v3 M16 18v3 M2 21h20',
+    streams:'M3 7h17 M16 3l4 4-4 4 M3 17h17 M16 13l4 4-4 4',
     settings:'M4 6h16 M4 12h16 M4 18h16 M8 4v4 M15 10v4 M10 16v4',
     help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4 M12 17h.01',
     examples:'M3 5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z M12 6v13',
