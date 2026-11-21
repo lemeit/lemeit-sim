@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.47.2 — 2026-11-20
+
+- Acceso desde la barra a todos los menús principales y botones de inserción para cada equipo y corriente.
+
 ## 0.47.1 — 2026-11-20
 
 - Resultados con vistas separadas de balances y corrientes, lecturas en formato compacto y controles de ventana alineados en el encabezado.
