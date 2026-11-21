@@ -660,6 +660,17 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
  const page=await browserPage(t);
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
+ for(const width of [1280,950,420]){
+   await page.setViewportSize({width,height:720});
+   for(const trigger of await toolbar.locator('.toolbar-object-picker summary').all()){
+     assert.ok(await trigger.evaluate(summary=>{
+       const box=summary.getBoundingClientRect(), icon=summary.querySelector('svg').getBoundingClientRect();
+       return icon.width>=20&&icon.height>=20&&icon.top>=box.top+3&&icon.bottom<=box.bottom-3
+         &&icon.left>=box.left+3&&icon.right<=box.right-8;
+     }));
+   }
+ }
+ await page.setViewportSize({width:1280,height:720});
  const triggers=toolbar.locator('[data-toolbar-menu]');
  assert.equal(await triggers.count(),7);
  for(const trigger of await triggers.all()){
