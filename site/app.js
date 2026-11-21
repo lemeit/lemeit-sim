@@ -533,15 +533,60 @@ function removeSelected(){
   selection=null;pending=null;changed();renderInspector();
 }
 function svgPoint(e){const p=$('diagram').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const world=p.matrixTransform($('diagram').getScreenCTM().inverse());return {x:world.x,y:world.y};}
+let resultsView='balances';
+function selectResultsView(view){
+  resultsView=view;
+  for(const button of document.querySelectorAll('[data-results-view]')){
+    button.setAttribute('aria-pressed',String(button.dataset.resultsView===view));
+  }
+  for(const section of $('results').querySelectorAll('[data-results-content]')){
+    section.hidden=section.dataset.resultsContent!==view;
+  }
+}
 function renderResults(){
   if(!result)return;
-  const keys=['mass_flow','molar_flow','temperature_C','pressure_kPa','enthalpy_kJ_kg','density_kg_m3'];
-  const labels=['Caudal másico','Caudal molar','Temperatura','Presión absoluta','Entalpía','Densidad'];
-  const numeric=(key,value,digits=resultDigits)=>fmt(SimproxStreams.fromCanonical(key,value,SimproxStreams.defaultUnit(key)),digits);
-  const rows=Object.entries(result.streams).map(([id,r])=>{const values=[r.mass_flow_kg_s,r.molar_flow_mol_s,r.temperature_K-273.15,r.pressure_Pa/1000,r.phases[0].enthalpy_kJ_kg,r.phases[0].density_kg_m3];return `<tr><td>${esc(nodeById(id)?.name||r.name)}</td>${keys.map((key,i)=>`<td>${numeric(key,values[i])}</td>`).join('')}</tr>`;}).join('');
+  const reading=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
+  const mass=value=>shown('mass_flow',value,null,6);
+  const residual=value=>shown('mass_flow',value,null,9);
+  const streamCards=Object.entries(result.streams).map(([id,r])=>{
+    const mixture=r.phases?.find(p=>p.name==='Mixture')??r.phases?.[0];
+    const properties=[
+      ['Caudal másico','mass_flow',r.mass_flow_kg_s],
+      ['Caudal molar','molar_flow',r.molar_flow_mol_s],
+      ['Temperatura','temperature_C',r.temperature_K==null?null:r.temperature_K-273.15],
+      ['Presión absoluta','pressure_kPa',r.pressure_Pa==null?null:r.pressure_Pa/1000],
+      ['Entalpía','enthalpy_kJ_kg',mixture?.enthalpy_kJ_kg],
+      ['Densidad','density_kg_m3',mixture?.density_kg_m3]
+    ];
+    const value=(key,number)=>Number.isFinite(number)?shown(key,number,null,resultDigits):'—';
+    return `<details class="results-card stream-result">
+      <summary><span>${esc(nodeById(id)?.name||r.name)}</span><strong>${value('mass_flow',r.mass_flow_kg_s)}</strong></summary>
+      <dl>${properties.map(([label,key,number])=>reading(label,value(key,number))).join('')}</dl>
+    </details>`;
+  }).join('');
+  const balances=result.balances.map(b=>{
+    const powerLabel=b.reactive?'Calor del reactor (DWSIM)':b.energy_kind==='shaft'?'Trabajo de eje al fluido':'Calor neto al fluido';
+    const compounds=Object.entries(b.components||{}).map(([name,v])=>`<div class="component-result">
+      <h4>${esc(name)}</h4><dl>
+      ${reading('Entrada',mass(v.in_kg_s))}
+      ${reading('Salida',mass(v.out_kg_s))}
+      ${reading(b.reactive?'Consumo (+) / generación (−)':'Residuo',residual(v.residual_kg_s))}
+      </dl>
+    </div>`).join('');
+    return `<article class="results-card">
+      <h3>${esc(nodeById(b.id)?.name||b.name)}</h3>
+      <dl>${reading('Entrada másica',mass(b.mass_in))}
+      ${reading('Salida másica',mass(b.mass_out))}
+      ${reading('Residuo másico',residual(b.mass_residual))}
+      ${reading(powerLabel,shown('power_kW',b.heat_to_fluid_kW))}</dl>
+      ${compounds?`<details class="component-balances"><summary>Por componente</summary>${compounds}</details>`:''}
+    </article>`;
+  }).join('');
   const recycleNote=result.recycle?`<p class="results-note"><strong>Recirculación estacionaria:</strong> ${esc(result.recycle.iterations)} iteraciones · residuo del caudal de retorno: ${shown('mass_flow',result.recycle.mass_residual_kg_s,null,9)} · residuo de temperatura: ${fmt(result.recycle.temperature_residual_K,4)} K · residuo de presión: ${fmt(result.recycle.pressure_residual_kPa,4)} kPa. El método usa una alimentación virtual de corte, que no forma parte del proyecto.</p>`:'';
-  const cards=result.balances.map(b=>`<article class="balance-card"><h3>${esc(nodeById(b.id)?.name||b.name)}</h3><p>Conservación de masa</p><p class="equation">${shown('mass_flow',b.mass_in,null,6)} → ${shown('mass_flow',b.mass_out,null,6)}</p><p>Residuo: <strong>${shown('mass_flow',b.mass_residual,null,9)}</strong></p><details class="component-balances"><summary>Balance por componente</summary>${Object.entries(b.components||{}).map(([c,v])=>`<p>${esc(c)}: ${shown('mass_flow',v.in_kg_s)} → ${shown('mass_flow',v.out_kg_s)}<br>${b.reactive?'Consumo neto (+) / generación (−)':'Residuo'}: ${shown('mass_flow',v.residual_kg_s,null,9)}</p>`).join('')}</details><p>${b.energy_kind==='shaft'?'Potencia de eje hacia el fluido':'Potencia térmica neta hacia el fluido'}</p><p class="equation">${b.reactive?'Q̇ del motor, incluye el calor de reacción':b.energy_kind==='shaft'?'Ẇ = Σ (ṁh)<sub>s</sub> − Σ (ṁh)<sub>e</sub>':'Q̇ = Σ (ṁh)<sub>s</sub> − Σ (ṁh)<sub>e</sub>'}</p><p class="equation">${shown('power_kW',b.heat_to_fluid_kW)}</p></article>`).join('');
-  $('results').innerHTML=`<div class="balance-grid">${cards}</div><div class="table-wrap"><table><thead><tr><th>Corriente</th>${keys.map((k,i)=>`<th>${labels[i]} · ${esc(SimproxStreams.defaultUnit(k))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>${recycleNote}<p class="results-note">Modelo: <strong>${esc(result.model)}</strong>. ${esc(SimproxStreams.systems[unitSystem].label)}. Presiones absolutas. Régimen estacionario; sin variaciones de energía cinética y potencial. Bombas y compresores reciben trabajo de eje; el expansor lo produce. Un trabajo negativo hacia el fluido indica potencia producida. Calor positivo hacia el fluido. La potencia de los reactores procede de DWSIM e incluye reacción. CSV y Excel conservan las unidades canónicas indicadas en sus cabeceras.</p>`;
+  $('results').innerHTML=`<section class="balance-grid" data-results-content="balances">${balances||'<p class="results-note">Sin balances de equipos.</p>'}${recycleNote}
+    <p class="results-note">Régimen estacionario. El trabajo de eje negativo indica potencia producida.</p></section>
+    <section class="stream-results" data-results-content="streams">${streamCards||'<p class="results-note">Sin corrientes calculadas.</p>'}</section>`;
+  selectResultsView(resultsView);
   $('result-meta').textContent='DWSIM 10.2.15 · '+fmt(result.elapsed_s,2)+' s';
 }
 async function convertCompositionBase(n,next){
@@ -1359,6 +1404,9 @@ function bindWorkspaceTools(){
   document.querySelectorAll('a[href="ejemplos.html"]').forEach(link=>link.onclick=e=>{e.preventDefault();closeMenus();document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());SimGuide.open($('guide-dialog'),$('guide-host'));});
   $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
   const dock=$('results-panel');
+  for(const button of dock.querySelectorAll('[data-results-view]')){
+    button.onclick=()=>{selectResultsView(button.dataset.resultsView);$('results').scrollTop=0;};
+  }
   const showResults=visible=>{dock.hidden=!visible;$('view-results').setAttribute('aria-pressed',String(visible));};
   $('results-close').onclick=()=>{if(document.body.classList.contains('results-window'))window.close();else showResults(false);};
   $('view-results').onclick=()=>{
