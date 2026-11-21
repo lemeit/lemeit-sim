@@ -619,6 +619,28 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  assert.equal(await page.locator('#canvas-model').isVisible(),true);
  assert.equal(await page.locator('#canvas-run-time').isVisible(),true);
  assert.equal(await results.locator('#results > :first-child').getAttribute('class'),'balance-grid');
+ await page.setViewportSize({width:950,height:720});
+ const titleBar=results.locator('.results-heading');
+ assert.ok(await titleBar.evaluate(header=>{
+   const row=header.getBoundingClientRect();
+   const controls=[...header.querySelectorAll('select,button,a')];
+   return controls.length===4&&controls.every(control=>{
+     const rect=control.getBoundingClientRect();
+     return rect.top>=row.top&&rect.bottom<=row.bottom&&rect.right<=row.right;
+   })&&Math.max(...controls.map(c=>c.getBoundingClientRect().top))
+       -Math.min(...controls.map(c=>c.getBoundingClientRect().top))<4;
+ }));
+ assert.equal(await results.getByText('Residuo másico').first().isVisible(),true);
+ const streams=results.getByRole('button',{name:'Corrientes',exact:true});
+ await streams.click();
+ assert.equal(await results.locator('[data-results-content="balances"]').isVisible(),false);
+ const stream=results.locator('.stream-result').first();
+ await stream.locator('summary').click();
+ assert.equal(await stream.getByText('Entalpía',{exact:true}).isVisible(),true);
+ assert.ok(await results.locator('#results').evaluate(el=>el.scrollWidth<=el.clientWidth));
+ await results.getByRole('button',{name:'Balances',exact:true}).click();
+ assert.equal(await results.locator('[data-results-content="balances"]').isVisible(),true);
+ await page.setViewportSize({width:1280,height:720});
  const position=results.locator('.sim-cad-position');
  await position.selectOption('bottom');
  assert.equal(await results.getAttribute('data-sim-cad-mode'),'bottom');

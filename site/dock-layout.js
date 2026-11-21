@@ -246,7 +246,8 @@ globalThis.SimDockLayout=(()=>{
       button.className='sim-cad-float';
       p.button=button;
       const tools=document.createElement('span');tools.className='sim-cad-controls';
-      tools.append(select,button);heading.append(tools);
+      tools.append(select,button);
+      heading.insertBefore(tools,heading.querySelector('.results-tools'));
       const sizeGrip=makeButton('◢','Redimensionar '+p.title);
       sizeGrip.className='sim-cad-size-grip';el.append(sizeGrip);
       select.addEventListener('change',()=>place(p,select.value));
