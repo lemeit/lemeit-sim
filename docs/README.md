@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 17/11/2026 · Portal 0.21.4 · Motor DWSIM 10.2.15.
+Revisión: 24/11/2026 · Portal publicado 0.47.4 · 0.47.5 en PR de corrección energética · Motor DWSIM 10.2.15.
 
 ## Empezar
 
@@ -11,6 +11,8 @@ Revisión: 17/11/2026 · Portal 0.21.4 · Motor DWSIM 10.2.15.
 | Entender los permisos, sesiones y secretos | [Acceso y seguridad](acceso-clases-admin.md) |
 | Consultar qué equipos están adaptados | [Catálogo](../site/catalogo.html) y [hoja de ruta](roadmap.md) |
 | Usar unidades y composición | [Unidades y calculadora](unidades-y-calculadora.md) |
+| Distinguir transferencia de calor de cierre energético | [Balances de intercambiadores](interpretacion-intercambiadores.md) |
+| Guardar proyectos individuales | [Manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/) y [acceso](acceso-clases-admin.md) |
 | Revisar ejemplos y referencias | [Ejemplos validados](ejemplos-validados.md) y [guía web](../site/ejemplos.html) |
 
 ## Operación y mantenimiento
