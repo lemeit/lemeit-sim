@@ -80,6 +80,7 @@ function renderDiagnosticLog(){
 }
 function diagnosticReport(){return SimDiagnostics.exportReport({project:graph.title,model:graph.model,engine:selectedEngine,portalVersion:document.documentElement.dataset.portalVersion,review:reviewGraph(),lastCalculation,connectionCheck,gatewayCheck,events:diagnosticEvents});}
 
+const auxiliaryWorkspace=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');
 let workspaceChannel=null,applyingWorkspace=false,workspaceId=new URLSearchParams(location.search).get('workspace')||crypto.randomUUID();
 const emptyProject=()=>({version:1,unit_system:unitSystem,title:'Ningún proyecto abierto',compounds:[],model:'',nodes:[],edges:[]});
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -121,7 +122,7 @@ function updateControls(){
   $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
   $('process-explorer-open').disabled=busy||!hasProject||!result||resultValidity!=='valid';
-  $('engine-select').disabled=busy;
+  $('engine-select').disabled=busy||auxiliaryWorkspace;
   document.querySelectorAll('[data-toolbar-action]').forEach(button=>{
     button.disabled=$(button.dataset.toolbarAction).disabled;
   });
@@ -250,7 +251,7 @@ async function selectCalculationEngine(mode){
   if(resultValidity==='valid')resultValidity='stale';
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   $('calculation-state').textContent='Comprobando motor de cálculo';
-  updateControls();paintConnection();await checkEngine();
+  updateControls();paintConnection();publishWorkspace(false);await checkEngine();
 }
 async function readCatalogResponse(response){try{return await response.json();}catch{throw new Error(`La API del motor no devolvió una respuesta válida (HTTP ${response.status}).`);}}
 function renderPalette(){
@@ -563,9 +564,10 @@ function selectResultsView(view){
 }
 function renderResults(){
   if(!result)return;
-  const reading=(label,value)=>`<div><dt>${label}</dt><dd>${value}</dd></div>`;
+  const reading=(label,value,kind='')=>`<div${kind?' class="'+kind+'"':''}><dt>${label}</dt><dd>${value}</dd></div>`;
   const mass=value=>shown('mass_flow',value,null,6);
   const residual=value=>shown('mass_flow',value,null,9);
+  const precisePower=value=>Number.isFinite(value)?(value!==0&&Math.abs(value)<0.0005?value.toExponential(3).replace('e',' × 10^').replace(/\^([+-]?)0*(\d+)/,(_,sign,d)=>'^'+(sign==='-'?'-':'')+d).replace(/\^(-?\d+)/,(_,power)=>'<sup>'+power+'</sup>'):fmt(value,resultDigits))+' kW':'—';
   const streamCards=Object.entries(result.streams).map(([id,r])=>{
     const mixture=r.phases?.find(p=>p.name==='Mixture')??r.phases?.[0];
     const properties=[
@@ -598,8 +600,8 @@ function renderResults(){
       <dl>${reading('Entrada másica',mass(b.mass_in))}
       ${reading('Salida másica',mass(b.mass_out))}
       ${reading('Residuo másico',residual(b.mass_residual))}
-      ${reading(powerLabel,shown('power_kW',b.heat_to_fluid_kW))}
-      ${isHX?hx?reading('Potencia cedida por lado caliente',shown('power_kW',hx.ceded_kW))+reading('Potencia recibida por lado frío',shown('power_kW',hx.received_kW))+reading('Potencia intercambiada (aprox.)',shown('power_kW',hx.exchanged_kW))+reading('Residuo de energía entre los dos lados',shown('power_kW',hx.residual_kW)):reading('Potencia entre los lados','Sin datos completos de las cuatro corrientes'):''}</dl>
+      ${reading(powerLabel,isHX?precisePower(b.heat_to_fluid_kW):shown('power_kW',b.heat_to_fluid_kW))}
+      ${isHX?hx?reading('Potencia cedida por lado caliente',shown('power_kW',hx.ceded_kW))+reading('Potencia recibida por lado frío',shown('power_kW',hx.received_kW))+reading('Potencia intercambiada (aprox.)',shown('power_kW',hx.exchanged_kW),'thermal-transfer')+reading('Residuo de energía entre los dos lados',precisePower(hx.residual_kW),'energy-residual'):reading('Potencia entre los lados','Sin datos completos de las cuatro corrientes'):''}</dl>
       ${compounds?`<details class="component-balances"><summary>Por componente</summary>${compounds}</details>`:''}
     </article>`;
   }).join('');
@@ -917,7 +919,7 @@ async function init(){
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
-  if(!await checkEngine()){
+  if(!auxiliaryWorkspace&&!await checkEngine()){
     try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: los motores están desconectados o no son compatibles. Podés guardar y reintentar.');}
     catch(error){notice(error.message,true);}
   }
@@ -1022,7 +1024,7 @@ function bindPanelResize(){
 
 function publishWorkspace(physical=true){
   if(!workspaceChannel||applyingWorkspace||!hasProject)return;
-  workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity});
+  workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity,engineMode,selectedEngine,connectionCheck,engineOnline});
 }
 function toolIcon(name){
   const paths={chevron:'M7 10l5 5 5-5',
@@ -1083,8 +1085,17 @@ function bindDiagramWindow(){
   workspaceChannel.onmessage=e=>{
     if(e.data?.type==='request'){publishWorkspace(false);return;}
     if(e.data?.type!=='state'||dragging||endpointDrag||resizing||bending)return;
+    // Solo la ventana principal es dueña de la selección y disponibilidad del motor.
+    if(auxiliaryWorkspace){
+      if(['auto','windows','debian'].includes(e.data.engineMode))engineMode=e.data.engineMode;
+      if(['windows','debian'].includes(e.data.selectedEngine))selectedEngine=e.data.selectedEngine;
+      engineOnline=e.data.engineOnline===true;
+      connectionCheck=e.data.connectionCheck??null;
+      $('engine-select').value=engineMode;
+      paintConnection();
+    }
     const previous={viewX,viewY,zoom,selection,result};applyingWorkspace=true;
-    try{loadGraph(e.data.graph);viewX=previous.viewX;viewY=previous.viewY;zoom=previous.zoom;selection=previous.selection&&nodeById(previous.selection.node)?previous.selection:null;resultValidity=e.data.resultValidity==='stale'?'stale':e.data.resultValidity==='valid'&&e.data.result?'valid':'none';if(!e.data.physical){result=e.data.result??null;lastCalculation=e.data.lastCalculation??lastCalculation;if(result)renderResults();else{$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';}}updateResultValidity();renderDiagram();renderInspector();}catch{notice('No se pudo sincronizar el diagrama recibido.',true);}finally{applyingWorkspace=false;}
+    try{loadGraph(e.data.graph);viewX=previous.viewX;viewY=previous.viewY;zoom=previous.zoom;selection=previous.selection&&nodeById(previous.selection.node)?previous.selection:null;resultValidity=e.data.resultValidity==='stale'?'stale':e.data.resultValidity==='valid'&&e.data.result?'valid':'none';if(!e.data.physical){result=e.data.result??null;lastCalculation=e.data.lastCalculation??lastCalculation;if(result)renderResults();else{$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';}}updateResultValidity();paintConnection();renderDiagram();renderInspector();}catch{notice('No se pudo sincronizar el diagrama recibido.',true);}finally{applyingWorkspace=false;}
   };
   const insertAtView=type=>{
     if(type)addNode(type,{x:viewX+300/zoom,y:viewY+180/zoom});
@@ -1348,7 +1359,8 @@ function paintConnection(){
   let state=connectionCheck?.state||(engineOnline?'online':'checking');if((state==='online'||state==='busy')&&age>75)state='stale';
   const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
   $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
-  $('engine-current').textContent=engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows');
+  const actual=resultValidity==='valid'&&lastCalculation?.state==='completed'&&['windows','debian'].includes(lastCalculation.engine)?' · cálculo: '+(lastCalculation.engine==='debian'?'Debian':'Windows'):'';
+  $('engine-current').textContent=(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
   $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
 }
@@ -1423,7 +1435,7 @@ async function checkEngine({silent=false,exclude=[]}={}){
     if(!silent)recordActivity('No hay motor compatible',lastError);
   }
   monitorRequest=false;$('server-refresh').disabled=false;
-  traceConnection('GET /api/status + /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();
+  traceConnection('GET /api/status + /api/catalog',connectionCheck);paintConnection();renderServerDetails();updateControls();publishWorkspace(false);
   return successful;
 }
 function bindWorkspaceTools(){
@@ -1452,9 +1464,10 @@ function bindWorkspaceTools(){
   refreshCanvasButtons();
   $('menu-calculate').onclick=calculate;$('diagnostics-button').onclick=()=>{$('diagnostics-dialog').showModal();renderDiagnostics();closeMenus();};
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
-  document.addEventListener('sim-session-role',event=>{const admin=event.detail?.role==='admin';document.body.dataset.sessionRole=admin?'admin':'student';$('engine-select').hidden=!admin;document.querySelector('label[for="engine-select"]').hidden=!admin;if(!admin&&engineMode!=='auto')void selectCalculationEngine('auto');});
+  document.addEventListener('sim-session-role',event=>{const admin=event.detail?.role==='admin';document.body.dataset.sessionRole=admin?'admin':'student';$('engine-select').hidden=!admin;document.querySelector('label[for="engine-select"]').hidden=!admin;if(!admin&&engineMode!=='auto'&&!auxiliaryWorkspace)void selectCalculationEngine('auto');});
+  if(auxiliaryWorkspace){$('engine-select').disabled=true;$('engine-select').title='El motor se elige en la ventana principal';}
   $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
-  const auxiliaryView=new URLSearchParams(location.search).has('diagram')||new URLSearchParams(location.search).has('results');$('monitor-auto').checked=!auxiliaryView;
+  $('monitor-auto').checked=!auxiliaryWorkspace;
   monitorTimer=setInterval(()=>{if(!busy&&$('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
   $('diagnostics-filter').onchange=renderDiagnosticLog;
   $('diagnostics-clear').onclick=()=>{diagnosticEvents.length=0;renderDiagnosticLog();$('diagnostics-copy-status').textContent='Eventos locales limpiados';};

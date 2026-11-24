@@ -724,3 +724,24 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
  await toolbar.getByRole('button',{name:'Ejemplos',exact:true}).click();
  assert.equal(await page.locator('#examples-dialog').isVisible(),true);
 });
+
+
+test('Ventana de balances respeta motor Debian fijado en ventana principal',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ await page.evaluate(async()=>{
+   document.body.dataset.sessionRole='admin';
+   await selectCalculationEngine('debian');
+ });
+ await page.waitForFunction(()=>document.querySelector('#engine-current')?.textContent?.includes('Fijado · Debian'));
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ const [popup]=await Promise.all([page.waitForEvent('popup'),page.locator('#results-popout').click()]);
+ await popup.waitForFunction(()=>document.querySelector('#engine-current')?.textContent?.includes('Fijado · Debian')&&document.querySelector('#engine-current')?.textContent?.includes('cálculo: Debian'));
+ assert.equal(await popup.locator('#engine-select').isDisabled(),true,'El motor solo se cambia en la ventana principal');
+ assert.match(await popup.locator('#results').innerText(),/Balances|Entrada másica/);
+ await page.evaluate(async()=>{await selectCalculationEngine('auto');});
+ await popup.waitForFunction(()=>document.querySelector('#engine-select')?.value==='auto');
+ assert.match(await popup.locator('#engine-current').innerText(),/Automático/);
+ await popup.close();
+});

@@ -6,7 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.47.5 — 2026-11-24 (propuesto; pendiente de validación y publicación)
+## 0.47.6 — 2026-11-24 (en revisión)
+
+- Ventanas independientes: sincronizan modo y motor efectivo desde la ventana principal; muestran el motor del cálculo completado sin recalcular ni seleccionar automáticamente otro destino.
+- Los resultados energéticos pequeños distintos de cero se representan mediante notación científica, evitando que el residuo se vea como cero exacto.
+- Mejora de diseño en balances y corrientes: tarjetas mejor distribuidas y potencia térmica intercambiada destacada sin agregar paneles.
+- Prueba de navegador que fija Debian y comprueba que la ventana emergente no cambie a Automático/Windows.
+
+## 0.47.5 — 2026-11-24
 
 - En balances y explorador, distingue cambio neto de entalpía del intercambiador de la potencia térmica transferida entre sus dos circuitos.
 - CSV, XLSX y reportes PDF que usan las tablas de resultados incluyen potencia cedida, recibida, intercambiada aproximada y residuo energético de un intercambiador de dos lados cuando se conocen las cuatro corrientes.

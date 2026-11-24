@@ -2048,3 +2048,33 @@ footer .cloud-user-label{max-width:130px;overflow:hidden;white-space:nowrap;text
 .toolbar-object-picker .menu-section-label{margin:6px 7px 1px;color:var(--spx-text-dim);font-size:10px;font-weight:600}
 .command-bar .toolbar-object-picker .menu-panel .palette-item{display:flex;justify-content:flex-start;align-items:center;gap:8px;width:100%;min-height:28px;height:auto;text-align:left;padding:4px 6px}
 .command-bar .toolbar-object-picker .menu-panel button svg{flex:none;width:22px;height:22px;margin:0;overflow:visible}
+
+
+/* Balances compactos y legibles en una ventana de resultados desacoplada. */
+body.results-window #results-panel [data-results-content="balances"]:not([hidden]){
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),450px));
+  justify-content:center;
+  box-sizing:border-box;
+  width:100%;
+  padding:14px 12px;
+  gap:12px;
+}
+body.results-window #results-panel [data-results-content="streams"]:not([hidden]){
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));
+  box-sizing:border-box;
+  max-width:1480px;
+  margin-inline:auto;
+  padding:14px 12px;
+  gap:10px;
+}
+.results-card dl>div.thermal-transfer{
+  padding:5px 0;
+  border-top:1px solid var(--spx-border);
+  border-bottom:1px solid var(--spx-border);
+  font-weight:600;
+}
+.results-card .thermal-transfer dt{color:var(--spx-text)}
+.results-card .energy-residual dd{white-space:nowrap;font-size:10.5px}
+.results-card .energy-residual sup{line-height:0}
+.results-card dt{min-width:0;overflow-wrap:anywhere}
+.results-card dd{max-width:54%;overflow-wrap:anywhere}
