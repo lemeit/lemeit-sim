@@ -6,10 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.47.5 — 2026-11-24 (en revisión)
+## 0.47.5 — 2026-11-24 (propuesto; pendiente de validación y publicación)
 
-- Corrección de interpretación energética en intercambiadores: potencia cedida, recibida e intercambiada frente a cambio neto de entalpía y residuo de cierre.
-- Nuevas columnas en las tablas exportadas y explicación ampliada en balances y explorador; se conservan los datos de DWSIM sin recalcular el proceso.
+- En balances y explorador, distingue cambio neto de entalpía del intercambiador de la potencia térmica transferida entre sus dos circuitos.
+- CSV, XLSX y reportes PDF que usan las tablas de resultados incluyen potencia cedida, recibida, intercambiada aproximada y residuo energético de un intercambiador de dos lados cuando se conocen las cuatro corrientes.
+- La magnitud transferida se estima como promedio de las magnitudes de ambos lados; los valores individuales se conservan con sus signos y el dato energético original del gateway no se reemplaza.
+- Si faltan conexiones o datos físicos, las nuevas magnitudes quedan vacías; no se estiman ni se atribuyen indebidamente a DWSIM.
+- Regresión automatizada del Ejemplo 13 incorporada; la publicación queda condicionada a CI y verificación real en Windows.
 
 ## 0.47.4 — 2026-11-20
 
