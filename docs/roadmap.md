@@ -1,5 +1,15 @@
 # Hoja de ruta de ΣIM
 
+> Nota de mantenimiento (24/11/2026): los hitos detallados más abajo incluyen instantáneas históricas y no sustituyen el historial de versiones. El código principal declara 0.47.4; los cambios de interpretación de intercambiadores se trabajan en 0.47.5 y están pendientes de CI/publicación. Ver [CHANGELOG](CHANGELOG.md) y [balances de intercambiadores](interpretacion-intercambiadores.md).
+
+## Prioridades a partir de 0.47.4
+
+1. Corregir la presentación de calor interno y residuos energéticos en informes y explorador (0.47.5, en revisión).
+2. Validar numéricamente los ejemplos 17–19 de recirculación en Windows y Debian, registrando convergencia y balances.
+3. Completar matriz equipo/modo soportado/validado: dibujable no implica calculable.
+4. Ensayar accesos simultáneos de alumnos, identidad y recuperación de proyectos nube.
+5. Auditar wiki, guía de alumnos, manual de administradores y ayudas contextuales frente a la interfaz publicada.
+
 Estado al 17 de noviembre de 2026 · portal 0.21.4. Este editor no es todavía una réplica completa de DWSIM.
 El alcance operativo se muestra en el [catálogo de la aplicación](https://sim.lemeit.ar/catalogo.html). Las capacidades se distinguen por su nivel de verificación: publicado y comprobado, implementado pero pendiente de comprobar, o planificado.
 
