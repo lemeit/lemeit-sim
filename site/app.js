@@ -1023,7 +1023,7 @@ function bindPanelResize(){
 }
 
 function publishWorkspace(physical=true){
-  if(!workspaceChannel||applyingWorkspace||!hasProject||auxiliaryWorkspace)return;
+  if(!workspaceChannel||applyingWorkspace||!hasProject)return;
   workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity,engineMode,selectedEngine,connectionCheck,engineOnline});
 }
 function toolIcon(name){
