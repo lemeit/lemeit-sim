@@ -1,5 +1,15 @@
 # Comprobaciones de ΣIM
 
+## Estado reciente · 24/11/2026
+
+- Portal 0.47.4 y gateways Windows/Debian 0.47.4 confirmados mediante consultas /api/status aportadas por el usuario.
+- Ejemplo 13 desde Debian: POST /api/simulate HTTP 200; cuatro corrientes y un equipo, modelo IAPWS-IF97. El informe CSV del caso se contrastó con las referencias de temperatura y potencia; residuo cercano a cero. La comprobación experimental independiente no está realizada.
+- Corrección 0.47.5 en borrador (PR #135): separa potencia de cada lado del intercambiador y residuo energético, con prueba de regresión en Node; CI y revisión visual de PDF necesarias antes de fusionar.
+- La wiki se actualiza por separado (PR #24 en lemeit-wiki). La compilación de MkDocs no prueba que todos los motores estén conectados.
+- Pendiente: repetición física del ejemplo 13 en Windows ya reiniciado, recirculaciones 17–19 cruzadas, y prueba de aula simultánea.
+
+
+
 ## Estado documental al 16/11/2026 · portal 0.17.2
 
 - Acceso y administración: suite de 107 comprobaciones correcta en 0.17.0. Incluye integración con SQLite en memoria: ingreso administrativo, crear/listar clases, ingreso de alumno, prohibir administración, revocar y cerrar sesión.
