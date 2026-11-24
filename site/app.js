@@ -1359,7 +1359,7 @@ function paintConnection(){
   let state=connectionCheck?.state||(engineOnline?'online':'checking');if((state==='online'||state==='busy')&&age>75)state='stale';
   const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
   $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
-  const actual=resultValidity==='valid'&&lastCalculation?.state==='success'&&['windows','debian'].includes(lastCalculation.engine)?' · cálculo: '+(lastCalculation.engine==='debian'?'Debian':'Windows'):'';
+  const actual=resultValidity==='valid'&&lastCalculation?.state==='completed'&&['windows','debian'].includes(lastCalculation.engine)?' · cálculo: '+(lastCalculation.engine==='debian'?'Debian':'Windows'):'';
   $('engine-current').textContent=(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
   $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
