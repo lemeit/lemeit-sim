@@ -14,13 +14,36 @@ const SimproxFiles=(()=>{
   return (local?'\ufeff':'')+rows.map(row=>row.map(field).join(separator)).join('\r\n')+'\r\n';
  }
  const convert=(value,fn)=>finite(value)?fn(value):null;
+ // Intercambiador de dos lados: cada puerto de materia debe estar conectado una vez.
+ // Los valores se DEDUCEN de caudal y entalpía de las corrientes devueltos por DWSIM.
+ // No interpretar el cambio neto de entalpía como la potencia intercambiada.
+ function thermalExchange(graph,result,id){
+  const edges=graph?.edges||[],nodes=new Map((graph?.nodes||[]).map(n=>[n.id,n]));
+  const hflow=streamId=>{
+   const s=result?.streams?.[streamId],p=s?.phases?.find(x=>x.name==='Mixture')??s?.phases?.[0];
+   return finite(s?.mass_flow_kg_s)&&finite(p?.enthalpy_kJ_kg)?s.mass_flow_kg_s*p.enthalpy_kJ_kg:null;
+  };
+  const side=[];
+  for(let i=0;i<2;i++){
+   const incoming=edges.filter(e=>e.to===id&&nodes.get(e.from)?.type==='MaterialStream'&&(e.toIndex??0)===i);
+   const outgoing=edges.filter(e=>e.from===id&&nodes.get(e.to)?.type==='MaterialStream'&&(e.fromIndex??0)===i);
+   if(incoming.length!==1||outgoing.length!==1)return null;
+   const hin=hflow(incoming[0].from),hout=hflow(outgoing[0].to);
+   if(!finite(hin)||!finite(hout))return null;
+   side.push(hout-hin);
+  }
+  const gained=side.filter(v=>v>0).reduce((s,v)=>s+v,0);
+  const lost=-side.filter(v=>v<0).reduce((s,v)=>s+v,0);
+  if(!(gained>0&&lost>0))return null;
+  return {ceded_kW:lost,received_kW:gained,exchanged_kW:(lost+gained)/2,residual_kW:side[0]+side[1],side_delta_kW:side};
+ }
  function tables(graph,result){
   const name=id=>graph.nodes.find(n=>n.id===id)?.name||id;
   const streams=[['Corriente','Caudal [kg/s]','Temperatura [°C]','Presión [kPa]','Entalpía [kJ/kg]','Entropía [kJ/(kg K)]','Densidad [kg/m³]','Caudal molar [mol/s]']];
   for(const [id,r] of Object.entries(result.streams||{})){const p=r.phases?.find(p=>p.name==='Mixture')??r.phases?.[0]??{};streams.push([name(id),r.mass_flow_kg_s,convert(r.temperature_K,v=>v-273.15),convert(r.pressure_Pa,v=>v/1000),p.enthalpy_kJ_kg,p.entropy_kJ_kgK,p.density_kg_m3,r.molar_flow_mol_s]);}
-  const balances=[['Equipo','Entrada [kg/s]','Salida [kg/s]','Residuo masa [kg/s]','Energía hacia fluido [kW]','Reactivo','Tipo de transferencia']];
+  const balances=[['Equipo','Entrada [kg/s]','Salida [kg/s]','Residuo masa [kg/s]','Energía neta al fluido [kW]','Reactivo','Tipo de transferencia','Potencia cedida (HX) [kW]','Potencia recibida (HX) [kW]','Potencia intercambiada aprox. (HX) [kW]','Residuo energético (HX) [kW]']];
   const components=[['Equipo','Componente','Entrada [kg/s]','Salida [kg/s]','Residuo o consumo neto [kg/s]','Interpretación']];
-  for(const b of result.balances||[]){balances.push([name(b.id),b.mass_in,b.mass_out,b.mass_residual,b.heat_to_fluid_kW,b.reactive?'Sí':'No',b.energy_kind==='shaft'?'Trabajo de eje':'Calor']);for(const [compound,c] of Object.entries(b.components||{}))components.push([name(b.id),compound,c.in_kg_s,c.out_kg_s,c.residual_kg_s,b.reactive?'Consumo (+), generación (−)':'Residuo']);}
+  for(const b of result.balances||[]){const hx=graph.nodes.find(n=>n.id===b.id)?.type==='HeatExchanger'?thermalExchange(graph,result,b.id):null;balances.push([name(b.id),b.mass_in,b.mass_out,b.mass_residual,b.heat_to_fluid_kW,b.reactive?'Sí':'No',hx?'Cambio neto de entalpía · no potencia interna':b.energy_kind==='shaft'?'Trabajo de eje':'Calor',hx?.ceded_kW??null,hx?.received_kW??null,hx?.exchanged_kW??null,hx?.residual_kW??null]);for(const [compound,c] of Object.entries(b.components||{}))components.push([name(b.id),compound,c.in_kg_s,c.out_kg_s,c.residual_kg_s,b.reactive?'Consumo (+), generación (−)':'Residuo']);}
   return [{name:'Corrientes',rows:streams},{name:'Balances',rows:balances},{name:'Componentes',rows:components},{name:'Datos',rows:[['Proyecto',graph.title],['Modelo',result.model],['Motor',result.engine],['Duración [s]',result.elapsed_s],['Exportado [UTC]',new Date().toISOString()],['Origen','Simulación calculada por DWSIM; no mediciones experimentales']]}];
  }
  // Una tabla rectangular: cada valor conserva sección, registro, objeto y unidad en el campo.
@@ -73,5 +96,5 @@ const SimproxFiles=(()=>{
   });
   return zip(files);
  }
- return {csv,tables,unified,xlsx};
+ return {csv,tables,unified,xlsx,thermalExchange};
 })();
