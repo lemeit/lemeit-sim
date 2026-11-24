@@ -18,7 +18,13 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Versión y estado
+## Estado actual y trazabilidad
+
+La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las funciones integradas hasta 0.47.4 incluyen la biblioteca de proyectos en nube, el explorador didáctico de resultados, balances por componentes, informes PDF y una barra por categorías. Los ejemplos con recirculación aún requieren validación física completa en ambos motores. El código desplegado puede ser anterior a una rama o PR en revisión.
+
+**Corrección 0.47.5 en revisión:** para intercambiadores de dos circuitos, diferenciar calor cedido, recibido, transferencia interna y residuo neto del balance energético; no confundir una energía neta cercana a cero con ausencia de transferencia. Ver [criterios de lectura del balance térmico](docs/interpretacion-intercambiadores.md).
+
+## Versión y estado (historial anterior)
 
 **0.32.0 — Cuadrícula y edición de corrientes**. Mostrar cuadrícula y ajustar posiciones a pasos de 20 unidades de manera independiente; Shift restringe el movimiento horizontal o vertical. El trazado penaliza retrocesos y segmentos diminutos, y Diagnóstico y actividad incorpora un botón para copiar el texto. No afecta motores ni exportaciones.
 
