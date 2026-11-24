@@ -87,7 +87,17 @@ const SimProcessExplorer=(()=>{
     const shaft=['Pump','Compressor','Expander'].includes(node.type);
     paragraph(parent,'ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ. Se desprecia la variación de energía cinética y potencial.');
     parent.append(row('ΔḢ · salida − entrada',value(hOut,'kW')+' − '+value(hIn,'kW')+' = '+value(hOut-hIn,'kW')));
-    parent.append(row(shaft?'Trabajo de eje hacia el fluido deducido por entalpía':reactive?'Calor del reactor informado por DWSIM':'Potencia térmica deducida por diferencia de entalpía',value(balance?.heat_to_fluid_kW,'kW')));
+    parent.append(row(node.type==='HeatExchanger'?'Cambio neto de entalpía · no calor transferido entre lados':shaft?'Trabajo de eje hacia el fluido deducido por entalpía':reactive?'Calor del reactor informado por DWSIM':'Potencia térmica deducida por diferencia de entalpía',value(balance?.heat_to_fluid_kW,'kW')));
+    if(node.type==='HeatExchanger'){
+      const hx=SimproxFiles.thermalExchange(graph,result,node.id);
+      if(hx){
+        parent.append(row('Potencia cedida por lado caliente',value(hx.ceded_kW,'kW')));
+        parent.append(row('Potencia recibida por lado frío',value(hx.received_kW,'kW')));
+        parent.append(row('Potencia intercambiada aproximada',value(hx.exchanged_kW,'kW')));
+        parent.append(row('Residuo energético entre los lados',value(hx.residual_kW,'kW')));
+        paragraph(parent,'Potencias deducidas de los caudales y entalpías de las cuatro corrientes calculadas por DWSIM; valor intercambiado = promedio de las magnitudes cedida y recibida, no calor neto al exterior.');
+      }else paragraph(parent,'No se puede determinar la potencia entre lados: faltan corrientes o entalpías válidas de DWSIM.');
+    }
     if(node.type==='Expander')parent.append(row('Potencia de eje generada por DWSIM',value(result.equipment?.[node.id]?.shaft_power_generated_kW,'kW')));
     if(node.type==='Tank')parent.append(row('Tiempo de residencia de DWSIM',value(result.equipment?.[node.id]?.residence_time_s,'s')));
     if(node.type==='Valve'){
