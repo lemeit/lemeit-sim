@@ -88,3 +88,27 @@ test('CSV unificado conserva todas las secciones, valores y registros sin mezcla
  const rows=api.unified(sheets);assert.ok(rows.every(row=>row.length===5));assert.equal(rows.find(r=>r[0]==='Corrientes'&&r[3]==='Caudal [kg/s]')[4],1.23456789);assert.equal(rows.find(r=>r[0]==='Balances')[4],-0.000001);
  assert.equal(rows.filter(r=>r[0]==='Componentes'&&r[3]==='Componente').length,2);assert.equal(rows.find(r=>r[3]==='Duración [s]')[4],3.5);assert.equal(rows.length,9);
 });
+
+
+test('intercambiador: exportación distingue intercambio de 40 kW y residuo prácticamente nulo',()=>{
+ const graph={title:'HX13',nodes:[{id:'hx',type:'HeatExchanger',name:'HX1'},...['a','b','c','d'].map(id=>({id,type:'MaterialStream',name:id}))],edges:[
+  {from:'a',to:'hx',toIndex:0},{from:'hx',to:'b',fromIndex:0},
+  {from:'c',to:'hx',toIndex:1},{from:'hx',to:'d',fromIndex:1}
+ ]};
+ const s=(h)=>({mass_flow_kg_s:1,phases:[{name:'Mixture',enthalpy_kJ_kg:h}]});
+ const result={streams:{a:s(335.1497),b:s(295.14969967),c:s(84.2),d:s(124.2)},balances:[{id:'hx',mass_in:2,mass_out:2,mass_residual:0,heat_to_fluid_kW:-0.00000033}]};
+ const hx=api.thermalExchange(graph,result,'hx');
+ assert.ok(Math.abs(hx.ceded_kW-40.00000033)<1e-8);
+ assert.ok(Math.abs(hx.received_kW-40)<1e-8);
+ assert.ok(Math.abs(hx.residual_kW+0.00000033)<1e-8);
+ const data=api.tables(graph,result)[1].rows;
+ assert.match(data[0][7],/Potencia cedida/);
+ assert.match(data[0][10],/Residuo energético/);
+ assert.match(data[1][6],/no potencia interna/);
+ assert.ok(Math.abs(data[1][9]-40)<1e-6);
+ assert.equal(data[1][4],-0.00000033,'El valor original del gateway se preserva');
+ assert.ok(api.unified(api.tables(graph,result)).some(row=>row[3].includes('Potencia intercambiada')&&Math.abs(row[4]-40)<1e-6));
+ const incomplete={...result,streams:{...result.streams,d:{mass_flow_kg_s:1,phases:[]}}};
+ assert.equal(api.thermalExchange(graph,incomplete,'hx'),null);
+ assert.equal(api.tables(graph,incomplete)[1].rows[1][9],null);
+});
