@@ -583,7 +583,9 @@ function renderResults(){
     </details>`;
   }).join('');
   const balances=result.balances.map(b=>{
-    const powerLabel=b.reactive?'Calor del reactor (DWSIM)':b.energy_kind==='shaft'?'Trabajo de eje al fluido':'Calor neto al fluido';
+    const isHX=nodeById(b.id)?.type==='HeatExchanger';
+    const hx=isHX?SimproxFiles.thermalExchange(graph,result,b.id):null;
+    const powerLabel=isHX?'Cambio neto de entalpía · no potencia intercambiada':b.reactive?'Calor del reactor (DWSIM)':b.energy_kind==='shaft'?'Trabajo de eje al fluido':'Calor neto al fluido';
     const compounds=Object.entries(b.components||{}).map(([name,v])=>`<div class="component-result">
       <h4>${esc(name)}</h4><dl>
       ${reading('Entrada',mass(v.in_kg_s))}
@@ -596,7 +598,8 @@ function renderResults(){
       <dl>${reading('Entrada másica',mass(b.mass_in))}
       ${reading('Salida másica',mass(b.mass_out))}
       ${reading('Residuo másico',residual(b.mass_residual))}
-      ${reading(powerLabel,shown('power_kW',b.heat_to_fluid_kW))}</dl>
+      ${reading(powerLabel,shown('power_kW',b.heat_to_fluid_kW))}
+      ${isHX?hx?reading('Potencia cedida por lado caliente',shown('power_kW',hx.ceded_kW))+reading('Potencia recibida por lado frío',shown('power_kW',hx.received_kW))+reading('Potencia intercambiada (aprox.)',shown('power_kW',hx.exchanged_kW))+reading('Residuo de energía entre los dos lados',shown('power_kW',hx.residual_kW)):reading('Potencia entre los lados','Sin datos completos de las cuatro corrientes'):''}</dl>
       ${compounds?`<details class="component-balances"><summary>Por componente</summary>${compounds}</details>`:''}
     </article>`;
   }).join('');
