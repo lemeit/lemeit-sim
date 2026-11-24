@@ -122,7 +122,7 @@ function updateControls(){
   $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
   $('process-explorer-open').disabled=busy||!hasProject||!result||resultValidity!=='valid';
-  $('engine-select').disabled=busy;
+  $('engine-select').disabled=busy||auxiliaryWorkspace;
   document.querySelectorAll('[data-toolbar-action]').forEach(button=>{
     button.disabled=$(button.dataset.toolbarAction).disabled;
   });
