@@ -1,6 +1,19 @@
 # Trabajar con un proyecto
 
-Guía vigente para el portal 0.17.2 · revisión 16/11/2026.
+Revisión: 24/11/2026 · portal publicado 0.47.4. Los apartados detallados más abajo describen funciones históricas; la guía operativa vigente se mantiene en el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
+
+## Flujo recomendado actual
+
+1. Ingresá con código de clase y elegí identidad individual de alumno si usás biblioteca de proyectos en nube.
+2. Creá proyecto, abrí uno de la biblioteca de clase o cargá un archivo JSON. Los ejemplos se buscan en **Ejemplos**.
+3. Agregá operaciones y corrientes desde los selectores por categorías o la paleta. Usá puertos visibles, arrastre y Supr. Para mover el lienzo, **Espacio + arrastre** o rueda central.
+4. Completá modelo termodinámico, composiciones, alimentaciones y especificaciones. Revisá **Herramientas → Diagnóstico del proyecto**.
+5. Elegí explícitamente Windows o Debian y pulsá **▶ Calcular**. Interpretá luces de estado y vigencia de resultados.
+6. Abrí **Explorar proceso…** para estudiar ecuaciones, balances y valores de DWSIM ya calculados, sin relanzar la simulación.
+7. Guardá el proyecto **en la nube**; opcionalmente descargá una **copia JSON**. Para presentar, exportá tablas CSV/Excel o **Reporte PDF · diagrama y balances** con rótulo, actividad y tablas.
+8. Un valor cercano a cero en la energía neta de un intercambiador **no** implica transferencia térmica interna cero. Ver [interpretación energética](interpretacion-intercambiadores.md) (corrección de etiquetas 0.47.5 en PR, pendiente de publicar).
+
+## Registro histórico de comandos y paneles previos
 
 ## Ingresar y reconocer la sesión
 
