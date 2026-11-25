@@ -59,6 +59,7 @@ globalThis.SimDockLayout=(()=>{
     const panels=recover(saved,innerWidth,innerHeight);
     for(const id of IDS)panels[id].el=elements[id];
     const sizes={...DEFAULT_SIZES,...saved.sizes};
+    const stackWeights=Object.fromEntries(IDS.map(id=>[id,clamp(safe(saved.stackWeights?.[id],1),.15,20)]));
     const slots={};
     for(const edge of EDGES){
       const slot=document.createElement('section');
@@ -77,7 +78,8 @@ globalThis.SimDockLayout=(()=>{
       const value=Object.fromEntries(IDS.map(id=>[id,{mode:panels[id].mode,
         lastDock:panels[id].lastDock,box:panels[id].box}]));
       value.sizes=sizes;
-      value.revision=1;
+      value.stackWeights=stackWeights;
+      value.revision=2;
       try{localStorage.setItem(KEY,JSON.stringify(value));}catch{}
     }
     function store(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,120);}
@@ -92,6 +94,74 @@ globalThis.SimDockLayout=(()=>{
       sizes[edge]=clamp(safe(n,sizes[edge]),side?160:100,max);
       workspace.style.setProperty('--sim-cad-'+edge,sizes[edge]+'px');
     }
+
+    // Separadores INTERNOS: cambian la altura de dos paneles de la misma columna,
+    // nunca el ancho de toda la columna ni su posición de acoplamiento.
+    function refreshStackSeparators(){
+      for(const edge of ['left','right']){
+        const slot=slots[edge];
+        slot.querySelectorAll(':scope>.sim-cad-stack-splitter').forEach(el=>el.remove());
+        const stack=IDS.map(id=>panels[id]).filter(p=>p.el.parentNode===slot&&visible(p));
+        stack.forEach(p=>p.el.style.setProperty('--sim-cad-weight',String(stackWeights[p.id])));
+        for(let i=1;i<stack.length;i++){
+          const upper=stack[i-1],lower=stack[i];
+          const handle=document.createElement('div');
+          handle.className='sim-cad-stack-splitter';
+          handle.tabIndex=0;handle.setAttribute('role','separator');
+          handle.setAttribute('aria-orientation','horizontal');
+          handle.setAttribute('aria-label','Ajustar altura entre '+upper.title+' y '+lower.title);
+          handle.title='Arrastrar para repartir la altura · Doble clic: partes iguales · Flechas ↑/↓: ajustar';
+          const applyDelta=(change,oldUpper,oldLower)=>{
+            const total=oldUpper+oldLower;
+            if(total<160)return;
+            const upperHeight=clamp(oldUpper+change,80,total-80);
+            const scale=stackWeights[upper.id]+stackWeights[lower.id];
+            stackWeights[upper.id]=scale*upperHeight/total;
+            stackWeights[lower.id]=scale*(total-upperHeight)/total;
+            upper.el.style.setProperty('--sim-cad-weight',String(stackWeights[upper.id]));
+            lower.el.style.setProperty('--sim-cad-weight',String(stackWeights[lower.id]));
+            handle.setAttribute('aria-valuenow',String(Math.round(upperHeight/total*100)));
+          };
+          const setCurrent=delta=>{
+            const a=upper.el.getBoundingClientRect().height,b=lower.el.getBoundingClientRect().height;
+            applyDelta(delta,a,b);store();
+          };
+          handle.setAttribute('aria-valuemin','10');handle.setAttribute('aria-valuemax','90');
+          handle.setAttribute('aria-valuenow',String(Math.round(100*stackWeights[upper.id]/(stackWeights[upper.id]+stackWeights[lower.id]))));
+          let start=null;
+          handle.addEventListener('pointerdown',e=>{
+            if(e.button!==0)return;e.preventDefault();e.stopPropagation();
+            start={pointer:e.pointerId,y:e.clientY,a:upper.el.getBoundingClientRect().height,b:lower.el.getBoundingClientRect().height};
+            handle.setPointerCapture(e.pointerId);
+          });
+          handle.addEventListener('pointermove',e=>{
+            if(!start||e.pointerId!==start.pointer)return;
+            applyDelta(e.clientY-start.y,start.a,start.b);
+          });
+          const finish=e=>{
+            if(!start||e.pointerId!==start.pointer)return;
+            start=null;if(handle.hasPointerCapture(e.pointerId))handle.releasePointerCapture(e.pointerId);store();
+          };
+          handle.addEventListener('pointerup',finish);
+          handle.addEventListener('pointercancel',finish);
+          handle.addEventListener('keydown',e=>{
+            if(!['ArrowUp','ArrowDown','Home','End'].includes(e.key))return;
+            e.preventDefault();
+            const a=upper.el.getBoundingClientRect().height,b=lower.el.getBoundingClientRect().height;
+            const delta=e.key==='Home'?80-a:e.key==='End'?a+b-80-a:(e.key==='ArrowDown'?1:-1)*(e.shiftKey?30:10);
+            applyDelta(delta,a,b);store();
+          });
+          handle.addEventListener('dblclick',()=>{
+            const v=(stackWeights[upper.id]+stackWeights[lower.id])/2;
+            stackWeights[upper.id]=v;stackWeights[lower.id]=v;
+            upper.el.style.setProperty('--sim-cad-weight',String(v));
+            lower.el.style.setProperty('--sim-cad-weight',String(v));
+            handle.setAttribute('aria-valuenow','50');store();
+          });
+          slot.insertBefore(handle,lower.el);
+        }
+      }
+    }
     function updateSlots(){
       for(const edge of EDGES){
         const el=slots[edge];
@@ -99,6 +169,7 @@ globalThis.SimDockLayout=(()=>{
         setSize(edge,sizes[edge]);
         if(el.hidden)workspace.style.setProperty('--sim-cad-'+edge,'0px');
       }
+      refreshStackSeparators();
     }
     function apply(p,save=true){
       const mode=activeMode(p);
@@ -288,6 +359,7 @@ globalThis.SimDockLayout=(()=>{
     reset.addEventListener('click',()=>{
       for(const id of IDS)place(panels[id],'reset');
       Object.assign(sizes,DEFAULT_SIZES);
+      for(const id of IDS)stackWeights[id]=1;
       updateSlots();store();
       document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));
     });
