@@ -22,14 +22,16 @@ export async function handle(request, env, assets=ASSETS) {
     const catalog=url.pathname==='/api/catalog'&&request.method==='GET';
     const status=url.pathname==='/api/status'&&request.method==='GET';
     const calculate=url.pathname==='/api/simulate'&&request.method==='POST';
-    if(!catalog&&!status&&!calculate)return error(404,'Operación no disponible.');
+    const dynamicCapabilities=url.pathname==='/api/dynamics/capabilities'&&request.method==='GET';
+    const dynamicTank=url.pathname==='/api/dynamics/tank'&&request.method==='POST';
+    if(!catalog&&!status&&!calculate&&!dynamicCapabilities&&!dynamicTank)return error(404,'Operación no disponible.');
     const engineId=request.headers.get('X-SIM-Engine')||'windows';
     if(!['windows','debian'].includes(engineId))return error(400,'Motor de cálculo no reconocido.');
     const origin=request.headers.get('Origin');
     if(origin&&origin!==url.origin)return error(403,'Origen no autorizado.');
     if(request.headers.get('Sec-Fetch-Site')==='cross-site')return error(403,'Origen no autorizado.');
     let body;
-    if(calculate) {
+    if(calculate||dynamicTank) {
       if(request.headers.get('Content-Type')?.split(';')[0]!=='application/json')return error(415,'Se requiere JSON.');
       if(Number(request.headers.get('Content-Length')||0)>100000)return error(413,'El proceso supera los 100 kB.');
       // Limitar también los cuerpos sin Content-Length, sin almacenarlos sin límite.
