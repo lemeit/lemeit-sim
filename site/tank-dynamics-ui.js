@@ -31,7 +31,8 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-orifice').value='0.0005';
    $('tank-dynamic-duration').value='6000';
    $('tank-dynamic-step').value='20';
-   $('tank-dynamic-chart-select').value='volume';
+   $('tank-dynamic-chart-select').value='level';
+   $('scientific-log').checked=false;
    $('tank-dynamic-hint').textContent='Modelo simplificado independiente de DWSIM. '+(Number.isFinite(rho)&&rho>0&&Number.isFinite(input)?'Densidad y caudal inicial tomados de la última corrida estacionaria; el caudal de salida se fija inicialmente en cero para estudiar el llenado.':'No hay propiedades calculadas válidas para esta entrada: densidad y caudal son valores iniciales orientativos editables.')+(Number.isFinite(output)?' Salida estacionaria: '+num(output)+' kg/s.':'');
    $('tank-dynamic-error').hidden=true;
    $('tank-dynamic-result').hidden=true;
@@ -84,12 +85,13 @@ globalThis.SimTankDynamicsUI=(()=>{
      variable==='flows'?[{key:'inlet_m3_s',name:real?'Entrada estimada':'Entrada'},{key:'outlet_m3_s',name:real?'Salida estimada':'Salida'}]:
      variable==='massflow'?[{key:'outlet_kg_s',name:'Descarga'}]:
      variable==='fill'?[{key:'fill_pct',name:'Llenado'}]:[{key:'volume_m3',name:real?'Volumen derivado':'Volumen'}];
-   const chartPoints=variable==='massflow'&&!real?points.map(p=>({...p,outlet_kg_s:p.outlet_m3_s*read('tank-dynamic-density')})):points;
+   const chartPoints=variable==='massflow'&&!real?points.map(p=>({...p,outlet_kg_s:p.outlet_m3_s*current.config.density})):points;
    const labels={level:'Nivel [m]',flows:'Caudal volumétrico [m³/s]',massflow:'Caudal másico [kg/s]',fill:'Llenado [%]',volume:'Volumen [m³]'};
    try{
      SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked,logY:$('scientific-log').checked});
    }catch(error){
      $('scientific-log').checked=false;
+     if(!chartPoints.some(p=>chartSeries.some(s=>Number.isFinite(p[s.key])))){$('tank-dynamic-chart').textContent='';$('tank-dynamic-status').textContent='Variable sin datos disponibles.';return;}
      SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked});
    }
  }
