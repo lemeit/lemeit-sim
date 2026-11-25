@@ -100,11 +100,35 @@ def _monitor_name(call, tag, words, preferred=None):
         '. Variables disponibles: ' + ', '.join(row['id'] for row in candidates[:12]))
 
 
-def _curve(series, name):
+def _curve(series, name, units):
+    """Select only the monitored variable, never fabricate a missing series."""
     data = series.get(name)
+    matched_name = name
+    if data is None:
+        # MCP versions may store display labels instead of internal property ids.
+        # Match only an unambiguous variable from the same equipment and units.
+        tag = name.rsplit('.', 1)[0] + '.'
+        matches = [(key, row) for key, row in series.items()
+                   if isinstance(key, str) and key.startswith(tag)
+                   and isinstance(row, dict) and row.get('units') == units
+                   and isinstance(row.get('values'), list)]
+        if len(matches) == 1:
+            matched_name, data = matches[0]
     if not isinstance(data, dict) or not isinstance(data.get('values'), list):
-        raise DynamicInputError('DWSIM no registró la variable ' + name + '.')
-    return [float(x) for x in data['values']]
+        keys = ', '.join(str(key) for key in series) or '(ninguna)'
+        raise DynamicInputError(
+            'DWSIM no registró la variable ' + name +
+            '. Series disponibles: ' + keys +
+            '. Revisar las propiedades e integrador monitoreado.')
+    try:
+        values = [float(x) for x in data['values']]
+    except (TypeError, ValueError) as exc:
+        raise DynamicInputError('La serie ' + matched_name +
+                                ' contiene valores no numéricos.') from exc
+    if not values or not all(math.isfinite(x) for x in values):
+        raise DynamicInputError('La serie ' + matched_name +
+                                ' está vacía o contiene valores no finitos.')
+    return values
 
 
 def run_tank(engine, payload=None):
@@ -167,11 +191,16 @@ def run_tank(engine, payload=None):
         job = engine.call('dwsim_dynamics_status', run_id=start['run_id'])
         if job.get('state') not in ('completed', 'finished', 'success'):
             raise DynamicInputError('La integración no terminó correctamente: '+str(job.get('error') or job.get('state')))
+        # Query all actual recorded series: the MCP may return display labels
+        # instead of the property ids requested through dynamics_monitor.
         preview = engine.call('dwsim_dynamics_series', run_id=start['run_id'],
-                              variables=monitored, max_points=240)
+                              max_points=240)
+        recorded = preview.get('series', {})
+        if not isinstance(recorded, dict):
+            raise DynamicInputError('El MCP devolvió series dinámicas inválidas.')
         times = [float(t) for t in preview.get('t_s', [])]
-        levels = _curve(preview.get('series', {}), monitored[0])
-        outlet = _curve(preview.get('series', {}), monitored[1])
+        levels = _curve(recorded, monitored[0], 'm')
+        outlet = _curve(recorded, monitored[1], 'kg/s')
         if len(times) < 2 or len(times) != len(levels) or len(levels) != len(outlet):
             raise DynamicInputError('DWSIM devolvió una serie temporal incompleta.')
         area = p['capacity_m3'] / p['height_m']
