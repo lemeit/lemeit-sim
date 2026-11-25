@@ -663,6 +663,14 @@ async function calculate(){
   }catch(error){transportFailed=simulationRequested&&(calculationHttp===503||/fetch|NetworkError|Failed to fetch|timeout/i.test(error.message));debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:simulationRequested?'POST enviado o conexión interrumpida':'validación local antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection(simulationRequested?'POST /api/simulate':'Preflight /api/status',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
   finally{busy=false;updateResultValidity();renderServerDetails();document.body.classList.remove('calculating');updateControls();publishWorkspace(false);if(transportFailed&&engineMode==='auto')void checkEngine({silent:true,exclude:[calculationEngine]});}
 }
+let compoundDisplayLimit=50;
+let newComponentDisplayLimit=35;
+const componentChoices=(list,limit,buttonId)=>{
+  const visible=list.slice(0,limit);
+  const buttons=visible.map(name=>`<button type="button" class="compound-option" data-${buttonId==='new-compounds-more'?'new-add':'add-compound'}="${esc(name)}">+ ${esc(name)}</button>`).join('');
+  const rest=list.length>visible.length?`<button type="button" id="${buttonId}" class="compound-more">Mostrar más (${list.length-visible.length} restantes)</button>`:'';
+  return buttons+rest;
+};
 function renderCompounds(){
   $('compound-summary').textContent=graph.compounds.map(c=>c==='Water'?'Agua':c).join(' + ')||'Sin componentes';
   $('compound-summary').title=graph.compounds.join(', ');
@@ -670,7 +678,8 @@ function renderCompounds(){
   $('selected-compounds').innerHTML=graph.compounds.map(c=>`<button type="button" class="compound-chip" data-remove-compound="${esc(c)}">${esc(c)} ×</button>`).join('');
   const query=$('compound-search').value.toLowerCase();
   const matches=(catalog?.compounds||[]).filter(c=>!graph.compounds.includes(c)&&c.toLowerCase().includes(query));
-  $('compound-list').innerHTML=matches.slice(0,50).map(c=>`<button type="button" class="compound-option" data-add-compound="${esc(c)}">+ ${esc(c)}</button>`).join('')||'<p class="mini">Sin coincidencias.</p>';
+  $('compound-count').textContent=`${matches.length} coincidencias · ${Math.min(compoundDisplayLimit,matches.length)} visibles`;
+  $('compound-list').innerHTML=componentChoices(matches,compoundDisplayLimit,'compounds-more')||'<p class="mini">Sin coincidencias.</p>';
 }
 function updateCompound(name,remove){
   if(busy)return;
@@ -901,7 +910,7 @@ function bindEvents(){
   $('project-title').oninput=e=>{graph.title=e.target.value;persist();if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();};
   $('model-select').onchange=e=>{graph.model=e.target.value;changed();renderCompounds();renderInspector();};
   $('compound-button').onclick=()=>{closeMenus();renderCompounds();$('compounds-dialog').showModal();};
-  $('compound-search').oninput=renderCompounds;
+  $('compound-search').oninput=()=>{compoundDisplayLimit=50;renderCompounds();};
   $('compounds-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-add-compound]'),remove=e.target.closest('[data-remove-compound]');if(add)updateCompound(add.dataset.addCompound,false);if(remove)updateCompound(remove.dataset.removeCompound,true);});
   $('about-button').onclick=()=>$('about-dialog').showModal();
   const changeZoom=(next,anchor)=>{const before=anchor?svgPoint(anchor):{x:viewX+500/zoom,y:viewY+260/zoom};const old=zoom;zoom=Math.max(.2,Math.min(4,next));viewX=before.x-(before.x-viewX)*old/zoom;viewY=before.y-(before.y-viewY)*old/zoom;renderDiagram();};
@@ -928,7 +937,7 @@ async function init(){
 }
 function newProject(){
   if(busy)return;if(!catalog)return notice('El catálogo todavía se está cargando. Volvé a intentar.',true);
-  draftCompounds=[];$('new-component-search').value='';$('new-project-error').textContent='';
+  draftCompounds=[];newComponentDisplayLimit=35;$('new-component-search').value='';$('new-project-error').textContent='';
   $('new-project-model').innerHTML='<option value="">Seleccioná un modelo…</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderNewProject();$('new-project-dialog').showModal();closeMenus();
 }
@@ -937,7 +946,10 @@ function renderNewProject(){
   const query=$('new-component-search').value.toLowerCase();
   $('new-selected-compounds').innerHTML=draftCompounds.map(c=>`<button type="button" class="compound-chip" data-new-remove="${esc(c)}">${esc(c)} ×</button>`).join('');
   const matches=(catalog?.compounds||[]).filter(c=>!draftCompounds.includes(c)&&c.toLowerCase().includes(query));
-  $('new-component-list').innerHTML=matches.slice(0,35).map(c=>`<button type="button" class="compound-option" data-new-add="${esc(c)}">+ ${esc(c)}</button>`).join('');
+  const suggested=['Water','Ethanol','Methane','Carbon Dioxide','Nitrogen','Oxygen'].filter(c=>matches.includes(c));
+  const ordered=query?matches:[...suggested,...matches.filter(c=>!suggested.includes(c))];
+  $('new-component-count').textContent=`${matches.length} compuestos disponibles · ${Math.min(newComponentDisplayLimit,ordered.length)} visibles`;
+  $('new-component-list').innerHTML=componentChoices(ordered,newComponentDisplayLimit,'new-compounds-more')||'<p class="mini">Sin coincidencias.</p>';
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
 }
 function clearLoadedProject(clearLocalDraft=false){
@@ -996,8 +1008,8 @@ function bindProjectEvents(){
   $('open-project-toolbar').onclick=()=>$('open-button').click();$('save-project-toolbar').onclick=()=>$('save-button').click();
   $('new-project-button').onclick=newProject;$('new-project-toolbar').onclick=newProject;
   $('cancel-project').onclick=()=>$('new-project-dialog').close();$('cancel-project-bottom').onclick=()=>$('new-project-dialog').close();
-  $('new-component-search').oninput=renderNewProject;$('new-project-model').onchange=renderNewProject;
-  $('new-project-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-new-add]'),remove=e.target.closest('[data-new-remove]');if(add&&draftCompounds.length<8)draftCompounds.push(add.dataset.newAdd);if(remove)draftCompounds=draftCompounds.filter(c=>c!==remove.dataset.newRemove);renderNewProject();});
+  $('new-component-search').oninput=()=>{newComponentDisplayLimit=35;renderNewProject();};$('new-project-model').onchange=renderNewProject;
+  $('new-project-dialog').addEventListener('click',e=>{if(e.target.closest('#new-compounds-more')){newComponentDisplayLimit+=35;renderNewProject();return;}const add=e.target.closest('[data-new-add]'),remove=e.target.closest('[data-new-remove]');if(add&&draftCompounds.length<8&&!draftCompounds.includes(add.dataset.newAdd))draftCompounds.push(add.dataset.newAdd);if(remove)draftCompounds=draftCompounds.filter(c=>c!==remove.dataset.newRemove);renderNewProject();});
   $('new-project-form').onsubmit=e=>{e.preventDefault();const model=$('new-project-model').value;if(!draftCompounds.length||!model)return;if(model==='Steam Tables (IAPWS-IF97)'&&(draftCompounds.length!==1||draftCompounds[0]!=='Water')){$('new-project-error').textContent='IAPWS-IF97 es para agua pura. Elegí otro modelo para esta mezcla.';return;}loadGraph({...emptyProject(),title:$('new-project-name').value.trim()||'Proceso sin título',compounds:[...draftCompounds],model});$('new-project-dialog').close();notice('');$('calculation-state').textContent='Proyecto nuevo · diagrama vacío';};
   $('start-panel').onclick=e=>{const action=e.target.closest('[data-start]')?.dataset.start;if(action==='new')newProject();if(action==='open')$('file-input').click();};
   $('recent-button').onclick=()=>{try{const saved=localStorage.getItem('lemeit-process-v1');if(saved)loadGraph(JSON.parse(saved));closeMenus();}catch(error){notice(error.message,true);}};
