@@ -41,7 +41,7 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-scrub').disabled=true;
    updateOutlet();
    $('tank-dynamics-dialog').showModal();
-   globalThis.SimTankDwsimMode?.onOpen();
+   globalThis.SimTankDwsimMode?.onOpen({graph,node});
  }
  function updateOutlet(){
    const gravity=$('tank-dynamic-mode').value==='gravity';
