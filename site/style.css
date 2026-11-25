@@ -2166,3 +2166,18 @@ body.results-window .results-card h3{font-size:13px;margin-bottom:9px}
  .access-page .access-portal-header{padding:6px 12px;gap:8px}
  .access-page .access-layout{width:calc(100% - 32px);padding:0;box-sizing:border-box}
 }
+
+
+/* Indicadores de expansión claros sin flechas repetidas. */
+.app-menu>summary::marker,.toolbar-object-picker>summary::marker,
+.results-card>summary::marker{content:''}
+.app-menu>summary::-webkit-details-marker,
+.toolbar-object-picker>summary::-webkit-details-marker,
+.results-card>summary::-webkit-details-marker{display:none}
+.results-card>summary{list-style:none}
+.results-card>summary::before{
+ content:'+';display:inline-grid;place-items:center;width:13px;height:13px;
+ margin-inline-end:5px;border-radius:2px;color:var(--spx-text-dim);
+ font-weight:600;line-height:1;
+}
+.results-card[open]>summary::before{content:'−'}
