@@ -10,7 +10,7 @@ import time
 REQUIRED = {
     'dwsim_dynamics_setup', 'dwsim_dynamics_monitor', 'dwsim_dynamics_object',
     'dwsim_dynamics_check', 'dwsim_dynamics_run', 'dwsim_dynamics_status',
-    'dwsim_dynamics_series', 'dwsim_flowsheet_close',
+    'dwsim_dynamics_series', 'dwsim_dynamics_properties', 'dwsim_flowsheet_close',
 }
 PRESET = {
     'capacity_m3': 2.0, 'height_m': 2.0, 'temperature_C': 25.0,
@@ -68,6 +68,31 @@ def _check_params(payload):
     return result
 
 
+def _monitor_name(call, tag, words, preferred=None):
+    """DWSIM ids are discovered on the actual engine, never inferred from labels."""
+    catalog = call('dwsim_dynamics_properties', tag=tag)
+    props = catalog.get('properties', [])
+    if not isinstance(props, list) or not props:
+        raise DynamicInputError('El motor no informó propiedades monitoreables para ' + tag)
+    candidates = [row for row in props if isinstance(row, dict)
+                  and isinstance(row.get('id'), str) and row['id'].strip()]
+    preferred = preferred or ()
+    for choice in preferred:
+        for row in candidates:
+            if row['id'].lower() == choice.lower():
+                return tag + '.' + row['id']
+    for word in words:
+        found = [row for row in candidates if word in (row.get('description') or row['id']).lower()
+                 or word in row['id'].lower()]
+        if found:
+            found.sort(key=lambda row: (not row.get('dynamic', False),
+                        0 if row.get('units') in ('m', 'kg/s') else 1))
+            return tag + '.' + found[0]['id']
+    raise DynamicInputError(
+        'No se encontró una propiedad compatible para ' + tag +
+        '. Variables disponibles: ' + ', '.join(row['id'] for row in candidates[:12]))
+
+
 def _curve(series, name):
     data = series.get(name)
     if not isinstance(data, dict) or not isinstance(data.get('values'), list):
@@ -119,7 +144,11 @@ def run_tank(engine, payload=None):
              properties={'OpeningPct':p['valve_opening_pct']})
         call('dwsim_dynamics_setup', schedule='SIM-Filling', integrator='SIM-Integrator',
              step_s=p['step_s'], duration_s=p['duration_s'], method='ExplicitEuler')
-        monitored = ['T-01.Liquid Level', 'Outlet.PROP_MS_2']
+        monitored = [
+            _monitor_name(call, 'T-01', ('liquid level', 'level', 'nivel', 'height')),
+            _monitor_name(call, 'Outlet', ('mass flow', 'massflow', 'mass flow rate', 'caudal másico'),
+                          preferred=('PROP_MS_2',)),
+        ]
         call('dwsim_dynamics_monitor', integrator='SIM-Integrator', action='set', variables=monitored)
         readiness = call('dwsim_dynamics_check', schedule='SIM-Filling')
         if not readiness.get('ready'):
