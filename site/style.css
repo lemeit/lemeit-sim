@@ -2400,3 +2400,9 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
  .sim-cad-slot>.sim-cad-stack-splitter:focus-visible::after{opacity:1;color:var(--spx-accent)}
  .sim-cad-slot>.sim-cad-stack-splitter:focus-visible::after{outline:1px solid var(--spx-accent);outline-offset:1px}
 }
+
+/* Gráficas: controles del portal y lámina científica blanca exportable. */
+.tank-dynamic-chart-tools{flex-wrap:wrap}
+.tank-dynamic-chart-tools label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.tank-dynamic-chart-tools input[type=checkbox]{accent-color:var(--spx-text);margin:0}
+#tank-dynamic-chart{background:#fff;min-height:0}
