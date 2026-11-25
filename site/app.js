@@ -911,7 +911,7 @@ function bindEvents(){
   $('model-select').onchange=e=>{graph.model=e.target.value;changed();renderCompounds();renderInspector();};
   $('compound-button').onclick=()=>{closeMenus();renderCompounds();$('compounds-dialog').showModal();};
   $('compound-search').oninput=()=>{compoundDisplayLimit=50;renderCompounds();};
-  $('compounds-dialog').addEventListener('click',e=>{const add=e.target.closest('[data-add-compound]'),remove=e.target.closest('[data-remove-compound]');if(add)updateCompound(add.dataset.addCompound,false);if(remove)updateCompound(remove.dataset.removeCompound,true);});
+  $('compounds-dialog').addEventListener('click',e=>{if(e.target.closest('#compounds-more')){compoundDisplayLimit+=50;renderCompounds();return;}const add=e.target.closest('[data-add-compound]'),remove=e.target.closest('[data-remove-compound]');if(add)updateCompound(add.dataset.addCompound,false);if(remove)updateCompound(remove.dataset.removeCompound,true);});
   $('about-button').onclick=()=>$('about-dialog').showModal();
   const changeZoom=(next,anchor)=>{const before=anchor?svgPoint(anchor):{x:viewX+500/zoom,y:viewY+260/zoom};const old=zoom;zoom=Math.max(.2,Math.min(4,next));viewX=before.x-(before.x-viewX)*old/zoom;viewY=before.y-(before.y-viewY)*old/zoom;renderDiagram();};
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
