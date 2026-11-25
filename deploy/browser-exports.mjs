@@ -926,3 +926,38 @@ test('Tanque: el módulo didáctico genera curva propia sin llamar al gateway de
  await page.keyboard.press('Escape');
  assert.equal(await dialog.isVisible(),false);
 });
+
+test('Dinámica DWSIM MCP: curva real identificada y CSV diferente del didáctico',async t=>{
+ const page=await browserPage(t);
+ await page.route('**/api/dynamics/capabilities',async route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({supported:true,missing_tools:[]})}));
+ let realRequests=0;
+ await page.route('**/api/dynamics/tank',async route=>{
+   realRequests++;
+   const body=route.request().postDataJSON();
+   assert.equal(body.capacity_m3,5);
+   assert.equal(route.request().headers()['x-sim-engine'],'windows');
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+     source:'dwsim-mcp-dynamics',model:'DWSIM · integración temporal real',
+     assumptions:'Serie real de DWSIM; volumen calculado a partir del nivel.',
+     points:[{time_s:0,volume_m3:0,level_m:0,fill_pct:0,inlet_m3_s:.01,outlet_m3_s:0,outlet_kg_s:0},
+       {time_s:60,volume_m3:.23,level_m:.23,fill_pct:4.6,inlet_m3_s:.01,outlet_m3_s:.0084,outlet_kg_s:8.4},
+       {time_s:600,volume_m3:.333,level_m:.333,fill_pct:6.66,inlet_m3_s:.01,outlet_m3_s:.01,outlet_kg_s:10}]
+   })});
+ });
+ const tank=await load('../site/examples/TankWater.json');
+ await openProject(page,tank);
+ await page.locator('#diagram [data-node="tank"]').click();
+ await page.locator('#inspector [data-tank-dynamic="tank"]').click();
+ const dialog=page.locator('#tank-dynamics-dialog');
+ await page.waitForFunction(()=>document.querySelector('#tank-dynamic-source option[value="dwsim"]')?.disabled===false);
+ assert.equal(await dialog.locator('#tank-dynamic-source').inputValue(),'dwsim');
+ await dialog.locator('#tank-dynamic-calculate').click();
+ await dialog.locator('#tank-dynamic-result').waitFor();
+ assert.equal(realRequests,1);
+ assert.match(await dialog.locator('#tank-dynamic-status').innerText(),/DWSIM/);
+ assert.ok(await dialog.locator('#tank-dynamic-chart path').count()>0);
+ const exported=await download(page,()=>dialog.locator('#tank-dynamic-download').click());
+ assert.match(exported.bytes.toString('utf8'),/DWSIM MCP · integración dinámica real/);
+ assert.doesNotMatch(exported.bytes.toString('utf8'),/Modelo;Didáctico ΣIM/);
+ await page.keyboard.press('Escape');
+});
