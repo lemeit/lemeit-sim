@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.48.0 — 2026-11-25 (en revisión)
+
+- Primer módulo de dinámica de tanques **didáctico de ΣIM**, sin atribuir resultados al integrador de DWSIM: balance integral de masa a densidad constante, caudal de salida fijo o descarga por gravedad, condición inicial, eventos de llenado/vaciado, gráfica temporal de volumen/nivel/caudales, reproducción de resultados y CSV separado.
+- Acceso a dinámica desde las propiedades del equipo Tanque. El cálculo estacionario DWSIM y sus resultados continúan independientes y sin modificaciones.
+- Separadores horizontales **entre paneles apilados dentro de una misma columna lateral**: ajustan alturas de Propiedades y Balances, entre otros; arrastre, teclado, doble clic a 50/50 y proporción persistente. No deben confundirse con los separadores verticales del ancho de las columnas.
+- Pruebas de solución analítica para llenado/vaciado, conservación de masa, condiciones límite, descarga gravitatoria y controles de navegador.
+- Pendiente: investigar y desarrollar integración con Dynamics Manager de DWSIM y conector MCP real, para después poder representar cálculos dinámicos propios de DWSIM.
+
 ## 0.47.10 — 2026-11-25 (en revisión)
 
 - Catálogo de compuestos: deja de aparentar que termina alfabéticamente en C; muestra favoritos de uso frecuente y paginación «Mostrar más» sin perder búsqueda sobre catálogo completo.

@@ -1,6 +1,6 @@
 # Módulo propuesto: simulación dinámica de llenado y vaciado de un tanque
 
-Estado: **especificación**, no implementación. El equipo `Tank` actual de ΣIM usa el cálculo estacionario de DWSIM para presión, estado de salida y tiempo de residencia `V / Q`; el Ejemplo 15 **no** calcula la evolución temporal.
+Estado: **prototipo didáctico implementado en ΣIM 0.48.0** con balance transitorio de masa a densidad constante; **integración dinámica real de DWSIM pendiente**. El equipo `Tank` actual de ΣIM usa el cálculo estacionario de DWSIM para presión, estado de salida y tiempo de residencia `V / Q`; el Ejemplo 15 **no** calcula la evolución temporal.
 
 ## 1. Modelo físico mínimo
 
@@ -20,7 +20,7 @@ Resultados como curvas interactivas `h(t)`, `V(t)`, `m(t)`, `Q_in(t)`, `Q_out(t)
 
 ## 3. Arquitectura y etapas
 
-1. **Prototipo didáctico explícito** con integrador matemático verificado para líquido incompresible y caudales prescritos, rotulado “modelo simplificado de ΣIM”; nunca presentarlo como corrida de DWSIM.
+1. **Prototipo didáctico explícito (implementado en 0.48.0)** con integrador matemático verificado para líquido incompresible y caudales prescritos, rotulado “modelo simplificado de ΣIM”; nunca presentarlo como corrida de DWSIM.
 2. **Investigación del puente DWSIM**: inspeccionar herramientas MCP instaladas en ambos gateways, determinar si pueden crear un Dynamics Manager / Integrator, definir estados iniciales y obtener series temporales. La documentación pública de DWSIM prueba que la biblioteca tiene esta capacidad, no que nuestro MCP la exponga.
 3. **Adaptador DWSIM dinámico**, solo después de confirmar API disponible o extender el puente con pruebas en Debian y Windows. Mantener elección manual del motor; trabajo de simulación por ejecución con estado, progreso y cancelación.
 4. **Validación**: comparación con solución analítica de caudales constantes, balance integral `m(t)`, eventos de lleno/vacío; luego ejemplo DWSIM “Dynamic Simulation - Water Tank Level Control” y pruebas cruzadas de motores. Comparar resultados con tolerancias definidas.

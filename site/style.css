@@ -2318,3 +2318,54 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
   opacity:.65;pointer-events:none;
 }
 .sim-shell .results-resizer:hover::after,.sim-shell .results-resizer:focus-visible::after{opacity:1}
+
+
+/* Ajuste de ALTURA de ventanas apiladas dentro de las columnas laterales.
+   Independiente del divisor vertical del ancho total de la columna. */
+@media(min-width:761px){
+ .sim-cad-slot[data-edge="left"]>.sim-cad-panel[data-sim-cad-mode="left"],
+ .sim-cad-slot[data-edge="right"]>.sim-cad-panel[data-sim-cad-mode="right"]{
+   flex:var(--sim-cad-weight,1) 1 0!important;
+   min-height:80px!important;
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter{
+   display:flex;align-items:center;justify-content:center;
+   flex:0 0 11px;min-height:11px;position:relative;z-index:7;
+   margin:0;border-top:1px solid var(--spx-border);
+   border-bottom:1px solid var(--spx-border);
+   cursor:row-resize;touch-action:none;background:var(--spx-surface);
+   color:var(--spx-text-dim);
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter::after{
+   content:'↕';font:600 13px/1 Arial,sans-serif;
+   display:inline-flex;align-items:center;justify-content:center;
+   width:24px;height:11px;border-radius:3px;
+   background:var(--spx-surface-2);pointer-events:none;
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter:hover,
+ .sim-cad-slot>.sim-cad-stack-splitter:focus-visible{
+   background:var(--spx-accent-dim);outline:1px solid var(--spx-accent);
+ }
+}
+/* Interfaz de dinámica didáctica, sin relación con el cálculo estacionario. */
+.tank-dynamics-dialog{width:min(1050px,calc(100vw - 30px));max-width:calc(100vw - 30px);max-height:calc(100dvh - 40px);overflow:auto}
+.tank-dynamic-intro{padding:10px 18px;border-bottom:1px solid var(--spx-border);font-size:11px}
+.tank-dynamic-intro strong{color:var(--spx-text)}
+.tank-dynamic-intro p{margin:5px 0 0;line-height:1.5;color:var(--spx-text-dim)}
+.tank-dynamic-layout{display:grid;grid-template-columns:minmax(280px,350px) minmax(300px,1fr);gap:18px;padding:14px 18px}
+.tank-dynamic-layout h3{font-size:12px;font-weight:700;margin:10px 0 8px}
+.tank-dynamic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.tank-dynamic-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;min-width:0}
+.tank-dynamic-grid input,.tank-dynamic-grid select{width:100%;height:30px;box-sizing:border-box;padding:4px 7px;border:1px solid var(--spx-border);border-radius:3px;background:var(--spx-surface);color:var(--spx-text);font:inherit}
+.tank-dynamic-grid .tank-dynamic-gravity{grid-column:1/-1}
+.tank-dynamics-dialog [hidden]{display:none!important}
+.tank-dynamic-results{min-width:0;border-left:1px solid var(--spx-border);padding-left:18px}
+.tank-dynamic-chart-tools{display:flex;align-items:center;gap:9px;font-size:11px;margin-bottom:6px}
+#tank-dynamic-chart{display:block;width:100%;height:auto;min-height:200px;background:var(--spx-surface-2);border:1px solid var(--spx-border);border-radius:4px}
+.tank-chart-axis text{font-size:11px}
+.tank-dynamic-reading{font:600 11px/1.6 var(--spx-font-mono);margin:9px 0}
+#tank-dynamic-scrub{display:block;width:100%;cursor:ew-resize}
+.tank-dynamic-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tank-dynamic-empty{font-size:12px;color:var(--spx-text-dim);line-height:1.5}
+.tank-dynamic-parameters>.primary-button{margin-top:12px}
+@media(max-width:760px){.tank-dynamic-layout{display:block}.tank-dynamic-results{border-left:0;padding:12px 0;border-top:1px solid var(--spx-border);margin-top:14px}}
