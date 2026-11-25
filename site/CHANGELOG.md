@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.47.10 — 2026-11-25 (en revisión)
+
+- Catálogo de compuestos: deja de aparentar que termina alfabéticamente en C; muestra favoritos de uso frecuente y paginación «Mostrar más» sin perder búsqueda sobre catálogo completo.
+- Contadores de coincidencias en los selectores de proyecto nuevo y proyecto en edición.
+- Separadores de paneles laterales y de balances con agarres discretos visibles; el arrastre y teclado existentes se conservan.
+- El tanque continúa siendo estacionario; el estudio de acumulación dinámica, nivel y gráficas temporales se documenta como trabajo separado.
+
 ## 0.47.9 — 2026-11-25 (en revisión)
 
 - Elimina triángulos nativos en detalles informativos del simulador, administración y ayudas; indicador uniforme +/− con foco visible y teclado.
