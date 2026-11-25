@@ -10,14 +10,16 @@ globalThis.SimChartWorkspace=(()=>{
  ];
  const fmt=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumSignificantDigits:7}):'—';
  function pause(){if(interval!==null){clearInterval(interval);interval=null;}if($('charts-play'))$('charts-play').textContent='▶ Reproducir';}
- function reset(){pause();dataset=null;if($('charts-dialog')?.open)refresh();}
+ function reset(){pause();dataset=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
  function accept(data,meta={}){
   if(!Array.isArray(data?.points)||!data.points.length)return;
   const real=data.source==='dwsim-mcp-dynamics';
   const density=data.config?.density;
   const points=data.points.map(p=>({...p,...(!real&&Number.isFinite(density)?{inlet_kg_s:p.inlet_m3_s*density,outlet_kg_s:p.outlet_m3_s*density}:{})}));
   const columns=vars.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
+  if(!columns.length)return;
   dataset={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
+  if($('charts-title'))$('charts-title').value='';
   if($('charts-dialog')?.open)refresh();
  }
  function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+' ['+column.unit+']';select.append(o);}
