@@ -35,6 +35,7 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-hint').textContent='Modelo simplificado independiente de DWSIM. '+(Number.isFinite(rho)&&rho>0&&Number.isFinite(input)?'Densidad y caudal inicial tomados de la última corrida estacionaria; el caudal de salida se fija inicialmente en cero para estudiar el llenado.':'No hay propiedades calculadas válidas para esta entrada: densidad y caudal son valores iniciales orientativos editables.')+(Number.isFinite(output)?' Salida estacionaria: '+num(output)+' kg/s.':'');
    $('tank-dynamic-error').hidden=true;
    $('tank-dynamic-result').hidden=true;
+   $('tank-dynamic-empty').hidden=false;
    $('tank-dynamic-download').disabled=true;
    $('tank-dynamic-play').disabled=true;
    $('tank-dynamic-scrub').disabled=true;
@@ -60,6 +61,7 @@ globalThis.SimTankDynamicsUI=(()=>{
      current=SimTankDynamics.simulate(values());
      $('tank-dynamic-error').hidden=true;
      $('tank-dynamic-result').hidden=false;
+     $('tank-dynamic-empty').hidden=true;
      $('tank-dynamic-download').disabled=false;
      $('tank-dynamic-play').disabled=false;
      const slider=$('tank-dynamic-scrub');slider.min='0';slider.max=String(current.points.length-1);slider.value='0';slider.disabled=false;
@@ -67,7 +69,7 @@ globalThis.SimTankDynamicsUI=(()=>{
      $('tank-dynamic-status').textContent=event+' · '+current.points.length+' puntos · Residuo de masa '+num(current.massResidualKg,8)+' kg';
      render();
    }catch(error){
-     current=null;$('tank-dynamic-result').hidden=true;$('tank-dynamic-play').disabled=true;$('tank-dynamic-download').disabled=true;
+     current=null;$('tank-dynamic-result').hidden=true;$('tank-dynamic-empty').hidden=false;$('tank-dynamic-play').disabled=true;$('tank-dynamic-download').disabled=true;
      $('tank-dynamic-error').textContent=error.message;$('tank-dynamic-error').hidden=false;
    }
  }
