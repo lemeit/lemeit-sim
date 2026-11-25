@@ -1,7 +1,7 @@
 # Ejemplo 20 · Llenado dinámico de un tanque con DWSIM
 
 **Complemento del Ejemplo 15** (tanque estacionario y tiempo de residencia).
-**Estado: integración experimental; falta una corrida real validada en los gateways Debian y Windows.**
+**Estado: integración experimental; corrida real de DWSIM verificada en Debian el 25/11/2026, pendiente de comprobación en Windows y de publicación web.**
 
 ## Objetivo
 
@@ -36,11 +36,25 @@ El Ejemplo 20 almacena el **diagrama de referencia**. El módulo DWSIM crea su p
 
 ## Control físico
 
-El balance acumulativo es `m(t)-m(0)=∫₀ᵗ(ṁ_e-ṁ_s)dt`. En la referencia oficial, a 1 min el nivel es alrededor de 0,23 m; a 2 min, 0,30 m; a 10 min, 0,333 m; el caudal de descarga se aproxima a 10 kg/s. Son valores **de la guía oficial**, no resultados medidos todavía desde los gateways de ΣIM.
+El balance acumulativo es `m(t)-m(0)=∫₀ᵗ(ṁ_e-ṁ_s)dt`. En la referencia oficial, a 1 min el nivel es alrededor de 0,23 m; a 2 min, 0,30 m; a 10 min, 0,333 m; el caudal de descarga se aproxima a 10 kg/s. Son valores **de la guía oficial**; la comparación con los valores obtenidos en Debian se indica abajo.
 
 La curva del **nivel** y el **caudal de salida** debe provenir de DWSIM. El volumen se obtiene a partir del nivel calculado y el área transversal supuesta `A=V_total/h_total`. La conversión aproximada de caudal másico a volumétrico usa 997 kg/m³ hasta integrar la densidad dinámica de DWSIM.
 
 DWSIM puede permitir sobrepasar la altura del tanque sin producir un rebalse real: si el nivel sobrepasa la capacidad, se debe señalar al alumno y no interpretar como una operación segura.
+
+## Resultado real del motor Debian · 25/11/2026
+
+La prueba `python3 tools/probe_dynamic_tank.py --run` completó **120 pasos y 121 registros** (600 s, Δt = 5 s). DWSIM devolvió la serie de nivel como `T-01 Liquid Level` y la de caudal como `Outlet Mass Flow`, esta última en kg/h; el adaptador convierte a kg/s sin recalcular la dinámica.
+
+| Tiempo | Nivel DWSIM Debian | Referencia aproximada | Salida DWSIM Debian |
+|---|---:|---:|---:|
+| 60 s | 0,2339 m | 0,23 m | 8,3828 kg/s |
+| 120 s | 0,2962 m | 0,30 m | 9,4336 kg/s |
+| 600 s | 0,3329 m | 0,333 m | 9,9997 kg/s |
+
+Los valores numéricos concuerdan con la tendencia de referencia. Al llegar a 600 s, la diferencia entre la alimentación de 10 kg/s y la descarga de 9,9997 kg/s es de 0,0003 kg/s, indicando un régimen prácticamente estacionario. Este control no sustituye una auditoría independiente del residuo integral utilizando toda la serie de caudales ni valida otros regímenes o equipos.
+
+**Alcance de la validación:** motor Debian operando a través de DWSIM MCP, con lectura de series y normalización de unidades. La prueba del navegador sigue separada y el gateway de Windows todavía no ha sido contrastado.
 
 ## Estado de validación
 
@@ -48,9 +62,10 @@ DWSIM puede permitir sobrepasar la altura del tanque sin producir un rebalse rea
 - [x] Puente al MCP: setup, monitor, check, run, status y series
 - [x] Diferenciación explícita entre curva DWSIM y curva didáctica
 - [x] Test unitario del puente y prueba de navegador con MCP simulado
-- [ ] Corrida DWSIM real en Debian
+- [x] Corrida DWSIM real en Debian (120 pasos; 121 puntos)
 - [ ] Corrida DWSIM real en Windows
-- [ ] Comparación con la tabla de referencia y revisión de posibles incompatibilidades MCP
+- [x] Comparación inicial con niveles de referencia; etiquetas de monitoreo y conversión kg/h → kg/s corregidas
+- [ ] Auditoría integral de masa sobre toda la serie, otras condiciones y compatibilidad Windows
 - [ ] Publicación al portal de producción
 
 ## Diagnóstico Debian sin revelar el token
@@ -58,7 +73,7 @@ DWSIM puede permitir sobrepasar la altura del tanque sin producir un rebalse rea
 Desde la rama que contiene la integración:
 
 ```bash
-cd ~/lemeit-sim
+cd ~/lemeit-sim-dinamica
 python3 tools/probe_dynamic_tank.py
 # Solo cuando la lista indique todas las herramientas necesarias:
 python3 tools/probe_dynamic_tank.py --run
