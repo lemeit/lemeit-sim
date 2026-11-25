@@ -856,6 +856,7 @@ test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas na
 
 test('Catálogo: acceso a nombres posteriores a C y carga paginada',async t=>{
  const page=await browserPage(t);
+ await page.locator('#file-menu>summary').click();
  await page.locator('#new-project-button').click();
  const list=page.locator('#new-component-list');
  assert.equal(await list.locator('[data-new-add="Water"]').count(),1,'Water aparece sin buscar');
