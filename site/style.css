@@ -2153,3 +2153,13 @@ body.results-window .results-card h3{font-size:13px;margin-bottom:9px}
   .command-bar #calculate-button.primary-calculate{min-width:112px;padding:4px 9px}
   .admin-header-navigation .admin-current-area{padding-inline:5px}
 }
+
+/* Acceso comparte cabecera y tema con el portal; un solo logotipo. */
+.access-page{padding:0}
+.access-page .access-portal-header{min-height:43px;padding:6px max(20px,calc((100vw - 1120px)/2))}
+.access-page .access-layout{margin:clamp(20px,5vh,60px) auto;padding:0 16px 24px;box-sizing:content-box}
+.access-page .access-portal-header #theme-toggle{color:#f2f2f0;flex-shrink:0}
+@media(max-width:600px){
+ .access-page .access-portal-header{padding:6px 12px;gap:8px}
+ .access-page .access-layout{width:calc(100% - 32px);padding:0;box-sizing:border-box}
+}
