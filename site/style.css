@@ -2078,3 +2078,78 @@ body.results-window #results-panel [data-results-content="streams"]:not([hidden]
 .results-card .energy-residual sup{line-height:0}
 .results-card dt{min-width:0;overflow-wrap:anywhere}
 .results-card dd{max-width:54%;overflow-wrap:anywhere}
+
+
+/* ΣIM 0.47.7: interfaz técnica, sin ornamentos; barra reordenable. */
+.command-bar .command-group{position:relative}
+.command-bar .toolbar-grip{
+  display:inline-grid;place-items:center;flex:0 0 11px!important;
+  width:11px!important;min-width:11px!important;height:25px!important;
+  padding:0!important;opacity:.24;color:var(--spx-text-dim);
+  background:transparent!important;border:0!important;cursor:grab;
+}
+.command-bar .toolbar-grip:hover,.command-bar .toolbar-grip:focus-visible{opacity:.9;outline:1px solid var(--spx-border);outline-offset:-1px}
+.command-bar .toolbar-grip:active{cursor:grabbing}
+.command-bar .toolbar-grip svg{pointer-events:none}
+.command-bar .toolbar-drop-target{outline:1px dashed var(--spx-accent);outline-offset:-2px;background:var(--spx-accent-dim)}
+.command-bar .simulation-tools{gap:5px;padding-inline:4px!important}
+.command-bar #calculate-button.primary-calculate{
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  width:auto;min-width:133px;min-height:32px;height:32px;
+  padding:4px 14px;border:1px solid var(--spx-accent);
+  border-radius:5px;background:var(--spx-accent);color:#fff;
+  font-size:12px;font-weight:700;letter-spacing:.01em;
+}
+.command-bar #calculate-button.primary-calculate:hover:not(:disabled){background:var(--spx-accent);filter:brightness(.9);color:#fff}
+.command-bar #calculate-button.primary-calculate:focus-visible{outline:2px solid var(--spx-text);outline-offset:2px}
+.command-bar #calculate-button.primary-calculate:disabled{
+  opacity:.56;filter:grayscale(.45);cursor:not-allowed;
+}
+.command-bar #calculate-button.primary-calculate .calculate-play{
+  flex:0 0 18px;width:18px;height:18px;color:inherit;
+}
+.command-bar #calculate-button.primary-calculate .calculation-lamp{
+  border-color:#fff9;background:#fff6;
+}
+.command-bar #calculate-button.primary-calculate[data-state="valid"] .calculation-lamp{
+  background:#38b66c;border-color:#1d8a49;
+}
+.command-bar .toolbar-menu-button[data-toolbar-menu]{color:var(--spx-text-dim)}
+.command-bar .toolbar-object-picker>summary::after{display:none}
+.command-bar .toolbar-object-picker>summary{min-width:34px}
+.app-header #admin-nav-link{
+  display:inline-flex;align-items:center;min-height:25px;box-sizing:border-box;
+  border:1px solid #51545a;padding:3px 10px;border-radius:4px;
+  color:#f3f3f0;font-size:11px;text-decoration:none;white-space:nowrap;
+}
+.app-header #admin-nav-link[hidden]{display:none!important}
+.app-header #admin-nav-link:hover{background:#2d3034}
+.admin-page .admin-portal-header{min-height:43px;padding-block:6px}
+.admin-header-navigation{display:flex;align-items:center;gap:6px;margin-left:auto}
+.admin-header-navigation a,.admin-header-navigation .admin-current-area{
+  display:inline-flex;align-items:center;min-height:29px;padding:4px 11px;
+  font-size:12px;border-radius:4px;text-decoration:none;
+}
+.admin-header-navigation a{color:#d7dadd}
+.admin-header-navigation a:hover{background:#2b3035}
+.admin-header-navigation .admin-current-area{background:#34383d;color:#fff;border-bottom:2px solid var(--spx-accent)}
+.admin-portal-header #theme-toggle{color:#f2f2f0;flex-shrink:0}
+.admin-layout{margin-top:23px}
+.admin-heading{margin-bottom:16px}
+.admin-panel{margin-bottom:13px}
+body.results-window #results-panel [data-results-content="streams"]:not([hidden]){
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+  max-width:1600px;gap:12px;padding:16px;
+}
+body.results-window #results-panel [data-results-content="balances"]:not([hidden]){
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,370px),500px));
+  gap:12px;padding:16px;
+}
+body.results-window .results-card{padding:12px;border-radius:5px}
+body.results-window .results-card dl{gap:6px;font-size:12px}
+body.results-window .results-card summary{font-size:12px}
+body.results-window .results-card h3{font-size:13px;margin-bottom:9px}
+@media(max-width:900px){
+  .command-bar #calculate-button.primary-calculate{min-width:112px;padding:4px 9px}
+  .admin-header-navigation .admin-current-area{padding-inline:5px}
+}
