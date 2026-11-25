@@ -70,13 +70,20 @@ def _check_params(payload):
 
 def _monitor_name(call, tag, words, preferred=None):
     """DWSIM ids are discovered on the actual engine, never inferred from labels."""
-    catalog = call('dwsim_dynamics_properties', tag=tag)
-    props = catalog.get('properties', [])
-    if not isinstance(props, list) or not props:
-        raise DynamicInputError('El motor no informó propiedades monitoreables para ' + tag)
-    candidates = [row for row in props if isinstance(row, dict)
-                  and isinstance(row.get('id'), str) and row['id'].strip()]
+    # El MCP limita a 20 propiedades por respuesta: primero consultar con filtros.
     preferred = preferred or ()
+    candidates = []
+    for term in (*preferred, *words, ''):
+        response = call('dwsim_dynamics_properties', tag=tag, filter=term or None)
+        props = response.get('properties', [])
+        if isinstance(props, list):
+            for row in props:
+                if isinstance(row, dict) and isinstance(row.get('id'), str) and row['id'].strip() and all(old.get('id') != row['id'] for old in candidates):
+                    candidates.append(row)
+        if candidates and term:
+            break
+    if not candidates:
+        raise DynamicInputError('El motor no informó propiedades monitoreables para ' + tag)
     for choice in preferred:
         for row in candidates:
             if row['id'].lower() == choice.lower():
