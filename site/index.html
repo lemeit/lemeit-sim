@@ -137,7 +137,11 @@
 <dialog id="tank-dynamics-dialog" class="tank-dynamics-dialog" aria-labelledby="tank-dynamic-title">
   <div class="dialog-heading"><h2 id="tank-dynamic-title">Dinámica · Tanque</h2><button type="button" class="dialog-close" data-close-dialog aria-label="Cerrar dinámica del tanque" title="Cerrar">×</button></div>
   <div class="tank-dynamic-intro">
-    <strong>Modelo didáctico de ΣIM · no calculado con DWSIM</strong>
+    <label class="tank-dynamic-source-picker" for="tank-dynamic-source">Motor de dinámica
+      <select id="tank-dynamic-source"><option value="sim">Modelo didáctico ΣIM</option><option value="dwsim" disabled>DWSIM real · requiere gateway compatible</option></select>
+    </label>
+    <p id="tank-dynamic-source-info" role="status" aria-live="polite">Comprobando disponibilidad dinámica del motor…</p>
+    <strong id="tank-dynamic-model-label">Modelo didáctico de ΣIM · no calculado con DWSIM</strong>
     <p id="tank-dynamic-hint">Balance transitorio de masa con densidad constante. La simulación estacionaria de DWSIM no se modifica.</p>
   </div>
   <div class="tank-dynamic-layout">
@@ -158,6 +162,18 @@
           <label>Coeficiente Cd<input id="tank-dynamic-coefficient" type="number" min="0" max="1" step="any" value="0.62"></label>
           <label>Área del orificio [m²]<input id="tank-dynamic-orifice" type="number" min="0" step="any" value="0.0005"></label>
         </div>
+      </div>
+      <div id="tank-dynamic-mcp-parameters" class="tank-dynamic-mcp-parameters" hidden>
+        <h3>DWSIM · tanque entre dos válvulas</h3>
+        <p class="mini">Topología fija de referencia: entrada → válvula V-01 → tanque T-01 → válvula V-02 → salida. Presiones y coeficientes de válvula se configuran exclusivamente para esta prueba. No representa el modelo didáctico con descarga simplificada.</p>
+        <div class="tank-dynamic-grid">
+          <label>Presión de entrada [kPa]<input id="tank-dynamic-feed-pressure" type="number" step="any" min="110" value="130"></label>
+          <label>Presión de salida [kPa]<input id="tank-dynamic-exit-pressure" type="number" step="any" min="50" value="101.325"></label>
+          <label>Kv V-01 [m³/h]<input id="tank-dynamic-inlet-kv" type="number" step="any" min="0.01" value="100"></label>
+          <label>Kv V-02 [m³/h]<input id="tank-dynamic-outlet-kv" type="number" step="any" min="0.01" value="400"></label>
+          <label>Apertura V-01/V-02 [%]<input id="tank-dynamic-opening" type="number" step="any" min="1" max="100" value="50"></label>
+        </div>
+        <p class="mini">El estado inicial lo define el integrador de DWSIM. No se aplica el volumen inicial del modelo didáctico.</p>
       </div>
       <h3>Integración</h3>
       <div class="tank-dynamic-grid">
