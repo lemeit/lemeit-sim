@@ -2406,3 +2406,15 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 .tank-dynamic-chart-tools label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .tank-dynamic-chart-tools input[type=checkbox]{accent-color:var(--spx-text);margin:0}
 #tank-dynamic-chart{background:#fff;min-height:0}
+
+/* Menús y espacio científico independiente */
+.sim-shell .menu-panel select,.sim-shell #diagram-menu #diagram-add{font-family:var(--spx-font-sans);font-size:11px;font-weight:400;line-height:1.5;color:var(--spx-text);box-sizing:border-box}
+.charts-dialog{width:min(1000px,calc(100vw - 30px));max-width:calc(100vw - 30px);max-height:calc(100dvh - 36px);resize:both;overflow:auto}
+.charts-body{padding:14px 18px;color:var(--spx-text)}
+.charts-dialog [hidden]{display:none!important}
+.charts-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.charts-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;min-width:0}
+.charts-controls :is(select,input){min-width:0;width:100%;box-sizing:border-box;font:inherit;background:var(--spx-surface);color:var(--spx-text);border:1px solid var(--spx-border);border-radius:3px;padding:6px}
+.charts-options{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0;font-size:11px}.charts-options label{display:flex;align-items:center;gap:4px}
+#charts-svg{display:block;width:100%;height:auto;border:1px solid var(--spx-border);background:white}#charts-scrub{width:100%}#charts-error{color:var(--spx-accent);font-size:12px}
+@media(max-width:700px){.charts-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
