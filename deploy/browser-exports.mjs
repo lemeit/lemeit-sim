@@ -717,7 +717,7 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
    const palette=page.locator(`#palette [data-type="${type}"] svg`);
    const picker=streams.locator(`[data-insert-type="${type}"] svg`);
    const icon=svg=>svg.evaluate(el=>({markup:el.innerHTML,stroke:getComputedStyle(el).stroke,fill:getComputedStyle(el).fill}));
-   assert.deepEqual(await icon(picker),await icon(palette));
+   assert.notDeepEqual(await icon(picker),await icon(palette),'La barra usa icono técnico propio y la paleta conserva DWSIM');
  }
  await streams.getByRole('button',{name:'Corriente de materia',exact:true}).click();
  assert.equal(await nodes.count(),count+2);
@@ -808,7 +808,7 @@ test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expa
  assert.ok(Math.abs(expanded.panelHeight-initial.panelHeight)<1,'Abrir ecuaciones no aumenta el panel');
  assert.ok(Math.abs(expanded.canvasHeight-initial.canvasHeight)<1,'Abrir ecuaciones no reduce el lienzo');
  const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content);
- assert.match(marker,/−|\\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
+ assert.match(marker,/−|\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
  if(await panel.locator('#process-explorer-next').isEnabled()){
    await panel.locator('#process-explorer-next').click();
    const after=await measure();
@@ -841,15 +841,15 @@ test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas na
  assert.equal(await details.count(),1);
  const summary=details.locator('summary');
  assert.ok(await summary.evaluate(el=>getComputedStyle(el).listStyleType==='none'));
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\\+/);
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
  await summary.click();
  assert.equal(await details.getAttribute('open'),'');
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\\2212/);
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
  const controls=page.locator('.app-menu>summary');
  assert.equal(await controls.first().evaluate(el=>getComputedStyle(el).listStyleType),'none');
  await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
  const history=page.locator('.services-history').first();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\\+/);
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
  await history.locator('summary').click();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\\2212/);
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
 });
