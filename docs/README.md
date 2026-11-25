@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 24/11/2026 · Portal publicado 0.47.4 · 0.47.5 en PR de corrección energética · Motor DWSIM 10.2.15.
+Revisión: 24/11/2026 · Portal 0.47.7 en revisión · 0.47.6 publicado · Motor DWSIM 10.2.15.
 
 ## Empezar
 
