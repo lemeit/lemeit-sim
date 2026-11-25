@@ -600,7 +600,7 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
  assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
-   ['Archivo','Proyecto','Diagrama','Simulación','Vista','Portal']);
+   ['Archivo','Proyecto','Simulación','Diagrama','Vista','Portal']);
  for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
    assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
  }
@@ -666,7 +666,7 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
      assert.ok(await trigger.evaluate(summary=>{
        const box=summary.getBoundingClientRect(), icon=summary.querySelector('svg').getBoundingClientRect();
        return icon.width>=20&&icon.height>=20&&icon.top>=box.top+3&&icon.bottom<=box.bottom-3
-         &&icon.left>=box.left+3&&icon.right<=box.right-8;
+         &&icon.left>=box.left+3&&icon.right<=box.right-3;
      }));
    }
  }
@@ -744,4 +744,33 @@ test('Ventana de balances respeta motor Debian fijado en ventana principal',asyn
  await popup.waitForFunction(()=>document.querySelector('#engine-select')?.value==='auto');
  assert.match(await popup.locator('#engine-current').innerText(),/Automático/);
  await popup.close();
+});
+
+test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación integrada',async t=>{
+  const page=await browserPage(t);
+  assert.equal(await page.locator('#theme-toggle').count(),1);
+  assert.equal(await page.locator('[data-toolbar-action="theme-toggle"]').count(),0);
+  assert.equal(await page.locator('#calculate-button .calculate-play path').count(),2);
+  assert.equal(await page.locator('#calculate-button.primary-calculate').count(),1);
+  assert.equal(await page.locator('#toolbar-layout-reset').count(),1);
+  assert.equal(await page.locator('#view-menu [data-toolbar-action="fit-button"]').count(),0,'Vista no repite el encuadre de la barra');
+  const admin=page.locator('#admin-nav-link');
+  assert.equal(await admin.getAttribute('target'),null,'Administración no abre otra pestaña');
+  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
+  const original=await order();
+  await page.locator('.simulation-tools .toolbar-grip').evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',altKey:true,bubbles:true})));
+  const changed=await order();
+  assert.notDeepEqual(changed,original);
+  assert.equal(changed.indexOf('simulation-tools'),original.indexOf('simulation-tools')-1);
+  await page.locator('#view-menu > summary').click();
+  await page.locator('#toolbar-layout-reset').click();
+  assert.deepEqual(await order(),['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
+  await page.locator('#theme-toggle').click();
+  assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+  await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#theme-toggle').count(),1);
+  assert.equal(await page.locator('.admin-header-navigation a[href="/"]').count(),1);
+  await page.goto(new URL('/acceso.html',page.url()).href,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#theme-toggle').count(),1);
+  assert.equal(await page.locator('.access-brand').count(),0,'Acceso usa un solo logotipo');
 });

@@ -6,7 +6,17 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.47.6 — 2026-11-24 (en revisión)
+## 0.47.7 — 2026-11-25 (en revisión; pendiente de publicación)
+
+- Botón Calcular con símbolo delta/play original de ΣIM, mayor tamaño y jerarquía visual sin efectos decorativos.
+- Elimina el segundo acceso al cambio claro/oscuro: se conserva el control en cabecera y se integra también en Acceso y Administración.
+- Controles «Más opciones» sustituyen flechas repetidas en la barra; menú Ver depurado para no repetir zoom.
+- Grupos Archivo, Proyecto, Simulación, Diagrama, Vista y Herramientas reordenables por arrastre o teclado (Alt + flechas) y persistentes solo en este navegador; restablecimiento desde Ver.
+- Administración deja de abrir una pestaña distinta y comparte navegación y cabecera con el simulador; Acceso usa la misma identidad visual.
+- Botón Calcular y tarjetas de resultados más legibles, manteniendo CSV/Excel y lógica física intactos.
+- Verificaciones de interfaz y diseño incorporadas; la publicación se condiciona a CI y prueba visual.
+
+## 0.47.6 — 2026-11-24
 
 - Ventanas independientes: sincronizan modo y motor efectivo desde la ventana principal; muestran el motor del cálculo completado sin recalcular ni seleccionar automáticamente otro destino.
 - Los resultados energéticos pequeños distintos de cero se representan mediante notación científica, evitando que el residuo se vea como cero exacto.
