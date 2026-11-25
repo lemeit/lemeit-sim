@@ -2358,6 +2358,7 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 .tank-dynamic-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;min-width:0}
 .tank-dynamic-grid input,.tank-dynamic-grid select{width:100%;height:30px;box-sizing:border-box;padding:4px 7px;border:1px solid var(--spx-border);border-radius:3px;background:var(--spx-surface);color:var(--spx-text);font:inherit}
 .tank-dynamic-grid .tank-dynamic-gravity{grid-column:1/-1}
+.tank-dynamics-dialog [hidden]{display:none!important}
 .tank-dynamic-results{min-width:0;border-left:1px solid var(--spx-border);padding-left:18px}
 .tank-dynamic-chart-tools{display:flex;align-items:center;gap:9px;font-size:11px;margin-bottom:6px}
 #tank-dynamic-chart{display:block;width:100%;height:auto;min-height:200px;background:var(--spx-surface-2);border:1px solid var(--spx-border);border-radius:4px}
