@@ -31,7 +31,8 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-orifice').value='0.0005';
    $('tank-dynamic-duration').value='6000';
    $('tank-dynamic-step').value='20';
-   $('tank-dynamic-chart-select').value='volume';
+   $('tank-dynamic-chart-select').value='level';
+   $('scientific-log').checked=false;
    $('tank-dynamic-hint').textContent='Modelo simplificado independiente de DWSIM. '+(Number.isFinite(rho)&&rho>0&&Number.isFinite(input)?'Densidad y caudal inicial tomados de la última corrida estacionaria; el caudal de salida se fija inicialmente en cero para estudiar el llenado.':'No hay propiedades calculadas válidas para esta entrada: densidad y caudal son valores iniciales orientativos editables.')+(Number.isFinite(output)?' Salida estacionaria: '+num(output)+' kg/s.':'');
    $('tank-dynamic-error').hidden=true;
    $('tank-dynamic-result').hidden=true;
@@ -79,21 +80,20 @@ globalThis.SimTankDynamicsUI=(()=>{
    const points=current.points,at=Math.min(points.length-1,Number($('tank-dynamic-scrub').value)),point=points[at];
    $('tank-dynamic-reading').textContent='t = '+num(point.time_s,2)+' s · V = '+num(point.volume_m3,4)+' m³ · h = '+num(point.level_m,4)+' m · '+num(point.fill_pct,2)+' %';
    const variable=$('tank-dynamic-chart-select').value;
-   const chartSeries=variable==='level'?[{key:'level_m',name:'Nivel [m]',color:'#2368a2'}]:
-     variable==='flows'?[{key:'inlet_m3_s',name:'Entrada [m³/s]',color:'#2465a3'},{key:'outlet_m3_s',name:'Salida [m³/s]',color:'#b14d44'}]:
-     [{key:'volume_m3',name:'Volumen [m³]',color:'#2465a3'}];
-   const left=58,right=746,top=22,bottom=216,w=right-left,h=bottom-top,end=points[points.length-1].time_s||1;
-   const maxVal=Math.max(1e-12,...chartSeries.flatMap(s=>points.map(p=>p[s.key])))*1.08;
-   const xx=t=>left+w*t/end, yy=v=>bottom-h*v/maxVal;
-   const lines=chartSeries.map(s=>{
-     const d=points.map((p,i)=>(i?'L':'M')+xx(p.time_s).toFixed(2)+' '+yy(p[s.key]).toFixed(2)).join(' ');
-     const marker='<circle cx="'+xx(point.time_s).toFixed(2)+'" cy="'+yy(point[s.key]).toFixed(2)+'" r="4" fill="'+s.color+'"/>';
-     return '<path d="'+d+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linejoin="round"/>'+marker;
-   }).join('');
-   const axisTicks=[0,.25,.5,.75,1].map(k=>'<line x1="'+left+'" x2="'+right+'" y1="'+yy(k*maxVal).toFixed(2)+'" y2="'+yy(k*maxVal).toFixed(2)+'" stroke="currentColor" opacity=".1"/><text x="'+(left-8)+'" y="'+(yy(k*maxVal)+4).toFixed(2)+'" text-anchor="end">'+escape(num(k*maxVal,4))+'</text>').join('');
-   const xticks=[0,.25,.5,.75,1].map(k=>'<text x="'+xx(k*end).toFixed(2)+'" y="240" text-anchor="middle">'+escape(num(k*end,1))+'</text>').join('');
-   const legend=chartSeries.map((s,i)=>'<rect x="'+(left+i*180)+'" y="2" width="10" height="3" fill="'+s.color+'"/><text x="'+(left+15+i*180)+'" y="8">'+escape(s.name)+'</text>').join('');
-   $('tank-dynamic-chart').innerHTML='<g class="tank-chart-axis" fill="currentColor" font-size="11">'+axisTicks+xticks+legend+'<text x="400" y="257" text-anchor="middle">Tiempo [s]</text></g>'+lines;
+   const real=current.source==='dwsim-mcp-dynamics';
+   const chartSeries=variable==='level'?[{key:'level_m',name:'Nivel'}]:
+     variable==='flows'?[{key:'inlet_m3_s',name:real?'Entrada estimada':'Entrada'},{key:'outlet_m3_s',name:real?'Salida estimada':'Salida'}]:
+     variable==='massflow'?[{key:'outlet_kg_s',name:'Descarga'}]:
+     variable==='fill'?[{key:'fill_pct',name:'Llenado'}]:[{key:'volume_m3',name:real?'Volumen derivado':'Volumen'}];
+   const chartPoints=variable==='massflow'&&!real?points.map(p=>({...p,outlet_kg_s:p.outlet_m3_s*current.config.density})):points;
+   const labels={level:'Nivel [m]',flows:'Caudal volumétrico [m³/s]',massflow:'Caudal másico [kg/s]',fill:'Llenado [%]',volume:'Volumen [m³]'};
+   try{
+     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked,logY:$('scientific-log').checked});
+   }catch(error){
+     $('scientific-log').checked=false;
+     if(!chartPoints.some(p=>chartSeries.some(s=>Number.isFinite(p[s.key])))){$('tank-dynamic-chart').textContent='';$('tank-dynamic-status').textContent='Variable sin datos disponibles.';return;}
+     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked});
+   }
  }
  function download(){
    if(!current)return;
@@ -118,6 +118,8 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-calculate').addEventListener('click',calculate);
    $('tank-dynamic-play').addEventListener('click',play);
    $('tank-dynamic-chart-select').addEventListener('change',render);
+   for(const id of ['scientific-grid','scientific-markers','scientific-log'])$(id).addEventListener('change',render);
+   $('scientific-export-svg').addEventListener('click',()=>{if(current)SimScientificCharts.download($('tank-dynamic-chart'));});
    $('tank-dynamic-scrub').addEventListener('input',()=>{pause();render();});
    $('tank-dynamic-download').addEventListener('click',download);
    $('tank-dynamics-dialog').addEventListener('close',()=>{pause();current=null;});

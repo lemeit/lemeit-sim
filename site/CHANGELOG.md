@@ -6,13 +6,19 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
-## 0.48.1 — 2026-11-25 (en revisión; sin validación física)
+## 0.49.0 — 2026-11-25 (en revisión)
+
+- Renderizador científico SVG reutilizable, independiente del motor y de la operación unitaria; ejes rotulados, unidades, leyenda y procedencia, cuadrícula opcional, marcadores, escala Y logarítmica y exportación vectorial.
+- Primera integración en dinámica de tanque, con nivel, volumen, porcentaje de llenado y caudales; conserva la reproducción temporal y CSV.
+- Pendiente panel autónomo, zoom y guardado de configuraciones por proyecto.
+
+## 0.48.1 — 2026-11-25 (Debian validado; Windows pendiente)
 
 - Separador horizontal ↕ entre ventanas laterales: apariencia mínima, línea de 1 px y área invisible de arrastre; se mantiene el ajuste y persistencia implementados en 0.48.0.
 - Primer puente **experimental** al integrador DWSIM MCP: herramienta de capacidades, topología tanque abierto con válvulas, dinámica con configuración de programa, monitoreo y series temporales del motor seleccionado.
 - Ejemplo 20: tanque de agua entre dos válvulas, complementario al Ejemplo 15 estacionario; se conserva la fuente real de datos y se evita sustituir fallos con cálculo didáctico.
 - El modo didáctico propio sigue disponible, marcado como independiente de DWSIM; CSV y gráficas de la simulación real identificados por separado.
-- Pruebas unitarias simuladas del protocolo MCP y pruebas de interfaz; **pendiente validación con gateways Debian y Windows antes de publicar**.
+- Pruebas unitarias simuladas del protocolo MCP y pruebas de interfaz; Debian validado con 121 puntos y nivel final 0,3329 m; Windows pendiente de prueba física.
 
 ## 0.48.0 — 2026-11-25 (en revisión)
 
