@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 24/11/2026 · Portal 0.47.7 en revisión · 0.47.6 publicado · Motor DWSIM 10.2.15.
+Revisión: 25/11/2026 · Portal 0.49.0 integrado y CI aprobado; despliegue a verificar · Motor DWSIM 10.2.15.
 
 ## Empezar
 
@@ -10,6 +10,7 @@ Revisión: 24/11/2026 · Portal 0.47.7 en revisión · 0.47.6 publicado · Motor
 | Crear una clase, copiar su código o desactivarlo | [Administración de clases](administracion-clases.md) |
 | Entender los permisos, sesiones y secretos | [Acceso y seguridad](acceso-clases-admin.md) |
 | Consultar qué equipos están adaptados | [Catálogo](../site/catalogo.html) y [hoja de ruta](roadmap.md) |
+| Estudiar dinámica y gráficas científicas | [Gráficas científicas](graficas-cientificas.md) · [Ejemplo 20](ejemplo-20-tanque-dinamico-dwsim.md) |
 | Usar unidades y composición | [Unidades y calculadora](unidades-y-calculadora.md) |
 | Distinguir transferencia de calor de cierre energético | [Balances de intercambiadores](interpretacion-intercambiadores.md) |
 | Guardar proyectos individuales | [Manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/) y [acceso](acceso-clases-admin.md) |
