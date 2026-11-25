@@ -131,7 +131,7 @@ def _curve(series, name, units):
     return values
 
 
-def run_tank(engine, payload=None):
+def run_tank(engine, payload=None, diagnostics=None):
     """Serie real desde DWSIM; jamás inferir datos del modelo didáctico."""
     p = _check_params(payload or {})
     caps = capabilities(engine)
@@ -180,7 +180,16 @@ def run_tank(engine, payload=None):
             _monitor_name(call, 'Outlet', ('mass flow', 'massflow', 'mass flow rate', 'caudal másico'),
                           preferred=('PROP_MS_2',)),
         ]
-        call('dwsim_dynamics_monitor', integrator='SIM-Integrator', action='set', variables=monitored)
+        monitor_reply = call('dwsim_dynamics_monitor', integrator='SIM-Integrator',
+                             action='set', variables=monitored)
+        if diagnostics is not None:
+            diagnostics['requested'] = monitored
+            diagnostics['monitor_returned'] = monitor_reply.get('monitored_variables')
+        # Record actual registered property names as returned by DWSIM. It is
+        # possible to configure a monitor successfully but get no stored values.
+        configured = monitor_reply.get('monitored_variables')
+        if isinstance(configured, list) and len(configured) == 0:
+            raise DynamicInputError('El integrador no registró ninguna variable monitoreada.')
         readiness = call('dwsim_dynamics_check', schedule='SIM-Filling')
         if not readiness.get('ready'):
             raise DynamicInputError('DWSIM bloqueó la simulación dinámica: '+str(readiness.get('findings', []))[:900])
@@ -189,6 +198,10 @@ def run_tank(engine, payload=None):
         if not start.get('started'):
             raise DynamicInputError('DWSIM no pudo iniciar la integración: '+str(start.get('blockers', []))[:900])
         job = engine.call('dwsim_dynamics_status', run_id=start['run_id'])
+        if diagnostics is not None:
+            diagnostics['run_state'] = job.get('state')
+            diagnostics['run_steps'] = job.get('steps')
+            diagnostics['run_summary_keys'] = list((job.get('summary') or {}).keys()) if isinstance(job.get('summary'), dict) else []
         if job.get('state') not in ('completed', 'finished', 'success'):
             raise DynamicInputError('La integración no terminó correctamente: '+str(job.get('error') or job.get('state')))
         # Query all actual recorded series: the MCP may return display labels
@@ -196,9 +209,19 @@ def run_tank(engine, payload=None):
         preview = engine.call('dwsim_dynamics_series', run_id=start['run_id'],
                               max_points=240)
         recorded = preview.get('series', {})
+        if diagnostics is not None:
+            diagnostics['series_names'] = list(recorded.keys()) if isinstance(recorded, dict) else []
+            diagnostics['series_note'] = preview.get('note')
+            diagnostics['time_count'] = len(preview.get('t_s') or [])
         if not isinstance(recorded, dict):
             raise DynamicInputError('El MCP devolvió series dinámicas inválidas.')
         times = [float(t) for t in preview.get('t_s', [])]
+        if not recorded:
+            raise DynamicInputError(
+                'DWSIM completó la integración pero no registró series. '
+                'Monitor solicitado: ' + ', '.join(monitored) + '. '
+                'Monitor confirmado: ' + str(monitor_reply.get('monitored_variables'))[:350] +
+                '. Nota del MCP: ' + str(preview.get('note'))[:350])
         levels = _curve(recorded, monitored[0], 'm')
         outlet = _curve(recorded, monitored[1], 'kg/s')
         if len(times) < 2 or len(times) != len(levels) or len(levels) != len(outlet):
