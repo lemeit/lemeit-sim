@@ -116,6 +116,78 @@ class DynamicMcpTests(unittest.TestCase):
             run_tank(engine)
         self.assertTrue(engine.closed)
 
+    def test_actual_debian_monitor_labels_and_kg_per_hour_are_normalized(self):
+        engine = FakeDynamicMcp()
+        original_call = engine.call
+
+        def debian_format(tool, **kwargs):
+            response = original_call(tool, **kwargs)
+            if tool == 'dwsim_dynamics_monitor':
+                return {'monitored_variables': [
+                    'T-01 Liquid Level (m)', 'Outlet Mass Flow (kg/h)'
+                ]}
+            if tool == 'dwsim_dynamics_series':
+                return {'t_s': [0, 60, 120, 600], 'series': {
+                    'T-01 Liquid Level': {'units': 'm', 'values': [0, .23, .3, .333]},
+                    'Outlet Mass Flow': {'units': 'kg/h', 'values': [0, 30240, 33840, 36000]}
+                }, 'decimated_from': 121}
+            return response
+
+        engine.call = debian_format
+        trace = {}
+        result = run_tank(engine, diagnostics=trace)
+        self.assertTrue(engine.closed)
+        self.assertEqual(result['source'], 'dwsim-mcp-dynamics')
+        self.assertEqual(trace['run_state'], 'completed')
+        self.assertEqual(trace['time_count'], 4)
+        self.assertAlmostEqual(result['points'][1]['level_m'], .23)
+        self.assertAlmostEqual(result['points'][1]['outlet_kg_s'], 8.4)
+        self.assertAlmostEqual(result['points'][-1]['outlet_kg_s'], 10)
+        self.assertAlmostEqual(result['points'][-1]['outlet_m3_s'], 10 / 997)
+
+    def test_wrong_or_ambiguous_monitor_labels_do_not_create_fake_series(self):
+        engine = FakeDynamicMcp()
+        original_call = engine.call
+
+        def misleading_labels(tool, **kwargs):
+            response = original_call(tool, **kwargs)
+            if tool == 'dwsim_dynamics_monitor':
+                return {'monitored_variables': [
+                    'T-01 Liquid Level (m)', 'Outlet Mass Flow (kg/h)'
+                ]}
+            if tool == 'dwsim_dynamics_series':
+                return {'t_s': [0, 60], 'series': {
+                    'T-01 Temperature': {'units': 'm', 'values': [0, .23]},
+                    'Outlet Mass Flow': {'units': 'kg/h', 'values': [0, 36000]}
+                }}
+            return response
+
+        engine.call = misleading_labels
+        with self.assertRaisesRegex(DynamicInputError, 'serie inequívoca'):
+            run_tank(engine)
+        self.assertTrue(engine.closed)
+
+    def test_unknown_mass_flow_unit_is_rejected(self):
+        engine = FakeDynamicMcp()
+        original_call = engine.call
+
+        def unknown_units(tool, **kwargs):
+            response = original_call(tool, **kwargs)
+            if tool == 'dwsim_dynamics_monitor':
+                return {'monitored_variables': [
+                    'T-01 Liquid Level (m)', 'Outlet Mass Flow (lb/h)'
+                ]}
+            if tool == 'dwsim_dynamics_series':
+                return {'t_s': [0, 60], 'series': {
+                    'T-01 Liquid Level': {'units': 'm', 'values': [0, .23]},
+                    'Outlet Mass Flow': {'units': 'lb/h', 'values': [0, 36000]}
+                }}
+            return response
+
+        engine.call = unknown_units
+        with self.assertRaisesRegex(DynamicInputError, 'Unidades inesperadas'):
+            run_tank(engine)
+
     def test_readiness_failure_is_not_silently_faked(self):
         engine = FakeDynamicMcp(ready=False)
         with self.assertRaisesRegex(DynamicInputError, 'DWSIM bloqueó'):
