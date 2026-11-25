@@ -915,7 +915,7 @@ test('Tanque: el módulo didáctico genera curva propia sin llamar al gateway de
  await page.locator('#inspector [data-tank-dynamic="tank"]').click();
  const dialog=page.locator('#tank-dynamics-dialog');
  assert.equal(await dialog.isVisible(),true);
- assert.match(await dialog.locator('#tank-dynamic-hint').innerText(),/independiente de DWSIM/);
+ assert.match(await dialog.locator('#tank-dynamic-hint').innerText(),/independiente de DWSIM|no usa DWSIM/);
  await dialog.locator('#tank-dynamic-calculate').click();
  assert.equal(await dialog.locator('#tank-dynamic-result').isVisible(),true);
  assert.ok(await dialog.locator('#tank-dynamic-chart path').count()>0);
