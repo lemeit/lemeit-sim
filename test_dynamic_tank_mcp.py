@@ -75,6 +75,45 @@ class DynamicMcpTests(unittest.TestCase):
         self.assertIn('dwsim_dynamics_check', call_names)
         self.assertIn('dwsim_dynamics_series', call_names)
 
+    def test_series_with_display_labels_use_unambiguous_tag_and_units(self):
+        # Regression: the MCP can record "T-01.Liquid Level" despite a
+        # configured internal property id "T-01.LevelOfLiquid".
+        engine = FakeDynamicMcp()
+        result = run_tank(engine)
+        self.assertAlmostEqual(result['points'][1]['level_m'], .23)
+
+    def test_missing_series_is_reported_without_fabricating_points(self):
+        engine = FakeDynamicMcp()
+        original_call = engine.call
+
+        def without_level(tool, **kwargs):
+            response = original_call(tool, **kwargs)
+            if tool == 'dwsim_dynamics_series':
+                response['series'].pop('T-01.Liquid Level')
+            return response
+
+        engine.call = without_level
+        with self.assertRaisesRegex(DynamicInputError, 'Series disponibles: Outlet.PROP_MS_2'):
+            run_tank(engine)
+        self.assertTrue(engine.closed)
+
+    def test_ambiguous_series_same_equipment_and_units_fails(self):
+        engine = FakeDynamicMcp()
+        original_call = engine.call
+
+        def ambiguous_level(tool, **kwargs):
+            response = original_call(tool, **kwargs)
+            if tool == 'dwsim_dynamics_series':
+                response['series']['T-01.Other Level'] = {
+                    'units': 'm', 'values': [0, .24, .31, .34]
+                }
+            return response
+
+        engine.call = ambiguous_level
+        with self.assertRaisesRegex(DynamicInputError, 'Series disponibles:'):
+            run_tank(engine)
+        self.assertTrue(engine.closed)
+
     def test_readiness_failure_is_not_silently_faked(self):
         engine = FakeDynamicMcp(ready=False)
         with self.assertRaisesRegex(DynamicInputError, 'DWSIM bloqueó'):
