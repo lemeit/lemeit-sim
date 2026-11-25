@@ -29,6 +29,8 @@ class FakeDynamicMcp:
             if kw['tag'] == 'T-01':
                 return {'properties': [{'id': 'LevelOfLiquid', 'description': 'Liquid Level', 'units': 'm', 'dynamic': True}]}
             return {'properties': [{'id': 'PROP_MS_2', 'description': 'Mass Flow', 'units': 'kg/s'}]}
+        if tool == 'dwsim_dynamics_monitor':
+            return {'monitored_variables': kw['variables']}
         if tool == 'dwsim_dynamics_check':
             return {'ready': self.ready, 'findings': [{'message': 'Falta presión'}]}
         if tool == 'dwsim_dynamics_run':
