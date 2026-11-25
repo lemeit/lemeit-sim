@@ -1,6 +1,6 @@
 # Trabajar con un proyecto
 
-Revisión: 24/11/2026 · portal publicado 0.47.4. Los apartados detallados más abajo describen funciones históricas; la guía operativa vigente se mantiene en el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
+Revisión: 25/11/2026 · 0.49.0 integrada; despliegue a verificar. Los apartados históricos se complementan con el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
 
 ## Flujo recomendado actual
 
@@ -11,7 +11,15 @@ Revisión: 24/11/2026 · portal publicado 0.47.4. Los apartados detallados más 
 5. Elegí explícitamente Windows o Debian y pulsá **▶ Calcular**. Interpretá luces de estado y vigencia de resultados.
 6. Abrí **Explorar proceso…** para estudiar ecuaciones, balances y valores de DWSIM ya calculados, sin relanzar la simulación.
 7. Guardá el proyecto **en la nube**; opcionalmente descargá una **copia JSON**. Para presentar, exportá tablas CSV/Excel o **Reporte PDF · diagrama y balances** con rótulo, actividad y tablas.
-8. Un valor cercano a cero en la energía neta de un intercambiador **no** implica transferencia térmica interna cero. Ver [interpretación energética](interpretacion-intercambiadores.md) (corrección de etiquetas 0.47.5 en PR, pendiente de publicar).
+8. Un valor cercano a cero en la energía neta de un intercambiador **no** implica transferencia térmica interna cero. Ver [interpretación energética](interpretacion-intercambiadores.md) (corrección integrada desde 0.47.5).
+
+## Dinámica y gráficas científicas
+
+Para la práctica de acumulación abrí Ejemplo 20, fijá Debian, seleccioná T-01 y abrí Dinámica del tanque · nivel y curvas. La [guía de gráficas](graficas-cientificas.md) describe los controles, la lectura de series y la exportación SVG/CSV. No confundir con Explorar proceso, que recorre resultados estacionarios.
+
+## Organización visual reciente
+
+Arrastrá las cabeceras para mover paneles flotantes y los bordes para ajustar tamaños. El separador horizontal ↕ dentro de cada lateral ajusta alturas de paneles apilados; doble clic lo centra. Los grupos de la barra se reordenan por arrastre o Alt + flechas; Ver permite restablecer. El tema se selecciona en cabecera; los detalles +/− y el desplazamiento interno mantienen estable el explorador de proceso.
 
 ## Registro histórico de comandos y paneles previos
 
