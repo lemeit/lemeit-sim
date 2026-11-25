@@ -13,6 +13,10 @@ Versión de referencia: **ΣIM 0.49.0**, integrada en main y con CI aprobado. Co
 
 El modo didáctico usa geometría, densidad y volumen inicial editables, caudal de salida constante o descarga por gravedad y Euler explícito. El modo DWSIM crea una topología temporal fija de agua con dos válvulas; no integra cualquier PFD ni utiliza el volumen inicial didáctico.
 
+## Ventana Gráficas (0.49.1)
+
+Desde **Ver → Gráficas científicas…**, el icono de gráfica de la barra de Simulación o **Abrir en Gráficas ↗** dentro del tanque, podés consultar la última serie calculada sin volver a ejecutar DWSIM. Elegí libremente X e Y, una segunda curva de la misma unidad y un título. La ventana es redimensionable y conserva la serie mientras no se cambie de proyecto ni de condiciones físicas. No es todavía un panel acoplable ni persiste datos en la nube.
+
 ## Leer y configurar las gráficas
 
 | Selector | Magnitud | Unidad |
@@ -53,5 +57,5 @@ El balance dm/dt = entrada − salida explica la estabilización: al final la de
 
 ## Alcance y evolución
 
-El núcleo gráfico es reutilizable, pero la interfaz actual está dentro del tanque. Panel autónomo acoplable, selección arbitraria X/Y, zoom, importación de datos experimentales, incertidumbre, regresiones, cinética y persistencia son desarrollos pendientes. No se atribuyen al módulo actual.
+El núcleo gráfico es reutilizable, pero la interfaz actual está dentro del tanque. Panel acoplable, zoom, importación de datos experimentales, incertidumbre, regresiones, cinética y persistencia son desarrollos pendientes. No se atribuyen al módulo actual.
 

@@ -81,7 +81,7 @@ globalThis.SimTankDwsimMode=(()=>{
        throw Error('DWSIM no devolvió una serie temporal completa.');
      if(token!==generation||!$('tank-dynamics-dialog').open)return;
      last=data;
-     SimTankDynamicsUI.showExternal(data);
+     SimTankDynamicsUI.showExternal(data,engine);
      info('Resultado real de DWSIM '+engine+'. '+data.assumptions);
    }catch(error){
      if(token!==generation)return;

@@ -106,7 +106,7 @@ function updateResultValidity(){
     button.setAttribute('aria-busy',String(busy));}
 }
 function changed({physical=true}={}){
-  if(physical){if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  if(physical){globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
   updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
@@ -461,7 +461,7 @@ function renderInspector(){
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
   if(n.type==='HeatExchanger')html+=`<p class="inspector-description">Intercambiador de dos corrientes sin mezcla. Puerto 1: caliente, puerto 2: frío. Se especifica únicamente la potencia térmica transferida del caliente al frío (kW); DWSIM calcula ambas temperaturas de salida. El modelo inicial no incluye pérdidas externas ni caídas de presión.</p>${field('heat_duty_kW','Calor transferido','kW',n.heat_duty_kW,{min:0.000001})}`;
   if(TYPES[n.type].diagramOnly)html+='<p class="inspector-description">Disponible para dibujar y conectar en el PFD. Cálculo sin implementar en ΣIM.</p>';
-  if(n.type==='Tank')html+=`<button type="button" class="outline-button tank-dynamic-open" data-tank-dynamic="${esc(n.id)}" title="Resolver balance integral de llenado con un modelo didáctico independiente de DWSIM">Dinámica del tanque · nivel y curvas…</button><p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
+  if(n.type==='Tank')html+=`<button type="button" class="outline-button tank-dynamic-open" data-tank-dynamic="${esc(n.id)}" title="Estudiar el llenado mediante DWSIM real o el modelo didáctico">Dinámica del tanque · nivel y curvas…</button><p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
   if(n.type==='Expander')html+=`<p class="inspector-description">Expansión adiabática de gas con producción de trabajo de eje. Especificá una presión absoluta de descarga menor que la entrada y la eficiencia isentrópica. Solo alimentación vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}${Number.isFinite(result?.equipment[n.id]?.shaft_power_generated_kW)?`<p class="reading-row">Potencia de eje producida: <strong>${fmt(result.equipment[n.id].shaft_power_generated_kW,3)} kW</strong></p>`:''}`;
   if(n.type==='Compressor')html+=`<p class="inspector-description">Compresión adiabática de gas: especificá presión absoluta de descarga y eficiencia isentrópica. DWSIM calcula temperatura y potencia de eje. Solo alimentación completamente vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}`;
   if(n.type==='Pump')html+=`<p class="inspector-description">Bomba de líquido con presión absoluta de salida y eficiencia. El motor calcula potencia y temperatura. No usar para alimentar con vapor.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia','%',n.efficiency_pct,{min:0.01})}`;
@@ -932,6 +932,7 @@ async function init(){
   SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
+  SimChartWorkspace.bind();
   SimTankDynamicsUI.bind();
   SimTankDwsimMode.bind({getEngine:()=>selectedEngine});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
@@ -961,6 +962,7 @@ function renderNewProject(){
   $('create-project').disabled=!draftCompounds.length||!$('new-project-model').value;
 }
 function clearLoadedProject(clearLocalDraft=false){
+  globalThis.SimChartWorkspace?.reset();
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   SimExerciseEditor.reset();
   graph=emptyProject();
