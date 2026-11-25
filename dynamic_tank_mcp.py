@@ -100,28 +100,48 @@ def _monitor_name(call, tag, words, preferred=None):
         '. Variables disponibles: ' + ', '.join(row['id'] for row in candidates[:12]))
 
 
-def _curve(series, name, units):
-    """Select only the monitored variable, never fabricate a missing series."""
-    data = series.get(name)
-    matched_name = name
-    if data is None:
-        # MCP versions may store display labels instead of internal property ids.
-        # Match only an unambiguous variable from the same equipment and units.
-        tag = name.rsplit('.', 1)[0] + '.'
-        matches = [(key, row) for key, row in series.items()
-                   if isinstance(key, str) and key.startswith(tag)
-                   and isinstance(row, dict) and row.get('units') == units
-                   and isinstance(row.get('values'), list)]
-        if len(matches) == 1:
-            matched_name, data = matches[0]
-    if not isinstance(data, dict) or not isinstance(data.get('values'), list):
+def _curve(series, name, units, confirmed_name=None):
+    """Locate an actual DWSIM monitor by label and convert only known units.
+
+    MCP monitor accepts TAG.PropertyId but its response and the time-series
+    API return human-readable labels (e.g. T-01 Liquid Level). Never choose
+    another monitored property merely because it has a compatible unit.
+    """
+    def label(text):
+        # Normalise separators only: preserve the actual meaning of each name.
+        return ' '.join(str(text).strip().lower().replace('.', ' ').split())
+
+    def split_display(text):
+        raw = str(text).strip()
+        if raw.endswith(')') and ' (' in raw:
+            prefix, suffix = raw.rsplit(' (', 1)
+            return prefix, suffix[:-1]
+        return raw, None
+
+    expected = {label(name)}
+    if confirmed_name:
+        expected.add(label(split_display(confirmed_name)[0]))
+    # The returned label is authoritative; match by complete name only.
+    matches = [(key, row) for key, row in series.items()
+               if isinstance(key, str) and label(key) in expected
+               and isinstance(row, dict) and isinstance(row.get('values'), list)]
+    if len(matches) != 1:
         keys = ', '.join(str(key) for key in series) or '(ninguna)'
         raise DynamicInputError(
-            'DWSIM no registró la variable ' + name +
+            'DWSIM no registró una serie inequívoca para ' + name +
             '. Series disponibles: ' + keys +
-            '. Revisar las propiedades e integrador monitoreado.')
+            '. Monitor confirmado: ' + str(confirmed_name))
+    matched_name, data = matches[0]
+    actual_units = data.get('units') or split_display(confirmed_name or '')[1]
+    conversions = {'m': {'m': 1.0},
+                   'kg/s': {'kg/s': 1.0, 'kg/h': 1.0 / 3600.0}}
+    factor = conversions.get(units, {}).get(actual_units)
+    if factor is None:
+        raise DynamicInputError(
+            'Unidades inesperadas para ' + matched_name + ': ' +
+            str(actual_units) + ' (se esperaba ' + units + ').')
     try:
-        values = [float(x) for x in data['values']]
+        values = [float(x) * factor for x in data['values']]
     except (TypeError, ValueError) as exc:
         raise DynamicInputError('La serie ' + matched_name +
                                 ' contiene valores no numéricos.') from exc
@@ -129,7 +149,6 @@ def _curve(series, name, units):
         raise DynamicInputError('La serie ' + matched_name +
                                 ' está vacía o contiene valores no finitos.')
     return values
-
 
 def run_tank(engine, payload=None, diagnostics=None):
     """Serie real desde DWSIM; jamás inferir datos del modelo didáctico."""
@@ -222,8 +241,11 @@ def run_tank(engine, payload=None, diagnostics=None):
                 'Monitor solicitado: ' + ', '.join(monitored) + '. '
                 'Monitor confirmado: ' + str(monitor_reply.get('monitored_variables'))[:350] +
                 '. Nota del MCP: ' + str(preview.get('note'))[:350])
-        levels = _curve(recorded, monitored[0], 'm')
-        outlet = _curve(recorded, monitored[1], 'kg/s')
+        names = monitor_reply.get('monitored_variables')
+        if not isinstance(names, list) or len(names) != len(monitored):
+            raise DynamicInputError('DWSIM no confirmó la correspondencia de las variables monitoreadas.')
+        levels = _curve(recorded, monitored[0], 'm', names[0])
+        outlet = _curve(recorded, monitored[1], 'kg/s', names[1])
         if len(times) < 2 or len(times) != len(levels) or len(levels) != len(outlet):
             raise DynamicInputError('DWSIM devolvió una serie temporal incompleta.')
         area = p['capacity_m3'] / p['height_m']
