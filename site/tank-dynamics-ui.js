@@ -41,6 +41,7 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-scrub').disabled=true;
    updateOutlet();
    $('tank-dynamics-dialog').showModal();
+   globalThis.SimTankDwsimMode?.onOpen();
  }
  function updateOutlet(){
    const gravity=$('tank-dynamic-mode').value==='gravity';
@@ -121,5 +122,18 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-download').addEventListener('click',download);
    $('tank-dynamics-dialog').addEventListener('close',()=>{pause();current=null;});
  }
- return {open,bind};
+ function showExternal(data){
+   if(data?.source!=='dwsim-mcp-dynamics'||!Array.isArray(data.points)||data.points.length<2)
+     throw Error('Los datos de DWSIM no contienen una serie de nivel válida.');
+   pause();current=data;
+   $('tank-dynamic-error').hidden=true;
+   $('tank-dynamic-result').hidden=false;
+   $('tank-dynamic-empty').hidden=true;
+   $('tank-dynamic-download').disabled=false;
+   $('tank-dynamic-play').disabled=false;
+   const slider=$('tank-dynamic-scrub');slider.min='0';slider.max=String(data.points.length-1);slider.value='0';slider.disabled=false;
+   $('tank-dynamic-status').textContent='DWSIM · '+data.points.length+' puntos · nivel del motor, volumen derivado de geometría';
+   render();
+ }
+ return {open,bind,showExternal};
 })();
