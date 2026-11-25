@@ -106,7 +106,8 @@ class DynamicMcpTests(unittest.TestCase):
         def ambiguous_level(tool, **kwargs):
             response = original_call(tool, **kwargs)
             if tool == 'dwsim_dynamics_series':
-                response['series']['T-01.Other Level'] = {
+                # Same semantic label with punctuation variation: ambiguous on purpose.
+                response['series']['T-01 Liquid Level'] = {
                     'units': 'm', 'values': [0, .24, .31, .34]
                 }
             return response
