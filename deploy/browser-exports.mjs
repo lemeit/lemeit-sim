@@ -880,3 +880,49 @@ test('Los divisores de panel son descubribles sin desplazar su mecanismo',async 
  assert.equal(await results.getAttribute('role'),'separator');
  assert.match(await results.evaluate(el=>getComputedStyle(el,'::after').content),/""/);
 });
+
+
+test('Ventanas laterales: separador horizontal regula altura y se restablece',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const right=page.locator('.sim-cad-slot[data-edge="right"]');
+ const inspector=right.locator('>.inspector-panel');
+ const balances=right.locator('>#results-panel');
+ const splitter=right.locator('>.sim-cad-stack-splitter');
+ assert.equal(await splitter.count(),1,'Hay separador interno entre Propiedades y Balances');
+ assert.equal(await splitter.getAttribute('aria-orientation'),'horizontal');
+ const before=await inspector.evaluate(el=>el.getBoundingClientRect().height);
+ const width=await right.evaluate(el=>el.getBoundingClientRect().width);
+ await splitter.focus();
+ await page.keyboard.press('ArrowDown');
+ const after=await inspector.evaluate(el=>el.getBoundingClientRect().height);
+ assert.ok(after>before+3,'La primera ventana aumenta su altura con flecha abajo');
+ assert.ok(Math.abs((await right.evaluate(el=>el.getBoundingClientRect().width))-width)<1,'No cambia el ancho de columna');
+ assert.ok(await balances.evaluate(el=>el.getBoundingClientRect().height)>80);
+ await splitter.dblclick();
+ const a=await inspector.evaluate(el=>el.getBoundingClientRect().height);
+ const b=await balances.evaluate(el=>el.getBoundingClientRect().height);
+ assert.ok(Math.abs(a-b)<4,'Doble clic reparte la altura en partes iguales');
+});
+
+test('Tanque: el módulo didáctico genera curva propia sin llamar al gateway de simulación',async t=>{
+ const page=await browserPage(t);
+ const tankExample=await load('../site/examples/TankWater.json');
+ await openProject(page,tankExample);
+ let simulations=0;
+ page.on('request',req=>{if(new URL(req.url()).pathname==='/api/simulate')simulations++;});
+ await page.locator('#diagram [data-node="tank"]').click();
+ await page.locator('#inspector [data-tank-dynamic="tank"]').click();
+ const dialog=page.locator('#tank-dynamics-dialog');
+ assert.equal(await dialog.isVisible(),true);
+ assert.match(await dialog.locator('#tank-dynamic-hint').innerText(),/independiente de DWSIM/);
+ await dialog.locator('#tank-dynamic-calculate').click();
+ assert.equal(await dialog.locator('#tank-dynamic-result').isVisible(),true);
+ assert.ok(await dialog.locator('#tank-dynamic-chart path').count()>0);
+ assert.match(await dialog.locator('#tank-dynamic-status').innerText(),/Residuo de masa/);
+ assert.equal(simulations,0,'Este prototipo no debe invocar DWSIM');
+ const csv=await download(page,()=>dialog.locator('#tank-dynamic-download').click());
+ assert.match(csv.toString('utf8'),/Didáctico ΣIM \(no DWSIM\)/);
+ await page.keyboard.press('Escape');
+ assert.equal(await dialog.isVisible(),false);
+});
