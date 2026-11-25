@@ -1,6 +1,6 @@
 (()=>{
  'use strict';
- window.SimproxTheme?.init();
+ if(typeof window!=='undefined')window.SimproxTheme?.init();
  const el=id=>document.getElementById(id),form=el('access-form'),code=el('access-code'),password=el('access-password'),message=el('access-message'),submit=el('access-submit');
  const admin=()=>form.elements.role.value==='admin';
  const params=new URLSearchParams(location.search);
