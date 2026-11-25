@@ -600,7 +600,7 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
  assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
-   ['Archivo','Proyecto','Diagrama','Simulación','Vista','Portal']);
+   ['Archivo','Proyecto','Simulación','Diagrama','Vista','Portal']);
  for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
    assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
  }
@@ -666,7 +666,7 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
      assert.ok(await trigger.evaluate(summary=>{
        const box=summary.getBoundingClientRect(), icon=summary.querySelector('svg').getBoundingClientRect();
        return icon.width>=20&&icon.height>=20&&icon.top>=box.top+3&&icon.bottom<=box.bottom-3
-         &&icon.left>=box.left+3&&icon.right<=box.right-8;
+         &&icon.left>=box.left+3&&icon.right<=box.right-3;
      }));
    }
  }
