@@ -886,9 +886,9 @@ test('Ventanas laterales: separador horizontal regula altura y se restablece',as
  const page=await browserPage(t);
  await openProject(page,example);
  const right=page.locator('.sim-cad-slot[data-edge="right"]');
- const inspector=right.locator('>.inspector-panel');
- const balances=right.locator('>#results-panel');
- const splitter=right.locator('>.sim-cad-stack-splitter');
+ const inspector=right.locator(':scope > .inspector-panel');
+ const balances=right.locator(':scope > #results-panel');
+ const splitter=right.locator(':scope > .sim-cad-stack-splitter');
  assert.equal(await splitter.count(),1,'Hay separador interno entre Propiedades y Balances');
  assert.equal(await splitter.getAttribute('aria-orientation'),'horizontal');
  const before=await inspector.evaluate(el=>el.getBoundingClientRect().height);
