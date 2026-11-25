@@ -1,5 +1,5 @@
 'use strict';
-window.SimproxTheme?.init();
+if(typeof window!=='undefined')window.SimproxTheme?.init();
 const $class=id=>document.getElementById(id);
 async function classApi(path,data){
  const response=await fetch('/api/auth/'+path,{
