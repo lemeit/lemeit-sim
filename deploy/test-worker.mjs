@@ -112,3 +112,31 @@ test('estado inaccesible nunca cambia a Windows como respaldo',async t=>{
   });
   assert.equal(response.status,503);
 });
+
+test('rutas de dinámica DWSIM solo van al motor seleccionado y no revelan credenciales',async t=>{
+ const calls=[];
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+   calls.push({url,options});
+   assert.equal(options.headers['X-Origin-Key'],'debian-secret');
+   assert.equal(options.headers.Origin,'https://sim.lemeit.ar');
+   if(url.endsWith('/capabilities'))return Response.json({supported:true,missing_tools:[]});
+   return Response.json({source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0},{time_s:1,level_m:.01}]});
+ });
+ const env={DEBIAN_ENGINE_URL:'https://debian.example',DEBIAN_ORIGIN_KEY:'debian-secret'};
+ const capabilities=await handle(new Request('https://sim.lemeit.ar/api/dynamics/capabilities',{headers:{'X-SIM-Engine':'debian'}}),env);
+ assert.equal(capabilities.status,200);
+ assert.equal((await capabilities.json()).supported,true);
+ const result=await handle(new Request('https://sim.lemeit.ar/api/dynamics/tank',{method:'POST',headers:{'X-SIM-Engine':'debian','Content-Type':'application/json'},body:'{"capacity_m3":2}'}),env);
+ assert.equal(result.status,200);
+ assert.equal((await result.json()).source,'dwsim-mcp-dynamics');
+ assert.deepEqual(calls.map(c=>c.url),['https://debian.example/api/dynamics/capabilities','https://debian.example/api/dynamics/tank']);
+ assert.equal(result.headers.get('X-Origin-Key'),null);
+});
+test('dinámica DWSIM no cambia de Debian a Windows si falla',async t=>{
+ t.mock.method(globalThis,'fetch',async()=>{throw new Error('motor desconectado');});
+ const r=await handle(new Request('https://sim.lemeit.ar/api/dynamics/tank',{method:'POST',headers:{'X-SIM-Engine':'debian','Content-Type':'application/json'},body:'{"step_s":5}'}),{
+   DEBIAN_ENGINE_URL:'https://debian.example',DEBIAN_ORIGIN_KEY:'debian-secret',
+   ENGINE_URL:'https://windows.example',ORIGIN_KEY:'windows-secret'
+ });
+ assert.equal(r.status,503);
+});
