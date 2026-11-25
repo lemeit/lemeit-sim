@@ -853,3 +853,30 @@ test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas na
  await history.locator('summary').click();
  assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
 });
+
+test('Catálogo: acceso a nombres posteriores a C y carga paginada',async t=>{
+ const page=await browserPage(t);
+ await page.locator('#file-menu>summary').click();
+ await page.locator('#new-project-button').click();
+ const list=page.locator('#new-component-list');
+ assert.equal(await list.locator('[data-new-add="Water"]').count(),1,'Water aparece sin buscar');
+ assert.equal(await list.locator('[data-new-add="Methane"]').count(),1,'Los compuestos frecuentes son accesibles de entrada');
+ assert.equal(await list.locator('.compound-option').count(),35,'La primera página tiene 35 resultados');
+ assert.equal(await list.locator('#new-compounds-more').count(),1,'Existe navegación para el resto del catálogo');
+ await list.locator('#new-compounds-more').click();
+ assert.equal(await list.locator('.compound-option').count(),70);
+ await page.locator('#new-component-search').fill('Water');
+ assert.equal(await list.locator('[data-new-add="Water"]').count(),1);
+ assert.match(await page.locator('#new-component-count').textContent(),/compuestos disponibles/);
+});
+test('Los divisores de panel son descubribles sin desplazar su mecanismo',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const splitter=page.locator('.equipment-panel .panel-resizer');
+ assert.equal(await splitter.getAttribute('role'),'separator');
+ assert.equal(await splitter.getAttribute('aria-orientation'),'vertical');
+ assert.match(await splitter.evaluate(el=>getComputedStyle(el,'::after').content),/""/);
+ const results=page.locator('#results-resizer');
+ assert.equal(await results.getAttribute('role'),'separator');
+ assert.match(await results.evaluate(el=>getComputedStyle(el,'::after').content),/""/);
+});

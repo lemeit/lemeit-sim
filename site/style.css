@@ -2281,3 +2281,40 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
   flex:0 0 22px;width:22px;height:22px;
   stroke-width:1.7;
 }
+
+
+/* Catálogo extenso: el listado se pagina, no se trunca en los primeros nombres. */
+.compound-count{margin:6px 0 3px;color:var(--spx-text-dim);font-size:11px}
+.compound-list .compound-more{
+  display:block;width:100%;min-height:31px;margin-top:3px;
+  border:1px solid var(--spx-border);border-radius:3px;
+  background:var(--spx-surface-2);color:var(--spx-text);
+  font:600 11px/1.4 var(--spx-font-sans);cursor:pointer;text-align:center;
+}
+.compound-list .compound-more:hover,.compound-list .compound-more:focus-visible{
+  border-color:var(--spx-accent);outline:1px solid var(--spx-accent);
+}
+/* Separadores discretos, pero visibles antes del hover: el arrastre existente se conserva. */
+@media(min-width:761px){
+  .sim-shell .panel-resizer{
+    background:transparent;
+    opacity:1;
+    border:0;
+  }
+  .sim-shell .panel-resizer::after{
+    content:'';position:absolute;top:calc(50% - 18px);left:3px;
+    width:4px;height:36px;border-radius:3px;
+    background:repeating-linear-gradient(to bottom,var(--spx-text-dim) 0 3px,transparent 3px 6px);
+    opacity:.6;pointer-events:none;
+  }
+  .sim-shell .panel-resizer:hover,.sim-shell .panel-resizer:focus-visible{
+    background:var(--spx-accent-dim);outline:1px solid var(--spx-accent);
+  }
+}
+.sim-shell .results-resizer::after{
+  content:'';position:absolute;top:2px;left:calc(50% - 18px);
+  width:36px;height:3px;border-radius:3px;
+  background:repeating-linear-gradient(to right,var(--spx-text-dim) 0 3px,transparent 3px 6px);
+  opacity:.65;pointer-events:none;
+}
+.sim-shell .results-resizer:hover::after,.sim-shell .results-resizer:focus-visible::after{opacity:1}
