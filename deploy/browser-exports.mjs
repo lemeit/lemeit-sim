@@ -717,7 +717,7 @@ test('La barra abre los menús completos y permite insertar equipos y corrientes
    const palette=page.locator(`#palette [data-type="${type}"] svg`);
    const picker=streams.locator(`[data-insert-type="${type}"] svg`);
    const icon=svg=>svg.evaluate(el=>({markup:el.innerHTML,stroke:getComputedStyle(el).stroke,fill:getComputedStyle(el).fill}));
-   assert.deepEqual(await icon(picker),await icon(palette));
+   assert.notDeepEqual(await icon(picker),await icon(palette),'La barra usa icono técnico propio y la paleta conserva DWSIM');
  }
  await streams.getByRole('button',{name:'Corriente de materia',exact:true}).click();
  assert.equal(await nodes.count(),count+2);
@@ -808,11 +808,48 @@ test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expa
  assert.ok(Math.abs(expanded.panelHeight-initial.panelHeight)<1,'Abrir ecuaciones no aumenta el panel');
  assert.ok(Math.abs(expanded.canvasHeight-initial.canvasHeight)<1,'Abrir ecuaciones no reduce el lienzo');
  const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content);
- assert.match(marker,/−|\\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
+ assert.match(marker,/−|\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
  if(await panel.locator('#process-explorer-next').isEnabled()){
    await panel.locator('#process-explorer-next').click();
    const after=await measure();
    assert.ok(Math.abs(after.panelHeight-initial.panelHeight)<1);
    assert.ok(Math.abs(after.canvasHeight-initial.canvasHeight)<1);
  }
+});
+
+test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas nativas',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const equipment=page.locator('#toolbar-equipment>summary>svg');
+ const streams=page.locator('#toolbar-streams>summary>svg');
+ assert.equal(await equipment.count(),1);
+ assert.equal(await streams.count(),1);
+ assert.equal(await equipment.getAttribute('viewBox'),'0 0 24 24');
+ assert.equal(await streams.getAttribute('viewBox'),'0 0 24 24');
+ assert.equal(await equipment.getAttribute('stroke-width'),await streams.getAttribute('stroke-width'));
+ assert.notEqual(await equipment.locator('path').getAttribute('d'),await streams.locator('path').getAttribute('d'));
+ await page.locator('#toolbar-streams>summary').click();
+ const menu=page.locator('#toolbar-streams .menu-panel');
+ assert.equal(await menu.locator('[data-insert-type="MaterialStream"]>svg').count(),1);
+ assert.equal(await menu.locator('[data-insert-type="EnergyStream"]>svg').count(),1);
+ assert.notEqual(await menu.locator('[data-insert-type="MaterialStream"]>svg path').getAttribute('d'),
+   await menu.locator('[data-insert-type="EnergyStream"]>svg path').getAttribute('d'));
+ await page.keyboard.press('Escape');
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ const details=page.locator('.component-balances').first();
+ assert.equal(await details.count(),1);
+ const summary=details.locator('summary');
+ assert.ok(await summary.evaluate(el=>getComputedStyle(el).listStyleType==='none'));
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ await summary.click();
+ assert.equal(await details.getAttribute('open'),'');
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
+ const controls=page.locator('.app-menu>summary');
+ assert.equal(await controls.first().evaluate(el=>getComputedStyle(el).listStyleType),'none');
+ await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
+ const history=page.locator('.services-history').first();
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ await history.locator('summary').click();
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
 });

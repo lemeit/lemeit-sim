@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.47.9 — 2026-11-25 (en revisión)
+
+- Elimina triángulos nativos en detalles informativos del simulador, administración y ayudas; indicador uniforme +/− con foco visible y teclado.
+- Equipos: icono lineal de unidad de proceso con conexiones laterales, reemplazando el pictograma genérico anterior.
+- Corrientes: flecha monolineal de flujo; Energía: icono del mismo sistema de trazos, distinguible en el menú.
+- Mantiene símbolos oficiales DWSIM en equipos del diagrama y paleta; no cambia cálculos ni exportaciones.
+- Pruebas en navegador de ambos estados de expansión y coherencia de SVG.
+
 ## 0.47.8 — 2026-11-25 (en revisión)
 
 - Explorador didáctico: altura estable del panel al recorrer etapas, abrir ecuaciones o cambiar entre corrientes y equipos; el contenido variable se desplaza dentro de la sección.
