@@ -25,6 +25,10 @@ class FakeDynamicMcp:
             return {'closed': True}
         if tool == 'dwsim_solve_run':
             return {'ok': True}
+        if tool == 'dwsim_dynamics_properties':
+            if kw['tag'] == 'T-01':
+                return {'properties': [{'id': 'LevelOfLiquid', 'description': 'Liquid Level', 'units': 'm', 'dynamic': True}]}
+            return {'properties': [{'id': 'PROP_MS_2', 'description': 'Mass Flow', 'units': 'kg/s'}]}
         if tool == 'dwsim_dynamics_check':
             return {'ready': self.ready, 'findings': [{'message': 'Falta presión'}]}
         if tool == 'dwsim_dynamics_run':
@@ -66,6 +70,8 @@ class DynamicMcpTests(unittest.TestCase):
         call_names = [name for name, _ in engine.calls]
         self.assertLess(call_names.index('dwsim_dynamics_setup'), call_names.index('dwsim_dynamics_run'))
         self.assertIn('dwsim_dynamics_monitor', call_names)
+        monitor = next(kw for name,kw in engine.calls if name == 'dwsim_dynamics_monitor')
+        self.assertEqual(monitor['variables'], ['T-01.LevelOfLiquid', 'Outlet.PROP_MS_2'])
         self.assertIn('dwsim_dynamics_check', call_names)
         self.assertIn('dwsim_dynamics_series', call_names)
 
