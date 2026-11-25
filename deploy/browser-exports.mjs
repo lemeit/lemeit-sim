@@ -816,3 +816,40 @@ test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expa
    assert.ok(Math.abs(after.canvasHeight-initial.canvasHeight)<1);
  }
 });
+
+test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas nativas',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ const equipment=page.locator('#toolbar-equipment>summary>svg');
+ const streams=page.locator('#toolbar-streams>summary>svg');
+ assert.equal(await equipment.count(),1);
+ assert.equal(await streams.count(),1);
+ assert.equal(await equipment.getAttribute('viewBox'),'0 0 24 24');
+ assert.equal(await streams.getAttribute('viewBox'),'0 0 24 24');
+ assert.equal(await equipment.getAttribute('stroke-width'),await streams.getAttribute('stroke-width'));
+ assert.notEqual(await equipment.locator('path').getAttribute('d'),await streams.locator('path').getAttribute('d'));
+ await page.locator('#toolbar-streams>summary').click();
+ const menu=page.locator('#toolbar-streams .menu-panel');
+ assert.equal(await menu.locator('[data-insert-type="MaterialStream"]>svg').count(),1);
+ assert.equal(await menu.locator('[data-insert-type="EnergyStream"]>svg').count(),1);
+ assert.notEqual(await menu.locator('[data-insert-type="MaterialStream"]>svg path').getAttribute('d'),
+   await menu.locator('[data-insert-type="EnergyStream"]>svg path').getAttribute('d'));
+ await page.keyboard.press('Escape');
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ const details=page.locator('.component-balances').first();
+ assert.equal(await details.count(),1);
+ const summary=details.locator('summary');
+ assert.ok(await summary.evaluate(el=>getComputedStyle(el).listStyleType==='none'));
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\\+/);
+ await summary.click();
+ assert.equal(await details.getAttribute('open'),'');
+ assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\\2212/);
+ const controls=page.locator('.app-menu>summary');
+ assert.equal(await controls.first().evaluate(el=>getComputedStyle(el).listStyleType),'none');
+ await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
+ const history=page.locator('.services-history').first();
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\\+/);
+ await history.locator('summary').click();
+ assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\\2212/);
+});
