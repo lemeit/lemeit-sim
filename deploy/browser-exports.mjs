@@ -922,7 +922,7 @@ test('Tanque: el módulo didáctico genera curva propia sin llamar al gateway de
  assert.match(await dialog.locator('#tank-dynamic-status').innerText(),/Residuo de masa/);
  assert.equal(simulations,0,'Este prototipo no debe invocar DWSIM');
  const csv=await download(page,()=>dialog.locator('#tank-dynamic-download').click());
- assert.match(csv.toString('utf8'),/Didáctico ΣIM \(no DWSIM\)/);
+ assert.match(csv.bytes.toString('utf8'),/Didáctico ΣIM \(no DWSIM\)/);
  await page.keyboard.press('Escape');
  assert.equal(await dialog.isVisible(),false);
 });
