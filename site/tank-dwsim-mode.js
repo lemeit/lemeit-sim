@@ -9,6 +9,9 @@ globalThis.SimTankDwsimMode=(()=>{
  const info=message=>{$('tank-dynamic-source-info').textContent=message;};
  function update(){
    const isReal=real();
+   $('tank-dynamic-hint').textContent=isReal?
+     'DWSIM construye y resuelve un flowsheet temporal independiente de agua, con válvula de entrada, tanque y válvula de salida. La curva corresponde al integrador de DWSIM; las variables derivadas y las aproximaciones se indican en los resultados.':
+     'Modelo didáctico de ΣIM: balance integral de masa a densidad constante, con caudal constante o descarga por gravedad; no usa DWSIM.';
    $('tank-dynamic-mcp-parameters').hidden=!isReal;
    $('tank-dynamic-model-label').textContent=isReal?'DWSIM MCP · integración temporal real (experimental)':'Modelo didáctico de ΣIM · no calculado con DWSIM';
    for(const id of ['tank-dynamic-area','tank-dynamic-density','tank-dynamic-initial']){
@@ -23,8 +26,10 @@ globalThis.SimTankDwsimMode=(()=>{
    $('tank-dynamic-play').disabled=true;
    $('tank-dynamic-download').disabled=true;
  }
- async function onOpen(){
+ async function onOpen({graph,node}={}){
    const token=++generation;last=null;running=false;
+   const source=graph?.nodes?.find(n=>n.type==='MaterialStream'&&!graph.edges?.some(e=>e.to===n.id)&&Number.isFinite(Number(n.mass_flow))&&Number(n.mass_flow)>0);
+   if(source&&node?.type==='Tank')$('tank-dynamic-inlet').value=String(source.mass_flow);
    $('tank-dynamic-source').value='sim';update();
    const option=$('tank-dynamic-source').querySelector('[value="dwsim"]');option.disabled=true;
    info('Comprobando el motor dinámico '+getEngine()+'…');
