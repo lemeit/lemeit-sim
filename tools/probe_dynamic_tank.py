@@ -31,10 +31,16 @@ def main():
         print('No puede ejecutarse: MCP incompleto.', file=sys.stderr)
         return 2
     print('Preparando el flowsheet DWSIM de agua con dos válvulas y tanque de 2 m³.')
+    diagnostics = {}
     try:
-        result = run_tank(engine, {})
+        result = run_tank(engine, {}, diagnostics=diagnostics)
     except Exception as exc:
-        print('La corrida DWSIM no pudo completarse:', str(exc)[:1100], file=sys.stderr)
+        print('La corrida DWSIM no pudo completarse:', str(exc)[:1600], file=sys.stderr)
+        print('Diagnóstico de monitorización (sin credenciales):')
+        for key in ('requested', 'monitor_returned', 'run_state', 'run_steps',
+                    'run_summary_keys', 'time_count', 'series_names', 'series_note'):
+            if key in diagnostics:
+                print(' ', key + ':', str(diagnostics[key])[:650])
         return 1
     print('Fuente:', result['source'])
     print('Puntos:', len(result['points']), 'tiempo final [s]:', result['simulatedDurationS'])
