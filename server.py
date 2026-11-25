@@ -1,5 +1,6 @@
 """Puerta local, acotada, entre el editor pedagógico y DWSIM MCP. Python 3.11+."""
 import argparse
+from dynamic_tank_mcp import capabilities as dynamic_capabilities, run_tank as run_real_tank, DynamicInputError
 import hmac
 import json
 import math
@@ -539,6 +540,19 @@ class Handler(SimpleHTTPRequestHandler):
             try: self.json_response(200, self.server.engine.get_catalog())
             except Exception as exc: self.json_response(503, {'error': str(exc)})
             finally: LOCK.release()
+        elif self.path == '/api/dynamics/capabilities':
+            if not LOCK.acquire(blocking=False):
+                return self.json_response(409, {'error': 'Motor ocupado.'})
+            try:
+                if self.server.shared_mcp:
+                    self.json_response(200, dynamic_capabilities(self.server.engine))
+                else:
+                    with IsolatedEngine(self.server.engine.root) as worker:
+                        self.json_response(200, dynamic_capabilities(worker))
+            except Exception as exc:
+                self.json_response(503, {'error': str(exc)})
+            finally:
+                LOCK.release()
         elif self.path.startswith('/api/'): self.json_response(404, {'error': 'Operación no disponible.'})
         else: super().do_GET()
 
@@ -547,7 +561,8 @@ class Handler(SimpleHTTPRequestHandler):
         allowed = (None, f'http://{self.headers.get("Host")}', self.server.public_origin)
         if not self.valid_host() or origin not in allowed or self.headers.get('Sec-Fetch-Site') == 'cross-site':
             return self.json_response(403, {'error': 'Origen no autorizado.'})
-        if self.path != '/api/simulate': return self.json_response(404, {'error': 'Operación no disponible.'})
+        dynamic = self.path == '/api/dynamics/tank'
+        if not dynamic and self.path != '/api/simulate': return self.json_response(404, {'error': 'Operación no disponible.'})
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
             return self.json_response(415, {'error': 'Se requiere JSON.'})
         try:
@@ -557,20 +572,27 @@ class Handler(SimpleHTTPRequestHandler):
         except (ValueError, TypeError) as exc: return self.json_response(400, {'error': str(exc)})
         if not LOCK.acquire(blocking=False): return self.json_response(409, {'error': 'Motor ocupado. Volvé a calcular en unos segundos.'})
         try:
-            catalog = self.server.engine.get_catalog()
-            validate_graph(graph, catalog)
+            if not dynamic:
+                catalog = self.server.engine.get_catalog()
+                validate_graph(graph, catalog)
             now = time.monotonic()
             if self.server.public_origin and (sum(now-t < 60 for t in self.server.jobs) >= 12 or sum(now-t < 3600 for t in self.server.jobs) >= 120):
                 return self.json_response(429, {'error': 'El piloto alcanzó su límite de cálculos. Esperá unos minutos y volvé a intentar.'})
             self.server.jobs.append(now)
-            if self.server.shared_mcp:
+            if dynamic:
+                if self.server.shared_mcp:
+                    data = run_real_tank(self.server.engine, graph)
+                else:
+                    with IsolatedEngine(self.server.engine.root) as worker:
+                        data = run_real_tank(worker, graph)
+            elif self.server.shared_mcp:
                 data = simulate(self.server.engine, graph)
             else:
                 with IsolatedEngine(self.server.engine.root) as worker:
                     worker.catalog = catalog
                     data = simulate(worker, graph)
             self.json_response(200, data)
-        except InputError as exc: self.json_response(422, {'error': str(exc)})
+        except (InputError, DynamicInputError) as exc: self.json_response(422, {'error': str(exc)})
         except Exception as exc: self.json_response(503, {'error': str(exc)})
         finally: LOCK.release()
 
