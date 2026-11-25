@@ -113,10 +113,10 @@ def run_tank(engine, payload=None):
         call('dwsim_dynamics_object', tag='Outlet', dynamics_spec='Pressure')
         call('dwsim_dynamics_object', tag='T-01', properties={'Height': p['height_m']})
         call('dwsim_dynamics_object', tag='V-01', valve_calc_mode='Kv_Liquid',
-             properties={'OpeningPercent':p['valve_opening_pct']})
+             properties={'OpeningPct':p['valve_opening_pct']})
         call('dwsim_dynamics_object', tag='V-02', valve_calc_mode='Kv_Liquid',
              valve_opening_characteristic='Linear',
-             properties={'OpeningPercent':p['valve_opening_pct']})
+             properties={'OpeningPct':p['valve_opening_pct']})
         call('dwsim_dynamics_setup', schedule='SIM-Filling', integrator='SIM-Integrator',
              step_s=p['step_s'], duration_s=p['duration_s'], method='ExplicitEuler')
         monitored = ['T-01.Liquid Level', 'Outlet.PROP_MS_2']
