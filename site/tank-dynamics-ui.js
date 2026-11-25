@@ -1,7 +1,7 @@
 /* Interfaz aislada de la física del tanque: no toca DWSIM ni el estado calculado. */
 'use strict';
 globalThis.SimTankDynamicsUI=(()=>{
- let current=null,interval=null;
+ let current=null,interval=null,tankName='Tanque';
  const $=id=>document.getElementById(id);
  const read=id=>Number($(id).value);
  const escape=text=>String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
@@ -12,7 +12,7 @@ globalThis.SimTankDynamicsUI=(()=>{
    return stream?.phases?.find(p=>p.name==='Mixture')?.density_kg_m3??stream?.phases?.[0]?.density_kg_m3;
  }
  function open({node,graph,result,valid}){
-   pause();current=null;
+   pause();current=null;tankName=String(node.name||'Tanque');
    const inlet=graph.edges.find(e=>e.to===node.id&&graph.nodes.some(n=>n.id===e.from&&n.type==='MaterialStream'))?.from;
    const outlet=graph.edges.find(e=>e.from===node.id&&graph.nodes.some(n=>n.id===e.to&&n.type==='MaterialStream'))?.to;
    const volume=Number(node.volume_m3)>0?Number(node.volume_m3):5;
@@ -61,6 +61,7 @@ globalThis.SimTankDynamicsUI=(()=>{
    pause();
    try{
      current=SimTankDynamics.simulate(values());
+     SimChartWorkspace.accept(current,{title:tankName});
      $('tank-dynamic-error').hidden=true;
      $('tank-dynamic-result').hidden=false;
      $('tank-dynamic-empty').hidden=true;
@@ -124,10 +125,10 @@ globalThis.SimTankDynamicsUI=(()=>{
    $('tank-dynamic-download').addEventListener('click',download);
    $('tank-dynamics-dialog').addEventListener('close',()=>{pause();current=null;});
  }
- function showExternal(data){
+ function showExternal(data,engine){
    if(data?.source!=='dwsim-mcp-dynamics'||!Array.isArray(data.points)||data.points.length<2)
      throw Error('Los datos de DWSIM no contienen una serie de nivel válida.');
-   pause();current=data;
+   pause();current=data;SimChartWorkspace.accept(data,{title:tankName,engine});
    $('tank-dynamic-error').hidden=true;
    $('tank-dynamic-result').hidden=false;
    $('tank-dynamic-empty').hidden=true;
