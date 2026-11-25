@@ -2181,3 +2181,52 @@ body.results-window .results-card h3{font-size:13px;margin-bottom:9px}
  font-weight:600;line-height:1;
 }
 .results-card[open]>summary::before{content:'−'}
+
+
+/* Explorador didáctico: el cambio de etapa nunca desplaza el diagrama.
+   El contenido variable se desplaza dentro del mismo panel. */
+.sim-shell .diagram-panel>.process-explorer-panel:not([hidden]){
+  flex:0 0 clamp(185px,28dvh,265px);
+  box-sizing:border-box;
+  height:clamp(185px,28dvh,265px);
+  min-height:0;
+  max-height:clamp(185px,28dvh,265px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  align-content:start;
+  grid-auto-rows:max-content;
+  scrollbar-gutter:stable;
+}
+.sim-shell .diagram-panel:has(>.process-explorer-panel:not([hidden]))>.canvas-wrap{
+  flex:1 1 0;
+  min-height:0;
+}
+.process-explorer-panel #process-explorer-interpretation>summary{
+  display:flex;align-items:center;gap:7px;
+  list-style:none;
+  cursor:pointer;
+  padding:6px 2px;
+  font-weight:600;
+}
+.process-explorer-panel #process-explorer-interpretation>summary::-webkit-details-marker{display:none}
+.process-explorer-panel #process-explorer-interpretation>summary::marker{content:''}
+.process-explorer-panel #process-explorer-interpretation>summary::before{
+  content:'+';display:inline-grid;place-items:center;
+  flex:0 0 16px;width:16px;height:16px;
+  border:1px solid var(--spx-border);border-radius:3px;
+  font-size:13px;line-height:1;font-weight:500;color:var(--spx-text-dim);
+}
+.process-explorer-panel #process-explorer-interpretation[open]>summary::before{content:'−'}
+.process-explorer-panel #process-explorer-interpretation>summary:hover::before{border-color:var(--spx-accent)}
+.process-explorer-panel #process-explorer-interpretation>summary:focus-visible{outline:2px solid var(--spx-accent);outline-offset:2px}
+@media(max-height:550px){
+  .sim-shell .diagram-panel>.process-explorer-panel:not([hidden]){
+    flex-basis:150px;height:150px;max-height:150px;
+  }
+}
+@media(max-width:760px){
+  .sim-shell .diagram-panel>.process-explorer-panel:not([hidden]){
+    flex-basis:220px;height:220px;max-height:220px;
+  }
+}
