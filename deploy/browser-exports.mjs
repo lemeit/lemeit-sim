@@ -774,3 +774,45 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(await page.locator('#theme-toggle').count(),1);
   assert.equal(await page.locator('.access-brand').count(),0,'Acceso usa un solo logotipo');
 });
+
+test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expandir ecuaciones',async t=>{
+ const page=await browserPage(t);
+ await openProject(page,example);
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
+ await page.locator('#process-explorer-open').click();
+ const panel=page.locator('#process-explorer-panel'),canvas=page.locator('#canvas-wrap');
+ const measure=()=>page.evaluate(()=>{
+   const panel=document.querySelector('#process-explorer-panel').getBoundingClientRect();
+   const canvas=document.querySelector('#canvas-wrap').getBoundingClientRect();
+   return {panelHeight:panel.height,canvasHeight:canvas.height,canvasTop:canvas.top};
+ });
+ const initial=await measure();
+ assert.ok(initial.panelHeight>100);
+ for(let i=0;i<4;i++){
+   const next=panel.locator('#process-explorer-next');
+   if(!await next.isEnabled())break;
+   await next.click();
+   const now=await measure();
+   assert.ok(Math.abs(now.panelHeight-initial.panelHeight)<1,'La altura del explorador no varía al avanzar');
+   assert.ok(Math.abs(now.canvasHeight-initial.canvasHeight)<1,'El alto del lienzo permanece fijo');
+   assert.ok(Math.abs(now.canvasTop-initial.canvasTop)<1,'El lienzo no se desplaza');
+ }
+ const details=panel.locator('#process-explorer-interpretation');
+ while(!await details.isVisible()&&await panel.locator('#process-explorer-next').isEnabled())
+   await panel.locator('#process-explorer-next').click();
+ assert.equal(await details.isVisible(),true);
+ await details.locator('summary').click();
+ assert.equal(await details.getAttribute('open'),'');
+ const expanded=await measure();
+ assert.ok(Math.abs(expanded.panelHeight-initial.panelHeight)<1,'Abrir ecuaciones no aumenta el panel');
+ assert.ok(Math.abs(expanded.canvasHeight-initial.canvasHeight)<1,'Abrir ecuaciones no reduce el lienzo');
+ const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content);
+ assert.match(marker,/−|\\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
+ if(await panel.locator('#process-explorer-next').isEnabled()){
+   await panel.locator('#process-explorer-next').click();
+   const after=await measure();
+   assert.ok(Math.abs(after.panelHeight-initial.panelHeight)<1);
+   assert.ok(Math.abs(after.canvasHeight-initial.canvasHeight)<1);
+ }
+});
