@@ -31,7 +31,7 @@ El Ejemplo 20 almacena el **diagrama de referencia**. El módulo DWSIM crea su p
 4. En Propiedades, abrir **Dinámica del tanque · nivel y curvas**.
 5. Verificar que la opción **DWSIM real (experimental)** aparezca habilitada después de consultar las capacidades del gateway seleccionado.
 6. Elegir DWSIM real, revisar sus parámetros y ejecutar.
-7. Elegir Nivel, Volumen, Caudales volumétricos, Descarga másica o Llenado en el selector de Gráficas científicas. Activar cuadrícula, puntos o Y log si corresponde; recorrer el tiempo con el deslizador o Reproducir.
+7. Elegir Nivel, Volumen, Caudales volumétricos, Descarga másica o Llenado en el selector de Gráficas. Activar cuadrícula, puntos o Y log si corresponde; recorrer el tiempo con el deslizador o Reproducir.
 8. Exportar CSV para analizar la serie o SVG para insertar la gráfica vectorial en un informe. Ver [guía de gráficas](graficas-cientificas.md).
 9. Si DWSIM informa un error, leerlo: **el programa no sustituye los resultados por la integración didáctica**.
 

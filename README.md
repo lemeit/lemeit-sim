@@ -30,7 +30,7 @@ La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las f
 - Paneles acoplables y flotantes, separadores horizontales mínimos, ajuste de ancho y altura, controles +/− y explorador de proceso de tamaño estable.
 - Símbolos DWSIM, puertos visibles, arrastre de equipos, selección múltiple y edición de recorridos de corrientes.
 - Dinámica de tanque: modelo didáctico y puente DWSIM experimental. Ejemplo 20 validado numéricamente en Debian; Windows pendiente.
-- Gráficas científicas con ejes y unidades, leyendas, marcadores, cuadrícula, escala Y logarítmica, reproducción temporal, SVG vectorial y CSV. Se integran por ahora en el diálogo del tanque, no en un panel independiente.
+- Gráficas con ejes y unidades, leyendas, marcadores, cuadrícula, escala Y logarítmica, reproducción temporal, SVG vectorial y CSV. Se integran por ahora en el diálogo del tanque, no en un panel independiente.
 
 **Cómo empezar:** Ejemplos → 20 → seleccionar T-01 → Propiedades → Dinámica del tanque · nivel y curvas. Fijar Debian si está disponible, elegir DWSIM real, verificar condiciones y ejecutar. Consultar [guía de gráficas](docs/graficas-cientificas.md), [manual de uso](https://wiki.lemeit.ar/sim/manual-de-uso/) y [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md).
 
