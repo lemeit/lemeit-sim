@@ -1028,7 +1028,9 @@ function publishWorkspace(physical=true){
 }
 function toolIcon(name){
   const paths={chevron:'M5 12h.01 M12 12h.01 M19 12h.01',
-    equipment:'M8 8h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 8z M10 8V4h5 M8 18v3 M16 18v3 M2 21h20',
+    equipment:'M7 6h10v12H7z M2.5 12H7 M17 12h4.5 M4 9v6 M20 9v6',
+    materialFlow:'M2 12h17 M14 7l5 5-5 5 M5 8v8',
+    energyFlow:'M2 12h7l3-6 2 12 3-6h5 M18 7l4 5-4 5',
     settings:'M4 6h16 M4 12h16 M4 18h16 M8 4v4 M15 10v4 M10 16v4',
     help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4 M12 17h.01',
     examples:'M3 5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z M12 6v13',
@@ -1047,7 +1049,7 @@ function bindDiagramWindow(){
   const focus=$('diagram-focus');
   for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Abrir diagrama en otra ventana'],['fit-button','fit','Encuadrar todo el proceso'],['diagram-grid','grid','Mostrar cuadrícula'],['diagram-note-insert','text','Insertar texto en el diagrama'],['report-label-tool','label','Datos del rótulo'],['exercise-open','edit','Editar ficha y actividad'],['zoom-in','zoomIn','Acercar'],['zoom-out','zoomOut','Alejar'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
   for(const control of document.querySelectorAll('[data-tool-icon]'))control.innerHTML=toolIcon(control.dataset.toolIcon);
-  $('toolbar-streams').querySelector('summary').innerHTML=DwsimSymbols.thumbnail('MaterialStream',TYPES.MaterialStream);
+  $('toolbar-streams').querySelector('summary').innerHTML=toolIcon('materialFlow');
   const exportButton=document.querySelector('.command-bar .diagram-export-tool');
   exportButton.innerHTML=toolIcon('export');
   exportButton.setAttribute('aria-label','Exportar diagrama');
