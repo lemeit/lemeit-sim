@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.47.8 — 2026-11-25 (en revisión)
+
+- Explorador didáctico: altura estable del panel al recorrer etapas, abrir ecuaciones o cambiar entre corrientes y equipos; el contenido variable se desplaza dentro de la sección.
+- «Ecuaciones y balances»: sustituye triángulo nativo por indicador sobrio + / −, sin perder accesibilidad por teclado.
+- Preserva la apertura del detalle entre equipos y reinicia el desplazamiento interior al avanzar.
+- Prueba en Chrome de estabilidad geométrica del lienzo y el explorador. No cambia cálculos ni exportaciones.
+
 ## 0.47.7 — 2026-11-25 (en revisión; pendiente de publicación)
 
 - Botón Calcular con símbolo delta/play original de ΣIM, mayor tamaño y jerarquía visual sin efectos decorativos.

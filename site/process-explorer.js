@@ -154,8 +154,10 @@ const SimProcessExplorer=(()=>{
     const body=$('process-explorer-readings');body.replaceChildren();
     const details=$('process-explorer-connections');details.replaceChildren();
     const interpretation=$('process-explorer-interpretation');
+    const wasExpanded=interpretation.open;
     interpretation.hidden=step.stream;
-    interpretation.open=false;
+    interpretation.open=!step.stream&&wasExpanded;
+    panel.scrollTop=0;
     const analysis=$('process-explorer-analysis');
     analysis.replaceChildren();
     if(step.stream){
