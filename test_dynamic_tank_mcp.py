@@ -30,7 +30,7 @@ class FakeDynamicMcp:
                 return {'properties': [{'id': 'LevelOfLiquid', 'description': 'Liquid Level', 'units': 'm', 'dynamic': True}]}
             return {'properties': [{'id': 'PROP_MS_2', 'description': 'Mass Flow', 'units': 'kg/s'}]}
         if tool == 'dwsim_dynamics_monitor':
-            return {'monitored_variables': kw['variables']}
+            return {'monitored_variables': ['T-01 Liquid Level (m)', 'Outlet Mass Flow (kg/h)']}
         if tool == 'dwsim_dynamics_check':
             return {'ready': self.ready, 'findings': [{'message': 'Falta presión'}]}
         if tool == 'dwsim_dynamics_run':
@@ -39,8 +39,8 @@ class FakeDynamicMcp:
             return {'state': 'completed'}
         if tool == 'dwsim_dynamics_series':
             return {'t_s': [0, 60, 120, 600], 'series': {
-                'T-01.Liquid Level': {'units': 'm', 'values': [0, .23, .3, .333]},
-                'Outlet.PROP_MS_2': {'units': 'kg/s', 'values': [0, 8.4, 9.4, 10]}
+                'T-01 Liquid Level': {'units': 'm', 'values': [0, .23, .3, .333]},
+                'Outlet Mass Flow': {'units': 'kg/h', 'values': [0, 30240, 33840, 36000]}
             }, 'decimated_from': 121}
         return {'ok': True}
 
@@ -68,6 +68,8 @@ class DynamicMcpTests(unittest.TestCase):
         self.assertAlmostEqual(result['points'][-1]['level_m'], .333)
         self.assertAlmostEqual(result['points'][-1]['volume_m3'], .333)
         self.assertAlmostEqual(result['points'][-1]['outlet_kg_s'], 10)
+        self.assertAlmostEqual(result['points'][1]['outlet_kg_s'], 8.4)
+        self.assertEqual(result['variables'], ['T-01.LevelOfLiquid', 'Outlet.PROP_MS_2'])
         self.assertEqual(result['decimated_from'], 121)
         call_names = [name for name, _ in engine.calls]
         self.assertLess(call_names.index('dwsim_dynamics_setup'), call_names.index('dwsim_dynamics_run'))
@@ -78,8 +80,8 @@ class DynamicMcpTests(unittest.TestCase):
         self.assertIn('dwsim_dynamics_series', call_names)
 
     def test_series_with_display_labels_use_unambiguous_tag_and_units(self):
-        # Regression: the MCP can record "T-01.Liquid Level" despite a
-        # configured internal property id "T-01.LevelOfLiquid".
+        # Regression: DWSIM stores labels with spaces and uses kg/h even
+        # when the configured property ids use dotted internal names.
         engine = FakeDynamicMcp()
         result = run_tank(engine)
         self.assertAlmostEqual(result['points'][1]['level_m'], .23)
@@ -91,11 +93,11 @@ class DynamicMcpTests(unittest.TestCase):
         def without_level(tool, **kwargs):
             response = original_call(tool, **kwargs)
             if tool == 'dwsim_dynamics_series':
-                response['series'].pop('T-01.Liquid Level')
+                response['series'].pop('T-01 Liquid Level')
             return response
 
         engine.call = without_level
-        with self.assertRaisesRegex(DynamicInputError, 'Series disponibles: Outlet.PROP_MS_2'):
+        with self.assertRaisesRegex(DynamicInputError, 'Series disponibles: Outlet Mass Flow'):
             run_tank(engine)
         self.assertTrue(engine.closed)
 
@@ -107,7 +109,7 @@ class DynamicMcpTests(unittest.TestCase):
             response = original_call(tool, **kwargs)
             if tool == 'dwsim_dynamics_series':
                 # Same semantic label with punctuation variation: ambiguous on purpose.
-                response['series']['T-01 Liquid Level'] = {
+                response['series']['T-01.Liquid Level'] = {
                     'units': 'm', 'values': [0, .24, .31, .34]
                 }
             return response
