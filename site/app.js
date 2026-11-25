@@ -933,6 +933,7 @@ async function init(){
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
   SimTankDynamicsUI.bind();
+  SimTankDwsimMode.bind({getEngine:()=>selectedEngine});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
   if(!auxiliaryWorkspace&&!await checkEngine()){

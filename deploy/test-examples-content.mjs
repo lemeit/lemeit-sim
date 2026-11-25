@@ -84,7 +84,8 @@ test('la guía distingue referencias analíticas de ejemplos DWSIM verificados',
   const guide=read('ejemplos.html');
   assert.match(guide,/resultados de referencia calculados con DWSIM/);
   assert.match(guide,/referencias de materia verificadas analíticamente/i);
-  assert.doesNotMatch(guide,/Windows|Debian/);
+  assert.doesNotMatch(guide.split('<section id="TankFillingDynamic">')[0],/Windows|Debian/);
+  assert.match(guide,/id="TankFillingDynamic"/);
   assert.match(guide,/no mediciones experimentales/i);
   assert.match(guide,/modelo termodinámico/i);
 });

@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "title": "20 · Tanque con válvulas · dinámica de llenado",
+  "compounds": [
+    "Water"
+  ],
+  "model": "Steam Tables (IAPWS-IF97)",
+  "learning": "Complemento del Ejemplo 15. El caso ilustra tanque de 2 m³ con válvulas antes y después (agua a 25 °C, 130 kPa y 10 kg/s; salida a presión atmosférica). Para observar nivel, volumen y caudal vs. tiempo, seleccioná T-01 y abrí «Dinámica del tanque». El módulo DWSIM experimental crea un flowsheet temporal separado con válvulas Kv, y utiliza el integrador temporal; si no está disponible, solo se ofrece la simulación didáctica, claramente identificada. No confundas el estado estacionario con el transitorio.",
+  "nodes": [
+    {
+      "id": "feed",
+      "type": "MaterialStream",
+      "name": "Inlet",
+      "x": 55,
+      "y": 215,
+      "temperature_C": 25,
+      "pressure_kPa": 130,
+      "mass_flow": 10,
+      "composition": {
+        "Water": 1
+      }
+    },
+    {
+      "id": "valve1",
+      "type": "Valve",
+      "name": "V-01",
+      "x": 270,
+      "y": 205,
+      "outlet_pressure_kPa": 117
+    },
+    {
+      "id": "s1",
+      "type": "MaterialStream",
+      "name": "S-1",
+      "x": 370,
+      "y": 215
+    },
+    {
+      "id": "tank",
+      "type": "Tank",
+      "name": "T-01",
+      "x": 510,
+      "y": 195,
+      "volume_m3": 2,
+      "pressure_drop_kPa": 0
+    },
+    {
+      "id": "s2",
+      "type": "MaterialStream",
+      "name": "S-2",
+      "x": 655,
+      "y": 215
+    },
+    {
+      "id": "valve2",
+      "type": "Valve",
+      "name": "V-02",
+      "x": 760,
+      "y": 205,
+      "outlet_pressure_kPa": 101.325
+    },
+    {
+      "id": "out",
+      "type": "MaterialStream",
+      "name": "Outlet",
+      "x": 890,
+      "y": 215
+    }
+  ],
+  "edges": [
+    {
+      "from": "feed",
+      "to": "valve1"
+    },
+    {
+      "from": "valve1",
+      "to": "s1"
+    },
+    {
+      "from": "s1",
+      "to": "tank"
+    },
+    {
+      "from": "tank",
+      "to": "s2"
+    },
+    {
+      "from": "s2",
+      "to": "valve2"
+    },
+    {
+      "from": "valve2",
+      "to": "out"
+    }
+  ]
+}

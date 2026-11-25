@@ -2369,3 +2369,34 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 .tank-dynamic-empty{font-size:12px;color:var(--spx-text-dim);line-height:1.5}
 .tank-dynamic-parameters>.primary-button{margin-top:12px}
 @media(max-width:760px){.tank-dynamic-layout{display:block}.tank-dynamic-results{border-left:0;padding:12px 0;border-top:1px solid var(--spx-border);margin-top:14px}}
+
+
+/* Separador interno: línea de 1 px y señal ↕ mínima. Área de arrastre invisible. */
+@media(min-width:761px){
+ .sim-cad-slot>.sim-cad-stack-splitter{
+   flex:0 0 7px;min-height:7px;
+   border:0;background:transparent;
+   margin:0;box-shadow:none;
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter::before{
+   content:'';position:absolute;left:0;right:0;top:50%;
+   height:1px;transform:translateY(-50%);
+   background:var(--spx-border);pointer-events:none;
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter::after{
+   content:'↕';position:absolute;left:50%;top:50%;
+   transform:translate(-50%,-50%);
+   display:flex;align-items:center;justify-content:center;
+   width:16px;height:12px;padding:0 3px;
+   font:400 11px/1 Arial,sans-serif;
+   border:0;border-radius:0;
+   background:var(--spx-surface);
+   color:var(--spx-text-dim);opacity:.7;
+   pointer-events:none;
+ }
+ .sim-cad-slot>.sim-cad-stack-splitter:hover,
+ .sim-cad-slot>.sim-cad-stack-splitter:focus-visible{background:transparent;outline:0}
+ .sim-cad-slot>.sim-cad-stack-splitter:hover::after,
+ .sim-cad-slot>.sim-cad-stack-splitter:focus-visible::after{opacity:1;color:var(--spx-accent)}
+ .sim-cad-slot>.sim-cad-stack-splitter:focus-visible::after{outline:1px solid var(--spx-accent);outline-offset:1px}
+}
