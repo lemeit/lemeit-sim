@@ -38,7 +38,7 @@ function objectButtons(groups,inToolbar=false){
   return groups.map(([label,types])=>`<p class="${heading}">${label}</p>`+types.map(type=>{
     const object=TYPES[type];
     const name=esc(object.label);
-    return `<button type="button" class="palette-item" ${typeAttribute}="${type}" title="Agregar ${name}">${DwsimSymbols.thumbnail(type,object)}<span>${name}</span></button>`;
+    return `<button type="button" class="palette-item" ${typeAttribute}="${type}" title="Agregar ${name}">${inToolbar&&type==='MaterialStream'?toolIcon('materialFlow'):inToolbar&&type==='EnergyStream'?toolIcon('energyFlow'):DwsimSymbols.thumbnail(type,object)}<span>${name}</span></button>`;
   }).join('')).join('');
 }
 const isReactor=n=>['ConversionReactor','EquilibriumReactor'].includes(n.type);
