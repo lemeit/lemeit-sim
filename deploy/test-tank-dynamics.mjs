@@ -22,7 +22,7 @@ test('Dinámica: llenado de 0,5 a 5 m³ conserva masa y detecta volumen máximo'
 });
 
 test('Dinámica: tanque con igual entrada y salida mantiene volumen',()=>{
- const run=tank.simulate({...defaults,outflowMass:1,durationS:1200});
+ const run=tank.simulate({...defaults,outflowKgS:1,durationS:1200});
  assert.equal(run.event,null);
  assert.equal(run.completed,true);
  assert.ok(run.points.every(p=>Math.abs(p.volume_m3-0.5)<1e-10));
