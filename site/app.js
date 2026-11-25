@@ -1027,7 +1027,7 @@ function publishWorkspace(physical=true){
   workspaceChannel.postMessage({type:'state',graph:structuredClone(graph),physical,result:physical?null:result,lastCalculation,resultValidity,engineMode,selectedEngine,connectionCheck,engineOnline});
 }
 function toolIcon(name){
-  const paths={chevron:'M7 10l5 5 5-5',
+  const paths={chevron:'M5 12h.01 M12 12h.01 M19 12h.01',
     equipment:'M8 8h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 8z M10 8V4h5 M8 18v3 M16 18v3 M2 21h20',
     settings:'M4 6h16 M4 12h16 M4 18h16 M8 4v4 M15 10v4 M10 16v4',
     help:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4 M12 17h.01',
