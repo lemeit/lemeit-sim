@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.47.5](https://img.shields.io/badge/portal-0.47.4-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.47.7](https://img.shields.io/badge/portal-0.47.4-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -22,7 +22,7 @@ Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutor
 
 La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las funciones integradas hasta 0.47.4 incluyen la biblioteca de proyectos en nube, el explorador didáctico de resultados, balances por componentes, informes PDF y una barra por categorías. Los ejemplos con recirculación aún requieren validación física completa en ambos motores. El código desplegado puede ser anterior a una rama o PR en revisión.
 
-**Corrección 0.47.5 en revisión:** para intercambiadores de dos circuitos, diferenciar calor cedido, recibido, transferencia interna y residuo neto del balance energético; no confundir una energía neta cercana a cero con ausencia de transferencia. Ver [criterios de lectura del balance térmico](docs/interpretacion-intercambiadores.md).
+**Corrección 0.47.5 publicada:** para intercambiadores de dos circuitos, diferenciar calor cedido, recibido, transferencia interna y residuo neto del balance energético; no confundir una energía neta cercana a cero con ausencia de transferencia. Ver [criterios de lectura del balance térmico](docs/interpretacion-intercambiadores.md).
 
 ## Versión y estado (historial anterior)
 
