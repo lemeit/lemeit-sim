@@ -100,3 +100,9 @@ pgrep -x cloudflared
 Para iniciar, detener o reiniciar: sudo systemctl start/stop/restart lemeit-sim.service (elegir una acción). sudo systemctl enable lemeit-sim.service activa arranque automático. Identificar primero la unidad o método real del túnel y MCP; no asumir sus nombres. Para actualizar: entrar en WorkingDirectory, verificar árbol limpio, detener gateway sin trabajos activos, git fetch origin, git pull --ff-only origin main, python3 -m unittest tests.python.gateway.test_dynamic_tank_mcp -v y reiniciar. Prueba local del MCP: python3 tools/probe_dynamic_tank.py --run (requiere token local configurado; no mostrarlo).
 
 Motor ocupado: no iniciar otro cálculo simultáneo. supported:true acredita herramientas disponibles, no una corrida correcta. Verificar Ejemplo 20 y consultar [referencia numérica](graficas-cientificas.md). Sin Internet no hay portal público ni nube; conservar esta guía localmente.
+
+## Incidente de referencia: motor conectado, dinámica no disponible
+
+El 26/11/2026 se reprodujo un fallo de dinámica con portal 0.51.6 y gateway Debian 0.47.5: estado y catálogo HTTP 200, pero /api/dynamics/capabilities devolvía «Operación no disponible». El servicio y túnel estaban activos. Tras actualizar el repositorio del servicio (/home/ll/lemeit-sim) y reiniciar el gateway, el usuario confirmó que Ejemplo 20 calculó y mostró Gráficas en Debian. No se aportó nueva versión exacta del gateway ni nueva serie numérica; se conserva la referencia anterior. No fue necesario atribuir el fallo a DWSIM o Cloudflare.
+
+Comprobar `systemctl show lemeit-sim.service -p WorkingDirectory`, estado del gateway y `/api/dynamics/capabilities`. Actualizar la copia efectiva del servicio con árbol limpio, ejecutar las pruebas indicadas arriba y reiniciar solo el gateway cuando no haya cálculos activos. Confirmar `supported: true` y repetir Ejemplo 20. No reinstalar el MCP ni el túnel como primer paso.

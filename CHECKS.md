@@ -1,5 +1,9 @@
 # Comprobaciones de ΣIM
 
+## Revalidación Debian · 26/11/2026 · portal 0.51.6
+
+El 26/11/2026 se reprodujo un fallo de dinámica con portal 0.51.6 y gateway Debian 0.47.5: estado y catálogo HTTP 200, pero /api/dynamics/capabilities devolvía «Operación no disponible». El servicio y túnel estaban activos. Tras actualizar el repositorio del servicio (/home/ll/lemeit-sim) y reiniciar el gateway, el usuario confirmó que Ejemplo 20 calculó y mostró Gráficas en Debian. No se aportó nueva versión exacta del gateway ni nueva serie numérica; se conserva la referencia anterior. No fue necesario atribuir el fallo a DWSIM o Cloudflare.
+
 ## Estado reciente · 24/11/2026
 
 - Portal 0.47.4 y gateways Windows/Debian 0.47.4 confirmados mediante consultas /api/status aportadas por el usuario.

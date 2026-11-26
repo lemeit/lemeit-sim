@@ -20,6 +20,8 @@ Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutor
 
 ## Estado actual · 0.51.6
 
+**Revalidación Debian (26/11):** Ejemplo 20 y Gráficas vuelven a funcionar tras actualizar el gateway desde 0.47.5. Un estado HTTP 200 no garantiza soporte dinámico; consultar `/api/dynamics/capabilities` y [recuperación](docs/operacion-local.md).
+
 - Régimen estacionario o dinámico guardado por proyecto. Ejemplo 20 abre en Dinámico: pulsar Calcular integra DWSIM y abre Gráficas con tiempo y nivel.
 - Desde **Ver → Gráficas** podés configurar un subtítulo y ajustar color, representación y grosor por curva. En **Administración → Operación y recuperación** podés copiar comandos o descargar el manual HTML.
 - Gráficas flotantes y acoplables, dos curvas con eje derecho automático si las unidades difieren, escalas independientes, paleta fija y leyenda según representación. SVG, PNG, JPG y CSV; referencias del proyecto configurables.
