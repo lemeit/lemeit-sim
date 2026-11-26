@@ -932,7 +932,7 @@ async function init(){
   SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
-  SimChartWorkspace.bind({getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine})});
+  SimChartWorkspace.bind({getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine,selectedId:selection?.nodes?.length===1?selection.nodes[0]:null})});
   SimTankDynamicsUI.bind();
   SimTankDwsimMode.bind({getEngine:()=>selectedEngine});
   $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
@@ -1443,7 +1443,7 @@ async function checkEngine({silent=false,exclude=[]}={}){
       const date=Date.parse(status.started_at);
       gatewayCheck={ok:true,version:status.gateway_version,startedAt:Number.isFinite(date)?new Date(date).toLocaleString('es-AR'):'Sin datos',uptime:fmt(status.uptime_s/3600,1)+' h',state:'Disponible',equipment:status.supported_equipment.join(', ')};
       connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:(engineMode==='auto'?'Selección automática':'Motor fijado')+' · '+(engine==='debian'?'Debian':'Windows')+' · compatible con el proceso.',ms:Math.round(performance.now()-started),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};
-      if(changedMotor&&!silent)recordActivity('Motor elegido: '+(engine==='debian'?'Debian':'Windows'));
+      if(changedMotor&&!silent&&document.body.dataset.sessionRole==='admin')recordActivity('Motor elegido: '+(engine==='debian'?'Debian':'Windows'));
       const modelSelect=$('model-select'),savedModel=modelSelect.value||graph.model;
       if(data.models?.length&&(!modelSelect.options.length||modelSelect.options.length<=1)){
         modelSelect.innerHTML='<option value="">Sin modelo seleccionado</option>'+data.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
@@ -1490,7 +1490,7 @@ function bindWorkspaceTools(){
   $('engine-select').onchange=event=>selectCalculationEngine(event.target.value);
   document.addEventListener('sim-session-role',event=>{const admin=event.detail?.role==='admin';document.body.dataset.sessionRole=admin?'admin':'student';$('engine-select').hidden=!admin;document.querySelector('label[for="engine-select"]').hidden=!admin;if(!admin&&engineMode!=='auto'&&!auxiliaryWorkspace)void selectCalculationEngine('auto');});
   if(auxiliaryWorkspace){$('engine-select').disabled=true;$('engine-select').title='El motor se elige en la ventana principal';}
-  $('connection-monitor-button').onclick=()=>{renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
+  $('connection-monitor-button').onclick=()=>{if(document.body.dataset.sessionRole!=='admin'){notice(engineOnline?'Servicio de cálculo disponible.':'Servicio de cálculo no disponible.');return;}renderServerDetails();$('server-dialog').showModal();closeMenus();};$('server-refresh').onclick=()=>checkEngine();
   $('monitor-auto').checked=!auxiliaryWorkspace;
   monitorTimer=setInterval(()=>{if(!busy&&$('monitor-auto').checked&&!document.hidden)checkEngine({silent:true});},30000);connectionPaintTimer=setInterval(()=>{if(!document.hidden)paintConnection();},1000);
   $('diagnostics-filter').onchange=renderDiagnosticLog;

@@ -23,5 +23,19 @@ globalThis.SimChartModels=(()=>{
   if(points.some(row=>Object.values(row).some(v=>!Number.isFinite(v))))throw Error('El modelo excede el rango numérico.');
   return {points,columns:d.columns,title:d.name,source:'ΣIM · modelo analítico',assumptions:d.note+' No son resultados de DWSIM.'};
  }
- return Object.freeze({definitions,generate});
+ function available(graph,result,selectedId){
+ const nodes=graph?.nodes||[],selected=nodes.find(n=>n.id===selectedId);
+ const candidates=selected?[selected]:nodes.filter(n=>['Compressor','Expander','Cooler'].includes(n.type));
+ if(candidates.length!==1||!result)return [];
+ const n=candidates[0];
+ if(n.type!=='Compressor'&&n.type!=='Expander')return []; // Newton exige un sistema transitorio explícito; un enfriador estacionario no basta.
+ const edges=graph.edges||[],inlet=edges.find(e=>e.to===n.id&&nodes.some(v=>v.id===e.from&&v.type==='MaterialStream'))?.from,outlet=edges.find(e=>e.from===n.id&&nodes.some(v=>v.id===e.to&&v.type==='MaterialStream'))?.to;
+ const a=result.streams?.[inlet],b=result.streams?.[outlet],rho=a?.phases?.find(p=>p.name==='Mixture')?.density_kg_m3;
+ if(!(a?.pressure_Pa>0&&b?.pressure_Pa>0&&a?.temperature_K>0&&rho>0))return [];
+ // No inferir una fase gaseosa por el tipo del equipo: exigir fracción de vapor próxima a uno.
+ const vapor=s=>s?.phases?.find(p=>/^(vapor|vapour)$/i.test(p.name))?.fraction;
+ if(!(vapor(a)>=.999&&vapor(b)>=.999))return [];
+ return ['isentropic','isothermal','polytropic'].map(id=>({id,params:{P0:a.pressure_Pa/1000,T0:a.temperature_K,v0:1/rho,ratio:b.pressure_Pa/a.pressure_Pa},streamIds:[inlet,outlet],equipment:n.name||n.id}));
+ }
+ return Object.freeze({definitions,generate,available});
 })();
