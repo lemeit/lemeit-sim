@@ -1001,7 +1001,16 @@ assert.equal(await charts.getAttribute('data-sim-cad-mode'),'float');
 const panel=await charts.boundingBox();
 assert.ok(panel.width/panel.height<1.25);
 assert.equal(await page.locator('#charts-svg').getAttribute('viewBox'),'0 0 785 590');
-assert.equal(await page.locator('#charts-x').inputValue(),'time_s');assert.equal(await page.locator('#charts-y').inputValue(),'level_m');await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');await page.locator('#charts-close').click();await page.locator('#dynamic-settings').click();await page.locator('#dynamic-parameters input[name=duration_s]').fill('300');await page.locator('#dynamic-settings-form button[type=submit]').click();assert.equal(await page.locator('#calculate-button').getAttribute('data-state'),'stale');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('lemeit-process-v1')).simulation.parameters.duration_s),300);});
+assert.equal(await page.locator('#charts-x').inputValue(),'time_s');assert.equal(await page.locator('#charts-y').inputValue(),'level_m');await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');
+await page.locator('#charts-close').click();
+await page.evaluate(()=>{
+  globalThis.SimChartWorkspace={...globalThis.SimChartWorkspace,accept:()=>{throw Error('Gráficas no disponible');}};
+});
+await page.locator('#calculate-button').click();
+await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');
+assert.equal(dynamic,2);
+assert.match(await page.locator('#results [data-results-content="balances"]').innerText(),/0,33 m/);
+await page.locator('#dynamic-settings').click();await page.locator('#dynamic-parameters input[name=duration_s]').fill('300');await page.locator('#dynamic-settings-form button[type=submit]').click();assert.equal(await page.locator('#calculate-button').getAttribute('data-state'),'stale');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('lemeit-process-v1')).simulation.parameters.duration_s),300);});
 
 test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un proyecto',async t=>{
   const page=await browserPage(t);

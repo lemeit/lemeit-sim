@@ -111,6 +111,10 @@ function rememberRun(regime,data){
   persist();
   if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
+function showDynamicChart(data,{title,defaultY}){
+  try{globalThis.SimChartWorkspace?.accept(data,{title,defaultY});}
+  catch{notice('La corrida está disponible en Balances y corrientes. No se pudo abrir Gráficas.',true);}
+}
 function restoreRun(run){
   const data=run?.data;
   if(!data||run.regime!==SimDynamics.regime(graph)||!['windows','debian'].includes(run.engine)||!Number.isFinite(Date.parse(run.time)))return;
@@ -119,12 +123,12 @@ function restoreRun(run){
     resultValidity='valid';
     if(run.regime==='dynamic'){
       const prepared=SimDynamics.prepare(graph);
-      const {title,defaultY,source}=prepared;
+      const {defaultY,source}=prepared;
       if(data.source!==source||!Array.isArray(data.points)||data.points.length<2||
         !data.points.every((p,i)=>Number.isFinite(p?.time_s)&&Number.isFinite(p?.[defaultY])&&(!i||p.time_s>data.points[i-1].time_s)))throw Error('Serie inválida');
       dynamicResult=data;
       renderDynamicResults(prepared);
-      SimChartWorkspace.accept(data,{title,defaultY});
+      showDynamicChart(data,prepared);
     }else{
       if(!data.streams||typeof data.streams!=='object'||!Array.isArray(data.balances))throw Error('Resultados inválidos');
       result=data;
@@ -133,7 +137,7 @@ function restoreRun(run){
     graph.saved_run=run;
   }catch{
     result=null;dynamicResult=null;lastCalculation=null;resultValidity='none';
-    SimChartWorkspace.reset();
+    globalThis.SimChartWorkspace?.reset();
     $('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   }
   updateControls();renderDiagram();renderInspector();publishWorkspace(false);
@@ -700,7 +704,7 @@ async function calculateDynamic(){
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
     dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
     $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
-    rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');globalThis.SimChartWorkspace.accept(data,{title:prepared.title,defaultY:prepared.defaultY});
+    rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
 }
