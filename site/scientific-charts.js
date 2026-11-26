@@ -47,13 +47,13 @@ globalThis.SimScientificCharts=(()=>{
    const selected=points[Math.max(0,Math.min(points.length-1,index))];
    if(Number.isFinite(selected?.[xKey])&&(!logX||selected[xKey]>0))out+=line(x(selected[xKey]),T,x(selected[xKey]),B,'stroke="#7b858e" stroke-dasharray="3 4"');
    series.forEach((s,i)=>{
-     const color=safeColor(s.color,i);let d='',started=false;
+     const color=safeColor(s.color,i),drawLine=s.connect??connect,drawMarkers=s.markers??markers,width=s.strokeWidth??strokeWidth;let d='',started=false;
      for(const p of points){if(!valid(p,s)){started=false;continue;}d+=(started?'L':'M')+x(p[xKey]).toFixed(2)+' '+sy(p[s.key],s).toFixed(2)+' ';started=true;}
-     if(connect)out+='<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+Math.max(.5,Math.min(5,Number(strokeWidth)||1.8))+'" stroke-linejoin="round"/>';
-     if(markers||!connect||points.filter(p=>valid(p,s)).length===1)for(const p of points)if(valid(p,s))out+='<circle cx="'+x(p[xKey])+'" cy="'+sy(p[s.key],s)+'" r="2" fill="white" stroke="'+color+'"/>';
+     if(drawLine)out+='<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+Math.max(.5,Math.min(5,Number(width)||1.8))+'" stroke-linejoin="round"/>';
+     if(drawMarkers||!drawLine||points.filter(p=>valid(p,s)).length===1)for(const p of points)if(valid(p,s))out+='<circle cx="'+x(p[xKey])+'" cy="'+sy(p[s.key],s)+'" r="2" fill="white" stroke="'+color+'"/>';
      if(selected&&valid(selected,s))out+='<circle cx="'+x(selected[xKey])+'" cy="'+sy(selected[s.key],s)+'" r="4" fill="'+color+'" stroke="white"/>';
      const lx=L+(i%3)*220,ly=B+54+Math.floor(i/3)*15;
-     if(legend){out+='<g data-legend-style="'+(!connect?'points':markers?'both':'line')+'">';if(connect)out+=line(lx,ly-4,lx+24,ly-4,'stroke="'+color+'" stroke-width="2"');if(markers||!connect)out+='<circle cx="'+(lx+12)+'" cy="'+(ly-4)+'" r="3" fill="white" stroke="'+color+'"/>';out+=label(lx+30,ly,s.name+(s.axis==='right'?' · Y2':''))+'</g>'; }
+     if(legend){out+='<g data-legend-style="'+(!drawLine?'points':drawMarkers?'both':'line')+'">';if(drawLine)out+=line(lx,ly-4,lx+24,ly-4,'stroke="'+color+'" stroke-width="2"');if(drawMarkers||!drawLine)out+='<circle cx="'+(lx+12)+'" cy="'+(ly-4)+'" r="3" fill="white" stroke="'+color+'"/>';out+=label(lx+30,ly,s.name+(s.axis==='right'?' · Y2':''))+'</g>'; }
    });
    for(const s of extra){for(const p of s.points)if(Number.isFinite(p.x)&&Number.isFinite(p.y)&&(!logX||p.x>0)&&(!logY||p.y>0))out+='<circle cx="'+x(p.x)+'" cy="'+y(p.y)+'" r="4" fill="white" stroke="#a33b35" stroke-width="2"/>';if(legend)out+=label(L,B+70,s.name,'fill="#a33b35" font-size="10"');}
    if(reference)out+=label(12,319,String(reference).slice(0,130),'font-size="9" fill="#59636d"');
