@@ -67,8 +67,8 @@ globalThis.SimScientificCharts=(()=>{
    const save=(data,filename)=>{const url=URL.createObjectURL(data),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);};
    if(format==='svg'){save(blob,name);return;}
    if(!['png','jpg'].includes(format))throw Error('Formato de imagen no admitido.');
-   const url=URL.createObjectURL(blob);
-   try{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('No se pudo convertir la gráfica en imagen.'));image.src=url;});const canvas=document.createElement('canvas');canvas.width=1570;canvas.height=680;const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear la imagen.');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);const raster=await new Promise(resolve=>canvas.toBlob(resolve,format==='jpg'?'image/jpeg':'image/png',.94));if(!raster)throw Error('No se pudo exportar la imagen.');save(raster,name.replace(/\\.[^.]+$/,'')+'.'+format);}finally{URL.revokeObjectURL(url);}
+   const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(await blob.text());
+   {const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('No se pudo convertir la gráfica en imagen.'));image.src=url;});const canvas=document.createElement('canvas');canvas.width=1570;canvas.height=680;const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear la imagen.');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);const raster=await new Promise(resolve=>canvas.toBlob(resolve,format==='jpg'?'image/jpeg':'image/png',.94));if(!raster)throw Error('No se pudo exportar la imagen.');save(raster,name.replace(/\.[^.]+$/,'')+'.'+format);}
  }
  return Object.freeze({render,download});
 })();

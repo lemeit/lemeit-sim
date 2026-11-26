@@ -90,7 +90,7 @@ globalThis.SimChartWorkspace=(()=>{
   for(const id of ['charts-x','charts-y','charts-log-x','charts-log'])$(id).addEventListener('change',()=>{view=[0,0,785,340];});
   for(const id of ['charts-x','charts-y','charts-y2','charts-log-y2','charts-zero-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend','charts-meta-subtitle','charts-meta-reference','charts-meta-date'])$(id).addEventListener('change',render);
   $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
-  $('charts-play').addEventListener('click',play);for(const format of ['svg','png','jpg'])$('charts-export-'+format).addEventListener('click',async()=>{try{render();const name=(getData().graph?.title||dataset?.title||'sim-grafica').replace(/[^\\p{L}\\p{N}._-]+/gu,'-').slice(0,75);await SimScientificCharts.download($('charts-svg'),name+'.'+format,format);}catch(error){$('charts-error').textContent=error.message;}});
+  $('charts-play').addEventListener('click',play);for(const format of ['svg','png','jpg'])$('charts-export-'+format).addEventListener('click',async()=>{try{render();const name=(getData().graph?.title||dataset?.title||'sim-grafica').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,75);await SimScientificCharts.download($('charts-svg'),name+'.'+format,format);}catch(error){$('charts-error').textContent=error.message;}});
   $('charts-export-csv').addEventListener('click',csv);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('charts-dialog').hidden&&$('charts-dialog').contains(document.activeElement)&&!document.querySelector('dialog[open]'))close();});
  }
  return Object.freeze({accept,reset,bind,open,close,completed});
