@@ -998,9 +998,13 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
     authenticated:true,role,student_name:role==='student'?'Alumno de prueba':null,class_name:'Clase de prueba'
   }}));
   await page.route('**/api/dynamics/capabilities',route=>route.fulfill({json:{supported:true}}));
-  await page.route('**/api/dynamics/tank',route=>route.fulfill({json:{
-    source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0,outlet_kg_s:0},{time_s:5,level_m:.2,outlet_kg_s:7}]
-  }}));
+  let runs=0;
+  await page.route('**/api/dynamics/tank',route=>{
+    runs++;
+    return route.fulfill({json:{
+      source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0,outlet_kg_s:0},{time_s:5,level_m:.2,outlet_kg_s:7}]
+    }});
+  });
   const id='10000000-0000-4000-8000-000000000000';
   let saved;
   await page.route('**/api/projects',route=>{
@@ -1051,8 +1055,10 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
   await page.reload({waitUntil:'networkidle'});
   await page.locator('#cloud-open-toolbar').click();
   await page.locator('#cloud-project-list').getByRole('button',{name:'Abrir'}).click();
-  await page.locator('#calculate-button').click();
   await page.locator('#charts-content').waitFor();
+  assert.equal(runs,1);
+  assert.equal(graph.saved_run.data.points[1].outlet_kg_s,7);
+  assert.deepEqual(cloudSave.postDataJSON().graph.saved_run,graph.saved_run);
   assert.equal(await page.locator('#charts-y2').inputValue(),'outlet_kg_s');
   assert.equal(await page.locator('#charts-subtitle').inputValue(),'Ensayo de llenado');
   assert.equal(await page.locator('#charts-color2').inputValue(),'#287a61');
@@ -1064,4 +1070,26 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
     page.locator('#charts-subtitle').fill('Ensayo corregido')
   ]);
   assert.equal(autosave.postDataJSON().graph.chart_settings.dynamic.subtitle,'Ensayo corregido');
+});
+
+test('Resultados estacionarios guardados vuelven a abrirse sin recalcular',async t=>{
+  const page=await browserPage(t);
+  let requests=0;
+  await page.route('**/api/simulate',route=>{
+    requests++;
+    assert.equal(route.request().postDataJSON().saved_run,undefined);
+    return route.fulfill({contentType:'application/json',body:result});
+  });
+  await openProject(page,example);
+  await page.locator('#calculate-button').click();
+  await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');
+  const saved=await page.evaluate(()=>localStorage.getItem('lemeit-process-v1'));
+  assert.equal(JSON.parse(saved).saved_run.regime,'steady');
+  await page.reload({waitUntil:'networkidle'});
+  await openProject(page,Buffer.from(saved));
+  await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');
+  assert.ok(await page.locator('#results .stream-result').count());
+  await page.locator('#charts-open').click();
+  await page.locator('#charts-content').waitFor();
+  assert.equal(requests,1);
 });

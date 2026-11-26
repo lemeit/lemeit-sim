@@ -35,11 +35,14 @@ test('clase → identidad individual → CRUD nube; aislamiento, admin y renovac
   let identity=await f.api('/api/auth/student-identity','POST',{action:'register',alias:'Alumno A',password:'clave-Alumno-A-123'},alice);
   assert.equal(identity.status,200,await identity.clone().text());
   const me=await f.api('/api/auth/me','GET',null,alice);assert.equal((await me.json()).student_name,'Alumno A');
-  const saved=await f.api('/api/projects','POST',{graph},alice);assert.equal(saved.status,201,await saved.clone().text());
+  const snapshot={regime:'steady',engine:'windows',time:'2026-11-26T12:00:00Z',data:{streams:{s:{temperature_K:300}},balances:[]}};
+  const saved=await f.api('/api/projects','POST',{graph:{...graph,saved_run:snapshot}},alice);assert.equal(saved.status,201,await saved.clone().text());
   const project=await saved.json();assert.equal(project.revision,1);
   const firstList=await f.api('/api/projects','GET',null,alice);assert.equal((await firstList.json()).projects.length,1);
   const got=await f.api('/api/projects/'+project.id,'GET',null,alice);
-  assert.equal((await got.json()).project.graph.exercise.statement,'Enunciado didáctico');
+  const stored=(await got.json()).project.graph;
+  assert.equal(stored.exercise.statement,'Enunciado didáctico');
+  assert.deepEqual(stored.saved_run,snapshot);
   const bob=await f.login('student',cls.code);
   identity=await f.api('/api/auth/student-identity','POST',{action:'register',alias:'Alumno B',password:'clave-Alumno-B-123'},bob);
   assert.equal(identity.status,200,await identity.clone().text());

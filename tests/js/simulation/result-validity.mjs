@@ -11,7 +11,7 @@ assert.ok(start>0&&end>start);
 function setup(){
   const elements=Object.fromEntries(['result-validity','results','result-meta','calculation-state'].map(id=>[id,{dataset:{},textContent:'',innerHTML:''}]));
   const ctx=vm.createContext({
-    result:null,dynamicResult:null,resultValidity:'none',hasProject:true,busy:false,revision:0,lastCalculation:null,
+    graph:{},result:null,dynamicResult:null,resultValidity:'none',hasProject:true,busy:false,revision:0,lastCalculation:null,
     blankResults:'<p>Sin resultados</p>',$:id=>elements[id],
     persist:()=>{},renderDiagram:()=>{},publishWorkspace:()=>{}
   });
@@ -33,13 +33,16 @@ test('el pie muestra el estado correcto, con texto y descripción accesible',()=
 test('cambios visuales conservan vigencia y datos; cambios físicos la invalidan',()=>{
  const {ctx,elements}=setup();
  ctx.resultValidity='valid';ctx.result={streams:{s:{mass_flow_kg_s:1}}};
+ ctx.graph.saved_run={data:ctx.result};
  ctx.changed({physical:false});
+ assert.ok(ctx.graph.saved_run);
  assert.equal(ctx.resultValidity,'valid');
  assert.equal(ctx.revision,0);
  assert.ok(ctx.result);
  ctx.changed({physical:true});
  assert.equal(ctx.resultValidity,'stale');
  assert.equal(ctx.result,null);
+ assert.equal(ctx.graph.saved_run,undefined);
  assert.equal(ctx.revision,1);
  assert.equal(elements['result-validity'].textContent,'Recalcular');
 });

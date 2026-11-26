@@ -106,8 +106,40 @@ function updateResultValidity(){
     const label=button.querySelector('.calculate-label');if(label)label.textContent=busy?'Calculando…':'Calcular';
     button.setAttribute('aria-busy',String(busy));}
 }
+function rememberRun(regime,data){
+  graph.saved_run={regime,data,time:lastCalculation.time,engine:lastCalculation.engine};
+  persist();
+  if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
+}
+function restoreRun(run){
+  const data=run?.data;
+  if(!data||run.regime!==SimDynamics.regime(graph)||!['windows','debian'].includes(run.engine)||!Number.isFinite(Date.parse(run.time)))return;
+  try{
+    lastCalculation={time:run.time,engine:run.engine,state:'completed',ok:true,message:'Resultado guardado',elapsed_s:data.elapsed_s};
+    resultValidity='valid';
+    if(run.regime==='dynamic'){
+      const {title,defaultY,source}=SimDynamics.prepare(graph);
+      if(data.source!==source||!Array.isArray(data.points)||data.points.length<2||
+        !data.points.every((p,i)=>Number.isFinite(p?.time_s)&&Number.isFinite(p?.[defaultY])&&(!i||p.time_s>data.points[i-1].time_s)))throw Error('Serie inválida');
+      dynamicResult=data;
+      $('result-meta').textContent='Dinámica guardada · '+data.points.length+' muestras';
+      $('results').innerHTML='<p class="results-note">Corrida guardada. Consultá Gráficas para ver y exportar la serie.</p>';
+      SimChartWorkspace.accept(data,{title,defaultY});
+    }else{
+      if(!data.streams||typeof data.streams!=='object'||!Array.isArray(data.balances))throw Error('Resultados inválidos');
+      result=data;
+      renderResults();
+    }
+    graph.saved_run=run;
+  }catch{
+    result=null;dynamicResult=null;lastCalculation=null;resultValidity='none';
+    SimChartWorkspace.reset();
+    $('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
+  }
+  updateControls();renderDiagram();renderInspector();publishWorkspace(false);
+}
 function changed({physical=true}={}){
-  if(physical){dynamicResult=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  if(physical){delete graph.saved_run;dynamicResult=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
   updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
@@ -252,6 +284,7 @@ async function selectCalculationEngine(mode){
   engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   if(resultValidity==='valid')resultValidity='stale';
   dynamicResult=null;globalThis.SimChartWorkspace?.reset();result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
+  if(graph.saved_run){delete graph.saved_run;persist();SimCloudProjects.onChange();}
   $('calculation-state').textContent='Comprobando motor de cálculo';
   updateControls();paintConnection();publishWorkspace(false);await checkEngine();
 }
@@ -641,7 +674,7 @@ async function calculateDynamic(){
     dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
     $('calculation-state').textContent='Resultados dinámicos vigentes';$('result-meta').textContent='Dinámica · '+data.points.length+' muestras';
     $('results').innerHTML='<p class="results-note">Integración temporal DWSIM · '+esc(prepared.title)+' · '+data.points.length+' muestras. Consultá Gráficas para ver la evolución y exportar la serie.</p>';
-    recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');globalThis.SimChartWorkspace.accept(data,{title:prepared.title,defaultY:prepared.defaultY});
+    rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');globalThis.SimChartWorkspace.accept(data,{title:prepared.title,defaultY:prepared.defaultY});
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
 }
@@ -660,7 +693,7 @@ async function calculate(){
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;
    // El backend recibe solo el modelo físico; los metadatos didácticos son locales.
-   delete payload.learning;delete payload.exercise;delete payload.annotations;delete payload.simulation;let calculationHttp=null,simulationRequested=false,transportFailed=false;
+   delete payload.learning;delete payload.exercise;delete payload.annotations;delete payload.simulation;delete payload.saved_run;delete payload.chart_settings;let calculationHttp=null,simulationRequested=false,transportFailed=false;
   lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
@@ -683,7 +716,7 @@ async function calculate(){
     if(!response.ok)throw new Error(data.error||'No se pudo calcular.');
     if(version!==revision)throw new Error('El proceso cambió durante el cálculo. Volvé a calcular.');
     debugEvent('OK','Resultados verificados',{engine:selectedEngine,streams:Object.keys(data.streams||{}).length,equipment:Object.keys(data.equipment||{}).length,ms:Math.round(performance.now()-started)});
-    lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();notice('Cálculo completado con el motor DWSIM.');
+    lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:true,state:'completed',http:calculationHttp,message:'Cálculo completado',elapsed_s:data.elapsed_s,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo completado',`Duración de la solicitud: ${lastCalculation.duration_ms} ms`);traceConnection('POST /api/simulate',{kind:'calculation',time:lastCalculation.time,state:'online',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo completado.'});result=data;resultValidity='valid';$('calculation-state').textContent='Resultados vigentes';renderDiagram();renderInspector();renderResults();rememberRun('steady',data);notice('Cálculo completado con el motor DWSIM.');
   }catch(error){transportFailed=simulationRequested&&(calculationHttp===503||/fetch|NetworkError|Failed to fetch|timeout/i.test(error.message));debugEvent('ERROR','Cálculo fallido',{engine:selectedEngine,stage:simulationRequested?'POST enviado o conexión interrumpida':'validación local antes de POST',http:calculationHttp,message:error.message});lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:false,state:'failed',http:calculationHttp,message:error.message,duration_ms:Math.round(performance.now()-started)};recordActivity('Cálculo fallido',error.message);traceConnection(simulationRequested?'POST /api/simulate':'Preflight /api/status',{kind:'calculation',time:lastCalculation.time,state:'offline',http:calculationHttp,ms:lastCalculation.duration_ms,message:'Cálculo fallido: '+error.message});notice(error.message+' · Ver Herramientas → Diagnóstico para revisar sugerencias.',true);$('calculation-state').textContent='Revisá los datos y las conexiones';renderDiagnostics();}
   finally{busy=false;updateResultValidity();if(result&&resultValidity==='valid')globalThis.SimChartWorkspace?.completed();renderServerDetails();document.body.classList.remove('calculating');updateControls();publishWorkspace(false);if(transportFailed&&engineMode==='auto')void checkEngine({silent:true,exclude:[calculationEngine]});}
 }
@@ -729,7 +762,12 @@ function loadGraph(data){
   resultValidity='none';lastCalculation=null;
   SimExerciseEditor.reset();
   graph=SimDynamics.normalize(structuredClone(data));if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
+  const savedRun=graph.saved_run;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
+  if(savedRun){
+    if(applyingWorkspace)graph.saved_run=savedRun;else restoreRun(savedRun);
+    persist();
+  }
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
 
@@ -950,8 +988,8 @@ function bindEvents(){
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
-  $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, las condiciones y el formato de las gráficas. Para guardar los datos calculados, exportá CSV.');};
-  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>100000)throw new Error('El archivo supera los 100 kB.');const data=JSON.parse(await file.text());loadGraph(data);notice('Proceso abierto. Calculá para obtener resultados actualizados.');}catch(error){notice(error.message,true);}e.target.value='';};
+  $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, el formato de Gráficas y la última corrida válida.');};
+  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data);notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();

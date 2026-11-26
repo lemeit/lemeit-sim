@@ -1,4 +1,4 @@
-/* ΣIM · ventana científica independiente de la simulación. Datos en memoria del proyecto. */
+/* ΣIM · ventana científica independiente de la simulación. Curvas de la corrida y datos importados. */
 'use strict';
 globalThis.SimChartWorkspace=(()=>{
  const $=id=>document.getElementById(id);
