@@ -94,3 +94,7 @@ Abrir Gráficas vuelve de Solo diagrama a la distribución de paneles, muestra e
 ### Ventana flotante por defecto (0.50.6)
 
 Como en COCO y las ventanas acoplables de DWSIM, Gráficas se presenta inicialmente flotante (570 × 440 px, adaptable al viewport). Se puede acoplar voluntariamente. El comando alterna visibilidad. Una dinámica abre su curva automáticamente; los resultados estacionarios se consultan a pedido, o actualizan una gráfica abierta. Se conserva la posición elegida después de esta migración.
+
+### Régimen dinámico integrado (0.51.0)
+
+Ejemplo 20 abre en Dinámico. Calcular usa /api/dynamics/tank y abre Gráficas automáticamente, sin estado estacionario previo. Configuración dinámica conserva parámetros en el proyecto. El primer adaptador admite solo agua a 25 °C, tanque y dos válvulas en serie; DWSIM reconstruye el circuito experimental y define el estado inicial. No simula cualquier diagrama ni sustituye un fallo por un modelo didáctico. Los próximos adaptadores podrán proporcionar sus propias columnas y variable Y predeterminada. Ejemplo 15 sigue estacionario. Las series no se guardan en la nube.

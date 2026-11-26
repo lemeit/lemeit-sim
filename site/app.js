@@ -59,6 +59,7 @@ function saveCanvasPreferences(){try{localStorage.setItem('sim-canvas-preference
 function showGrid(){return `<defs><pattern id="canvas-grid-pattern" width="${GRID_STEP}" height="${GRID_STEP}" patternUnits="userSpaceOnUse"><path d="M ${GRID_STEP} 0 L 0 0 0 ${GRID_STEP}" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width=".7"/></pattern></defs><rect x="-100000" y="-100000" width="200000" height="200000" fill="url(#canvas-grid-pattern)" pointer-events="none" aria-hidden="true"/>`;}
 function refreshCanvasButtons(){for(const [id,on] of [['view-grid',gridVisible],['view-snap',gridSnap],['diagram-grid',gridVisible]]){const button=$(id);if(button)button.setAttribute('aria-pressed',String(on));}}
 
+let dynamicResult=null;
 let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=null, busy=false, revision=0;
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let resultValidity='none'; // none | stale | valid; solo resultados calculados pueden quedar obsoletos.
@@ -97,7 +98,7 @@ function notice(message,error=false){$('notice').hidden=!message;$('notice').tex
 function persist(){try{localStorage.setItem('lemeit-process-v1',JSON.stringify(graph));}catch{/* Guardar archivo sigue disponible. */}}
 function updateResultValidity(){
   const element=$('result-validity');if(!element||!element.dataset)return;
-  const state=busy?'calculating':!hasProject?'none':result&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':lastCalculation?.state==='failed'?'failed':'none';
+  const state=busy?'calculating':!hasProject?'none':(result||dynamicResult)&&resultValidity==='valid'?'valid':resultValidity==='stale'?'stale':lastCalculation?.state==='failed'?'failed':'none';
   const labels={none:'Sin resultados',valid:'Cálculo correcto',stale:'Recalcular',calculating:'Calculando…',failed:'Cálculo fallido'};
   const descriptions={none:'Todavía no se calculó este proyecto.',valid:'DWSIM terminó correctamente. Los resultados corresponden a las condiciones actuales.',stale:'Las condiciones físicas cambiaron desde el último cálculo correcto.',calculating:'El motor seleccionado está resolviendo el proceso.',failed:lastCalculation?.message||'No se pudo resolver el proceso.'};
   element.dataset.state=state;element.textContent=labels[state];element.title=descriptions[state];
@@ -106,12 +107,13 @@ function updateResultValidity(){
     button.setAttribute('aria-busy',String(busy));}
 }
 function changed({physical=true}={}){
-  if(physical){globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
+  if(physical){dynamicResult=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();revision++;if(resultValidity==='valid')resultValidity='stale';lastCalculation=null;result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';$('calculation-state').textContent=resultValidity==='stale'?'Condiciones modificadas · recalcular':'Proyecto listo para calcular';}
   updateResultValidity();
   if(hasProject)persist();renderDiagram();publishWorkspace(physical);if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
 function updateControls(){
   updateResultValidity();
+  const dynamic=SimDynamics.regime(graph)==='dynamic';$('simulation-regime').value=dynamic?'dynamic':'steady';$('simulation-regime').disabled=!hasProject||busy;$('dynamic-settings').hidden=!dynamic;$('dynamic-settings').disabled=busy||!hasProject;$('dynamic-settings-menu').hidden=!dynamic;$('dynamic-settings-menu').disabled=busy||!hasProject;
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
   $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
@@ -249,7 +251,7 @@ async function selectCalculationEngine(mode){
   if(mode!=='auto')selectedEngine=mode;
   engineCheckGeneration++;engineOnline=false;connectionCheck=null;gatewayCheck=null;
   if(resultValidity==='valid')resultValidity='stale';
-  result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
+  dynamicResult=null;globalThis.SimChartWorkspace?.reset();result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   $('calculation-state').textContent='Comprobando motor de cálculo';
   updateControls();paintConnection();publishWorkspace(false);await checkEngine();
 }
@@ -461,7 +463,8 @@ function renderInspector(){
   if(n.type==='Heater'||n.type==='Cooler')html+=`<p class="inspector-description">Especificación: temperatura de salida. El motor calcula el calor transferido al fluido. Caída de presión nula.</p>${streamField(n,'outlet_C')}`;
   if(n.type==='HeatExchanger')html+=`<p class="inspector-description">Intercambiador de dos corrientes sin mezcla. Puerto 1: caliente, puerto 2: frío. Se especifica únicamente la potencia térmica transferida del caliente al frío (kW); DWSIM calcula ambas temperaturas de salida. El modelo inicial no incluye pérdidas externas ni caídas de presión.</p>${field('heat_duty_kW','Calor transferido','kW',n.heat_duty_kW,{min:0.000001})}`;
   if(TYPES[n.type].diagramOnly)html+='<p class="inspector-description">Disponible para dibujar y conectar en el PFD. Cálculo sin implementar en ΣIM.</p>';
-  if(n.type==='Tank')html+=`<button type="button" class="outline-button tank-dynamic-open" data-tank-dynamic="${esc(n.id)}" title="Estudiar el llenado mediante DWSIM real o el modelo didáctico">Dinámica del tanque · nivel y curvas…</button><p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
+  if(n.type==='Tank'&&SimDynamics.regime(graph)==='dynamic')html+=`<p class="inspector-description">Tanque dinámico: nivel y caudales variables con el tiempo. El estado inicial lo define DWSIM.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}`;
+  if(n.type==='Tank'&&SimDynamics.regime(graph)!=='dynamic')html+=`<button type="button" class="outline-button tank-dynamic-open" data-tank-dynamic="${esc(n.id)}" title="Estudiar el llenado mediante DWSIM real o el modelo didáctico">Dinámica del tanque · nivel y curvas…</button><p class="inspector-description">Tanque de líquido en régimen estacionario. Especificá volumen útil y pérdida de presión. DWSIM calcula el tiempo de residencia V/Q y el estado de salida. No simula nivel, llenado, vaciado ni separación de fases.</p>${field('volume_m3','Volumen útil','m³',n.volume_m3,{min:0.000001})}${field('pressure_drop_kPa','Pérdida de presión','kPa',n.pressure_drop_kPa,{min:0})}${Number.isFinite(result?.equipment[n.id]?.residence_time_s)?`<p class="reading-row">Tiempo de residencia: <strong>${fmt(result.equipment[n.id].residence_time_s/60,3)} min</strong></p>`:''}`;
   if(n.type==='Expander')html+=`<p class="inspector-description">Expansión adiabática de gas con producción de trabajo de eje. Especificá una presión absoluta de descarga menor que la entrada y la eficiencia isentrópica. Solo alimentación vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}${Number.isFinite(result?.equipment[n.id]?.shaft_power_generated_kW)?`<p class="reading-row">Potencia de eje producida: <strong>${fmt(result.equipment[n.id].shaft_power_generated_kW,3)} kW</strong></p>`:''}`;
   if(n.type==='Compressor')html+=`<p class="inspector-description">Compresión adiabática de gas: especificá presión absoluta de descarga y eficiencia isentrópica. DWSIM calcula temperatura y potencia de eje. Solo alimentación completamente vapor; sin curvas ni modo politrópico.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia isentrópica','%',n.efficiency_pct,{min:0.01})}`;
   if(n.type==='Pump')html+=`<p class="inspector-description">Bomba de líquido con presión absoluta de salida y eficiencia. El motor calcula potencia y temperatura. No usar para alimentar con vapor.</p>${field('outlet_pressure_kPa','Presión de descarga','kPa abs',n.outlet_pressure_kPa,{min:0.001})}${field('efficiency_pct','Eficiencia','%',n.efficiency_pct,{min:0.01})}`;
@@ -622,8 +625,29 @@ async function convertFlowBase(n,next){
  const old=n.flow_basis||'mass';if(old===next)return;
  try{const db=await SimUnitCalculator.getMasses();if(nodeById(n.id)!==n||busy)return;const mixed=SimUnits.mixture(graph.compounds.map(c=>n.composition?.[c]??0),graph.compounds.map(c=>db[c]),n.composition_basis||'mass');const known=n[old==='mass'?'mass_flow':'molar_flow'];if(!(known>0))throw Error('Completá un caudal positivo antes de cambiar su base.');if(next==='molar')n.molar_flow=known*1000/mixed.M;else n.mass_flow=known*mixed.M/1000;n.flow_basis=next;changed();renderInspector();notice('Caudal convertido con la masa molar de la mezcla.');}catch(error){renderInspector();notice('No se pudo convertir el caudal: '+error.message,true);}
 }
+function openDynamicSettings(){
+  if(!hasProject||busy||SimDynamics.regime(graph)!=='dynamic')return;closeMenus();
+  const p={...SimDynamics.defaults,...graph.simulation.parameters};$('dynamic-parameters').replaceChildren();
+  for(const [key,label] of SimDynamics.fields){const l=document.createElement('label'),i=document.createElement('input');l.textContent=label;i.type='number';i.name=key;i.step='any';i.min='0.000001';i.required=true;i.value=String(p[key]);if(key==='valve_opening_pct')i.max='100';l.append(i);$('dynamic-parameters').append(l);}
+  $('dynamic-settings-dialog').showModal();
+}
+async function calculateDynamic(){
+  if(!hasProject||busy)return;
+  const started=performance.now(),version=revision,engine=selectedEngine;
+  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();notice('');
+  try{
+    const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
+    if(version!==revision)throw Error('El proyecto cambió durante la integración.');
+    dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
+    $('calculation-state').textContent='Resultados dinámicos vigentes';$('result-meta').textContent='Dinámica · '+data.points.length+' muestras';
+    $('results').innerHTML='<p class="results-note">Integración temporal DWSIM · '+esc(prepared.title)+' · '+data.points.length+' muestras. Consultá Gráficas para ver la evolución y exportar la serie.</p>';
+    recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');globalThis.SimChartWorkspace.accept(data,{title:prepared.title,defaultY:prepared.defaultY});
+  }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
+}
 async function calculate(){
   if(!hasProject||busy)return;
+  if(SimDynamics.regime(graph)==='dynamic')return calculateDynamic();
   const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
   if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
 
@@ -636,7 +660,7 @@ async function calculate(){
   result=null;$('results').innerHTML=blankResults;$('result-meta').textContent='Calculando resultados nuevos…';renderDiagram();renderInspector();
   const version=revision,payload=structuredClone(graph),started=performance.now(),calculationEngine=selectedEngine;
    // El backend recibe solo el modelo físico; los metadatos didácticos son locales.
-   delete payload.learning;delete payload.exercise;delete payload.annotations;let calculationHttp=null,simulationRequested=false,transportFailed=false;
+   delete payload.learning;delete payload.exercise;delete payload.annotations;delete payload.simulation;let calculationHttp=null,simulationRequested=false,transportFailed=false;
   lastCalculation={time:new Date().toISOString(),engine:calculationEngine,ok:null,state:'running',message:'Cálculo iniciado'};recordActivity('Cálculo iniciado');debugEvent('INFO','Preparación del cálculo',{engine:selectedEngine,stage:'preflight'});renderServerDetails();
   try{
     const newEquipment=payload.nodes.filter(n=>['Compressor','Expander','Tank'].includes(n.type));
@@ -704,7 +728,7 @@ function loadGraph(data){
   SimProjectLibrary.resetActive();if(typeof SimCloudProjects!=='undefined')SimCloudProjects.resetActive();
   resultValidity='none';lastCalculation=null;
   SimExerciseEditor.reset();
-  graph=structuredClone(data);if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
+  graph=SimDynamics.normalize(structuredClone(data));if(graph.exercise&&typeof graph.exercise==='object')delete graph.exercise.title;if(Object.hasOwn(SimproxStreams.systems,graph.unit_system))unitSystem=graph.unit_system;SimproxStreams.setSystem(unitSystem);hasProject=true;graph.title=String(data.title||'Proceso sin título').slice(0,70);selection=null;pending=null;zoom=1;viewX=0;viewY=0;$('project-title').value=graph.title;
   if(catalog)$('model-select').value=graph.model;changed();renderCompounds();renderInspector();
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
@@ -906,6 +930,9 @@ function bindEvents(){
     else{const value=Number(e.target.value);if(e.target.value===''||!Number.isFinite(value)){notice('Ingresá un valor numérico.',true);renderInspector();return;}if(key.startsWith('fraction:')){n.composition??={};n.composition[key.slice(9)]=value/(n.fraction_display==='percent'?100:1);}else if(key.startsWith('stoich:')){n.stoichiometry??={};n.stoichiometry[key.slice(7)]=value;}else n[key]=value;changed();}
     renderInspector();
   });
+  $('simulation-regime').onchange=()=>{if(busy)return;graph.simulation=$('simulation-regime').value==='dynamic'?{regime:'dynamic',model:'tank-valves',parameters:{...SimDynamics.defaults}}:{regime:'steady'};changed();renderInspector();};
+  $('dynamic-settings').onclick=$('dynamic-settings-menu').onclick=openDynamicSettings;
+  $('dynamic-settings-form').onsubmit=e=>{e.preventDefault();if(busy)return;graph.simulation.parameters=Object.fromEntries([...$('dynamic-parameters').querySelectorAll('input')].map(i=>[i.name,i.valueAsNumber]));$('dynamic-settings-dialog').close();changed();};
   $('calculate-button').onclick=calculate;$('example-button').onclick=()=>{resetExample();closeMenus();};
   $('project-title').oninput=e=>{graph.title=e.target.value;persist();if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();};
   $('model-select').onchange=e=>{graph.model=e.target.value;changed();renderCompounds();renderInspector();};
@@ -965,7 +992,7 @@ function clearLoadedProject(clearLocalDraft=false){
   globalThis.SimChartWorkspace?.reset();
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   SimExerciseEditor.reset();
-  graph=emptyProject();
+  graph=emptyProject();dynamicResult=null;
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();
   hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;

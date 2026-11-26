@@ -16,15 +16,16 @@ globalThis.SimChartWorkspace=(()=>{
   const real=data.source==='dwsim-mcp-dynamics';
   const density=data.config?.density;
   const points=data.points.map(p=>({...p,...(!real&&Number.isFinite(density)?{inlet_kg_s:p.inlet_m3_s*density,outlet_kg_s:p.outlet_m3_s*density}:{})}));
-  const columns=vars.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
+  const definitions=Array.isArray(data.columns)?data.columns.map(c=>[c.key,c.name,c.unit]):vars;
+  const columns=definitions.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
   if(!columns.length)return;
-  preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',assumptions:data.assumptions||''};
+  preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',assumptions:data.assumptions||'',defaultY:meta.defaultY||'level_m'};
   if($('charts-title'))$('charts-title').value='';
   show('dynamic');
  }
  function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+(column.unit?' ['+column.unit+']':'');select.append(o);}
  function refresh(preferred){
-  pause();const state=getData();availableModels=dynamic?[]:SimChartModels.available(state.graph,state.result,state.selectedId);updateModelOptions();sources=SimChartData.stationary(state.graph||{nodes:[]},state.result,state.engine).map((d,i)=>({id:'steady'+i,d}));if(dynamic)sources.push({id:'dynamic',d:dynamic});if(manual)sources.push({id:'manual',d:manual});if(model&&availableModels.some(m=>m.id===modelContext?.id&&m.equipment===modelContext?.equipment))sources.push({id:'model',d:model});const picker=$('charts-dataset'),previous=preferred||preferredSource||picker.value;picker.replaceChildren();for(const entry of sources){const o=document.createElement('option');o.value=entry.id;o.textContent=entry.id==='dynamic'?entry.d.title+' · Evolución temporal':entry.id==='manual'?'Datos importados':entry.id==='model'?entry.d.title:entry.d.title+' · Estado estacionario';picker.append(o);}picker.value=sources.some(s=>s.id===previous)?previous:dynamic?'dynamic':sources[0]?.id||'';dataset=sources.find(s=>s.id===picker.value)?.d||null;preferredSource=picker.value;view=[0,0,785,340];dataPage=0;const ready=!!dataset;
+  pause();const state=getData();availableModels=dynamic?[]:SimChartModels.available(state.graph,state.result,state.selectedId);updateModelOptions();sources=SimChartData.stationary(state.graph||{nodes:[]},state.graph?.simulation?.regime==='dynamic'?null:state.result,state.engine).map((d,i)=>({id:'steady'+i,d}));if(dynamic)sources.push({id:'dynamic',d:dynamic});if(manual)sources.push({id:'manual',d:manual});if(model&&availableModels.some(m=>m.id===modelContext?.id&&m.equipment===modelContext?.equipment))sources.push({id:'model',d:model});const picker=$('charts-dataset'),previous=preferred||preferredSource||picker.value;picker.replaceChildren();for(const entry of sources){const o=document.createElement('option');o.value=entry.id;o.textContent=entry.id==='dynamic'?entry.d.title+' · Evolución temporal':entry.id==='manual'?'Datos importados':entry.id==='model'?entry.d.title:entry.d.title+' · Estado estacionario';picker.append(o);}picker.value=sources.some(s=>s.id===previous)?previous:dynamic?'dynamic':sources[0]?.id||'';dataset=sources.find(s=>s.id===picker.value)?.d||null;preferredSource=picker.value;view=[0,0,785,340];dataPage=0;const ready=!!dataset;
   $('charts-empty').hidden=ready;$('charts-dataset').disabled=sources.length<2;$('charts-content').hidden=!ready;
   if(!ready)return;
   $('charts-source').textContent=dataset.title+' · '+dataset.source+' · '+dataset.points.length+' registros';$('charts-dataset').disabled=sources.length<2;
@@ -33,7 +34,7 @@ globalThis.SimChartWorkspace=(()=>{
   const none=document.createElement('option');none.value='';none.textContent='Ninguna';$('charts-y2').append(none);
   for(const c of dataset.columns)for(const id of ['charts-x','charts-y','charts-y2'])option($(id),c);
   $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
-  $('charts-y').value=dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
+  $('charts-y').value=dataset.columns.some(c=>c.key===dataset.defaultY)?dataset.defaultY:dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
   $('charts-y2').value='';$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
   const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
  }
