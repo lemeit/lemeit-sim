@@ -51,7 +51,7 @@ globalThis.SimScientificCharts=(()=>{
    svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML=out;
  }
  function download(svg,name='sim-grafica.svg'){
-   const clone=svg.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','785');clone.setAttribute('height','340');
+   const clone=svg.cloneNode(true);clone.setAttribute('viewBox','0 0 785 340');clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','785');clone.setAttribute('height','340');
    const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'}));
    const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
  }

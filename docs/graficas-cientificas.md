@@ -70,3 +70,7 @@ El núcleo gráfico es reutilizable, pero la interfaz actual está dentro del ta
 ## Modelos físicos (0.50.1)
 
 Abrí Modelos físicos, elegí el modelo y completá los parámetros. Generá la curva y seleccioná ejes XY. Activá Superponer estados DWSIM compatibles si hay variables de igual magnitud y unidad en resultados vigentes. Se muestran como puntos, sin atribuirles una trayectoria. Los parámetros del gas ideal deben corresponder al gas de estudio; los valores iniciales son ilustrativos. La selección incluye todas las corrientes compatibles, no solo las de un compresor. Exportar CSV descarga el conjunto seleccionado; SVG incluye la superposición visible. No hay barridos automáticos ni ajuste de modelos reales de gas en esta revisión.
+
+### Navegación y datos del tanque
+
+No se requiere importar CSV. Una corrida dinámica entrega sus muestras a Gráficas automáticamente; Abrir en Gráficas selecciona la serie temporal y mantiene los datos al cerrar la ventana del tanque. La tabla Datos de la gráfica muestra todas las columnas en páginas de 100 filas. Rueda o +/− para zoom, arrastre o flechas para desplazar la vista ampliada y Ajustar para recuperar el gráfico completo. El botón de ampliar cambia el tamaño de la ventana y el cuerpo tiene desplazamiento propio. El SVG exportado conserva la gráfica completa. Las series permanecen en memoria, no sobreviven a recargar la página ni a cambios físicos del proyecto.
