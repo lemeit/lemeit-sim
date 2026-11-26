@@ -8,7 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.51.6 — 2026-11-26
 
-- Guarda el formato de Gráficas con el proyecto, alinea el selector de régimen y aclara las opciones de almacenamiento según la sesión.
+- Guarda el formato de Gráficas con el proyecto, alinea el selector de régimen y deja el guardado en la nube como acción principal para el alumnado. Las copias JSON de respaldo toman el título del proyecto.
 
 ## 0.51.5 — 2026-11-26
 

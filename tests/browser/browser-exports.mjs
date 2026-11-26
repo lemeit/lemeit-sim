@@ -993,14 +993,31 @@ test('Ejemplo 20: Calcular principal integra tiempo sin POST estacionario',async
 
 test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un proyecto',async t=>{
   const page=await browserPage(t);
+  let role='admin';
   await page.route('**/api/auth/me',route=>route.fulfill({json:{
-    authenticated:true,role:'student',student_name:'Alumno de prueba',class_name:'Clase de prueba'
+    authenticated:true,role,student_name:role==='student'?'Alumno de prueba':null,class_name:'Clase de prueba'
   }}));
   await page.route('**/api/dynamics/capabilities',route=>route.fulfill({json:{supported:true}}));
   await page.route('**/api/dynamics/tank',route=>route.fulfill({json:{
     source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0,outlet_kg_s:0},{time_s:5,level_m:.2,outlet_kg_s:7}]
   }}));
-  await page.route('**/api/projects',route=>route.fulfill({status:201,json:{id:'test-project',revision:1}}));
+  const id='10000000-0000-4000-8000-000000000000';
+  let saved;
+  await page.route('**/api/projects',route=>{
+    if(route.request().method()==='POST'){
+      const {graph}=route.request().postDataJSON();
+      saved={id,title:graph.title,graph,revision:1,updated_at:1};
+      return route.fulfill({status:201,json:{id,revision:1}});
+    }
+    return route.fulfill({json:{projects:saved?[saved]:[]}});
+  });
+  await page.route('**/api/projects/'+id,route=>{
+    if(route.request().method()==='PUT'){
+      saved={...saved,graph:route.request().postDataJSON().graph,revision:2};
+      return route.fulfill({json:{id,revision:2}});
+    }
+    return route.fulfill({json:{project:saved}});
+  });
   await page.reload({waitUntil:'networkidle'});
   await openProject(page,await load('../../site/examples/TankFillingDynamic.json'));
   await page.locator('#calculate-button').click();
@@ -1013,20 +1030,27 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
   await page.locator('#charts-width2').selectOption('3');
   await page.locator('#charts-close').click();
 
-  const file=await download(page,()=>page.locator('#save-project-toolbar').click());
+  await page.locator('#file-menu summary').click();
+  const file=await download(page,()=>page.locator('#save-button').click());
+  assert.match(file.name,/^20-Tanque.*\.json$/u);
   const graph=JSON.parse(file.bytes);
   assert.equal(graph.chart_settings.dynamic.subtitle,'Ensayo de llenado');
   assert.equal(graph.chart_settings.dynamic.y2,'outlet_kg_s');
   assert.equal(graph.chart_settings.dynamic.color2,'#287a61');
   assert.equal(graph.chart_settings.dynamic.width2,'3');
-  await page.locator('#file-menu summary').click();
+  role='student';
+  await page.reload({waitUntil:'networkidle'});
+  await openProject(page,file.bytes);
+  assert.equal(await page.locator('#project-backups').getAttribute('hidden'),'');
   const [cloudSave]=await Promise.all([
     page.waitForRequest(request=>new URL(request.url()).pathname==='/api/projects'&&request.method()==='POST'),
-    page.locator('#cloud-save-menu').click()
+    page.getByRole('button',{name:'Guardar proyecto en nube',exact:true}).click()
   ]);
   assert.deepEqual(cloudSave.postDataJSON().graph.chart_settings,graph.chart_settings);
 
-  await openProject(page,file.bytes);
+  await page.reload({waitUntil:'networkidle'});
+  await page.locator('#cloud-open-toolbar').click();
+  await page.locator('#cloud-project-list').getByRole('button',{name:'Abrir'}).click();
   await page.locator('#calculate-button').click();
   await page.locator('#charts-content').waitFor();
   assert.equal(await page.locator('#charts-y2').inputValue(),'outlet_kg_s');
@@ -1034,4 +1058,10 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
   assert.equal(await page.locator('#charts-color2').inputValue(),'#287a61');
   assert.equal(await page.locator('#charts-width2').inputValue(),'3');
   assert.equal(await page.locator('#calculate-button').getAttribute('data-state'),'valid');
+  await page.locator('#charts-format summary').click();
+  const [autosave]=await Promise.all([
+    page.waitForRequest(request=>request.url().endsWith('/api/projects/'+id)&&request.method()==='PUT'),
+    page.locator('#charts-subtitle').fill('Ensayo corregido')
+  ]);
+  assert.equal(autosave.postDataJSON().graph.chart_settings.dynamic.subtitle,'Ensayo corregido');
 });

@@ -18,7 +18,14 @@ const SimCloudProjects=(()=>{
   const adminReadOnly='Administración solo consulta proyectos de clase. Para guardar este proyecto en esta sesión, descargá una copia JSON.';
   const status=message=>{$('cloud-project-status').textContent=message;};
   const identity=()=>me?{student_name:me.student_name||'',class_name:me.class_name||'',role:me.role}:{};
-  const updateIdentity=()=>{const label=$('cloud-user-label');if(!label)return;label.textContent=me?.role==='admin'?'Administrador':me?.student_name?me.student_name+' · '+(me.class_name||'Clase'):me?.class_name?me.class_name+' · sin identificar':'Sin identificar';label.title='Identidad de esta sesión';};
+  const updateIdentity=()=>{
+    $('project-backups').hidden=student();
+    $('cloud-project-intro').hidden=me?.role==='admin';
+    const label=$('cloud-user-label');
+    if(!label)return;
+    label.textContent=me?.role==='admin'?'Administrador':me?.student_name?me.student_name+' · '+(me.class_name||'Clase'):me?.class_name?me.class_name+' · sin identificar':'Sin identificar';
+    label.title='Identidad de esta sesión';
+  };
   function resetActive(){
     active=null;revision=null;version++;dirty=false;
     if(timer)clearTimeout(timer);timer=null;
@@ -128,7 +135,7 @@ const SimCloudProjects=(()=>{
       }
       if(!quiet){status('Proyecto guardado en la nube.');notice('Proyecto guardado en la nube.');if($('cloud-project-dialog').open)await list();}
       else status('Guardado automáticamente en la nube.');
-    }catch(error){status('No se pudo guardar: '+error.message+' Descargá el JSON como respaldo.');if(!$('cloud-project-dialog').open)notice('No se pudo guardar en la nube: '+error.message,true);dirty=false;}
+    }catch(error){status('No se pudo guardar: '+error.message+' Conservá el proyecto abierto y volvé a intentar.');if(!$('cloud-project-dialog').open)notice('No se pudo guardar en la nube: '+error.message,true);dirty=false;}
     finally{
       working=false;
       if(dirty&&currentGeneration===version){dirty=false;onChange();}

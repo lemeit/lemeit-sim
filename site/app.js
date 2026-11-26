@@ -116,7 +116,7 @@ function updateControls(){
   const dynamic=SimDynamics.regime(graph)==='dynamic';$('simulation-regime').value=dynamic?'dynamic':'steady';$('simulation-regime').disabled=!hasProject||busy;$('dynamic-settings').hidden=!dynamic;$('dynamic-settings').disabled=busy||!hasProject;$('dynamic-settings-menu').hidden=!dynamic;$('dynamic-settings-menu').disabled=busy||!hasProject;
   $('close-project-button').disabled=!hasProject;$('menu-calculate').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;document.querySelectorAll('[data-export]').forEach(b=>b.disabled=!result||busy);
   document.querySelectorAll('[data-diagram-export]').forEach(b=>b.disabled=!hasProject||!graph.nodes.length);
-  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;$('save-project-toolbar').disabled=!hasProject;
+  $('project-title').disabled=!hasProject;$('exercise-open').disabled=!hasProject;$('project-editor-menu').disabled=!hasProject;$('project-report-menu').disabled=!hasProject||!graph.nodes.length;$('local-projects-save').disabled=!hasProject;$('cloud-save-menu').disabled=!hasProject;$('cloud-save-toolbar').disabled=!hasProject;$('save-button').disabled=!hasProject;$('report-pdf-menu').disabled=!hasProject||!graph.nodes.length;
   $('compound-button').disabled=!hasProject||!catalog;$('model-select').disabled=!hasProject||!catalog;
   $('diagram-add').disabled=!hasProject||busy;
   document.querySelectorAll('[data-insert-type]').forEach(button=>button.disabled=!hasProject||busy);
@@ -136,7 +136,7 @@ function updateControls(){
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
-  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · Abrir proyecto</p>';
+  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · Abrir biblioteca en la nube</p>';
   document.body.classList.toggle('no-project',!hasProject);
 }
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
@@ -950,7 +950,7 @@ function bindEvents(){
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
-  $('save-button').onclick=()=>{const blob=new Blob([JSON.stringify(graph,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='proceso-lemeit.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Proceso descargado. El JSON conserva el diagrama, las condiciones y el formato de las gráficas. Para guardar los datos calculados, exportá CSV.');};
+  $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, las condiciones y el formato de las gráficas. Para guardar los datos calculados, exportá CSV.');};
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>100000)throw new Error('El archivo supera los 100 kB.');const data=JSON.parse(await file.text());loadGraph(data);notice('Proceso abierto. Calculá para obtener resultados actualizados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
@@ -1042,7 +1042,7 @@ function bindProjectEvents(){
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('.app-menu,[data-toolbar-menu]'))closeMenus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const active=menus.find(menu=>menu.open);closeMenus();if(active)menuAnchor?.focus();}});
   window.addEventListener('resize',closeMenus);
-  $('open-project-toolbar').onclick=()=>$('open-button').click();$('save-project-toolbar').onclick=()=>$('save-button').click();
+  $('open-project-toolbar').onclick=()=>$('open-button').click();
   $('new-project-button').onclick=newProject;$('new-project-toolbar').onclick=newProject;
   $('cancel-project').onclick=()=>$('new-project-dialog').close();$('cancel-project-bottom').onclick=()=>$('new-project-dialog').close();
   $('new-component-search').oninput=()=>{newComponentDisplayLimit=35;renderNewProject();};$('new-project-model').onchange=renderNewProject;
@@ -1096,7 +1096,7 @@ function toolIcon(name){
 }
 function bindDiagramWindow(){
   const focus=$('diagram-focus');
-  for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Abrir diagrama en otra ventana'],['fit-button','fit','Encuadrar todo el proceso'],['diagram-grid','grid','Mostrar cuadrícula'],['diagram-note-insert','text','Insertar texto en el diagrama'],['report-label-tool','label','Datos del rótulo'],['exercise-open','edit','Editar ficha y actividad'],['zoom-in','zoomIn','Acercar'],['zoom-out','zoomOut','Alejar'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto'],['save-project-toolbar','save','Guardar proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
+  for(const [id,icon,label] of [['diagram-focus','focus','Solo diagrama'],['diagram-library','library','Biblioteca'],['diagram-popout','popout','Abrir diagrama en otra ventana'],['fit-button','fit','Encuadrar todo el proceso'],['diagram-grid','grid','Mostrar cuadrícula'],['diagram-note-insert','text','Insertar texto en el diagrama'],['report-label-tool','label','Datos del rótulo'],['exercise-open','edit','Editar ficha y actividad'],['zoom-in','zoomIn','Acercar'],['zoom-out','zoomOut','Alejar'],['diagram-fullscreen','fullscreen','Pantalla completa'],['new-project-toolbar','new','Nuevo proyecto'],['open-project-toolbar','open','Abrir proyecto']]){const button=$(id);button.innerHTML=toolIcon(icon);button.setAttribute('aria-label',label);button.title=label;}
   for(const control of document.querySelectorAll('[data-tool-icon]'))control.innerHTML=toolIcon(control.dataset.toolIcon);
   $('toolbar-streams').querySelector('summary').innerHTML=toolIcon('materialFlow');
   const exportButton=document.querySelector('.command-bar .diagram-export-tool');
@@ -1170,7 +1170,10 @@ function bindDiagramWindow(){
 }
 function recordActivity(message,detail=''){activity.unshift({time:new Date().toISOString(),message,detail});activity=activity.slice(0,30);}
 function downloadLocal(filename,body,type){const blob=new Blob([body],{type}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function exportStem(){return (graph.title||'sim').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,60);}
+function exportStem(){
+  const stem=(graph.title||'').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,60).replace(/^[._-]+|[._-]+$/g,'')||'sim';
+  return /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(stem)?'sim-'+stem:stem;
+}
 function exportResults(kind,locale='es-AR'){
   if(!result||busy){notice('Calculá el proyecto para exportar resultados vigentes.',true);return;}
   const sheets=SimproxFiles.tables(graph,result),stem=exportStem();

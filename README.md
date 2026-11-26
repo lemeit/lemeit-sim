@@ -27,7 +27,7 @@ Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutor
 - El adaptador dinámico admite solamente el circuito de agua a 25 °C con tanque y dos válvulas; no integra cualquier PFD. Sin reemplazo silencioso por modelo didáctico.
 - Portal y gateway tienen versiones independientes. Consultar Ayuda → Acerca de y el monitor administrativo. La publicación efectiva se verifica por separado.
 
-El JSON y los proyectos en la nube conservan el diagrama y el formato de Gráficas. Volvé a calcular para reconstruir una curva o exportá CSV para guardar sus muestras. La biblioteca permite guardar con identidad de alumno y consultar por clase desde Administración.
+Como alumno, usá **Guardar en nube** en la barra y retomá el trabajo desde **Mis proyectos en la nube**. Después del primer guardado, los cambios se guardan automáticamente. El proyecto conserva el diagrama y el formato de Gráficas. Volvé a calcular para reconstruir la curva o exportá sus datos, tablas e imágenes para un informe. Desde Administración podés consultar la biblioteca por clase y descargar una copia JSON del proyecto abierto.
 
 [Manual de uso](https://wiki.lemeit.ar/sim/manual-de-uso/) · [Guía de gráficas](docs/graficas-cientificas.md) · [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md) · [Manual de recuperación](docs/operacion-local.md) · [Organización y mantenimiento](docs/mantenimiento.md).
 
