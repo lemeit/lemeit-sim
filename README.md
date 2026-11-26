@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.50.0](https://img.shields.io/badge/portal-0.50.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.51.1](https://img.shields.io/badge/portal-0.51.1-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -18,25 +18,15 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Estado actual y trazabilidad
+## Estado actual · 0.51.1
 
-La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las funciones integradas hasta 0.49.0 incluyen la biblioteca de proyectos en nube, el explorador didáctico de resultados, balances por componentes, informes PDF y una barra por categorías. Los ejemplos con recirculación aún requieren validación física completa en ambos motores. El código desplegado puede ser anterior a una rama o PR en revisión.
+- Régimen estacionario o dinámico guardado por proyecto. Ejemplo 20 abre en Dinámico: pulsar Calcular integra DWSIM y abre Gráficas con tiempo y nivel.
+- Gráficas flotantes y acoplables, dos curvas con eje derecho automático si las unidades difieren, escalas independientes, paleta fija y leyenda según representación. SVG, PNG, JPG y CSV; referencias del proyecto configurables.
+- Ejemplo 20 comprobado en ambos motores: 121 muestras durante 600 s, paso 5 s, nivel final ≈0,333 m y descarga ≈10 kg/s. Consistencia numérica, no validación experimental.
+- El adaptador dinámico admite solamente el circuito de agua a 25 °C con tanque y dos válvulas; no integra cualquier PFD. Sin reemplazo silencioso por modelo didáctico.
+- Portal y gateway tienen versiones independientes. Consultar Ayuda → Acerca de y el monitor administrativo. La publicación efectiva se verifica por separado.
 
-**Corrección 0.47.5 integrada:** para intercambiadores de dos circuitos, diferenciar calor cedido, recibido, transferencia interna y residuo neto del balance energético; no confundir una energía neta cercana a cero con ausencia de transferencia. Ver [criterios de lectura del balance térmico](docs/interpretacion-intercambiadores.md).
-
-## Novedades hasta 0.50.0
-
-- Gráficas generales de resultados estacionarios, dinámicos y datos propios, con ejes XY y edición visual.
-
-- Interfaz técnica negro/blanco/rojo con modo claro y oscuro común, barra reordenable, botón Calcular destacado y estados de cálculo.
-- Paneles acoplables y flotantes, separadores horizontales mínimos, ajuste de ancho y altura, controles +/− y explorador de proceso de tamaño estable.
-- Símbolos DWSIM, puertos visibles, arrastre de equipos, selección múltiple y edición de recorridos de corrientes.
-- Dinámica de tanque: modelo didáctico y puente DWSIM experimental. Ejemplo 20 validado numéricamente en Debian; Windows pendiente.
-- Gráficas con ejes y unidades, leyendas, marcadores, cuadrícula, escala Y logarítmica, reproducción temporal, SVG vectorial y CSV. Se integran por ahora en el diálogo del tanque, no en un panel independiente.
-
-**Cómo empezar:** Ejemplos → 20 → seleccionar T-01 → Propiedades → Dinámica del tanque · nivel y curvas. Fijar Debian si está disponible, elegir DWSIM real, verificar condiciones y ejecutar. Consultar [guía de gráficas](docs/graficas-cientificas.md), [manual de uso](https://wiki.lemeit.ar/sim/manual-de-uso/) y [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md).
-
-La versión 0.50.0 incorpora el módulo general; la publicación efectiva se confirma en Ayuda → Acerca de. No se atribuyen datos experimentales al cálculo de DWSIM.
+[Guía de gráficas](docs/graficas-cientificas.md) · [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md) · [Manual de recuperación](docs/operacion-local.md) · [Organización y mantenimiento](docs/mantenimiento.md).
 
 ## Versión y estado (historial anterior)
 

@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 25/11/2026 · Portal 0.49.0 integrado y CI aprobado; despliegue a verificar · Motor DWSIM 10.2.15.
+Revisión: 26/11/2026 · Portal 0.51.1 integrado, CI aprobado; despliegue a verificar · DWSIM 10.2.15.
 
 ## Empezar
 
@@ -19,6 +19,7 @@ Revisión: 25/11/2026 · Portal 0.49.0 integrado y CI aprobado; despliegue a ver
 ## Operación y mantenimiento
 
 - [Operación local](operacion-local.md): Windows, Debian, arranque y recuperación.
+- [Mantenimiento y arquitectura prevista](mantenimiento.md): organización del código, modo local y administración segura.
 - [Selección de motores](seleccion-manual-motores.md): elección manual, requisitos y límites.
 - [Despliegue automático](despliegue-automatico.md): publicación del Worker, secretos y migraciones D1.
 - [Comprobaciones](../CHECKS.md): evidencia por fecha y versión, con sus límites.
