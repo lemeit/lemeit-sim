@@ -201,3 +201,10 @@ para explorar → límites y errores frecuentes → tutorial de origen y cambios
 Una función se marca disponible al completar puertos, formulario, validación,
 conversión de unidades, cálculo real, errores y un ejemplo verificado. Dibujar su icono
 no equivale a validar el equipo. **Cada PR que cambia una capacidad debe revisar tanto `site/catalogo.html` como este `docs/roadmap.md`**, documentando el estado real, el ejemplo y la evidencia de pruebas.
+
+## Consolidación posterior a 0.51.1
+
+- Agente administrativo local independiente, operaciones permitidas y autenticadas, supervisión del gateway y túnel; no terminal arbitraria desde Internet.
+- Validar modo local sin Internet, acceso local y almacenamiento de archivos; no sustituir autenticación de nube por acceso público.
+- Reorganizar pruebas por etapas preservando descubrimiento de unittest, rutas de imports, CI y scripts de arranque.
+- Extender adaptadores dinámicos a cinética de reacción y reactores discontinuos tras validar sus modelos.
