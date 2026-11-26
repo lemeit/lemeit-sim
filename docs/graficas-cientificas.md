@@ -2,7 +2,7 @@
 
 ## Módulo general (0.50.0)
 
-Calculá cualquier ejemplo con el botón Calcular y abrí Ver → Gráficas o el icono de la barra. Elegí el conjunto Corrientes, Balances, Componentes, dinámica del tanque o Datos propios. Para ingresar datos propios, pegá una tabla numérica con encabezados y unidades entre corchetes, o importá CSV/TSV. Las filas vacías se omiten; los campos faltantes no se inventan. Se admiten hasta 10.000 filas y 30 columnas.
+Calculá cualquier ejemplo con el botón Calcular y abrí Simulación → Gráficas o el icono de la barra. Elegí el conjunto Corrientes, Balances, Componentes, dinámica del tanque o Datos propios. Para ingresar datos propios, pegá una tabla numérica con encabezados y unidades entre corchetes, o importá CSV/TSV. Las filas vacías se omiten; los campos faltantes no se inventan. Se admiten hasta 10.000 filas y 30 columnas.
 
 Seleccioná X e Y y opcionalmente una segunda curva de igual unidad. Configurá título, color principal, grosor, representación línea/puntos/dispersión, escalas logarítmicas, cuadrícula y leyenda. Exportá SVG o CSV. En estacionario cada punto es una corriente, equipo o componente, no un instante; para obtener curvas temporales o paramétricas reales hacen falta series calculadas o importadas. No se recalcula al graficar. Los datos se conservan en memoria hasta modificar condiciones o cambiar de proyecto; guardá las exportaciones. Todavía no hay barrido automático, regresión, persistencia ni panel acoplable.
 
@@ -22,7 +22,7 @@ El modo didáctico usa geometría, densidad y volumen inicial editables, caudal 
 
 ## Ventana Gráficas (0.49.1)
 
-Desde **Ver → Gráficas…**, el icono de gráfica de la barra de Simulación o **Abrir en Gráficas ↗** dentro del tanque, podés consultar la última serie calculada sin volver a ejecutar DWSIM. Elegí libremente X e Y, una segunda curva de la misma unidad y un título. La ventana es redimensionable y conserva la serie mientras no se cambie de proyecto ni de condiciones físicas. No es todavía un panel acoplable ni persiste datos en la nube.
+Desde **Simulación → Gráficas**, el icono de gráfica de la barra de Simulación o **Abrir en Gráficas ↗** dentro del tanque, podés consultar la última serie calculada sin volver a ejecutar DWSIM. Elegí libremente X e Y, una segunda curva de la misma unidad y un título. La ventana es redimensionable y conserva la serie mientras no se cambie de proyecto ni de condiciones físicas. No es todavía un panel acoplable ni persiste datos en la nube.
 
 ## Leer y configurar las gráficas
 
@@ -66,3 +66,11 @@ El balance dm/dt = entrada − salida explica la estabilización: al final la de
 
 El núcleo gráfico es reutilizable, pero la interfaz actual está dentro del tanque. Panel acoplable, zoom, importación de datos experimentales, incertidumbre, regresiones, cinética y persistencia son desarrollos pendientes. No se atribuyen al módulo actual.
 
+
+## Modelos físicos (0.50.1)
+
+Abrí Modelos físicos, elegí el modelo y completá los parámetros. Generá la curva y seleccioná ejes XY. Activá Superponer estados DWSIM compatibles si hay variables de igual magnitud y unidad en resultados vigentes. Se muestran como puntos, sin atribuirles una trayectoria. Los parámetros del gas ideal deben corresponder al gas de estudio; los valores iniciales son ilustrativos. La selección incluye todas las corrientes compatibles, no solo las de un compresor. Exportar CSV descarga el conjunto seleccionado; SVG incluye la superposición visible. No hay barridos automáticos ni ajuste de modelos reales de gas en esta revisión.
+
+### Navegación y datos del tanque
+
+No se requiere importar CSV. Una corrida dinámica entrega sus muestras a Gráficas automáticamente; Abrir en Gráficas selecciona la serie temporal y mantiene los datos al cerrar la ventana del tanque. La tabla Datos de la gráfica muestra todas las columnas en páginas de 100 filas. Rueda o +/− para zoom, arrastre o flechas para desplazar la vista ampliada y Ajustar para recuperar el gráfico completo. El botón de ampliar cambia el tamaño de la ventana y el cuerpo tiene desplazamiento propio. El SVG exportado conserva la gráfica completa. Las series permanecen en memoria, no sobreviven a recargar la página ni a cambios físicos del proyecto.

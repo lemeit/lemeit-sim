@@ -959,9 +959,27 @@ test('Dinámica DWSIM MCP: curva real identificada y CSV diferente del didáctic
  const exported=await download(page,()=>dialog.locator('#tank-dynamic-download').click());
  assert.match(exported.bytes.toString('utf8'),/DWSIM MCP · integración dinámica real/);
  assert.doesNotMatch(exported.bytes.toString('utf8'),/Modelo;Didáctico ΣIM/);
+ await page.locator('#charts-from-tank').click();
+ await page.locator('#charts-content').waitFor();
+ assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');
+ assert.equal(await page.locator('#charts-x').inputValue(),'time_s');
+ assert.equal(await page.locator('#charts-y').inputValue(),'level_m');
+ assert.match(await page.locator('#charts-source').innerText(),/3 registros/);
+ assert.ok(await page.locator('#charts-svg circle').count()>=3);
+ await page.locator('#charts-data-details summary').click();
+ assert.equal(await page.locator('#charts-data-table tbody tr').count(),3);
+ await page.locator('#charts-zoom-in').click();
+ assert.notEqual(await page.locator('#charts-svg').getAttribute('viewBox'),'0 0 785 340');
+ await page.locator('#charts-fit').click();
+ assert.equal(await page.locator('#charts-svg').getAttribute('viewBox'),'0 0 785 340');
+ assert.equal(await page.locator('.charts-body').evaluate(el=>getComputedStyle(el).overflowY),'auto');
+ await page.keyboard.press('Escape');
+ await page.locator('#charts-open').click();
+ assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');
+ assert.equal(realRequests,1);
  await page.keyboard.press('Escape');
 });
 
  test('Gráficas: cálculo estacionario alimenta ejes XY e importación independiente',async t=>{
- const page=await browserPage(t);await openProject(page,example);await page.locator('#calculate-button').click();await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');await page.locator('#charts-open').click();await page.locator('#charts-content').waitFor();assert.equal(await page.locator('#charts-y').inputValue(),'temperature');assert.match(await page.locator('#charts-svg').innerHTML(),/Temperatura/);await page.locator('#charts-x').selectOption('mass');assert.match(await page.locator('#charts-svg').innerHTML(),/Caudal másico/);await page.locator('.charts-import summary').click();await page.locator('#charts-paste').fill('Tiempo [s];Concentración [mol/L]\\n0;1\\n5;0,5'.replaceAll('\\n','\n'));await page.locator('#charts-load-data').click();assert.equal(await page.locator('#charts-dataset').inputValue(),'manual');assert.match(await page.locator('#charts-svg').innerHTML(),/Concentración/);await page.keyboard.press('Escape');
+ const page=await browserPage(t);await openProject(page,example);await page.locator('#calculate-button').click();await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');await page.locator('#charts-open').click();await page.locator('#charts-content').waitFor();assert.equal(await page.locator('#charts-y').inputValue(),'temperature');assert.match(await page.locator('#charts-svg').innerHTML(),/Temperatura/);await page.locator('#charts-x').selectOption('mass');assert.match(await page.locator('#charts-svg').innerHTML(),/Caudal másico/);await page.getByText('Importar o ingresar datos',{exact:true}).click();await page.locator('#charts-paste').fill('Tiempo [s];Concentración [mol/L]\\n0;1\\n5;0,5'.replaceAll('\\n','\n'));await page.locator('#charts-load-data').click();assert.equal(await page.locator('#charts-dataset').inputValue(),'manual');assert.match(await page.locator('#charts-svg').innerHTML(),/Concentración/);await page.keyboard.press('Escape');
 });

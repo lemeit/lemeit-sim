@@ -11,11 +11,11 @@ globalThis.SimChartData=(()=>{
   const name=id=>graph.nodes.find(n=>n.id===id)?.name||id;
   const source='DWSIM · '+(engine||'motor no indicado')+' · estacionario';
   const common=[column('index','Objeto')];
-  const sc=[...common,column('temperature','Temperatura','°C'),column('pressure','Presión absoluta','kPa'),column('mass','Caudal másico','kg/s'),column('molar','Caudal molar','mol/s'),column('enthalpy','Entalpía','kJ/kg'),column('entropy','Entropía','kJ/(kg·K)'),column('density','Densidad','kg/m³'),column('volume','Caudal volumétrico','m³/s')];
+  const sc=[...common,column('temperature','Temperatura','°C'),column('pressure','Presión absoluta','kPa'),column('mass','Caudal másico','kg/s'),column('molar','Caudal molar','mol/s'),column('enthalpy','Entalpía','kJ/kg'),column('entropy','Entropía','kJ/(kg·K)'),column('density','Densidad','kg/m³'),column('specificVolume','Volumen específico','m³/kg'),column('volume','Caudal volumétrico','m³/s')];
   for(const [i,c] of (graph.compounds||[]).entries()){sc.push(column('w'+i,'Fracción másica · '+c,'kg/kg'),column('z'+i,'Fracción molar · '+c,'mol/mol'));}
   const streams=Object.entries(result.streams||{}).map(([id,s],i)=>{
    const p=s.phases?.find(p=>p.name==='Mixture');
-   const row={index:i+1,label:name(id),temperature:finite(s.temperature_K)?s.temperature_K-273.15:null,pressure:finite(s.pressure_Pa)?s.pressure_Pa/1000:null,mass:s.mass_flow_kg_s,molar:s.molar_flow_mol_s,enthalpy:p?.enthalpy_kJ_kg,entropy:p?.entropy_kJ_kgK,density:p?.density_kg_m3,volume:finite(s.mass_flow_kg_s)&&p?.density_kg_m3>0?s.mass_flow_kg_s/p.density_kg_m3:null};
+   const row={index:i+1,label:name(id),temperature:finite(s.temperature_K)?s.temperature_K-273.15:null,pressure:finite(s.pressure_Pa)?s.pressure_Pa/1000:null,mass:s.mass_flow_kg_s,molar:s.molar_flow_mol_s,enthalpy:p?.enthalpy_kJ_kg,entropy:p?.entropy_kJ_kgK,density:p?.density_kg_m3,specificVolume:p?.density_kg_m3>0?1/p.density_kg_m3:null,volume:finite(s.mass_flow_kg_s)&&p?.density_kg_m3>0?s.mass_flow_kg_s/p.density_kg_m3:null};
    for(const [j,c] of (graph.compounds||[]).entries()){row['w'+j]=p?.compounds?.[c]?.mass_fraction;row['z'+j]=p?.compounds?.[c]?.mole_fraction;}return row;
   });
   const balances=(result.balances||[]).map((b,i)=>({index:i+1,label:name(b.id),massIn:b.mass_in,massOut:b.mass_out,residual:b.mass_residual,energy:b.heat_to_fluid_kW}));

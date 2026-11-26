@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.50.1 — 2026-11-25
+
+- Modelos analíticos de gas ideal (isentrópico, isotérmico y politrópico), cinética de primer orden y enfriamiento de Newton, con parámetros editables y estados DWSIM compatibles superpuestos como puntos. No se presentan como trayectorias DWSIM. Barridos automáticos pendientes.
+
 ## 0.50.0 — 2026-11-25
 
 - Gráficas generales: resultados estacionarios de corrientes, balances y componentes, series dinámicas y tablas numéricas propias CSV/TSV. Ejes XY, escalas logarítmicas X/Y, línea o dispersión, título, color, grosor, cuadrícula, leyenda y exportación.

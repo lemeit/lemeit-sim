@@ -2,7 +2,7 @@
 'use strict';
 globalThis.SimChartWorkspace=(()=>{
  const $=id=>document.getElementById(id);
- let dataset=null,interval=null,dynamic=null,manual=null,getData=()=>({}),sources=[];
+ let dataset=null,interval=null,dynamic=null,manual=null,model=null,getData=()=>({}),sources=[],preferredSource='',view=[0,0,785,340],dataPage=0;
  const vars=[
   ['time_s','Tiempo','s'],['level_m','Nivel','m'],['volume_m3','Volumen','m³'],['fill_pct','Llenado','%'],
   ['inlet_m3_s','Entrada volumétrica','m³/s'],['outlet_m3_s','Salida volumétrica','m³/s'],
@@ -10,7 +10,7 @@ globalThis.SimChartWorkspace=(()=>{
  ];
  const fmt=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumSignificantDigits:7}):'—';
  function pause(){if(interval!==null){clearInterval(interval);interval=null;}if($('charts-play'))$('charts-play').textContent='▶ Reproducir';}
- function reset(){pause();dataset=null;dynamic=null;manual=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
+ function reset(){pause();dataset=null;dynamic=null;manual=null;model=null;preferredSource='';if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
  function accept(data,meta={}){
   if(!Array.isArray(data?.points)||!data.points.length)return;
   const real=data.source==='dwsim-mcp-dynamics';
@@ -18,13 +18,13 @@ globalThis.SimChartWorkspace=(()=>{
   const points=data.points.map(p=>({...p,...(!real&&Number.isFinite(density)?{inlet_kg_s:p.inlet_m3_s*density,outlet_kg_s:p.outlet_m3_s*density}:{})}));
   const columns=vars.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
   if(!columns.length)return;
-  dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
+  preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
   if($('charts-title'))$('charts-title').value='';
   if($('charts-dialog')?.open)refresh('dynamic');
  }
  function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+(column.unit?' ['+column.unit+']':'');select.append(o);}
  function refresh(preferred){
-  pause();const state=getData();sources=SimChartData.stationary(state.graph||{nodes:[]},state.result,state.engine).map((d,i)=>({id:'steady'+i,d}));if(dynamic)sources.push({id:'dynamic',d:dynamic});if(manual)sources.push({id:'manual',d:manual});const picker=$('charts-dataset'),previous=preferred||picker.value;picker.replaceChildren();for(const entry of sources){const o=document.createElement('option');o.value=entry.id;o.textContent=entry.d.title+' · '+entry.d.source;picker.append(o);}picker.value=sources.some(s=>s.id===previous)?previous:dynamic?'dynamic':sources[0]?.id||'';dataset=sources.find(s=>s.id===picker.value)?.d||null;const ready=!!dataset;
+  pause();const state=getData();sources=SimChartData.stationary(state.graph||{nodes:[]},state.result,state.engine).map((d,i)=>({id:'steady'+i,d}));if(dynamic)sources.push({id:'dynamic',d:dynamic});if(manual)sources.push({id:'manual',d:manual});if(model)sources.push({id:'model',d:model});const picker=$('charts-dataset'),previous=preferred||preferredSource||picker.value;picker.replaceChildren();for(const entry of sources){const o=document.createElement('option');o.value=entry.id;o.textContent=entry.d.title+' · '+entry.d.source;picker.append(o);}picker.value=sources.some(s=>s.id===previous)?previous:dynamic?'dynamic':sources[0]?.id||'';dataset=sources.find(s=>s.id===picker.value)?.d||null;preferredSource=picker.value;view=[0,0,785,340];dataPage=0;const ready=!!dataset;
   $('charts-empty').hidden=ready;$('charts-content').hidden=!ready;
   if(!ready)return;
   $('charts-source').textContent=dataset.title+' · '+dataset.source+' · '+dataset.points.length+' registros';
@@ -34,8 +34,8 @@ globalThis.SimChartWorkspace=(()=>{
   for(const c of dataset.columns)for(const id of ['charts-x','charts-y','charts-y2'])option($(id),c);
   $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
   $('charts-y').value=dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
-  $('charts-y2').value='';$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-play').hidden=!!dataset.categorical;
-  const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();
+  $('charts-y2').value='';$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
+  const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
  }
  function render(){
   if(!dataset)return;
@@ -46,12 +46,18 @@ globalThis.SimChartWorkspace=(()=>{
   if(chosen.length===1)$('charts-y2').value='';
   const index=Number($('charts-scrub').value),p=dataset.points[index];
   const config={points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),yLabel:chosen.length===1?y.name+(y.unit?' ['+y.unit+']':''):'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,color:i===0?$('charts-color').value:undefined})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked||$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source,categories:dataset.categorical&&x.key==='index'?dataset.points.map(p=>p.label):null};
-  try{SimScientificCharts.render($('charts-svg'),config);$('charts-error').textContent='';}
+  const compare=$('charts-compare');compare.disabled=dataset!==model||!sources.some(e=>e.id.startsWith('steady')&&e.d.columns.some(c=>c.key===x.key&&c.unit===x.unit)&&e.d.columns.some(c=>c.key===y.key&&c.unit===y.unit));
+  if(!compare.disabled&&compare.checked){const other=sources.find(e=>e.id.startsWith('steady')&&e.d.columns.some(c=>c.key===x.key&&c.unit===x.unit)&&e.d.columns.some(c=>c.key===y.key&&c.unit===y.unit));config.extra=[{name:'Estados DWSIM · '+other.d.title,points:other.d.points.map(p=>({x:p[x.key],y:p[y.key]})),color:'#a33b35'}];}
+  try{SimScientificCharts.render($('charts-svg'),config);applyView();$('charts-error').textContent='';}
   catch(e){$('charts-svg').replaceChildren();$('charts-error').textContent=e.message;}
   $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
   $('charts-export-svg').disabled=!!$('charts-error').textContent;
  }
  function open(preferred){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));refresh(typeof preferred==='string'?preferred:undefined);$('charts-dialog').showModal();}
+ function applyView(){$('charts-svg').setAttribute('viewBox',view.join(' '));}
+ function zoom(factor,cx=.5,cy=.5){const [x,y,w,h]=view;const nw=Math.max(785/16,Math.min(785,w*factor)),nh=nw*340/785;view=[Math.max(0,Math.min(785-nw,x+(w-nw)*cx)),Math.max(0,Math.min(340-nh,y+(h-nh)*cy)),nw,nh];applyView();}
+ function renderTable(){if(!dataset)return;const host=$('charts-data-table'),table=document.createElement('table'),head=table.createTHead().insertRow();for(const name of ['#',...dataset.columns.map(c=>c.name+(c.unit?' ['+c.unit+']':''))]){const th=document.createElement('th');th.textContent=name;head.append(th);}const body=table.createTBody(),start=dataPage*100,end=Math.min(start+100,dataset.points.length);for(let i=start;i<end;i++){const row=body.insertRow();for(const value of [i+1,...dataset.columns.map(c=>fmt(dataset.points[i][c.key]))])row.insertCell().textContent=String(value);}host.replaceChildren(table);$('charts-data-count').textContent=(start+1)+'–'+end+' / '+dataset.points.length;$('charts-data-prev').disabled=start===0;$('charts-data-next').disabled=end===dataset.points.length;}
+ function bindNavigation(){const svg=$('charts-svg');let drag=null;$('charts-maximize').onclick=()=>{const full=$('charts-dialog').classList.toggle('charts-maximized');$('charts-maximize').setAttribute('aria-label',full?'Restaurar ventana':'Ampliar ventana');};$('charts-zoom-in').onclick=()=>zoom(.8);$('charts-zoom-out').onclick=()=>zoom(1.25);$('charts-fit').onclick=()=>{view=[0,0,785,340];applyView();};svg.addEventListener('wheel',e=>{if(!dataset)return;e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY<0?.8:1.25,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);},{passive:false});svg.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,view:[...view]};svg.setPointerCapture(e.pointerId);});svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),[x,y,w,h]=drag.view;view=[Math.max(0,Math.min(785-w,x-(e.clientX-drag.x)*w/r.width)),Math.max(0,Math.min(340-h,y-(e.clientY-drag.y)*h/r.height)),w,h];applyView();});for(const event of ['pointerup','pointercancel','lostpointercapture'])svg.addEventListener(event,()=>{drag=null;});svg.addEventListener('keydown',e=>{if(e.key==='+'||e.key==='='){zoom(.8);e.preventDefault();}else if(e.key==='-'){zoom(1.25);e.preventDefault();}else if(e.key.startsWith('Arrow')){const [x,y,w,h]=view;view=[Math.max(0,Math.min(785-w,x+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)*w*.1)),Math.max(0,Math.min(340-h,y+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)*h*.1)),w,h];applyView();e.preventDefault();}});$('charts-data-prev').onclick=()=>{dataPage=Math.max(0,dataPage-1);renderTable();};$('charts-data-next').onclick=()=>{if((dataPage+1)*100<dataset.points.length){dataPage++;renderTable();}};}
  function play(){if(interval!==null){pause();return;}const s=$('charts-scrub');if(Number(s.value)>=Number(s.max))s.value='0';$('charts-play').textContent='⏸ Pausar';interval=setInterval(()=>{s.value=String(Math.min(Number(s.max),Number(s.value)+1));render();if(s.value===s.max)pause();},80);}
  function csv(){
   if(!dataset)return;
@@ -59,13 +65,20 @@ globalThis.SimChartWorkspace=(()=>{
   const rows=['Origen;'+escape(dataset.source),'Objeto;'+dataset.columns.map(c=>escape(c.name+' ['+c.unit+']')).join(';'),...dataset.points.map(p=>escape(p.label||'')+';'+dataset.columns.map(c=>Number.isFinite(p[c.key])?String(p[c.key]).replace('.',','):'').join(';'))];
   const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='sim-series.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
  }
+ function modelFields(){const d=SimChartModels.definitions[$('charts-model').value],host=$('charts-model-params');host.replaceChildren();for(const [key,name,value] of d.params){const l=document.createElement('label'),input=document.createElement('input');l.textContent=name;input.type='number';input.step='any';input.value=String(value);input.dataset.key=key;l.append(input);host.append(l);}}
  function bind(options={}){
+  bindNavigation();
+  for(const [id,d] of Object.entries(SimChartModels.definitions)){const o=document.createElement('option');o.value=id;o.textContent=d.name;$('charts-model').append(o);}modelFields();
+  $('charts-model').addEventListener('change',modelFields);
+  $('charts-model-run').addEventListener('click',()=>{try{const p=Object.fromEntries([...$('charts-model-params').querySelectorAll('input')].map(e=>[e.dataset.key,e.valueAsNumber]));model=SimChartModels.generate($('charts-model').value,p);$('charts-model-error').textContent='';refresh('model');}catch(e){$('charts-model-error').textContent=e.message;}});
+  $('charts-compare').addEventListener('change',render);
   if(typeof options.getData==='function')getData=options.getData;
   $('charts-dataset').addEventListener('change',()=>refresh($('charts-dataset').value));
   $('charts-load-data').addEventListener('click',()=>{try{manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(e){$('charts-import-error').textContent=e.message;}});
   $('charts-file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(f.size>2000000){$('charts-import-error').textContent='Archivo demasiado grande.';return;}try{$('charts-paste').value=await f.text();manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(err){$('charts-import-error').textContent=err.message;}});
   for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',open);
-  $('charts-from-tank').addEventListener('click',()=>{$('tank-dynamics-dialog').close();open('dynamic');});
+  $('charts-from-tank').addEventListener('click',()=>{globalThis.SimTankDynamicsUI?.publishCurrent?.();$('tank-dynamics-dialog').close();open('dynamic');});
+  for(const id of ['charts-x','charts-y','charts-log-x','charts-log'])$(id).addEventListener('change',()=>{view=[0,0,785,340];});
   for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend'])$(id).addEventListener('change',render);
   $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
   $('charts-play').addEventListener('click',play);$('charts-export-svg').addEventListener('click',()=>SimScientificCharts.download($('charts-svg')));
