@@ -30,7 +30,8 @@ globalThis.SimDockLayout=(()=>{
     const fallback={
       equipment:{x:60,y:130,w:310,h:500},
       inspector:{x:Math.max(8,vw-390),y:130,w:355,h:500},
-      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},charts:{x:Math.max(8,vw-620),y:105,w:570,h:440}
+      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},
+      charts:{x:(vw-660)/2,y:Math.max(65,(vh-640)/2),w:660,h:Math.min(640,vh-90)}
     };
     return Object.fromEntries(IDS.map(id=>{
       const p=stored?.[id];
@@ -374,9 +375,13 @@ globalThis.SimDockLayout=(()=>{
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
     },true);
-    revealPanel=id=>{const p=panels[id];if(!p)return;p.el.hidden=false;apply(p,false);if(activeMode(p)==='float')p.el.style.zIndex=String(++z);};
+    revealPanel=(id,{presentation=false}={})=>{
+      const p=panels[id];if(!p)return;
+      if(presentation&&id==='charts'){p.mode='float';p.box=recover(null,innerWidth,innerHeight).charts.box;}
+      p.el.hidden=false;apply(p,false);
+    };
     updateSlots();store();
   }
-  return Object.freeze({fit,targetEdge,recover,mount,reveal:id=>revealPanel(id)});
+  return Object.freeze({fit,targetEdge,recover,mount,reveal:(id,options)=>revealPanel(id,options)});
 })();
 document.addEventListener('DOMContentLoaded',()=>globalThis.SimDockLayout.mount());

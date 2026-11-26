@@ -2431,6 +2431,7 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 #charts-dialog .charts-body{flex:1 1 auto;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;box-sizing:border-box}
 #charts-dialog .charts-plot{width:100%;min-width:0;overflow:hidden;border:1px solid var(--spx-border);box-sizing:border-box;background:white}
 #charts-dialog #charts-svg{display:block;width:100%;height:auto;aspect-ratio:785/340;border:0;touch-action:none;cursor:grab;user-select:none}
+#charts-dialog #charts-svg[data-chart-height="590"]{aspect-ratio:785/590}
 #charts-dialog #charts-svg:active{cursor:grabbing}
 .charts-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0}.charts-navigation button{min-width:30px;padding:4px 8px}
 #charts-data-details{margin:10px 0}#charts-data-table{max-height:240px;overflow:auto;border:1px solid var(--spx-border)}#charts-data-table table{border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap}#charts-data-table :is(th,td){padding:4px 7px;border-bottom:1px solid var(--spx-border);text-align:right}#charts-data-table th{position:sticky;top:0;background:var(--spx-surface-2)}
