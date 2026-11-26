@@ -2000,7 +2000,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 .command-bar .command-group svg{display:block;margin-inline:auto}
 .command-bar .zoom-controls{margin-left:auto}
 .command-bar #diagram-grid[aria-pressed="true"],.command-bar #diagram-focus[aria-pressed="true"],.command-bar #diagram-library[aria-pressed="true"],.menu-panel button[aria-pressed="true"]{background:var(--spx-accent-dim);color:var(--spx-accent)}
-#diagram-menu #diagram-add{box-sizing:border-box;width:100%;font:inherit;color:inherit;background:var(--spx-surface);border:1px solid var(--spx-border);padding:6px}
+
 body.diagram-focus .command-bar .project-tools{display:none}
 body.diagram-focus.diagram-library .sim-cad-workspace>.sim-cad-slot:has(.equipment-panel){display:flex!important;position:absolute;inset:0 auto 0 0;width:186px;z-index:4}
 .sim-shell .diagram-footer{justify-content:flex-start;flex-wrap:wrap;gap:4px 12px}
@@ -2408,7 +2408,7 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 #tank-dynamic-chart{background:#fff;min-height:0}
 
 /* Menús y espacio científico independiente */
-.sim-shell .menu-panel select,.sim-shell #diagram-menu #diagram-add{font-family:var(--spx-font-sans);font-size:11px;font-weight:400;line-height:1.5;color:var(--spx-text);box-sizing:border-box}
+.sim-shell .menu-panel select,.sim-shell #diagram-menu #diagram-add,.sim-shell .thermo-menu .model-bar select{box-sizing:border-box;width:100%;min-width:0;max-width:none;height:30px;min-height:30px;padding:5px 7px;font-family:var(--spx-font-sans);font-size:11px;font-weight:400;line-height:1.5;color:var(--spx-text);background:var(--spx-surface-2);border:1px solid var(--spx-border);border-radius:5px;appearance:auto}
 .charts-dialog{width:min(1000px,calc(100vw - 30px));max-width:calc(100vw - 30px);max-height:calc(100dvh - 36px);resize:both;overflow:auto}
 .charts-body{padding:14px 18px;color:var(--spx-text)}
 .charts-dialog [hidden]{display:none!important}
