@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.50.5 — 2026-11-25
+
+- Corrige apertura de Gráficas desde la barra y el menú, recupera el panel desde Solo diagrama y su posición guardada; informa errores de preparación de datos.
+
 ## 0.50.4 — 2026-11-25
 
 - Calcular cambia a verde cuando el resultado es válido; rojo solo para fallos. Gráficas se abre tras calcular como panel no modal, flotante o acoplable, con configuración secundaria.

@@ -2456,3 +2456,5 @@ body:not([data-session-role=admin]) [data-technical]{display:none!important}#cha
 #charts-dialog #charts-svg{min-height:0}
 @media(min-width:761px){.sim-shell #charts-dialog.sim-cad-panel[data-sim-cad-mode="float"]{max-height:calc(100dvh - 16px)!important}.sim-cad-slot #charts-dialog .charts-body{padding:6px}.sim-cad-slot #charts-dialog .charts-source-picker{margin-bottom:3px}}
 body.diagram-focus #charts-dialog,body.results-window #charts-dialog,body.diagram-window #charts-dialog{display:none!important}
+
+#charts-open-error{color:var(--spx-accent);padding:8px}#charts-dialog .charts-body{min-height:0} .sim-shell #charts-dialog:not(.sim-cad-panel):not([hidden]){position:fixed;z-index:950;inset:70px 20px auto auto;width:min(650px,calc(100vw - 40px));height:min(500px,calc(100dvh - 100px));background:var(--spx-surface);border:1px solid var(--spx-border)}
