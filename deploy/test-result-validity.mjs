@@ -11,7 +11,7 @@ assert.ok(start>0&&end>start);
 function setup(){
   const elements=Object.fromEntries(['result-validity','results','result-meta','calculation-state'].map(id=>[id,{dataset:{},textContent:'',innerHTML:''}]));
   const ctx=vm.createContext({
-    result:null,resultValidity:'none',hasProject:true,busy:false,revision:0,lastCalculation:null,
+    result:null,dynamicResult:null,resultValidity:'none',hasProject:true,busy:false,revision:0,lastCalculation:null,
     blankResults:'<p>Sin resultados</p>',$:id=>elements[id],
     persist:()=>{},renderDiagram:()=>{},publishWorkspace:()=>{}
   });
