@@ -29,7 +29,7 @@ La sonda acepta temporalmente residuos absolutos `≤ 2×10⁻⁵ kg/s` de masa 
 ## Pruebas
 
 ```bash
-python3 -m unittest test_flash_separator -v
+python3 -m unittest tests.python.simulation.test_flash_separator -v
 npm run build:verified
 python3 tools/probe_flash_debian.py
 ```

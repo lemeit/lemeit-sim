@@ -105,7 +105,7 @@ Ver [selección manual y operación](seleccion-manual-motores.md).
 cd ~/lemeit-sim
 git status --short
 git pull --ff-only origin main
-python3 -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+python3 -m unittest tests.python.gateway.test_server.ValidationTests tests.python.gateway.test_stream_properties.StreamValidation -v
 systemctl show lemeit-sim.service -p WorkingDirectory -p ExecStart --no-pager
 sudo systemctl restart lemeit-sim.service
 systemctl is-active lemeit-sim.service
@@ -128,7 +128,7 @@ En PowerShell, en el equipo Windows, comprobar primero que no haya cálculos en 
 cd C:\GitHub\lemeit-sim
 git status --short
 git pull --ff-only origin main
-python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+python -m unittest tests.python.gateway.test_server.ValidationTests tests.python.gateway.test_stream_properties.StreamValidation -v
 .\stop-online.ps1
 .\start-online.ps1
 ```
@@ -150,7 +150,7 @@ El monitor nunca instala, reinicia ni modifica servicios; las actualizaciones so
 ```powershell
 npm ci
 npm run build:verified
-python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+python -m unittest tests.python.gateway.test_server.ValidationTests tests.python.gateway.test_stream_properties.StreamValidation -v
 npm run deploy:check
 ```
 

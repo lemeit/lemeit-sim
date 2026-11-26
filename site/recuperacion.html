@@ -9,7 +9,7 @@ Get-Content .\.local\runtime\tunnel.stderr.log -Tail 50
 git status -sb
 git fetch origin
 git pull --ff-only origin main
-python -m unittest test_dynamic_tank_mcp -v</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-1">Copiar comandos</button></details><details><summary>Windows · inicio automático</summary><pre id="recovery-code-2"><code>powershell -ExecutionPolicy Bypass -File .\enable-autostart.ps1
+python -m unittest tests.python.gateway.test_dynamic_tank_mcp -v</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-1">Copiar comandos</button></details><details><summary>Windows · inicio automático</summary><pre id="recovery-code-2"><code>powershell -ExecutionPolicy Bypass -File .\enable-autostart.ps1
 # Para desactivar:
 powershell -ExecutionPolicy Bypass -File .\disable-autostart.ps1</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-2">Copiar comandos</button></details><details><summary>Debian · servicio y diagnóstico</summary><pre id="recovery-code-3"><code>sudo systemctl status lemeit-sim.service
 systemctl show lemeit-sim.service -p WorkingDirectory
@@ -27,7 +27,7 @@ pgrep -x cloudflared</code></pre><button type="button" class="portal-button" dat
 git status -sb
 git fetch origin
 git pull --ff-only origin main
-python3 -m unittest test_dynamic_tank_mcp -v
+python3 -m unittest tests.python.gateway.test_dynamic_tank_mcp -v
 sudo systemctl restart lemeit-sim.service
 python3 tools/probe_dynamic_tank.py --run</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-4">Copiar comandos</button></details><details><summary>Windows · servidor local</summary><pre id="recovery-code-5"><code>cd C:\GitHub\lemeit-sim
 powershell -ExecutionPolicy Bypass -File .\start-local.ps1 -EngineRoot "C:\GitHub\lemeit-sim\.local\runtime" -Port 5910
