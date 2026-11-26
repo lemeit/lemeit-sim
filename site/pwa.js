@@ -1,5 +1,6 @@
 'use strict';
 (()=>{
+  if(globalThis.SimDesktop)return;
   const button=document.getElementById('install-app-button');let installPrompt=null;
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;if(button)button.hidden=false;});
   window.addEventListener('appinstalled',()=>{installPrompt=null;if(button)button.hidden=true;});
