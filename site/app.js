@@ -172,7 +172,7 @@ function updateControls(){
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
-  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · Abrir biblioteca en la nube</p>';
+  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · '+(globalThis.SimDesktop?'Abrir proyecto local':'Abrir biblioteca en la nube')+'</p>';
   document.body.classList.toggle('no-project',!hasProject);
 }
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
