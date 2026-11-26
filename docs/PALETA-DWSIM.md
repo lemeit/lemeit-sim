@@ -40,7 +40,7 @@ Las imágenes DWSIM históricas ya presentes conservan sus licencias y créditos
 ## Validación
 
 - Build local completo, sin despliegue.
-- Suite deploy/test-*.mjs: preferencia, sincronización, almacenamiento bloqueado,
+- Suite `npm test`: preferencia, sincronización, almacenamiento bloqueado,
   fallback, todos los equipos, puertos, tamaños y conservación de estado calculado;
   además de las regresiones existentes de selección, movimiento, borrado,
   arrastre, exportaciones, catálogo y proyectos.

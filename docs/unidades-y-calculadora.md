@@ -77,7 +77,7 @@ python tools/export_molar_masses.py --engine-root .local/runtime --output .local
 
 El exportador lee compuestos en lotes mediante procesos aislados. Registra lo que
 no puede obtener; no expone claves ni modifica el servicio Windows o Debian.
-`deploy/test-unit-tools.mjs` contrasta definiciones SI/anglosajonas, ida/vuelta,
+`tests/js/simulation/unit-tools.mjs` contrasta definiciones SI/anglosajonas, ida/vuelta,
 temperaturas, presiones relativas, composición y gases. Las pruebas del catálogo
 verifican finitud, cobertura y valores exportados de compuestos de referencia.
 
