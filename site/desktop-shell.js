@@ -33,6 +33,14 @@ globalThis.SimDesktopShell=(()=>{
     const menu=$('file-menu')?.querySelector('.menu-panel');
     const saveMenu=$('save-button');
     if(menu&&saveMenu)menu.insertBefore(saveMenu,$('close-project-button'));
+    const cloudStart=cloudLabel?.previousElementSibling;
+    if(cloudStart?.tagName==='HR')cloudStart.classList.add('desktop-hidden');
+    const about=$('about-dialog');
+    if(about){
+      about.querySelector('h2').textContent='Acerca de ΣIM Desktop';
+      const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
+      if(version)version.textContent='Desktop · prototipo alpha.2 | Base científica 0.51.9';
+    }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
   }
   return {init};
