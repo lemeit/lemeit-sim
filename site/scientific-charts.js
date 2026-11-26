@@ -12,7 +12,7 @@ globalThis.SimScientificCharts=(()=>{
    if(lo===hi){const d=Math.abs(lo)*.1||1;lo-=d;hi+=d;}
    return [lo,hi];
  }
- function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',logX=false,connect=true,strokeWidth=1.8,legend=true}){
+ function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null}){
    if(!Array.isArray(points)||!series?.length)throw Error('Series no disponibles.');
    const [xmin,xmax]=bounds(points.map(p=>p[xKey]),false,logX);
    const [ymin,ymax]=bounds(series.flatMap(s=>points.map(p=>p[s.key])),zeroY,logY);
@@ -28,9 +28,10 @@ globalThis.SimScientificCharts=(()=>{
      const xx=L+(R-L)*i/5,yy=B-(B-T)*i/5;
      if(grid)out+=line(xx,T,xx,B,'stroke="#dce1e5" stroke-width=".7"')+line(L,yy,R,yy,'stroke="#dce1e5" stroke-width=".7"');
      out+=line(xx,B,xx,B+5,'stroke="#222"')+line(L-5,yy,L,yy,'stroke="#222"');
-     out+=label(xx,B+19,fmt(logX?10**(xmin+(xmax-xmin)*i/5):xmin+(xmax-xmin)*i/5),'text-anchor="middle"');
+     if(!categories||logX)out+=label(xx,B+19,fmt(logX?10**(xmin+(xmax-xmin)*i/5):xmin+(xmax-xmin)*i/5),'text-anchor="middle"');
      const v=ymin+(ymax-ymin)*i/5;out+=label(L-9,yy+4,fmt(logY?10**v:v),'text-anchor="end"');
    }
+   if(categories&&!logX){const step=Math.max(1,Math.ceil(categories.length/7));categories.forEach((name,i)=>{if(i%step===0)out+=label(x(i+1),B+15,String(name).slice(0,20),'text-anchor="middle" font-size="9"');});}
    out+='<rect x="'+L+'" y="'+T+'" width="'+(R-L)+'" height="'+(B-T)+'" fill="none" stroke="#222" stroke-width="1.1"/>';
    out+=label((L+R)/2,B+40,xLabel+(logX?' · log':''),'text-anchor="middle" font-size="13"');
    out+='<text transform="translate(19 '+((T+B)/2)+') rotate(-90)" text-anchor="middle" font-size="13">'+esc(yLabel+(logY?' · log':''))+'</text>';
