@@ -15,6 +15,10 @@ globalThis.SimScientificCharts=(()=>{
  }
  function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',y2Label='',logY2=false,zeroY2=true,series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',subtitle='',reference='',generated='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[],tall=false}){
    if(!Array.isArray(points)||!series?.length)throw Error('Series no disponibles.');
+   const usable=(n,log)=>Number.isFinite(n)&&(!log||n>0);
+   if(!series.some(s=>points.some(p=>usable(p[xKey],logX)&&usable(p[s.key],s.axis==='right'?logY2:logY)))&&
+     !extra.some(s=>s.points.some(p=>usable(p.x,logX)&&usable(p.y,logY))))
+     throw Error('No hay datos válidos en una misma fila para estos ejes y escalas. Probá otra variable o una escala lineal.');
    const [xmin,xmax]=bounds([...points.map(p=>p[xKey]),...extra.flatMap(s=>s.points.map(p=>p.x))],false,logX);
    const dual=series.some(s=>s.axis==='right');
    const [ymin,ymax]=bounds([...series.filter(s=>s.axis!=='right').flatMap(s=>points.map(p=>p[s.key])),...extra.flatMap(s=>s.points.map(p=>p.y))],zeroY,logY);

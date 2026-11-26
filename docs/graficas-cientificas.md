@@ -1,4 +1,6 @@
-# Gráficas · ΣIM 0.51.8
+# Gráficas · ΣIM 0.51.9
+
+En el Ejemplo 14, Corrientes abre con presión frente a volumen específico y muestra los dos estados calculados. Comparar con modelo físico permite generar una curva analítica por separado.
 
 Los ejes, títulos y el formato de las curvas se guardan en el proyecto al guardar en la nube o en una copia JSON de respaldo. Al abrirlo, podés consultar los resultados de la última corrida DWSIM guardada. Exportá CSV para usar las muestras fuera de ΣIM y SVG, PNG o JPG para conservar la imagen.
 

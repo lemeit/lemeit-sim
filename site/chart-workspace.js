@@ -63,7 +63,7 @@ globalThis.SimChartWorkspace=(()=>{
   for(const id of ['charts-x','charts-y','charts-y2'])$(id).replaceChildren();
   const none=document.createElement('option');none.value='';none.textContent='Ninguna';$('charts-y2').append(none);
   for(const c of dataset.columns)for(const id of ['charts-x','charts-y','charts-y2'])option($(id),c);
-  $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
+  $('charts-x').value=dataset.columns.some(c=>c.key===dataset.defaultX)?dataset.defaultX:dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
   $('charts-y').value=dataset.columns.some(c=>c.key===dataset.defaultY)?dataset.defaultY:dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
   $('charts-y2').value='';$('charts-log-y2').checked=false;$('charts-zero-y2').checked=true;$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
   restoreFormat();const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
