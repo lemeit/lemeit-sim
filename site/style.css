@@ -2458,3 +2458,7 @@ body:not([data-session-role=admin]) [data-technical]{display:none!important}#cha
 body.diagram-focus #charts-dialog,body.results-window #charts-dialog,body.diagram-window #charts-dialog{display:none!important}
 
 #charts-open-error{color:var(--spx-accent);padding:8px}#charts-dialog .charts-body{min-height:0} .sim-shell #charts-dialog:not(.sim-cad-panel):not([hidden]){position:fixed;z-index:950;inset:70px 20px auto auto;width:min(650px,calc(100vw - 40px));height:min(500px,calc(100dvh - 100px));background:var(--spx-surface);border:1px solid var(--spx-border)}
+
+/* Gráficas flotante compacta; no altera el tamaño del diagrama salvo acoplamiento explícito. */
+#charts-open[aria-pressed=true],#charts-menu-open[aria-pressed=true]{background:var(--spx-accent-dim);color:var(--spx-accent)}
+#charts-dialog .charts-navigation .mini{display:none}#charts-dialog .charts-body{padding:8px}#charts-dialog .charts-source-picker{margin-bottom:4px}#charts-dialog #charts-source{margin:3px 0}#charts-dialog .charts-plot{margin:3px 0 6px}#charts-dialog .charts-controls{gap:6px}#charts-dialog .charts-controls select{padding:4px}#charts-dialog .charts-body>details{margin:5px 0}#charts-dialog #charts-format,#charts-dialog #charts-data-details{margin:5px 0}

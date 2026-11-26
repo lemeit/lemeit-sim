@@ -53,10 +53,13 @@ globalThis.SimChartWorkspace=(()=>{
   $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
   $('charts-export-svg').disabled=!!$('charts-error').textContent;
  }
- function show(preferred){const panel=$('charts-dialog');if(!panel)return;if(document.body.classList.contains('diagram-focus')&&!document.body.classList.contains('diagram-window'))$('diagram-focus')?.click();panel.hidden=false;try{refresh(typeof preferred==='string'?preferred:undefined);$('charts-open-error').hidden=true;}catch(error){$('charts-content').hidden=true;$('charts-empty').hidden=true;$('charts-open-error').textContent='No se pudieron preparar los datos de la gráfica: '+error.message;$('charts-open-error').hidden=false;console.error('Gráficas:',error);}globalThis.SimDockLayout?.reveal?.('charts');}
+ function show(preferred){const panel=$('charts-dialog');if(!panel)return;if(document.body.classList.contains('diagram-focus')&&!document.body.classList.contains('diagram-window'))$('diagram-focus')?.click();panel.hidden=false;syncVisibility();try{refresh(typeof preferred==='string'?preferred:undefined);$('charts-open-error').hidden=true;}catch(error){$('charts-content').hidden=true;$('charts-empty').hidden=true;$('charts-open-error').textContent='No se pudieron preparar los datos de la gráfica: '+error.message;$('charts-open-error').hidden=false;console.error('Gráficas:',error);}globalThis.SimDockLayout?.reveal?.('charts');}
+ function syncVisibility(){const open=!$('charts-dialog').hidden;for(const id of ['charts-open','charts-menu-open'])$(id)?.setAttribute('aria-pressed',String(open));}
  function open(preferred){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));show(preferred);}
- function close(){pause();$('charts-dialog').hidden=true;}
- function completed(){show(dynamic?'dynamic':'steady0');}
+ function toggle(){if(!$('charts-dialog').hidden)close();else open();}
+ function close(){pause();$('charts-dialog').hidden=true;syncVisibility();}
+ function completed(){// No imponer una gráfica estacionaria arbitraria ni tapar el diagrama tras cada cálculo.
+ if(!$('charts-dialog').hidden)show(dynamic?'dynamic':'steady0');}
  function applyView(){$('charts-svg').setAttribute('viewBox',view.join(' '));}
  function zoom(factor,cx=.5,cy=.5){const [x,y,w,h]=view;const nw=Math.max(785/16,Math.min(785,w*factor)),nh=nw*340/785;view=[Math.max(0,Math.min(785-nw,x+(w-nw)*cx)),Math.max(0,Math.min(340-nh,y+(h-nh)*cy)),nw,nh];applyView();}
  function renderTable(){if(!dataset)return;const host=$('charts-data-table'),table=document.createElement('table'),head=table.createTHead().insertRow();for(const name of ['#',...dataset.columns.map(c=>c.name+(c.unit?' ['+c.unit+']':''))]){const th=document.createElement('th');th.textContent=name;head.append(th);}const body=table.createTBody(),start=dataPage*100,end=Math.min(start+100,dataset.points.length);for(let i=start;i<end;i++){const row=body.insertRow();for(const value of [i+1,...dataset.columns.map(c=>fmt(dataset.points[i][c.key]))])row.insertCell().textContent=String(value);}host.replaceChildren(table);$('charts-data-count').textContent=(start+1)+'–'+end+' / '+dataset.points.length;$('charts-data-prev').disabled=start===0;$('charts-data-next').disabled=end===dataset.points.length;}
@@ -80,7 +83,7 @@ globalThis.SimChartWorkspace=(()=>{
   $('charts-dataset').addEventListener('change',()=>refresh($('charts-dataset').value));
   $('charts-load-data').addEventListener('click',()=>{try{manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(e){$('charts-import-error').textContent=e.message;}});
   $('charts-file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(f.size>2000000){$('charts-import-error').textContent='Archivo demasiado grande.';return;}try{$('charts-paste').value=await f.text();manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(err){$('charts-import-error').textContent=err.message;}});
-  for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',()=>open());
+  for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',toggle);syncVisibility();
   $('charts-from-tank').addEventListener('click',()=>{globalThis.SimTankDynamicsUI?.publishCurrent?.();$('tank-dynamics-dialog').close();open('dynamic');});
   for(const id of ['charts-x','charts-y','charts-log-x','charts-log'])$(id).addEventListener('change',()=>{view=[0,0,785,340];});
   for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend'])$(id).addEventListener('change',render);

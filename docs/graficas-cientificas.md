@@ -90,3 +90,7 @@ Después de un cálculo correcto, Gráficas se muestra automáticamente, inicial
 ### Recuperación de apertura (0.50.5)
 
 Abrir Gráficas vuelve de Solo diagrama a la distribución de paneles, muestra el panel incluso sin resultados y recupera la posición. Si falla la preparación de datos se informa el error dentro del panel en vez de ignorar el clic.
+
+### Ventana flotante por defecto (0.50.6)
+
+Como en COCO y las ventanas acoplables de DWSIM, Gráficas se presenta inicialmente flotante (570 × 440 px, adaptable al viewport). Se puede acoplar voluntariamente. El comando alterna visibilidad. Una dinámica abre su curva automáticamente; los resultados estacionarios se consultan a pedido, o actualizan una gráfica abierta. Se conserva la posición elegida después de esta migración.
