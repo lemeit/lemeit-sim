@@ -534,6 +534,14 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if not self.valid_host(): return self.json_response(403, {'error': 'Acceso local únicamente.'})
+        if self.path == '/desktop-mode.js' and getattr(self.server, 'desktop_mode', False):
+            body = b'globalThis.SimDesktop = true;\n'
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/javascript')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path == '/api/status': return self.json_response(200, gateway_status())
         if self.path == '/api/catalog':
             if not LOCK.acquire(blocking=False): return self.json_response(409, {'error': 'Motor ocupado. Volvé a intentar en unos segundos.'})
@@ -605,7 +613,10 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=5910)
     parser.add_argument('--public-origin', default=None, help='Origen HTTPS autorizado, por ejemplo https://sim.lemeit.ar')
     parser.add_argument('--origin-key-file', default=None, help='Archivo privado para autenticar al Worker de Cloudflare')
+    parser.add_argument('--desktop', action='store_true', help='Modo local de desarrollo sin servicios cloud')
     args = parser.parse_args()
+    if args.desktop and (args.public_origin or args.origin_key_file):
+        parser.error('Desktop no admite publicación ni clave de origen.')
     if bool(args.engine_root) == bool(args.mcp_token_file):
         parser.error('Indicá --engine-root (Windows) o --mcp-token-file (Debian), pero no ambos.')
     if args.mcp_token_file and args.mcp_url != 'http://127.0.0.1:5901/mcp':
@@ -613,6 +624,7 @@ if __name__ == '__main__':
     if args.public_origin and not re.fullmatch(r'https://[a-z0-9.-]+', args.public_origin):
         parser.error('--public-origin debe ser un origen HTTPS sin ruta ni puerto.')
     server = BoundedServer(('127.0.0.1', args.port), partial(Handler, directory=str(ROOT / 'site')))
+    server.desktop_mode = args.desktop
     server.shared_mcp = bool(args.mcp_token_file)
     server.engine = RemoteMcpEngine(args.mcp_token_file, args.mcp_url) if server.shared_mcp else Engine(args.engine_root)
     server.public_origin = args.public_origin
