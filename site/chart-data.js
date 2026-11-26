@@ -9,7 +9,7 @@ globalThis.SimChartData=(()=>{
  function stationary(graph,result,engine){
   if(!result)return [];
   const name=id=>graph.nodes.find(n=>n.id===id)?.name||id;
-  const source='DWSIM · '+(engine||'motor no indicado')+' · estacionario';
+  const source='DWSIM · Estado estacionario';
   const common=[column('index','Objeto')];
   const sc=[...common,column('temperature','Temperatura','°C'),column('pressure','Presión absoluta','kPa'),column('mass','Caudal másico','kg/s'),column('molar','Caudal molar','mol/s'),column('enthalpy','Entalpía','kJ/kg'),column('entropy','Entropía','kJ/(kg·K)'),column('density','Densidad','kg/m³'),column('specificVolume','Volumen específico','m³/kg'),column('volume','Caudal volumétrico','m³/s')];
   for(const [i,c] of (graph.compounds||[]).entries()){sc.push(column('w'+i,'Fracción másica · '+c,'kg/kg'),column('z'+i,'Fracción molar · '+c,'mol/mol'));}

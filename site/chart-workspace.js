@@ -18,7 +18,7 @@ globalThis.SimChartWorkspace=(()=>{
   const points=data.points.map(p=>({...p,...(!real&&Number.isFinite(density)?{inlet_kg_s:p.inlet_m3_s*density,outlet_kg_s:p.outlet_m3_s*density}:{})}));
   const columns=vars.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
   if(!columns.length)return;
-  preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
+  preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',assumptions:data.assumptions||''};
   if($('charts-title'))$('charts-title').value='';
   if($('charts-dialog')?.open)refresh('dynamic');
  }

@@ -32,7 +32,7 @@ globalThis.SimTankDwsimMode=(()=>{
    if(source&&node?.type==='Tank')$('tank-dynamic-inlet').value=String(source.mass_flow);
    $('tank-dynamic-source').value='sim';update();
    const option=$('tank-dynamic-source').querySelector('[value="dwsim"]');option.disabled=true;
-   info('Comprobando el motor dinámico '+getEngine()+'…');
+   info('Comprobando disponibilidad de dinámica DWSIM…');
    $('tank-dynamic-height').value=String(Math.min(30,Math.max(.2,number('tank-dynamic-capacity')||2)));
    try{
      const engine=getEngine();
@@ -40,8 +40,8 @@ globalThis.SimTankDwsimMode=(()=>{
      const data=await res.json();
      if(token!==generation||!$('tank-dynamics-dialog').open)return;
      option.disabled=!(res.ok&&data.supported);
-     info(option.disabled?'DWSIM dinámico no disponible en '+engine+': '+(data.error||'herramientas MCP incompletas')+'. Podés usar el modelo didáctico.':
-       'Motor '+engine+' compatible con las herramientas de dinámica MCP. La integración real es experimental.');
+     info(option.disabled?'Dinámica DWSIM no disponible. Consultá Diagnóstico o utilizá el modelo didáctico.':
+       'Dinámica DWSIM disponible. Integración temporal experimental.');
      if(!option.disabled){
        $('tank-dynamic-source').value='dwsim';
        $('tank-dynamic-height').value=String(number('tank-dynamic-capacity')===2?2:Math.min(30,Math.max(.2,number('tank-dynamic-capacity')||2)));
@@ -51,7 +51,7 @@ globalThis.SimTankDwsimMode=(()=>{
      }
    }catch(error){
      if(token!==generation)return;
-     info('No se pudo verificar el motor '+getEngine()+'; se conserva el modelo didáctico.');
+     info('No se pudo verificar la disponibilidad de dinámica DWSIM; se conserva el modelo didáctico.');
    }
  }
  async function calculate(){
@@ -59,7 +59,7 @@ globalThis.SimTankDwsimMode=(()=>{
    running=true;const token=generation,engine=getEngine();
    $('tank-dynamic-calculate').disabled=true;
    $('tank-dynamic-error').hidden=true;
-   info('DWSIM '+engine+' · integrando nivel y caudales…');
+   info('DWSIM · integrando nivel y caudales…');
    try{
      const payload={
        capacity_m3:number('tank-dynamic-capacity'),
@@ -82,7 +82,7 @@ globalThis.SimTankDwsimMode=(()=>{
      if(token!==generation||!$('tank-dynamics-dialog').open)return;
      last=data;
      SimTankDynamicsUI.showExternal(data,engine);
-     info('Resultado real de DWSIM '+engine+'. '+data.assumptions);
+     info('Resultado de dinámica DWSIM. '+data.assumptions);
    }catch(error){
      if(token!==generation)return;
      last=null;
