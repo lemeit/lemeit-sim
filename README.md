@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.51.5](https://img.shields.io/badge/portal-0.51.5-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.51.6](https://img.shields.io/badge/portal-0.51.6-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -18,7 +18,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Estado actual · 0.51.5
+## Estado actual · 0.51.6
 
 - Régimen estacionario o dinámico guardado por proyecto. Ejemplo 20 abre en Dinámico: pulsar Calcular integra DWSIM y abre Gráficas con tiempo y nivel.
 - Desde **Ver → Gráficas** podés configurar un subtítulo y ajustar color, representación y grosor por curva. En **Administración → Operación y recuperación** podés copiar comandos o descargar el manual HTML.
@@ -26,6 +26,8 @@ Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutor
 - Ejemplo 20 comprobado en ambos motores: 121 muestras durante 600 s, paso 5 s, nivel final ≈0,333 m y descarga ≈10 kg/s. Consistencia numérica, no validación experimental.
 - El adaptador dinámico admite solamente el circuito de agua a 25 °C con tanque y dos válvulas; no integra cualquier PFD. Sin reemplazo silencioso por modelo didáctico.
 - Portal y gateway tienen versiones independientes. Consultar Ayuda → Acerca de y el monitor administrativo. La publicación efectiva se verifica por separado.
+
+Como alumno, usá **Guardar en nube** en la barra y retomá el trabajo desde **Mis proyectos en la nube**. Después del primer guardado, los cambios se guardan automáticamente. El proyecto conserva el diagrama y el formato de Gráficas. Volvé a calcular para reconstruir la curva o exportá sus datos, tablas e imágenes para un informe. Desde Administración podés consultar la biblioteca por clase y descargar una copia JSON del proyecto abierto.
 
 [Manual de uso](https://wiki.lemeit.ar/sim/manual-de-uso/) · [Guía de gráficas](docs/graficas-cientificas.md) · [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md) · [Manual de recuperación](docs/operacion-local.md) · [Organización y mantenimiento](docs/mantenimiento.md).
 

@@ -1,4 +1,6 @@
-# Gráficas · ΣIM 0.51.5
+# Gráficas · ΣIM 0.51.6
+
+Los ejes, títulos y el formato de las curvas se guardan en el proyecto al guardar en la nube o en una copia JSON de respaldo. Al abrirlo, recalculá o importá de nuevo los datos para reconstruir la gráfica. Exportá CSV para conservar las muestras y SVG, PNG o JPG para conservar la imagen.
 
 ## Uso
 
