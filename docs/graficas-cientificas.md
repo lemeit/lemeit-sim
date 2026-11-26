@@ -82,3 +82,7 @@ El selector identifica DWSIM · Estado estacionario, DWSIM · Dinámica o el mod
 ## Interfaz contextual (0.50.3)
 
 La gráfica y los ejes aparecen primero; Formato y opciones, Datos de la gráfica e importación son secciones secundarias. Los modelos de gas ideal se ofrecen únicamente para un compresor/expansor identificable con corrientes calculadas y fase vapor confirmada; los valores iniciales se toman del cálculo y γ/n son hipótesis editables. En dinámica del tanque no se ofrecen modelos ajenos. Los estados superpuestos se limitan a entrada y salida del equipo. Cinética y Newton quedan en la biblioteca interna hasta disponer de contextos transitorios adecuados. Los nombres de servidores no aparecen en el pie de usuario ni en exportaciones tabulares comunes; administración conserva el monitor técnico.
+
+## Panel acoplable (0.50.4)
+
+Después de un cálculo correcto, Gráficas se muestra automáticamente, inicialmente abajo del diagrama. Se puede mover, separar o acoplar mediante los mismos controles de los demás paneles. El diagrama permanece interactivo; Formato y opciones permite ajustar la gráfica ya generada. El cálculo dinámico muestra el panel de resultados al finalizar, no genera muestras ficticias durante la espera.

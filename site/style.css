@@ -2435,3 +2435,24 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 #charts-data-details{margin:10px 0}#charts-data-table{max-height:240px;overflow:auto;border:1px solid var(--spx-border)}#charts-data-table table{border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap}#charts-data-table :is(th,td){padding:4px 7px;border-bottom:1px solid var(--spx-border);text-align:right}#charts-data-table th{position:sticky;top:0;background:var(--spx-surface-2)}
 
 body:not([data-session-role=admin]) [data-technical]{display:none!important}#charts-dialog #charts-format,#charts-dialog #charts-model-section{margin:8px 0}#charts-dialog #charts-content>.charts-controls{grid-template-columns:repeat(2,minmax(0,1fr))}#charts-dialog #charts-format>.charts-controls{margin-top:8px}#charts-dialog .charts-body{padding:10px 14px}#charts-dialog .charts-plot{margin:4px 0 10px}
+
+/* Estado completo del comando, no solo la lámpara. */
+.command-bar #calculate-button.primary-calculate[data-state="valid"],.command-bar #calculate-button.primary-calculate[data-state="valid"]:hover:not(:disabled){background:#237344;border-color:#237344;color:#fff}
+.command-bar #calculate-button.primary-calculate[data-state="none"],.command-bar #calculate-button.primary-calculate[data-state="stale"]{background:var(--spx-surface-2);border-color:var(--spx-border);color:var(--spx-text)}
+.command-bar #calculate-button.primary-calculate[data-state="calculating"]{background:#9a681b;border-color:#9a681b;color:#fff}
+.command-bar #calculate-button.primary-calculate[data-state="failed"]{background:#b52f3c;border-color:#b52f3c;color:#fff}
+/* Gráficas: panel no modal integrado al acoplamiento existente. */
+.sim-shell #charts-dialog{font:12px/1.45 var(--spx-font-sans);min-width:0;min-height:0;max-width:none;max-height:none;width:auto;height:auto;resize:none;padding:0;box-sizing:border-box}
+.sim-shell #charts-dialog[hidden]{display:none!important}
+.sim-shell #charts-dialog:not([hidden]){display:flex;flex-direction:column}
+#charts-dialog .panel-heading{flex:none;display:flex;align-items:center;gap:4px;margin:0;padding:4px;border-bottom:1px solid var(--spx-border)}
+#charts-dialog .panel-heading h2{flex:1;font-size:12px;margin:0;min-width:0}
+#charts-close{width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--spx-text-dim);font-size:19px;cursor:pointer}
+#charts-dialog .charts-body{padding:7px;min-height:0;overflow:auto;flex:1}
+#charts-dialog .charts-source-picker select{max-width:100%;min-width:0;flex:1}
+#charts-dialog .charts-navigation{gap:4px}
+#charts-dialog .charts-options{gap:8px}
+#charts-dialog .charts-import{margin:5px 0}
+#charts-dialog #charts-svg{min-height:0}
+@media(min-width:761px){.sim-shell #charts-dialog.sim-cad-panel[data-sim-cad-mode="float"]{max-height:calc(100dvh - 16px)!important}.sim-cad-slot #charts-dialog .charts-body{padding:6px}.sim-cad-slot #charts-dialog .charts-source-picker{margin-bottom:3px}}
+body.diagram-focus #charts-dialog,body.results-window #charts-dialog,body.diagram-window #charts-dialog{display:none!important}
