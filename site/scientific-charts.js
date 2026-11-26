@@ -13,11 +13,20 @@ globalThis.SimScientificCharts=(()=>{
    if(lo===hi){const d=Math.abs(lo)*.1||1;lo-=d;hi+=d;}
    return [lo,hi];
  }
- function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',y2Label='',logY2=false,zeroY2=true,series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',subtitle='',reference='',generated='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[],tall=false}){
+ function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',y2Label='',logY2=false,zeroY2=true,series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',subtitle='',reference='',generated='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[],tall=false,labelPoints=false}){
    if(!Array.isArray(points)||!series?.length)throw Error('Series no disponibles.');
-   const [xmin,xmax]=bounds([...points.map(p=>p[xKey]),...extra.flatMap(s=>s.points.map(p=>p.x))],false,logX);
+   const usable=(n,log)=>Number.isFinite(n)&&(!log||n>0);
+   if(!series.some(s=>points.some(p=>usable(p[xKey],logX)&&usable(p[s.key],s.axis==='right'?logY2:logY)))&&
+     !extra.some(s=>s.points.some(p=>usable(p.x,logX)&&usable(p.y,logY))))
+     throw Error('No hay datos válidos en una misma fila para estos ejes y escalas. Probá otra variable o una escala lineal.');
+   const margin=([min,max],keepZero=false)=>{
+     if(!labelPoints)return [min,max];
+     const padding=(max-min)*.055;
+     return [keepZero&&min===0?min:min-padding,keepZero&&max===0?max:max+padding];
+   };
+   const [xmin,xmax]=margin(bounds([...points.map(p=>p[xKey]),...extra.flatMap(s=>s.points.map(p=>p.x))],false,logX));
    const dual=series.some(s=>s.axis==='right');
-   const [ymin,ymax]=bounds([...series.filter(s=>s.axis!=='right').flatMap(s=>points.map(p=>p[s.key])),...extra.flatMap(s=>s.points.map(p=>p.y))],zeroY,logY);
+   const [ymin,ymax]=margin(bounds([...series.filter(s=>s.axis!=='right').flatMap(s=>points.map(p=>p[s.key])),...extra.flatMap(s=>s.points.map(p=>p.y))],zeroY,logY),zeroY&&!logY);
    const [rmin,rmax]=dual?bounds(series.filter(s=>s.axis==='right').flatMap(s=>points.map(p=>p[s.key])),zeroY2,logY2):[0,1];
    const W=785,H=tall?590:340,L=91,R=dual?694:753,T=subtitle?60:48,B=H-(reference||generated?102:90);
    const rightColor=safeColor(series.find(s=>s.axis==='right')?.color,1);
@@ -50,7 +59,15 @@ globalThis.SimScientificCharts=(()=>{
      const color=safeColor(s.color,i),drawLine=s.connect??connect,drawMarkers=s.markers??markers,width=s.strokeWidth??strokeWidth;let d='',started=false;
      for(const p of points){if(!valid(p,s)){started=false;continue;}d+=(started?'L':'M')+x(p[xKey]).toFixed(2)+' '+sy(p[s.key],s).toFixed(2)+' ';started=true;}
      if(drawLine)out+='<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+Math.max(.5,Math.min(5,Number(width)||1.8))+'" stroke-linejoin="round"/>';
-     if(drawMarkers||!drawLine||points.filter(p=>valid(p,s)).length===1)for(const p of points)if(valid(p,s))out+='<circle cx="'+x(p[xKey])+'" cy="'+sy(p[s.key],s)+'" r="2" fill="white" stroke="'+color+'"/>';
+     if(drawMarkers||!drawLine||points.filter(p=>valid(p,s)).length===1)for(const p of points)if(valid(p,s)){
+       const xx=x(p[xKey]),yy=sy(p[s.key],s);
+       out+='<circle cx="'+xx+'" cy="'+yy+'" r="'+(labelPoints?5:2)+'" fill="'+(labelPoints?color:'white')+'" stroke="'+color+'"/>';
+       if(labelPoints&&i===0&&p.label){
+         const left=xx>(L+R)/2;
+         out+=label(xx+(left?-9:9),yy+(yy<T+25?16:-9),String(p.label).slice(0,32),
+           'data-chart-point-label="true" text-anchor="'+(left?'end':'start')+'" font-size="12" font-weight="600" fill="'+color+'"');
+       }
+     }
      if(selected&&valid(selected,s))out+='<circle cx="'+x(selected[xKey])+'" cy="'+sy(selected[s.key],s)+'" r="4" fill="'+color+'" stroke="white"/>';
      const lx=L+(i%3)*220,ly=B+54+Math.floor(i/3)*15;
      if(legend){out+='<g data-legend-style="'+(!drawLine?'points':drawMarkers?'both':'line')+'">';if(drawLine)out+=line(lx,ly-4,lx+24,ly-4,'stroke="'+color+'" stroke-width="2"');if(drawMarkers||!drawLine)out+='<circle cx="'+(lx+12)+'" cy="'+(ly-4)+'" r="3" fill="white" stroke="'+color+'"/>';out+=label(lx+30,ly,s.name+(s.axis==='right'?' · Y2':''))+'</g>'; }

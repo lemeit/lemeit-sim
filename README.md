@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.51.8](https://img.shields.io/badge/portal-0.51.8-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.51.9](https://img.shields.io/badge/portal-0.51.9-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -18,7 +18,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Estado actual · 0.51.8
+## Estado actual · 0.51.9
 
 **Revalidación Debian (26/11):** Ejemplo 20 y Gráficas vuelven a funcionar tras actualizar el gateway desde 0.47.5. Un estado HTTP 200 no garantiza soporte dinámico; consultar `/api/dynamics/capabilities` y [recuperación](docs/operacion-local.md).
 

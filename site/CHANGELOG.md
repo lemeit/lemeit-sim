@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.9 — 2026-11-26
+
+- Gráficas abre el Ejemplo 14 con presión frente a volumen específico con marcadores más visibles y rótulos de entrada y salida. También explica cuándo los ejes no contienen pares válidos.
+
 ## 0.51.8 — 2026-11-26
 
 - Abre la gráfica del tanque en un panel flotante proporcionado y aumenta la altura de la curva y sus exportaciones. Balances y corrientes muestran el estado del tanque, la alimentación y la descarga al calcular o reabrir el proyecto.

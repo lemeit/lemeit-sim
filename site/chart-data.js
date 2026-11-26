@@ -22,6 +22,13 @@ globalThis.SimChartData=(()=>{
   const components=(result.balances||[]).flatMap(b=>Object.entries(b.components||{}).map(([c,v])=>({label:name(b.id)+' · '+c,massIn:v.in_kg_s,massOut:v.out_kg_s,residual:v.residual_kg_s}))).map((p,i)=>({...p,index:i+1}));
   const bc=[...common,column('massIn','Entrada','kg/s'),column('massOut','Salida','kg/s'),column('residual','Residuo o consumo neto','kg/s')];
   const datasets=[table(streams,sc,'Corrientes',source,'Cada punto es una corriente, no un instante. Caudal volumétrico derivado de masa/densidad.',true),table(balances,[...bc,column('energy','Energía neta al fluido','kW')],'Balances',source,'Cada punto es un equipo; la energía neta no equivale a potencia intercambiada en un intercambiador.',true),table(components,bc,'Componentes',source,'Cada punto es un par equipo/componente. En reacción, el residuo puede representar consumo o generación.',true)];
+  if(streams.length===2&&graph.nodes.some(n=>n.type==='Compressor'||n.type==='Expander')){
+   const states=datasets[0];
+   states.labelPoints=true;
+   states.defaultX=states.columns.some(c=>c.key==='specificVolume')?'specificVolume':'index';
+   states.defaultY=states.columns.some(c=>c.key==='pressure')?'pressure':'temperature';
+   states.assumptions='Cada punto muestra un estado calculado de entrada o salida. Para una curva continua, generá un modelo analítico por separado.';
+  }
   return datasets.filter(d=>d.points.length&&d.columns.length>1);
  }
  function parse(text){

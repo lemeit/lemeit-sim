@@ -1122,3 +1122,25 @@ test('Resultados estacionarios guardados vuelven a abrirse sin recalcular',async
   await page.locator('#charts-content').waitFor();
   assert.equal(requests,1);
 });
+
+test('Ejemplo 14 grafica los estados y el modelo de compresión',async t=>{
+  const fixture=JSON.parse(await load('../../docs/validation/compressor-0.24.0-windows.json'));
+  const page=await browserPage(t,JSON.stringify(fixture.cases['75'].result));
+  await openProject(page,await load('../../site/examples/CompressorNitrogen.json'));
+  await page.locator('#calculate-button').click();
+  await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');
+  await page.locator('#charts-open').click();
+  await page.locator('#charts-content').waitFor();
+  assert.equal(await page.locator('#charts-x').inputValue(),'specificVolume');
+  assert.equal(await page.locator('#charts-y').inputValue(),'pressure');
+  assert.equal(await page.locator('#charts-error').textContent(),'');
+  assert.ok(await page.locator('#charts-svg circle').count()>=2);
+  const stateLabels=await page.locator('#charts-svg [data-chart-point-label]').allTextContents();
+  assert.deepEqual(stateLabels,['Nitrógeno entrada','Nitrógeno comprimido']);
+  await page.locator('#charts-model-section summary').click();
+  await page.locator('#charts-model-run').click();
+  assert.equal(await page.locator('#charts-model-error').textContent(),'');
+  assert.equal(await page.locator('#charts-error').textContent(),'');
+  assert.equal(await page.locator('#charts-dataset').inputValue(),'model');
+  assert.ok(await page.locator('#charts-svg path').count());
+});
