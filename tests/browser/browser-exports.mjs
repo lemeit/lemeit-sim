@@ -1071,6 +1071,14 @@ test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un p
   assert.equal(runs,1);
   assert.equal(graph.saved_run.data.points[1].outlet_kg_s,7);
   assert.deepEqual(cloudSave.postDataJSON().graph.saved_run,graph.saved_run);
+  await page.locator('#charts-close').click();
+  const tankResults=page.locator('#results [data-results-content="balances"]');
+  assert.match(await tankResults.innerText(),/0,2 m/);
+  await page.locator('[data-results-view="streams"]').click();
+  const streamResults=page.locator('#results [data-results-content="streams"]');
+  assert.match(await streamResults.innerText(),/7 kg\/s/);
+  assert.match(await streamResults.innerText(),/Última muestra · 5 s/);
+  await page.locator('#charts-open').click();
   assert.equal(await page.locator('#charts-y2').inputValue(),'outlet_kg_s');
   assert.equal(await page.locator('#charts-subtitle').inputValue(),'Ensayo de llenado');
   assert.equal(await page.locator('#charts-color2').inputValue(),'#287a61');

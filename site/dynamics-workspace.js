@@ -18,7 +18,7 @@ globalThis.SimDynamics=(()=>{
   const payload={capacity_m3:vessel.volume_m3,height_m:p.height_m,feed_pressure_kPa:feed.pressure_kPa,outlet_pressure_kPa:exit.outlet_pressure_kPa,feed_mass_flow_kg_s:feed.mass_flow,inlet_kv:p.inlet_kv,outlet_kv:p.outlet_kv,valve_opening_pct:p.valve_opening_pct,step_s:p.step_s,duration_s:p.duration_s};
   for(const [key,val] of Object.entries(payload))if(!Number.isFinite(val)||val<=0)throw Error('Parámetro dinámico inválido: '+key);
   if(payload.step_s>payload.duration_s||payload.valve_opening_pct>100||payload.feed_pressure_kPa<=payload.outlet_pressure_kPa)throw Error('Revisá paso temporal, apertura y presiones.');
-  return {payload,title:vessel.name,objectId:vessel.id};
+  return {payload,title:vessel.name,objectId:vessel.id,streamIds:[chain[0].id,chain[2].id,chain[4].id,chain[6].id]};
  }
  const adapters={'tank-valves':{prepare:tank,path:'/api/dynamics/tank',source:'dwsim-mcp-dynamics',defaultY:'level_m'}};
  function prepare(g){const a=adapters[g.simulation?.model];if(!a)throw Error('Modelo dinámico todavía no disponible.');return {...a,...a.prepare(g)};}
