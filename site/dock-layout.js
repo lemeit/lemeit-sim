@@ -3,11 +3,11 @@
 'use strict';
 globalThis.SimDockLayout=(()=>{
   const KEY='sim-dock-layout-cad-v3';
-  const IDS=['equipment','inspector','results'];
+  const IDS=['equipment','inspector','results','charts'];
   const EDGES=['left','right','top','bottom'];
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
-  const DEFAULT={equipment:'left',inspector:'right',results:'right'};
+  const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'bottom'};
   const DEFAULT_SIZES={left:186,right:336,top:200,bottom:160};
   const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
   const safe=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
@@ -29,7 +29,7 @@ globalThis.SimDockLayout=(()=>{
     const fallback={
       equipment:{x:60,y:130,w:310,h:500},
       inspector:{x:Math.max(8,vw-390),y:130,w:355,h:500},
-      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350}
+      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},charts:{x:Math.max(8,(vw-700)/2),y:100,w:700,h:510}
     };
     return Object.fromEntries(IDS.map(id=>{
       const p=stored?.[id];
@@ -46,7 +46,7 @@ globalThis.SimDockLayout=(()=>{
     const elements={
       equipment:workspace?.querySelector('.equipment-panel'),
       inspector:workspace?.querySelector('.inspector-panel'),
-      results:document.getElementById('results-panel')
+      results:document.getElementById('results-panel'),charts:document.getElementById('charts-dialog')
     };
     if(!workspace||!diagram||IDS.some(id=>!elements[id]))return;
     let saved={};
@@ -299,10 +299,10 @@ globalThis.SimDockLayout=(()=>{
     for(const id of IDS){
       const el=elements[id],p=panels[id];
       p.el=el;
-      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Balances y corrientes'}[id];
+      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Balances y corrientes',charts:'Gráficas'}[id];
       const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
       heading.classList.add('sim-cad-heading');heading.tabIndex=0;
-      if(id!=='results')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
+      if(id!=='results'&&id!=='charts')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
       heading.title='Arrastrar para mover o acoplar; Alt evita el acoplamiento; doble clic para flotar o volver';
       const grip=document.createElement('span');grip.className='sim-cad-move';
       grip.textContent='⠿';grip.setAttribute('aria-hidden','true');grip.title='Arrastrar panel';heading.prepend(grip);
@@ -318,7 +318,7 @@ globalThis.SimDockLayout=(()=>{
       p.button=button;
       const tools=document.createElement('span');tools.className='sim-cad-controls';
       tools.append(select,button);
-      heading.insertBefore(tools,heading.querySelector('.results-tools'));
+      heading.insertBefore(tools,heading.querySelector('.results-tools,#charts-close'));
       const sizeGrip=makeButton('◢','Redimensionar '+p.title);
       sizeGrip.className='sim-cad-size-grip';el.append(sizeGrip);
       select.addEventListener('change',()=>place(p,select.value));

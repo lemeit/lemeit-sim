@@ -975,13 +975,13 @@ test('Dinámica DWSIM MCP: curva real identificada y CSV diferente del didáctic
  await page.locator('#charts-fit').click();
  assert.equal(await page.locator('#charts-svg').getAttribute('viewBox'),'0 0 785 340');
  assert.equal(await page.locator('.charts-body').evaluate(el=>getComputedStyle(el).overflowY),'auto');
- await page.keyboard.press('Escape');
+ await page.locator('#charts-close').click();
  await page.locator('#charts-open').click();
  assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');
  assert.equal(realRequests,1);
- await page.keyboard.press('Escape');
+ await page.locator('#charts-close').click();
 });
 
  test('Gráficas: cálculo estacionario alimenta ejes XY e importación independiente',async t=>{
- const page=await browserPage(t);await openProject(page,example);await page.locator('#calculate-button').click();await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');await page.locator('#charts-open').click();await page.locator('#charts-content').waitFor();assert.equal(await page.locator('#charts-y').inputValue(),'temperature');assert.match(await page.locator('#charts-svg').innerHTML(),/Temperatura/);await page.locator('#charts-x').selectOption('mass');assert.match(await page.locator('#charts-svg').innerHTML(),/Caudal másico/);await page.getByText('Importar o ingresar datos',{exact:true}).click();await page.locator('#charts-paste').fill('Tiempo [s];Concentración [mol/L]\\n0;1\\n5;0,5'.replaceAll('\\n','\n'));await page.locator('#charts-load-data').click();assert.equal(await page.locator('#charts-dataset').inputValue(),'manual');assert.match(await page.locator('#charts-svg').innerHTML(),/Concentración/);await page.keyboard.press('Escape');
+ const page=await browserPage(t);await openProject(page,example);await page.locator('#calculate-button').click();await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');await page.locator('#charts-content').waitFor();assert.equal(await page.locator('#charts-dialog').isVisible(),true);assert.equal(await page.locator('#calculate-button').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(35, 115, 68)');await page.locator('#charts-dialog .sim-cad-position').selectOption('float');assert.equal(await page.locator('#charts-dialog').getAttribute('data-sim-cad-mode'),'float');await page.locator('#charts-dialog .sim-cad-position').selectOption('bottom');assert.equal(await page.locator('#charts-dialog').getAttribute('data-sim-cad-mode'),'bottom');assert.equal(await page.locator('#charts-y').inputValue(),'temperature');assert.match(await page.locator('#charts-svg').innerHTML(),/Temperatura/);await page.locator('#charts-x').selectOption('mass');assert.match(await page.locator('#charts-svg').innerHTML(),/Caudal másico/);await page.getByText('Importar o ingresar datos',{exact:true}).click();await page.locator('#charts-paste').fill('Tiempo [s];Concentración [mol/L]\\n0;1\\n5;0,5'.replaceAll('\\n','\n'));await page.locator('#charts-load-data').click();assert.equal(await page.locator('#charts-dataset').inputValue(),'manual');assert.match(await page.locator('#charts-svg').innerHTML(),/Concentración/);await page.keyboard.press('Escape');
 });

@@ -10,7 +10,7 @@ globalThis.SimChartWorkspace=(()=>{
  ];
  const fmt=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumSignificantDigits:7}):'—';
  function pause(){if(interval!==null){clearInterval(interval);interval=null;}if($('charts-play'))$('charts-play').textContent='▶ Reproducir';}
- function reset(){pause();dataset=null;dynamic=null;manual=null;model=null;preferredSource='';modelContext=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
+ function reset(){pause();dataset=null;dynamic=null;manual=null;model=null;preferredSource='';modelContext=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog'))close();}
  function accept(data,meta={}){
   if(!Array.isArray(data?.points)||!data.points.length)return;
   const real=data.source==='dwsim-mcp-dynamics';
@@ -20,7 +20,7 @@ globalThis.SimChartWorkspace=(()=>{
   if(!columns.length)return;
   preferredSource='dynamic';dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',assumptions:data.assumptions||''};
   if($('charts-title'))$('charts-title').value='';
-  if($('charts-dialog')?.open)refresh('dynamic');
+  if(!$('charts-dialog')?.hidden)refresh('dynamic');else show('dynamic');
  }
  function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+(column.unit?' ['+column.unit+']':'');select.append(o);}
  function refresh(preferred){
@@ -53,11 +53,14 @@ globalThis.SimChartWorkspace=(()=>{
   $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
   $('charts-export-svg').disabled=!!$('charts-error').textContent;
  }
- function open(preferred){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));refresh(typeof preferred==='string'?preferred:undefined);$('charts-dialog').showModal();}
+ function show(preferred){refresh(typeof preferred==='string'?preferred:undefined);$('charts-dialog').hidden=false;}
+ function open(preferred){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));show(preferred);}
+ function close(){pause();$('charts-dialog').hidden=true;}
+ function completed(){if(!dynamic)show('steady0');else if(!$('charts-dialog').hidden)refresh();}
  function applyView(){$('charts-svg').setAttribute('viewBox',view.join(' '));}
  function zoom(factor,cx=.5,cy=.5){const [x,y,w,h]=view;const nw=Math.max(785/16,Math.min(785,w*factor)),nh=nw*340/785;view=[Math.max(0,Math.min(785-nw,x+(w-nw)*cx)),Math.max(0,Math.min(340-nh,y+(h-nh)*cy)),nw,nh];applyView();}
  function renderTable(){if(!dataset)return;const host=$('charts-data-table'),table=document.createElement('table'),head=table.createTHead().insertRow();for(const name of ['#',...dataset.columns.map(c=>c.name+(c.unit?' ['+c.unit+']':''))]){const th=document.createElement('th');th.textContent=name;head.append(th);}const body=table.createTBody(),start=dataPage*100,end=Math.min(start+100,dataset.points.length);for(let i=start;i<end;i++){const row=body.insertRow();for(const value of [i+1,...dataset.columns.map(c=>fmt(dataset.points[i][c.key]))])row.insertCell().textContent=String(value);}host.replaceChildren(table);$('charts-data-count').textContent=(start+1)+'–'+end+' / '+dataset.points.length;$('charts-data-prev').disabled=start===0;$('charts-data-next').disabled=end===dataset.points.length;}
- function bindNavigation(){const svg=$('charts-svg');let drag=null;$('charts-maximize').onclick=()=>{const full=$('charts-dialog').classList.toggle('charts-maximized');$('charts-maximize').setAttribute('aria-label',full?'Restaurar ventana':'Ampliar ventana');};$('charts-zoom-in').onclick=()=>zoom(.8);$('charts-zoom-out').onclick=()=>zoom(1.25);$('charts-fit').onclick=()=>{view=[0,0,785,340];applyView();};svg.addEventListener('wheel',e=>{if(!dataset)return;e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY<0?.8:1.25,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);},{passive:false});svg.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,view:[...view]};svg.setPointerCapture(e.pointerId);});svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),[x,y,w,h]=drag.view;view=[Math.max(0,Math.min(785-w,x-(e.clientX-drag.x)*w/r.width)),Math.max(0,Math.min(340-h,y-(e.clientY-drag.y)*h/r.height)),w,h];applyView();});for(const event of ['pointerup','pointercancel','lostpointercapture'])svg.addEventListener(event,()=>{drag=null;});svg.addEventListener('keydown',e=>{if(e.key==='+'||e.key==='='){zoom(.8);e.preventDefault();}else if(e.key==='-'){zoom(1.25);e.preventDefault();}else if(e.key.startsWith('Arrow')){const [x,y,w,h]=view;view=[Math.max(0,Math.min(785-w,x+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)*w*.1)),Math.max(0,Math.min(340-h,y+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)*h*.1)),w,h];applyView();e.preventDefault();}});$('charts-data-prev').onclick=()=>{dataPage=Math.max(0,dataPage-1);renderTable();};$('charts-data-next').onclick=()=>{if((dataPage+1)*100<dataset.points.length){dataPage++;renderTable();}};}
+ function bindNavigation(){const svg=$('charts-svg');let drag=null;$('charts-close').onclick=close;$('charts-zoom-in').onclick=()=>zoom(.8);$('charts-zoom-out').onclick=()=>zoom(1.25);$('charts-fit').onclick=()=>{view=[0,0,785,340];applyView();};svg.addEventListener('wheel',e=>{if(!dataset)return;e.preventDefault();const r=svg.getBoundingClientRect();zoom(e.deltaY<0?.8:1.25,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);},{passive:false});svg.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,view:[...view]};svg.setPointerCapture(e.pointerId);});svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),[x,y,w,h]=drag.view;view=[Math.max(0,Math.min(785-w,x-(e.clientX-drag.x)*w/r.width)),Math.max(0,Math.min(340-h,y-(e.clientY-drag.y)*h/r.height)),w,h];applyView();});for(const event of ['pointerup','pointercancel','lostpointercapture'])svg.addEventListener(event,()=>{drag=null;});svg.addEventListener('keydown',e=>{if(e.key==='+'||e.key==='='){zoom(.8);e.preventDefault();}else if(e.key==='-'){zoom(1.25);e.preventDefault();}else if(e.key.startsWith('Arrow')){const [x,y,w,h]=view;view=[Math.max(0,Math.min(785-w,x+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)*w*.1)),Math.max(0,Math.min(340-h,y+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)*h*.1)),w,h];applyView();e.preventDefault();}});$('charts-data-prev').onclick=()=>{dataPage=Math.max(0,dataPage-1);renderTable();};$('charts-data-next').onclick=()=>{if((dataPage+1)*100<dataset.points.length){dataPage++;renderTable();}};}
  function play(){if(interval!==null){pause();return;}const s=$('charts-scrub');if(Number(s.value)>=Number(s.max))s.value='0';$('charts-play').textContent='⏸ Pausar';interval=setInterval(()=>{s.value=String(Math.min(Number(s.max),Number(s.value)+1));render();if(s.value===s.max)pause();},80);}
  function csv(){
   if(!dataset)return;
@@ -83,7 +86,7 @@ globalThis.SimChartWorkspace=(()=>{
   for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend'])$(id).addEventListener('change',render);
   $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
   $('charts-play').addEventListener('click',play);$('charts-export-svg').addEventListener('click',()=>SimScientificCharts.download($('charts-svg')));
-  $('charts-export-csv').addEventListener('click',csv);$('charts-dialog').addEventListener('close',pause);
+  $('charts-export-csv').addEventListener('click',csv);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('charts-dialog').hidden&&$('charts-dialog').contains(document.activeElement)&&!document.querySelector('dialog[open]'))close();});
  }
- return Object.freeze({accept,reset,bind,open});
+ return Object.freeze({accept,reset,bind,open,close,completed});
 })();
