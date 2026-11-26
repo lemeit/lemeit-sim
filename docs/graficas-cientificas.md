@@ -98,3 +98,7 @@ Como en COCO y las ventanas acoplables de DWSIM, Gráficas se presenta inicialme
 ### Régimen dinámico integrado (0.51.0)
 
 Ejemplo 20 abre en Dinámico. Calcular usa /api/dynamics/tank y abre Gráficas automáticamente, sin estado estacionario previo. Configuración dinámica conserva parámetros en el proyecto. El primer adaptador admite solo agua a 25 °C, tanque y dos válvulas en serie; DWSIM reconstruye el circuito experimental y define el estado inicial. No simula cualquier diagrama ni sustituye un fallo por un modelo didáctico. Los próximos adaptadores podrán proporcionar sus propias columnas y variable Y predeterminada. Ejemplo 15 sigue estacionario. Las series no se guardan en la nube.
+
+### Doble eje Y y validación (0.51.1)
+
+La segunda curva comparte el eje izquierdo si tiene la misma unidad; si difiere, aparece automáticamente un eje derecho con escala propia, también en SVG. Sin segunda curva no hay eje derecho. Windows y Debian reprodujeron 121 muestras (600 s, paso 5 s); Windows: nivel inicial 0,0100295 m, 60 s 0,233917 m, 120 s 0,296234 m, 300 s 0,330749 m, 600 s 0,332854 m; descarga final 9,999722 kg/s. Coincidencia a la precisión registrada, no validación experimental independiente.

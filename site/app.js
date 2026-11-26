@@ -147,7 +147,7 @@ const equipmentPorts = {
   Mixer: [[0,.2],[0,.5],[0,.8],[1,.5]],
   Splitter: [[0,.5],[1,.2],[1,.8]],
   Separator: [[.25,.2],[.5,0,'up'],[.75,5/7]],
-  Tank: [[0,.5],[1,.5]],
+  Tank: [[.1,.5],[.9,.5]], // paredes del símbolo SVG (10% y 90%)
   Expander: [[0,.5],[1,.5],[1,.85,'right']],
   Compressor: [[0,.5],[1,.5],[0,.85,'left']],
   Pump: [[-.05,.5],[1,.125]],
