@@ -102,3 +102,5 @@ Ejemplo 20 abre en Dinámico. Calcular usa /api/dynamics/tank y abre Gráficas a
 ### Doble eje Y y validación (0.51.1)
 
 La segunda curva comparte el eje izquierdo si tiene la misma unidad; si difiere, aparece automáticamente un eje derecho con escala propia, también en SVG. Sin segunda curva no hay eje derecho. Windows y Debian reprodujeron 121 muestras (600 s, paso 5 s); Windows: nivel inicial 0,0100295 m, 60 s 0,233917 m, 120 s 0,296234 m, 300 s 0,330749 m, 600 s 0,332854 m; descarga final 9,999722 kg/s. Coincidencia a la precisión registrada, no validación experimental independiente.
+
+Las exportaciones SVG (vectorial), PNG y JPG (1570 × 680 px, fondo blanco) conservan los ejes, leyendas y referencias seleccionadas. Formato y opciones permite ocultar proyecto/régimen, pie técnico y fecha local de generación. La leyenda representa puntos, línea o ambos según el dibujo; paleta fija de ocho colores con contraste automático entre curvas.

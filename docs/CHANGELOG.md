@@ -8,7 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.51.1 — 2026-11-26
 
-- Alinea conexiones del tanque con las paredes del símbolo; distingue motor ocupado de falta de capacidad dinámica; segunda curva con eje Y derecho automático para unidades distintas, con escala independiente. Validación real Windows y Debian del caso 20.
+- Alinea conexiones del tanque con las paredes del símbolo; distingue motor ocupado de falta de capacidad dinámica; segunda curva con eje Y derecho automático para unidades distintas, con escala independiente. Validación real Windows y Debian del caso 20. Exportación SVG, PNG y JPG con referencias del proyecto, fecha y pie técnico configurables; leyenda según representación y paleta fija de ocho colores.
 
 ## 0.51.0 — 2026-11-25
 
