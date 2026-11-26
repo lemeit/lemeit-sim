@@ -12,10 +12,10 @@ globalThis.SimScientificCharts=(()=>{
    if(lo===hi){const d=Math.abs(lo)*.1||1;lo-=d;hi+=d;}
    return [lo,hi];
  }
- function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null}){
+ function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[]}){
    if(!Array.isArray(points)||!series?.length)throw Error('Series no disponibles.');
-   const [xmin,xmax]=bounds(points.map(p=>p[xKey]),false,logX);
-   const [ymin,ymax]=bounds(series.flatMap(s=>points.map(p=>p[s.key])),zeroY,logY);
+   const [xmin,xmax]=bounds([...points.map(p=>p[xKey]),...extra.flatMap(s=>s.points.map(p=>p.x))],false,logX);
+   const [ymin,ymax]=bounds([...series.flatMap(s=>points.map(p=>p[s.key])),...extra.flatMap(s=>s.points.map(p=>p.y))],zeroY,logY);
    const W=785,H=340,L=91,R=753,T=48,B=250;
    const x=v=>L+((logX?Math.log10(v):v)-xmin)/(xmax-xmin)*(R-L);
    const y=v=>B-((logY?Math.log10(v):v)-ymin)/(ymax-ymin)*(B-T);
@@ -46,6 +46,7 @@ globalThis.SimScientificCharts=(()=>{
      const lx=L+(i%3)*220,ly=304+Math.floor(i/3)*15;
      if(legend)out+=line(lx,ly-4,lx+24,ly-4,'stroke="'+color+'" stroke-width="2"')+label(lx+30,ly,s.name);
    });
+   for(const s of extra){for(const p of s.points)if(Number.isFinite(p.x)&&Number.isFinite(p.y)&&(!logX||p.x>0)&&(!logY||p.y>0))out+='<circle cx="'+x(p.x)+'" cy="'+y(p.y)+'" r="4" fill="white" stroke="#a33b35" stroke-width="2"/>';if(legend)out+=label(L,321,s.name,'fill="#a33b35" font-size="10"');}
    out+=label(R,334,source,'text-anchor="end" font-size="10" fill="#59636d"')+'</g>';
    svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML=out;
  }

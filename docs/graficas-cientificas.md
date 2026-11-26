@@ -66,3 +66,7 @@ El balance dm/dt = entrada − salida explica la estabilización: al final la de
 
 El núcleo gráfico es reutilizable, pero la interfaz actual está dentro del tanque. Panel acoplable, zoom, importación de datos experimentales, incertidumbre, regresiones, cinética y persistencia son desarrollos pendientes. No se atribuyen al módulo actual.
 
+
+## Modelos físicos (0.50.1)
+
+Abrí Modelos físicos, elegí el modelo y completá los parámetros. Generá la curva y seleccioná ejes XY. Activá Superponer estados DWSIM compatibles si hay variables de igual magnitud y unidad en resultados vigentes. Se muestran como puntos, sin atribuirles una trayectoria. Los parámetros del gas ideal deben corresponder al gas de estudio; los valores iniciales son ilustrativos. La selección incluye todas las corrientes compatibles, no solo las de un compresor. Exportar CSV descarga el conjunto seleccionado; SVG incluye la superposición visible. No hay barridos automáticos ni ajuste de modelos reales de gas en esta revisión.
