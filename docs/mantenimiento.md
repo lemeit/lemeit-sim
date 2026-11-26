@@ -4,10 +4,10 @@
 
 - `tests/js/{editor,simulation,content,worker}/` contiene las pruebas Node por área. `npm test` ejecuta todas y `node --test tests/js/simulation/*.mjs` permite limitar la ejecución.
 - `tests/browser/` contiene la suite Playwright. Ejecutá `npm run test:exports-browser` con Chromium de Playwright o con `PLAYWRIGHT_CHANNEL=chrome` y Chrome instalado. En PowerShell configurá `$env:PLAYWRIGHT_CHANNEL = 'chrome'`.
-- `tests/python/{gateway,simulation,validation}/` contiene las pruebas Python. Desde la raíz, ejecutá `python -m unittest discover -s tests/python -t . -p "*_cases.py"` (en Debian, `python3`).
+- `tests/python/{gateway,simulation,validation}/` contiene las pruebas Python. Desde la raíz, ejecutá `python -m unittest discover -s tests/python -t .` (en Debian, `python3`).
 - `tests/fixtures/` contiene la respuesta de referencia del Ejemplo 06 compartida por las pruebas de exportación Node y Playwright.
 
-Los archivos anteriores de la raíz y de `deploy/` delegan a las pruebas reubicadas. Siguen funcionando `python -m unittest discover`, `python -m unittest test_server.ValidationTests`, `python test_server.py`, `node --test deploy/test-*.mjs` y `node --test deploy/browser-exports.mjs`. Ejecutá una sola ruta por suite para evitar repetir pruebas.
+La búsqueda general `python -m unittest discover` sigue disponible. Para ejecutar un módulo o clase en particular, usá la ruta completa, por ejemplo `python -m unittest tests.python.gateway.test_server.ValidationTests -v`. Para la suite de navegador, usá `npm run test:exports-browser`.
 
 ## Dependencias y puntos de entrada
 
@@ -19,7 +19,7 @@ Los archivos anteriores de la raíz y de `deploy/` delegan a las pruebas reubica
 | Motores | Windows usa los scripts PowerShell en raíz y `.local/runtime`. Debian usa el gateway Python, MCP HTTP local y su túnel. Consultá [Operación y recuperación](operacion-local.md). |
 | Despliegue | `deploy/build.mjs` empaqueta `site/` y los módulos de `deploy/` en `.build/worker.mjs`. `wrangler.jsonc` conserva el punto de entrada. `npm run deploy:check` prepara el despliegue sin publicar. |
 
-El flujo de CI usa los comandos npm y conserva sus invocaciones Python compatibles. `tools/` aloja las sondas y validaciones manuales. `.local/runtime` queda privado y fuera de Git.
+El flujo de CI usa los comandos npm y ejecuta los módulos Python desde `tests/python/`. `tools/` aloja las sondas y validaciones manuales. `.local/runtime` queda privado y fuera de Git.
 
 ## Administración prevista
 

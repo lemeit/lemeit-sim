@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.51.4](https://img.shields.io/badge/portal-0.51.4-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.51.5](https://img.shields.io/badge/portal-0.51.5-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -18,7 +18,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Estado actual · 0.51.4
+## Estado actual · 0.51.5
 
 - Régimen estacionario o dinámico guardado por proyecto. Ejemplo 20 abre en Dinámico: pulsar Calcular integra DWSIM y abre Gráficas con tiempo y nivel.
 - Desde **Ver → Gráficas** podés configurar un subtítulo y ajustar color, representación y grosor por curva. En **Administración → Operación y recuperación** podés copiar comandos o descargar el manual HTML.
@@ -371,7 +371,7 @@ Los archivos origin-key.txt y tunnel-token.txt no deben publicarse ni compartirs
 ```powershell
 npm ci
 npm run build:verified
-python -m unittest test_server.ValidationTests test_stream_properties.StreamValidation -v
+python -m unittest tests.python.gateway.test_server.ValidationTests tests.python.gateway.test_stream_properties.StreamValidation -v
 npm run deploy:check
 ```
 
@@ -379,7 +379,7 @@ Para pruebas aisladas reales en PowerShell:
 
 ```powershell
 $env:DWSIM_HOME = (Resolve-Path .local/runtime).Path
-python -m unittest test_stream_properties test_server.IsolatedIntegrationTests -v
+python -m unittest tests.python.gateway.test_stream_properties tests.python.gateway.test_server.IsolatedIntegrationTests -v
 ```
 
 Las pruebas históricas EngineIntegrationTests requieren además el MCP HTTP 5901;

@@ -81,7 +81,7 @@ Get-Content .\.local\runtime\public-gateway.stderr.log -Tail 50
 Get-Content .\.local\runtime\tunnel.stderr.log -Tail 50
 ```
 
-Para actualizar: detener el servicio cuando no esté calculando; comprobar git status -sb, ejecutar git fetch origin y git pull --ff-only origin main solo con árbol limpio, python -m unittest test_dynamic_tank_mcp -v y volver a iniciar. No borrar .local/runtime. Si hay conflicto, detener la actualización.
+Para actualizar: detener el servicio cuando no esté calculando; comprobar git status -sb, ejecutar git fetch origin y git pull --ff-only origin main solo con árbol limpio, python -m unittest tests.python.gateway.test_dynamic_tank_mcp -v y volver a iniciar. No borrar .local/runtime. Si hay conflicto, detener la actualización.
 
 Modo local Windows: ejecutar powershell -ExecutionPolicy Bypass -File .\start-local.ps1 -EngineRoot "C:\GitHub\lemeit-sim\.local\runtime" -Port 5910 y abrir http://127.0.0.1:5910. El servidor local existe; el funcionamiento offline completo de sesión, editor y proyectos debe verificarse. Detener con Ctrl+C.
 
@@ -97,6 +97,6 @@ ss -ltnp | grep -E ':5901|:5910'
 pgrep -x cloudflared
 ```
 
-Para iniciar, detener o reiniciar: sudo systemctl start/stop/restart lemeit-sim.service (elegir una acción). sudo systemctl enable lemeit-sim.service activa arranque automático. Identificar primero la unidad o método real del túnel y MCP; no asumir sus nombres. Para actualizar: entrar en WorkingDirectory, verificar árbol limpio, detener gateway sin trabajos activos, git fetch origin, git pull --ff-only origin main, python3 -m unittest test_dynamic_tank_mcp -v y reiniciar. Prueba local del MCP: python3 tools/probe_dynamic_tank.py --run (requiere token local configurado; no mostrarlo).
+Para iniciar, detener o reiniciar: sudo systemctl start/stop/restart lemeit-sim.service (elegir una acción). sudo systemctl enable lemeit-sim.service activa arranque automático. Identificar primero la unidad o método real del túnel y MCP; no asumir sus nombres. Para actualizar: entrar en WorkingDirectory, verificar árbol limpio, detener gateway sin trabajos activos, git fetch origin, git pull --ff-only origin main, python3 -m unittest tests.python.gateway.test_dynamic_tank_mcp -v y reiniciar. Prueba local del MCP: python3 tools/probe_dynamic_tank.py --run (requiere token local configurado; no mostrarlo).
 
 Motor ocupado: no iniciar otro cálculo simultáneo. supported:true acredita herramientas disponibles, no una corrida correcta. Verificar Ejemplo 20 y consultar [referencia numérica](graficas-cientificas.md). Sin Internet no hay portal público ni nube; conservar esta guía localmente.

@@ -12,7 +12,7 @@ Desde el repositorio en Windows (DWSIM MCP en `.local/runtime/server/dwsim-mcp.e
 
 ```powershell
 cd C:\GitHub\lemeit-sim
-python -m unittest test_native_recycle_probe -v
+python -m unittest tests.python.validation.test_native_recycle_probe -v
 python tools/probe_recycle_native.py --engine windows
 ```
 
@@ -20,7 +20,7 @@ Desde Debian, utilizar la ruta **local ya configurada** al token MCP; no pegar n
 
 ```bash
 cd ~/lemeit-sim
-python3 -m unittest test_native_recycle_probe -v
+python3 -m unittest tests.python.validation.test_native_recycle_probe -v
 python3 tools/probe_recycle_native.py --engine debian --token-file "$HOME/.config/lemeit-sim/mcp-token"
 ```
 

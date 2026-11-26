@@ -3,7 +3,7 @@ import copy
 import os
 import unittest
 from server import IsolatedEngine, InputError, simulate, validate_graph
-from .server_cases import case, CATALOG
+from .test_server import case, CATALOG
 
 class StreamValidation(unittest.TestCase):
     def test_active_flash_inputs_only(self):

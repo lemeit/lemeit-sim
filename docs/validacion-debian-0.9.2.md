@@ -28,7 +28,7 @@ El archivo completo se preservó por el usuario fuera de Git; se identifica por 
 
 ```bash
 cd ~/lemeit-sim
-python3 -m unittest test_validate_debian_examples -v
+python3 -m unittest tests.python.validation.test_validate_debian_examples -v
 python3 tools/validate_debian_examples.py
 ```
 

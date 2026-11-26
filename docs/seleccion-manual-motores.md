@@ -49,7 +49,7 @@ y `--mcp-url` restringido a `http://127.0.0.1:5901/mcp`. Ejemplo de comprobació
 local, usando un archivo de token previamente configurado:
 
 ```bash
-python3 -m unittest test_server.ValidationTests test_server.RemoteMcpTests -v
+python3 -m unittest tests.python.gateway.test_server.ValidationTests tests.python.gateway.test_server.RemoteMcpTests -v
 python3 server.py --mcp-token-file "$HOME/.config/lemeit-sim/mcp-token" --port 5910
 ```
 
