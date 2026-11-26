@@ -2,7 +2,7 @@
 
 ## Módulo general (0.50.0)
 
-Calculá cualquier ejemplo con el botón Calcular y abrí Ver → Gráficas o el icono de la barra. Elegí el conjunto Corrientes, Balances, Componentes, dinámica del tanque o Datos propios. Para ingresar datos propios, pegá una tabla numérica con encabezados y unidades entre corchetes, o importá CSV/TSV. Las filas vacías se omiten; los campos faltantes no se inventan. Se admiten hasta 10.000 filas y 30 columnas.
+Calculá cualquier ejemplo con el botón Calcular y abrí Simulación → Gráficas o el icono de la barra. Elegí el conjunto Corrientes, Balances, Componentes, dinámica del tanque o Datos propios. Para ingresar datos propios, pegá una tabla numérica con encabezados y unidades entre corchetes, o importá CSV/TSV. Las filas vacías se omiten; los campos faltantes no se inventan. Se admiten hasta 10.000 filas y 30 columnas.
 
 Seleccioná X e Y y opcionalmente una segunda curva de igual unidad. Configurá título, color principal, grosor, representación línea/puntos/dispersión, escalas logarítmicas, cuadrícula y leyenda. Exportá SVG o CSV. En estacionario cada punto es una corriente, equipo o componente, no un instante; para obtener curvas temporales o paramétricas reales hacen falta series calculadas o importadas. No se recalcula al graficar. Los datos se conservan en memoria hasta modificar condiciones o cambiar de proyecto; guardá las exportaciones. Todavía no hay barrido automático, regresión, persistencia ni panel acoplable.
 
@@ -22,7 +22,7 @@ El modo didáctico usa geometría, densidad y volumen inicial editables, caudal 
 
 ## Ventana Gráficas (0.49.1)
 
-Desde **Ver → Gráficas…**, el icono de gráfica de la barra de Simulación o **Abrir en Gráficas ↗** dentro del tanque, podés consultar la última serie calculada sin volver a ejecutar DWSIM. Elegí libremente X e Y, una segunda curva de la misma unidad y un título. La ventana es redimensionable y conserva la serie mientras no se cambie de proyecto ni de condiciones físicas. No es todavía un panel acoplable ni persiste datos en la nube.
+Desde **Simulación → Gráficas**, el icono de gráfica de la barra de Simulación o **Abrir en Gráficas ↗** dentro del tanque, podés consultar la última serie calculada sin volver a ejecutar DWSIM. Elegí libremente X e Y, una segunda curva de la misma unidad y un título. La ventana es redimensionable y conserva la serie mientras no se cambie de proyecto ni de condiciones físicas. No es todavía un panel acoplable ni persiste datos en la nube.
 
 ## Leer y configurar las gráficas
 
