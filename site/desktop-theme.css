@@ -1,0 +1,7 @@
+.sim-desktop .desktop-hidden{display:none!important}
+.sim-desktop .desktop-save-button{display:inline-flex!important;align-items:center;justify-content:center;min-width:34px}
+.sim-desktop .file-tools button:not(.toolbar-menu-button){min-width:34px;min-height:32px;border-radius:5px}
+.sim-desktop .file-tools button svg{width:19px;height:19px;flex:none}
+.sim-desktop .app-menu .menu-panel{border-radius:7px;padding:5px;box-shadow:0 6px 20px #0002}
+.sim-desktop .menu-panel button{border-radius:4px}
+.sim-desktop .menu-section-label{letter-spacing:.06em;font-size:10px}
