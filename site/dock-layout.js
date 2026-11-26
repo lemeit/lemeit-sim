@@ -8,7 +8,8 @@ globalThis.SimDockLayout=(()=>{
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
   const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'bottom'};
-  const DEFAULT_SIZES={left:186,right:336,top:200,bottom:160};
+  const DEFAULT_SIZES={left:186,right:336,top:200,bottom:240};
+  let revealPanel=()=>{};
   const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
   const safe=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
   function fit(b,vw,vh){
@@ -371,8 +372,9 @@ globalThis.SimDockLayout=(()=>{
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
     },true);
+    revealPanel=id=>{const p=panels[id];if(!p)return;p.el.hidden=false;apply(p,false);if(id==='charts'&&activeMode(p)==='bottom'&&sizes.bottom<200){setSize('bottom',240);store();}if(activeMode(p)==='float')p.el.style.zIndex=String(++z);};
     updateSlots();store();
   }
-  return Object.freeze({fit,targetEdge,recover,mount});
+  return Object.freeze({fit,targetEdge,recover,mount,reveal:id=>revealPanel(id)});
 })();
 document.addEventListener('DOMContentLoaded',()=>globalThis.SimDockLayout.mount());

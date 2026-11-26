@@ -86,3 +86,7 @@ La gráfica y los ejes aparecen primero; Formato y opciones, Datos de la gráfic
 ## Panel acoplable (0.50.4)
 
 Después de un cálculo correcto, Gráficas se muestra automáticamente, inicialmente abajo del diagrama. Se puede mover, separar o acoplar mediante los mismos controles de los demás paneles. El diagrama permanece interactivo; Formato y opciones permite ajustar la gráfica ya generada. El cálculo dinámico muestra el panel de resultados al finalizar, no genera muestras ficticias durante la espera.
+
+### Recuperación de apertura (0.50.5)
+
+Abrir Gráficas vuelve de Solo diagrama a la distribución de paneles, muestra el panel incluso sin resultados y recupera la posición. Si falla la preparación de datos se informa el error dentro del panel en vez de ignorar el clic.
