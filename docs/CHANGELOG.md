@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.2 — 2026-11-26
+
+- Subtítulo automático o personalizado, muestras de color y formato independiente de la segunda curva. Manual de recuperación integrado en Administración, con comandos copiables y copia HTML para consulta local. Sin control remoto de motores.
+
 ## 0.51.1 — 2026-11-26
 
 - Alinea conexiones del tanque con las paredes del símbolo; distingue motor ocupado de falta de capacidad dinámica; segunda curva con eje Y derecho automático para unidades distintas, con escala independiente. Validación real Windows y Debian del caso 20. Exportación SVG, PNG y JPG con referencias del proyecto, fecha y pie técnico configurables; leyenda según representación y paleta fija de ocho colores.

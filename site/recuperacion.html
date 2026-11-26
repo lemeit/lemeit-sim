@@ -1,0 +1,34 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>ΣIM · Operación y recuperación</title><link rel="stylesheet" href="style.css"><script src="recovery-help.js" defer></script><main><h2>Operación y recuperación</h2><p>Ejecutar los comandos individualmente en el equipo correspondiente. No detener durante cálculos activos ni borrar .local/runtime. No compartir claves ni tokens. Windows online 5911; Debian 5910; MCP HTTP Debian 5901.</p><details><summary>Windows · iniciar y detener</summary><pre id="recovery-code-0"><code>cd C:\GitHub\lemeit-sim
+powershell -ExecutionPolicy Bypass -File .\start-online.ps1 -EngineRoot "C:\GitHub\lemeit-sim\.local\runtime"
+# Detener (solo sin cálculos activos):
+powershell -ExecutionPolicy Bypass -File .\stop-online.ps1 -EngineRoot "C:\GitHub\lemeit-sim\.local\runtime"</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-0">Copiar comandos</button></details><details><summary>Windows · diagnóstico y actualización</summary><pre id="recovery-code-1"><code>Invoke-RestMethod http://127.0.0.1:5911/api/status
+Invoke-RestMethod http://127.0.0.1:5911/api/dynamics/capabilities
+Get-Content .\.local\runtime\public-gateway.stderr.log -Tail 50
+Get-Content .\.local\runtime\tunnel.stderr.log -Tail 50
+# Detener antes de actualizar; comprobar árbol limpio:
+git status -sb
+git fetch origin
+git pull --ff-only origin main
+python -m unittest test_dynamic_tank_mcp -v</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-1">Copiar comandos</button></details><details><summary>Windows · inicio automático</summary><pre id="recovery-code-2"><code>powershell -ExecutionPolicy Bypass -File .\enable-autostart.ps1
+# Para desactivar:
+powershell -ExecutionPolicy Bypass -File .\disable-autostart.ps1</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-2">Copiar comandos</button></details><details><summary>Debian · servicio y diagnóstico</summary><pre id="recovery-code-3"><code>sudo systemctl status lemeit-sim.service
+systemctl show lemeit-sim.service -p WorkingDirectory
+sudo systemctl start lemeit-sim.service
+# Para detener o reiniciar (elegir una acción):
+sudo systemctl stop lemeit-sim.service
+sudo systemctl restart lemeit-sim.service
+sudo systemctl enable lemeit-sim.service
+curl -sS http://127.0.0.1:5910/api/status
+curl -sS http://127.0.0.1:5910/api/dynamics/capabilities
+sudo journalctl -u lemeit-sim.service -n 50 --no-pager
+ss -ltnp | grep -E ':5901|:5910'
+pgrep -x cloudflared</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-3">Copiar comandos</button></details><details><summary>Debian · actualizar y probar</summary><pre id="recovery-code-4"><code># Entrar en WorkingDirectory y verificar árbol limpio.
+# Detener gateway sin cálculos activos antes de actualizar.
+git status -sb
+git fetch origin
+git pull --ff-only origin main
+python3 -m unittest test_dynamic_tank_mcp -v
+sudo systemctl restart lemeit-sim.service
+python3 tools/probe_dynamic_tank.py --run</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-4">Copiar comandos</button></details><details><summary>Windows · servidor local</summary><pre id="recovery-code-5"><code>cd C:\GitHub\lemeit-sim
+powershell -ExecutionPolicy Bypass -File .\start-local.ps1 -EngineRoot "C:\GitHub\lemeit-sim\.local\runtime" -Port 5910
+# Abrir http://127.0.0.1:5910; detener con Ctrl+C.</code></pre><button type="button" class="portal-button" data-copy-recovery="recovery-code-5">Copiar comandos</button></details><p>Motor ocupado: dejar finalizar la operación. supported:true indica capacidad dinámica, no éxito de una corrida. Sin Internet no hay acceso al portal público ni a la nube. El modo local completo aún requiere validación.</p><p>Ejemplo 20: 600 s, paso 5 s, 121 muestras; nivel final 0,332854 m y descarga 9,999722 kg/s. Coincidencia numérica entre motores.</p><a href="recuperacion.html" download="SIM-recuperacion.html">Guardar manual para consultar sin Internet</a><p id="recovery-copy-status" role="status"></p></main></html>

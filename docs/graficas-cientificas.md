@@ -1,4 +1,4 @@
-# Gráficas · ΣIM 0.51.1
+# Gráficas · ΣIM 0.51.2
 
 ## Uso
 
@@ -21,3 +21,5 @@ Circuito experimental de agua a 25 °C, tanque de 2 m³, altura 2 m, alimentaci�
 |600|0,332854|9,999722|
 
 Debian reprodujo los niveles a 60, 120 y 600 s (0,2339; 0,2962; 0,3329 m). Consistencia entre motores, no validación experimental independiente.
+
+Formato y opciones permite editar el subtítulo o conservarlo automático, elegir colores mediante muestras y configurar representación, color y grosor de cada curva por separado.
