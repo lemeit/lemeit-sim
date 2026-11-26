@@ -1,4 +1,4 @@
-# Gráficas · ΣIM 0.51.3
+# Gráficas · ΣIM 0.51.4
 
 ## Uso
 
