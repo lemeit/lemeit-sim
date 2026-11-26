@@ -6,8 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node --test deploy/test-*.mjs",
-    "test:exports-browser": "node --test deploy/browser-exports.mjs",
+    "test": "node --test tests/js/*/*.mjs",
+    "test:exports-browser": "node --test tests/browser/browser-exports.mjs",
     "build": "node deploy/build.mjs",
     "build:verified": "npm test && npm run build",
     "predeploy": "npm run build:verified",
