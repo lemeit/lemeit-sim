@@ -961,6 +961,8 @@ test('Dinámica DWSIM MCP: curva real identificada y CSV diferente del didáctic
  assert.doesNotMatch(exported.bytes.toString('utf8'),/Modelo;Didáctico ΣIM/);
  await page.locator('#charts-from-tank').click();
  await page.locator('#charts-content').waitFor();
+ assert.equal(await page.locator('#charts-model-section').isVisible(),false);
+ assert.equal(await page.locator('#charts-format').evaluate(el=>el.open),false);
  assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');
  assert.equal(await page.locator('#charts-x').inputValue(),'time_s');
  assert.equal(await page.locator('#charts-y').inputValue(),'level_m');

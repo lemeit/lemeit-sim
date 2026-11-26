@@ -2433,3 +2433,5 @@ details:not(.app-menu).services-history>summary{color:var(--spx-text-dim)}
 #charts-dialog #charts-svg:active{cursor:grabbing}
 .charts-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0}.charts-navigation button{min-width:30px;padding:4px 8px}
 #charts-data-details{margin:10px 0}#charts-data-table{max-height:240px;overflow:auto;border:1px solid var(--spx-border)}#charts-data-table table{border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap}#charts-data-table :is(th,td){padding:4px 7px;border-bottom:1px solid var(--spx-border);text-align:right}#charts-data-table th{position:sticky;top:0;background:var(--spx-surface-2)}
+
+body:not([data-session-role=admin]) [data-technical]{display:none!important}#charts-dialog #charts-format,#charts-dialog #charts-model-section{margin:8px 0}#charts-dialog #charts-content>.charts-controls{grid-template-columns:repeat(2,minmax(0,1fr))}#charts-dialog #charts-format>.charts-controls{margin-top:8px}#charts-dialog .charts-body{padding:10px 14px}#charts-dialog .charts-plot{margin:4px 0 10px}
