@@ -3,12 +3,12 @@
 'use strict';
 const responses=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const problem=(message,status=400)=>responses({error:message},status);
-const MAX_BYTES=100000;
+const MAX_BYTES=1000000;
 async function readBody(request){
   if(request.headers.get('Content-Type')?.split(';')[0]!=='application/json')throw Error('Se requiere JSON.');
-  if(Number(request.headers.get('Content-Length')||0)>MAX_BYTES)throw Error('El proyecto supera los 100 kB.');
+  if(Number(request.headers.get('Content-Length')||0)>MAX_BYTES)throw Error('El proyecto supera 1 MB.');
   const text=await request.text();
-  if(new TextEncoder().encode(text).byteLength>MAX_BYTES)throw Error('El proyecto supera los 100 kB.');
+  if(new TextEncoder().encode(text).byteLength>MAX_BYTES)throw Error('El proyecto supera 1 MB.');
   return JSON.parse(text);
 }
 function graphData(value){
@@ -17,7 +17,7 @@ function graphData(value){
       typeof value.model!=='string'||!Array.isArray(value.nodes)||value.nodes.length>30||
       !Array.isArray(value.edges)||value.edges.length>60)throw Error('El proyecto no tiene un formato válido.');
   const json=JSON.stringify(value);
-  if(new TextEncoder().encode(json).byteLength>MAX_BYTES)throw Error('El proyecto supera los 100 kB.');
+  if(new TextEncoder().encode(json).byteLength>MAX_BYTES)throw Error('El proyecto supera 1 MB.');
   return {title:value.title.trim(),json};
 }
 function originAllowed(request){

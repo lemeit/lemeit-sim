@@ -1,12 +1,12 @@
-# Gráficas · ΣIM 0.51.6
+# Gráficas · ΣIM 0.51.7
 
-Los ejes, títulos y el formato de las curvas se guardan en el proyecto al guardar en la nube o en una copia JSON de respaldo. Al abrirlo, recalculá o importá de nuevo los datos para reconstruir la gráfica. Exportá CSV para conservar las muestras y SVG, PNG o JPG para conservar la imagen.
+Los ejes, títulos y el formato de las curvas se guardan en el proyecto al guardar en la nube o en una copia JSON de respaldo. Al abrirlo, podés consultar los resultados de la última corrida DWSIM guardada. Exportá CSV para usar las muestras fuera de ΣIM y SVG, PNG o JPG para conservar la imagen.
 
 ## Uso
 
 Ejemplo 20 → Dinámico → Calcular. DWSIM integra 600 s con paso de 5 s; Gráficas aparece flotante con tiempo frente a nivel. En estacionario, abrir Simulación → Gráficas a pedido; los puntos representan objetos, no instantes. Arrastrar la cabecera contra un borde para acoplar; el botón alterna visibilidad.
 
-Elegir X, Y y segunda curva opcional. Si las unidades coinciden se comparte el eje Y; si difieren aparece el eje derecho, con escala logarítmica e inclusión de cero independientes. Formato permite título, paleta de ocho colores, línea/puntos/dispersión, cuadrícula y referencias. Exportar SVG, PNG o JPG (1570 × 680 px para raster) y CSV. El proyecto/régimen, pie técnico y fecha local de generación son configurables. La leyenda distingue puntos, línea o ambos. Las series se conservan en memoria hasta cambiar condiciones o proyecto; no se guardan en nube.
+Elegir X, Y y segunda curva opcional. Si las unidades coinciden se comparte el eje Y; si difieren aparece el eje derecho, con escala logarítmica e inclusión de cero independientes. Formato permite título, paleta de ocho colores, línea/puntos/dispersión, cuadrícula y referencias. Exportar SVG, PNG o JPG (1570 × 680 px para raster) y CSV. El proyecto/régimen, pie técnico y fecha local de generación son configurables. La leyenda distingue puntos, línea o ambos. La última corrida DWSIM se guarda junto al proyecto. Para conservar los datos importados o las curvas didácticas, exportá CSV.
 
 Datos propios: importar CSV/TSV o pegar tabla numérica con unidades entre corchetes (hasta 10.000 filas y 30 columnas). No se inventan datos faltantes. No hay barridos automáticos ni regresión todavía.
 
