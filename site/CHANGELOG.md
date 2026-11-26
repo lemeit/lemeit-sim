@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.8 — 2026-11-26
+
+- Abre la gráfica del tanque en un panel flotante proporcionado y aumenta la altura de la curva y sus exportaciones. Balances y corrientes muestran el estado del tanque, la alimentación y la descarga al calcular o reabrir el proyecto.
+
 ## 0.51.7 — 2026-11-26
 
 - Conserva la última corrida DWSIM con el proyecto para consultar resultados y gráficas al reabrirlo.

@@ -13,13 +13,13 @@ globalThis.SimScientificCharts=(()=>{
    if(lo===hi){const d=Math.abs(lo)*.1||1;lo-=d;hi+=d;}
    return [lo,hi];
  }
- function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',y2Label='',logY2=false,zeroY2=true,series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',subtitle='',reference='',generated='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[]}){
+ function render(svg,{points,xKey='time_s',xLabel='Tiempo [s]',yLabel='',y2Label='',logY2=false,zeroY2=true,series,index=0,grid=true,markers=false,logY=false,zeroY=true,title='',source='',subtitle='',reference='',generated='',logX=false,connect=true,strokeWidth=1.8,legend=true,categories=null,extra=[],tall=false}){
    if(!Array.isArray(points)||!series?.length)throw Error('Series no disponibles.');
    const [xmin,xmax]=bounds([...points.map(p=>p[xKey]),...extra.flatMap(s=>s.points.map(p=>p.x))],false,logX);
    const dual=series.some(s=>s.axis==='right');
    const [ymin,ymax]=bounds([...series.filter(s=>s.axis!=='right').flatMap(s=>points.map(p=>p[s.key])),...extra.flatMap(s=>s.points.map(p=>p.y))],zeroY,logY);
    const [rmin,rmax]=dual?bounds(series.filter(s=>s.axis==='right').flatMap(s=>points.map(p=>p[s.key])),zeroY2,logY2):[0,1];
-   const W=785,H=340,L=91,R=dual?694:753,T=subtitle?60:48,B=reference||generated?238:250;
+   const W=785,H=tall?590:340,L=91,R=dual?694:753,T=subtitle?60:48,B=H-(reference||generated?102:90);
    const rightColor=safeColor(series.find(s=>s.axis==='right')?.color,1);
    const x=v=>L+((logX?Math.log10(v):v)-xmin)/(xmax-xmin)*(R-L);
    const y=v=>B-((logY?Math.log10(v):v)-ymin)/(ymax-ymin)*(B-T);
@@ -28,7 +28,7 @@ globalThis.SimScientificCharts=(()=>{
    const valid=(p,s)=>Number.isFinite(p[xKey])&&(!logX||p[xKey]>0)&&Number.isFinite(p[s.key])&&(!(s.axis==='right'?logY2:logY)||p[s.key]>0);
    const line=(a,b,c,d,extra='')=>'<line x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'" '+extra+'/>';
    const label=(a,b,t,extra='')=>'<text x="'+a+'" y="'+b+'" '+extra+'>'+esc(t)+'</text>';
-   let out='<rect width="785" height="340" fill="#fff"/><g fill="#20252a" stroke="none" font-family="Arial, sans-serif" font-size="12">';
+   let out='<rect width="785" height="'+H+'" fill="#fff"/><g fill="#20252a" stroke="none" font-family="Arial, sans-serif" font-size="12">';
    out+=label((L+R)/2,22,title,'text-anchor="middle" font-size="15" font-weight="600"');
    if(subtitle)out+=label((L+R)/2,40,String(subtitle).slice(0,115),'text-anchor="middle" font-size="10" fill="#59636d"');
    for(let i=0;i<=5;i++){
@@ -56,19 +56,20 @@ globalThis.SimScientificCharts=(()=>{
      if(legend){out+='<g data-legend-style="'+(!drawLine?'points':drawMarkers?'both':'line')+'">';if(drawLine)out+=line(lx,ly-4,lx+24,ly-4,'stroke="'+color+'" stroke-width="2"');if(drawMarkers||!drawLine)out+='<circle cx="'+(lx+12)+'" cy="'+(ly-4)+'" r="3" fill="white" stroke="'+color+'"/>';out+=label(lx+30,ly,s.name+(s.axis==='right'?' · Y2':''))+'</g>'; }
    });
    for(const s of extra){for(const p of s.points)if(Number.isFinite(p.x)&&Number.isFinite(p.y)&&(!logX||p.x>0)&&(!logY||p.y>0))out+='<circle cx="'+x(p.x)+'" cy="'+y(p.y)+'" r="4" fill="white" stroke="#a33b35" stroke-width="2"/>';if(legend)out+=label(L,B+70,s.name,'fill="#a33b35" font-size="10"');}
-   if(reference)out+=label(12,319,String(reference).slice(0,130),'font-size="9" fill="#59636d"');
-   if(generated)out+=label(12,334,generated,'font-size="9" fill="#59636d"');
-   out+=label(773,334,source,'text-anchor="end" font-size="10" fill="#59636d"')+'</g>';
-   svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML=out;
+   if(reference)out+=label(12,H-21,String(reference).slice(0,130),'font-size="9" fill="#59636d"');
+   if(generated)out+=label(12,H-6,generated,'font-size="9" fill="#59636d"');
+   out+=label(773,H-6,source,'text-anchor="end" font-size="10" fill="#59636d"')+'</g>';
+   svg.setAttribute('data-chart-height',String(H));svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML=out;
  }
  async function download(svg,name='sim-grafica.svg',format='svg'){
-   const clone=svg.cloneNode(true);clone.setAttribute('viewBox','0 0 785 340');clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','785');clone.setAttribute('height','340');
+   const height=svg.getAttribute('data-chart-height')==='590'?590:340;
+   const clone=svg.cloneNode(true);clone.setAttribute('viewBox','0 0 785 '+height);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','785');clone.setAttribute('height',String(height));
    const blob=new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'});
    const save=(data,filename)=>{const url=URL.createObjectURL(data),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);};
    if(format==='svg'){save(blob,name);return;}
    if(!['png','jpg'].includes(format))throw Error('Formato de imagen no admitido.');
    const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(await blob.text());
-   {const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('No se pudo convertir la gráfica en imagen.'));image.src=url;});const canvas=document.createElement('canvas');canvas.width=1570;canvas.height=680;const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear la imagen.');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);const raster=await new Promise(resolve=>canvas.toBlob(resolve,format==='jpg'?'image/jpeg':'image/png',.94));if(!raster)throw Error('No se pudo exportar la imagen.');save(raster,name.replace(/\.[^.]+$/,'')+'.'+format);}
+   {const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('No se pudo convertir la gráfica en imagen.'));image.src=url;});const canvas=document.createElement('canvas');canvas.width=1570;canvas.height=height*2;const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear la imagen.');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);const raster=await new Promise(resolve=>canvas.toBlob(resolve,format==='jpg'?'image/jpeg':'image/png',.94));if(!raster)throw Error('No se pudo exportar la imagen.');save(raster,name.replace(/\.[^.]+$/,'')+'.'+format);}
  }
  return Object.freeze({render,download});
 })();

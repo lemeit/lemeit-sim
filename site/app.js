@@ -111,6 +111,10 @@ function rememberRun(regime,data){
   persist();
   if(typeof SimCloudProjects!=='undefined')SimCloudProjects.onChange();
 }
+function showDynamicChart(data,{title,defaultY}){
+  try{globalThis.SimChartWorkspace?.accept(data,{title,defaultY});}
+  catch{notice('La corrida está disponible en Balances y corrientes. No se pudo abrir Gráficas.',true);}
+}
 function restoreRun(run){
   const data=run?.data;
   if(!data||run.regime!==SimDynamics.regime(graph)||!['windows','debian'].includes(run.engine)||!Number.isFinite(Date.parse(run.time)))return;
@@ -118,13 +122,13 @@ function restoreRun(run){
     lastCalculation={time:run.time,engine:run.engine,state:'completed',ok:true,message:'Resultado guardado',elapsed_s:data.elapsed_s};
     resultValidity='valid';
     if(run.regime==='dynamic'){
-      const {title,defaultY,source}=SimDynamics.prepare(graph);
+      const prepared=SimDynamics.prepare(graph);
+      const {defaultY,source}=prepared;
       if(data.source!==source||!Array.isArray(data.points)||data.points.length<2||
         !data.points.every((p,i)=>Number.isFinite(p?.time_s)&&Number.isFinite(p?.[defaultY])&&(!i||p.time_s>data.points[i-1].time_s)))throw Error('Serie inválida');
       dynamicResult=data;
-      $('result-meta').textContent='Dinámica guardada · '+data.points.length+' muestras';
-      $('results').innerHTML='<p class="results-note">Corrida guardada. Consultá Gráficas para ver y exportar la serie.</p>';
-      SimChartWorkspace.accept(data,{title,defaultY});
+      renderDynamicResults(prepared);
+      showDynamicChart(data,prepared);
     }else{
       if(!data.streams||typeof data.streams!=='object'||!Array.isArray(data.balances))throw Error('Resultados inválidos');
       result=data;
@@ -133,7 +137,7 @@ function restoreRun(run){
     graph.saved_run=run;
   }catch{
     result=null;dynamicResult=null;lastCalculation=null;resultValidity='none';
-    SimChartWorkspace.reset();
+    globalThis.SimChartWorkspace?.reset();
     $('results').innerHTML=blankResults;$('result-meta').textContent='Sin resultados vigentes';
   }
   updateControls();renderDiagram();renderInspector();publishWorkspace(false);
@@ -598,6 +602,33 @@ function selectResultsView(view){
     section.hidden=section.dataset.resultsContent!==view;
   }
 }
+function renderDynamicResults({payload,streamIds,objectId}){
+  const {points}=dynamicResult,final=points.at(-1);
+  const [feed,intoTank,fromTank,outlet]=streamIds.map(nodeById);
+  const time=fmt(final.time_s);
+  const tank=nodeById(objectId);
+  const row=(label,value)=>'<div><dt>'+label+'</dt><dd>'+value+'</dd></div>';
+  const card=(node,role,rows)=>'<details class="results-card stream-result" open><summary><span>'+esc(node.name)+'</span><strong>'+role+'</strong></summary><dl>'+rows+'</dl></details>';
+  const feedRows=row('Caudal másico fijado',shown('mass_flow',payload.feed_mass_flow_kg_s,feed))+
+    row('Presión de alimentación fijada',shown('pressure_kPa',payload.feed_pressure_kPa,feed))+
+    row('Temperatura de alimentación fijada',shown('temperature_C',feed.temperature_C,feed));
+  const outletRows=row('Caudal másico calculado',shown('mass_flow',final.outlet_kg_s,outlet))+
+    row('Presión de descarga fijada',shown('pressure_kPa',payload.outlet_pressure_kPa,outlet));
+  const tankRows=[
+    ['Nivel calculado',final.level_m,'m'],
+    ['Volumen derivado',final.volume_m3,'m³'],
+    ['Llenado derivado',final.fill_pct,'%'],
+    ['Masa estimada',final.mass_kg,'kg']
+  ].filter(([,value])=>Number.isFinite(value)).map(([label,value,unit])=>row(label,fmt(value)+' '+unit)).join('');
+  $('result-meta').textContent='Dinámica · '+points.length+' muestras';
+  $('results').innerHTML=
+    '<section class="balance-grid" data-results-content="balances"><p class="results-note">Última muestra · '+time+' s</p>'+
+    '<article class="results-card"><h3>'+esc(tank.name)+'</h3><dl>'+tankRows+'</dl></article></section>'+
+    '<section class="stream-results" data-results-content="streams"><p class="results-note">Última muestra · '+time+' s</p>'+
+    card(feed,'Alimentación',feedRows)+card(outlet,'Descarga',outletRows)+
+    '<p class="results-note">La integración no registró las propiedades de '+esc(intoTank.name)+' ni de '+esc(fromTank.name)+'.</p></section>';
+  selectResultsView(resultsView);
+}
 function renderResults(){
   if(!result)return;
   const reading=(label,value,kind='')=>`<div${kind?' class="'+kind+'"':''}><dt>${label}</dt><dd>${value}</dd></div>`;
@@ -672,9 +703,8 @@ async function calculateDynamic(){
     const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
     dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
-    $('calculation-state').textContent='Resultados dinámicos vigentes';$('result-meta').textContent='Dinámica · '+data.points.length+' muestras';
-    $('results').innerHTML='<p class="results-note">Integración temporal DWSIM · '+esc(prepared.title)+' · '+data.points.length+' muestras. Consultá Gráficas para ver la evolución y exportar la serie.</p>';
-    rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');globalThis.SimChartWorkspace.accept(data,{title:prepared.title,defaultY:prepared.defaultY});
+    $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
+    rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
 }
