@@ -5,3 +5,17 @@
 .sim-desktop .app-menu .menu-panel{border-radius:7px;padding:5px;box-shadow:0 6px 20px #0002}
 .sim-desktop .menu-panel button{border-radius:4px}
 .sim-desktop .menu-section-label{letter-spacing:.06em;font-size:10px}
+
+/* Desktop engineering workstation: flat surfaces, tighter menus and a neutral canvas. */
+.sim-desktop .sim-shell .app-header{height:33px;min-height:33px;padding:0 9px;gap:14px}
+.sim-desktop .app-header .app-menu summary{padding:5px 9px;font-size:12px}
+.sim-desktop .sim-brand img{width:70px;height:auto}
+.sim-desktop .app-header #theme-toggle{width:25px;height:25px}
+.sim-desktop .command-bar{padding:5px 8px;gap:7px}
+.sim-desktop .command-bar button:not(:disabled):hover{border-color:var(--spx-border)}
+.sim-desktop .command-bar .file-tools{gap:3px;padding-right:8px}
+.sim-desktop .command-bar .file-tools button:not(.toolbar-menu-button){width:32px;min-width:32px;min-height:30px;border-radius:3px}
+.sim-desktop .app-menu .menu-panel{border-radius:4px;padding:5px 4px;box-shadow:0 4px 14px #0002}
+.sim-desktop .menu-panel button{border-radius:2px}
+.sim-desktop[data-theme="light"] .canvas-wrap{background:#fff}
+.sim-desktop .site-footer{font-size:10px}
