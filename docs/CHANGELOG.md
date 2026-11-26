@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.0 — 2026-11-25
+
+- Régimen de simulación persistente por proyecto, estacionario o dinámico. Ejemplo 20 activa dinámica, Calcular ejecuta el integrador DWSIM y abre nivel vs tiempo automáticamente. Configuración temporal y adaptadores extensibles; primer modelo limitado al circuito de agua con tanque y válvulas. Sin sustitución silenciosa por cálculo estacionario.
+
 ## 0.50.6 — 2026-11-25
 
 - Gráficas abre como ventana flotante compacta por defecto, con acoplamiento voluntario. El botón alterna mostrar/ocultar y refleja la visibilidad. La dinámica abre automáticamente su curva; en régimen estacionario se abre a pedido o actualiza una ventana ya visible. Migra la posición anterior sin alterar los demás paneles.

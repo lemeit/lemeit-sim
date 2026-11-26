@@ -5,7 +5,7 @@
     "Water"
   ],
   "model": "Steam Tables (IAPWS-IF97)",
-  "learning": "Complemento del Ejemplo 15. El caso ilustra tanque de 2 m³ con válvulas antes y después (agua a 25 °C, 130 kPa y 10 kg/s; salida a presión atmosférica). Para observar nivel, volumen y caudal vs. tiempo, seleccioná T-01 y abrí «Dinámica del tanque». El módulo DWSIM experimental crea un flowsheet temporal separado con válvulas Kv, y utiliza el integrador temporal; si no está disponible, solo se ofrece la simulación didáctica, claramente identificada. No confundas el estado estacionario con el transitorio.",
+  "learning": "Régimen transitorio. Tanque de 2 m³ con válvulas, agua a 25 °C, 130 kPa y 10 kg/s; descarga a presión atmosférica. Pulsá Calcular para integrar durante 600 s con paso de 5 s. La ventana Gráficas muestra nivel frente a tiempo. DWSIM construye un circuito temporal equivalente experimental, no un flowsheet dinámico arbitrario.",
   "nodes": [
     {
       "id": "feed",
@@ -92,5 +92,17 @@
       "from": "valve2",
       "to": "out"
     }
-  ]
+  ],
+  "simulation": {
+    "regime": "dynamic",
+    "model": "tank-valves",
+    "parameters": {
+      "duration_s": 600,
+      "step_s": 5,
+      "height_m": 2,
+      "inlet_kv": 100,
+      "outlet_kv": 400,
+      "valve_opening_pct": 50
+    }
+  }
 }
