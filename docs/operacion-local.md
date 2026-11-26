@@ -2,6 +2,8 @@
 
 Configuración adicional: [selección de motores](seleccion-manual-motores.md). Los scripts PowerShell administran Windows.
 
+En el portal, ingresá como administrador y abrí **Operación y recuperación**. Podés copiar cada bloque de comandos y descargar el HTML para consultarlo cuando no tengas conexión. Ejecutá los comandos en el equipo del motor correspondiente.
+
 ## Ubicación del motor
 
 Runtime predeterminado: `C:\GitHub\lemeit-sim\.local\runtime`. Contiene

@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.3 — 2026-11-26
+
+- Sincroniza la ayuda, el manual de uso y las referencias de Gráficas, Ejemplo 20 y recuperación administrativa.
+
 ## 0.51.2 — 2026-11-26
 
 - Subtítulo automático o personalizado, muestras de color y formato independiente de la segunda curva. Manual de recuperación integrado en Administración, con comandos copiables y copia HTML para consulta local. Sin control remoto de motores.
