@@ -89,11 +89,11 @@ globalThis.SimTankDynamicsUI=(()=>{
    const chartPoints=variable==='massflow'&&!real?points.map(p=>({...p,outlet_kg_s:p.outlet_m3_s*current.config.density})):points;
    const labels={level:'Nivel [m]',flows:'Caudal volumétrico [m³/s]',massflow:'Caudal másico [kg/s]',fill:'Llenado [%]',volume:'Volumen [m³]'};
    try{
-     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked,logY:$('scientific-log').checked});
+     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked,logY:$('scientific-log').checked});
    }catch(error){
      $('scientific-log').checked=false;
      if(!chartPoints.some(p=>chartSeries.some(s=>Number.isFinite(p[s.key])))){$('tank-dynamic-chart').textContent='';$('tank-dynamic-status').textContent='Variable sin datos disponibles.';return;}
-     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM MCP · integración real':'ΣIM · modelo didáctico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked});
+     SimScientificCharts.render($('tank-dynamic-chart'),{points:chartPoints,series:chartSeries,index:at,yLabel:labels[variable],title:'Evolución temporal · tanque',source:real?'DWSIM · Dinámica':'ΣIM · Modelo analítico',grid:$('scientific-grid').checked,markers:$('scientific-markers').checked});
    }
  }
  function download(){
