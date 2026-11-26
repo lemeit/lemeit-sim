@@ -8,7 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.51.9 — 2026-11-26
 
-- Gráficas abre el Ejemplo 14 con presión frente a volumen específico y explica cuándo una combinación de ejes no contiene pares válidos.
+- Gráficas abre el Ejemplo 14 con presión frente a volumen específico con marcadores más visibles y rótulos de entrada y salida. También explica cuándo los ejes no contienen pares válidos.
 
 ## 0.51.8 — 2026-11-26
 

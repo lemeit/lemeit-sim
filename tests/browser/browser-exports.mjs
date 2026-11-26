@@ -1135,6 +1135,8 @@ test('Ejemplo 14 grafica los estados y el modelo de compresión',async t=>{
   assert.equal(await page.locator('#charts-y').inputValue(),'pressure');
   assert.equal(await page.locator('#charts-error').textContent(),'');
   assert.ok(await page.locator('#charts-svg circle').count()>=2);
+  const stateLabels=await page.locator('#charts-svg [data-chart-point-label]').allTextContents();
+  assert.deepEqual(stateLabels,['Nitrógeno entrada','Nitrógeno comprimido']);
   await page.locator('#charts-model-section summary').click();
   await page.locator('#charts-model-run').click();
   assert.equal(await page.locator('#charts-model-error').textContent(),'');
