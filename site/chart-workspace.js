@@ -2,7 +2,7 @@
 'use strict';
 globalThis.SimChartWorkspace=(()=>{
  const $=id=>document.getElementById(id);
- let dataset=null,interval=null;
+ let dataset=null,interval=null,dynamic=null,manual=null,getData=()=>({}),sources=[];
  const vars=[
   ['time_s','Tiempo','s'],['level_m','Nivel','m'],['volume_m3','Volumen','m³'],['fill_pct','Llenado','%'],
   ['inlet_m3_s','Entrada volumétrica','m³/s'],['outlet_m3_s','Salida volumétrica','m³/s'],
@@ -10,7 +10,7 @@ globalThis.SimChartWorkspace=(()=>{
  ];
  const fmt=v=>Number.isFinite(v)?v.toLocaleString('es-AR',{maximumSignificantDigits:7}):'—';
  function pause(){if(interval!==null){clearInterval(interval);interval=null;}if($('charts-play'))$('charts-play').textContent='▶ Reproducir';}
- function reset(){pause();dataset=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
+ function reset(){pause();dataset=null;dynamic=null;manual=null;if($('charts-title'))$('charts-title').value='';if($('charts-dialog')?.open)refresh();}
  function accept(data,meta={}){
   if(!Array.isArray(data?.points)||!data.points.length)return;
   const real=data.source==='dwsim-mcp-dynamics';
@@ -18,23 +18,23 @@ globalThis.SimChartWorkspace=(()=>{
   const points=data.points.map(p=>({...p,...(!real&&Number.isFinite(density)?{inlet_kg_s:p.inlet_m3_s*density,outlet_kg_s:p.outlet_m3_s*density}:{})}));
   const columns=vars.filter(([key])=>points.some(p=>Number.isFinite(p[key]))).map(([key,name,unit])=>({key,name:real&&['inlet_m3_s','outlet_m3_s'].includes(key)?name+' estimada':real&&['volume_m3','fill_pct'].includes(key)?name+' derivado':name,unit}));
   if(!columns.length)return;
-  dataset={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
+  dynamic={points,columns,title:meta.title||'Tanque',source:real?'DWSIM MCP'+(meta.engine?' · '+meta.engine:''):'ΣIM · modelo didáctico',assumptions:data.assumptions||''};
   if($('charts-title'))$('charts-title').value='';
-  if($('charts-dialog')?.open)refresh();
+  if($('charts-dialog')?.open)refresh('dynamic');
  }
- function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+' ['+column.unit+']';select.append(o);}
- function refresh(){
-  pause();const ready=!!dataset;
+ function option(select,column){const o=document.createElement('option');o.value=column.key;o.textContent=column.name+(column.unit?' ['+column.unit+']':'');select.append(o);}
+ function refresh(preferred){
+  pause();const state=getData();sources=SimChartData.stationary(state.graph||{nodes:[]},state.result,state.engine).map((d,i)=>({id:'steady'+i,d}));if(dynamic)sources.push({id:'dynamic',d:dynamic});if(manual)sources.push({id:'manual',d:manual});const picker=$('charts-dataset'),previous=preferred||picker.value;picker.replaceChildren();for(const entry of sources){const o=document.createElement('option');o.value=entry.id;o.textContent=entry.d.title+' · '+entry.d.source;picker.append(o);}picker.value=sources.some(s=>s.id===previous)?previous:dynamic?'dynamic':sources[0]?.id||'';dataset=sources.find(s=>s.id===picker.value)?.d||null;const ready=!!dataset;
   $('charts-empty').hidden=ready;$('charts-content').hidden=!ready;
   if(!ready)return;
-  $('charts-source').textContent=dataset.title+' · '+dataset.source+' · '+dataset.points.length+' muestras';
+  $('charts-source').textContent=dataset.title+' · '+dataset.source+' · '+dataset.points.length+' registros';
   $('charts-note').textContent=dataset.assumptions;
   for(const id of ['charts-x','charts-y','charts-y2'])$(id).replaceChildren();
   const none=document.createElement('option');none.value='';none.textContent='Ninguna';$('charts-y2').append(none);
   for(const c of dataset.columns)for(const id of ['charts-x','charts-y','charts-y2'])option($(id),c);
   $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
-  $('charts-y').value=dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.at(-1).key;
-  $('charts-y2').value='';$('charts-log').checked=false;
+  $('charts-y').value=dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
+  $('charts-y2').value='';$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-play').hidden=!!dataset.categorical;
   const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();
  }
  function render(){
@@ -45,24 +45,28 @@ globalThis.SimChartWorkspace=(()=>{
   for(const option of $('charts-y2').options){const c=dataset.columns.find(v=>v.key===option.value);option.disabled=!!c&&(c.unit!==y.unit||c.key===y.key);}
   if(chosen.length===1)$('charts-y2').value='';
   const index=Number($('charts-scrub').value),p=dataset.points[index];
-  const config={points:dataset.points,xKey:x.key,xLabel:x.name+' ['+x.unit+']',yLabel:chosen.length===1?y.name+' ['+y.unit+']':'Magnitud ['+y.unit+']',series:chosen.map(c=>({key:c.key,name:c.name})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source};
+  const config={points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),yLabel:chosen.length===1?y.name+' ['+y.unit+']':'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,color:i===0?$('charts-color').value:undefined})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked||$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source};
   try{SimScientificCharts.render($('charts-svg'),config);$('charts-error').textContent='';}
   catch(e){$('charts-svg').replaceChildren();$('charts-error').textContent=e.message;}
-  $('charts-reading').textContent=[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
+  $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
   $('charts-export-svg').disabled=!!$('charts-error').textContent;
  }
- function open(){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));refresh();$('charts-dialog').showModal();}
+ function open(preferred){document.querySelectorAll('.app-menu[open]').forEach(m=>m.removeAttribute('open'));refresh(typeof preferred==='string'?preferred:undefined);$('charts-dialog').showModal();}
  function play(){if(interval!==null){pause();return;}const s=$('charts-scrub');if(Number(s.value)>=Number(s.max))s.value='0';$('charts-play').textContent='⏸ Pausar';interval=setInterval(()=>{s.value=String(Math.min(Number(s.max),Number(s.value)+1));render();if(s.value===s.max)pause();},80);}
  function csv(){
   if(!dataset)return;
-  const escape=s=>'"'+String(s).replaceAll('"','""')+'"';
-  const rows=['Origen;'+escape(dataset.source),dataset.columns.map(c=>escape(c.name+' ['+c.unit+']')).join(';'),...dataset.points.map(p=>dataset.columns.map(c=>Number.isFinite(p[c.key])?String(p[c.key]).replace('.',','):'').join(';'))];
+  const escape=s=>'"'+String(s).replace(/^[=+@\-\t\r]/,"'const escape=s=>'"'+String(s).replaceAll").replaceAll('"','""')+'"';
+  const rows=['Origen;'+escape(dataset.source),'Objeto;'+dataset.columns.map(c=>escape(c.name+' ['+c.unit+']')).join(';'),...dataset.points.map(p=>escape(p.label||'')+';'+dataset.columns.map(c=>Number.isFinite(p[c.key])?String(p[c.key]).replace('.',','):'').join(';'))];
   const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='sim-series.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
  }
- function bind(){
+ function bind(options={}){
+  if(typeof options.getData==='function')getData=options.getData;
+  $('charts-dataset').addEventListener('change',()=>refresh($('charts-dataset').value));
+  $('charts-load-data').addEventListener('click',()=>{try{manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(e){$('charts-import-error').textContent=e.message;}});
+  $('charts-file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(f.size>2000000){$('charts-import-error').textContent='Archivo demasiado grande.';return;}try{$('charts-paste').value=await f.text();manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(err){$('charts-import-error').textContent=err.message;}});
   for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',open);
-  $('charts-from-tank').addEventListener('click',()=>{$('tank-dynamics-dialog').close();open();});
-  for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero'])$(id).addEventListener('change',render);
+  $('charts-from-tank').addEventListener('click',()=>{$('tank-dynamics-dialog').close();open('dynamic');});
+  for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend'])$(id).addEventListener('change',render);
   $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
   $('charts-play').addEventListener('click',play);$('charts-export-svg').addEventListener('click',()=>SimScientificCharts.download($('charts-svg')));
   $('charts-export-csv').addEventListener('click',csv);$('charts-dialog').addEventListener('close',pause);
