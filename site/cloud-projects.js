@@ -15,6 +15,7 @@ const SimCloudProjects=(()=>{
   const student=()=>me?.role==='student';
   const identified=()=>student()&&!!me.student_name;
   const available=()=>me?.role==='admin'||identified();
+  const adminReadOnly='Administración solo consulta proyectos de clase. Para guardar este proyecto en esta sesión, descargá una copia JSON.';
   const status=message=>{$('cloud-project-status').textContent=message;};
   const identity=()=>me?{student_name:me.student_name||'',class_name:me.class_name||'',role:me.role}:{};
   const updateIdentity=()=>{const label=$('cloud-user-label');if(!label)return;label.textContent=me?.role==='admin'?'Administrador':me?.student_name?me.student_name+' · '+(me.class_name||'Clase'):me?.class_name?me.class_name+' · sin identificar':'Sin identificar';label.title='Identidad de esta sesión';};
@@ -30,6 +31,7 @@ const SimCloudProjects=(()=>{
     $('cloud-switch-student').hidden=!identified();
     $('cloud-identify-message').textContent='';
     $('cloud-library-body').hidden=!available();
+    $('cloud-project-save').hidden=!student();$('cloud-project-copy').hidden=!student();
     $('cloud-project-save').disabled=!identified()||!hasProject();
     $('cloud-project-copy').disabled=!identified()||!hasProject();
     if(student()){
@@ -106,7 +108,7 @@ const SimCloudProjects=(()=>{
         }));
         row.append(info,controls);target.append(row);
       }
-      status('Tus proyectos están disponibles desde cualquier computadora.');
+      status(student()?'Tus proyectos están disponibles desde cualquier computadora.':adminReadOnly);
     }catch(error){status(error.message);}
   }
   async function save(copy=false,quiet=false){
@@ -133,7 +135,9 @@ const SimCloudProjects=(()=>{
     }
   }
   function onChange(){
-    if(!identified()||!active||!hasProject())return;
+    if(!identified()||!hasProject())return;
+    if(working){dirty=true;return;}
+    if(!active)return;
     if(timer)clearTimeout(timer);
     timer=setTimeout(()=>{timer=null;void save(false,true);},1800);
   }
@@ -150,7 +154,7 @@ const SimCloudProjects=(()=>{
         pendingSave=true;
         await open();
         if(identified()){pendingSave=false;await save();}
-        else status('Identificate para guardar tu proyecto.');
+        else{pendingSave=student();status(me?.role==='admin'?adminReadOnly:'Identificate para guardar tu proyecto.');}
         return;
       }
       await save();

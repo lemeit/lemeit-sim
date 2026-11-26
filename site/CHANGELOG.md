@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.6 — 2026-11-26
+
+- Guarda el formato de Gráficas con el proyecto, alinea el selector de régimen y aclara las opciones de almacenamiento según la sesión.
+
 ## 0.51.5 — 2026-11-26
 
 - Centraliza las pruebas en tests/ y actualiza los comandos de comprobación en la documentación y en Operación y recuperación.

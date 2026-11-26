@@ -990,3 +990,48 @@ test('Dinámica DWSIM MCP: curva real identificada y CSV diferente del didáctic
  test('Gráficas: abrir sin cálculo, recuperar vista solo diagrama y posición guardada',async t=>{const page=await browserPage(t);await openProject(page,example);await page.locator('#charts-open').click();await page.locator('#charts-empty').waitFor({state:'visible'});assert.equal(await page.locator('#charts-dialog').getAttribute('data-sim-cad-mode'),'float');assert.equal(await page.locator('#charts-open').getAttribute('aria-pressed'),'true');await page.locator('#charts-open').click();assert.equal(await page.locator('#charts-dialog').isVisible(),false);await page.locator('#charts-open').click();assert.equal(await page.locator('#charts-open-error').isVisible(),false);await page.locator('#charts-close').click();await page.locator('#diagram-focus').click();await page.locator('#charts-open').click();await page.locator('#charts-empty').waitFor({state:'visible'});assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('diagram-focus')),false);await page.locator('#charts-close').click();await page.evaluate(()=>{const k='sim-dock-layout-cad-v3',v=JSON.parse(localStorage.getItem(k)||'{}');v.chartsFloatingV1=true;v.charts={mode:'float',lastDock:'bottom',box:{x:99999,y:99999,w:650,h:450}};localStorage.setItem(k,JSON.stringify(v));});await page.reload({waitUntil:'networkidle'});await openProject(page,example);await page.getByText('Simulación',{exact:true}).click();await page.locator('#charts-menu-open').click();await page.locator('#charts-empty').waitFor({state:'visible'});const b=await page.locator('#charts-dialog').boundingBox();assert.ok(b.x>=0&&b.y>=0&&b.width>100&&b.height>100);});
 
 test('Ejemplo 20: Calcular principal integra tiempo sin POST estacionario',async t=>{const page=await browserPage(t);let steady=0,dynamic=0;await page.route('**/api/simulate',r=>{steady++;return r.abort();});await page.route('**/api/dynamics/capabilities',r=>r.fulfill({json:{supported:true}}));await page.route('**/api/dynamics/tank',r=>{dynamic++;const p=r.request().postDataJSON();assert.equal(p.duration_s,600);assert.equal(p.step_s,5);assert.equal(p.capacity_m3,2);assert.equal(p.feed_mass_flow_kg_s,10);return r.fulfill({json:{source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0},{time_s:5,level_m:.1},{time_s:600,level_m:.33}]}});});await openProject(page,await load('../../site/examples/TankFillingDynamic.json'));assert.equal(await page.locator('#simulation-regime').inputValue(),'dynamic');await page.locator('#calculate-button').click();await page.locator('#charts-content').waitFor();assert.equal(steady,0);assert.equal(dynamic,1);assert.equal(await page.locator('#charts-x').inputValue(),'time_s');assert.equal(await page.locator('#charts-y').inputValue(),'level_m');await page.waitForFunction(()=>document.querySelector('#calculate-button').dataset.state==='valid');assert.equal(await page.locator('#charts-dataset').inputValue(),'dynamic');await page.locator('#charts-close').click();await page.locator('#dynamic-settings').click();await page.locator('#dynamic-parameters input[name=duration_s]').fill('300');await page.locator('#dynamic-settings-form button[type=submit]').click();assert.equal(await page.locator('#calculate-button').getAttribute('data-state'),'stale');assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('lemeit-process-v1')).simulation.parameters.duration_s),300);});
+
+test('Gráficas conserva el formato al descargar, guardar en nube y reabrir un proyecto',async t=>{
+  const page=await browserPage(t);
+  await page.route('**/api/auth/me',route=>route.fulfill({json:{
+    authenticated:true,role:'student',student_name:'Alumno de prueba',class_name:'Clase de prueba'
+  }}));
+  await page.route('**/api/dynamics/capabilities',route=>route.fulfill({json:{supported:true}}));
+  await page.route('**/api/dynamics/tank',route=>route.fulfill({json:{
+    source:'dwsim-mcp-dynamics',points:[{time_s:0,level_m:0,outlet_kg_s:0},{time_s:5,level_m:.2,outlet_kg_s:7}]
+  }}));
+  await page.route('**/api/projects',route=>route.fulfill({status:201,json:{id:'test-project',revision:1}}));
+  await page.reload({waitUntil:'networkidle'});
+  await openProject(page,await load('../../site/examples/TankFillingDynamic.json'));
+  await page.locator('#calculate-button').click();
+  await page.locator('#charts-content').waitFor();
+  await page.locator('#charts-y2').selectOption('outlet_kg_s');
+  await page.locator('#charts-format summary').click();
+  await page.locator('#charts-subtitle-mode').selectOption('custom');
+  await page.locator('#charts-subtitle').fill('Ensayo de llenado');
+  await page.locator('[data-palette="charts-color2"][data-color="#287a61"]').click();
+  await page.locator('#charts-width2').selectOption('3');
+  await page.locator('#charts-close').click();
+
+  const file=await download(page,()=>page.locator('#save-project-toolbar').click());
+  const graph=JSON.parse(file.bytes);
+  assert.equal(graph.chart_settings.dynamic.subtitle,'Ensayo de llenado');
+  assert.equal(graph.chart_settings.dynamic.y2,'outlet_kg_s');
+  assert.equal(graph.chart_settings.dynamic.color2,'#287a61');
+  assert.equal(graph.chart_settings.dynamic.width2,'3');
+  await page.locator('#file-menu summary').click();
+  const [cloudSave]=await Promise.all([
+    page.waitForRequest(request=>new URL(request.url()).pathname==='/api/projects'&&request.method()==='POST'),
+    page.locator('#cloud-save-menu').click()
+  ]);
+  assert.deepEqual(cloudSave.postDataJSON().graph.chart_settings,graph.chart_settings);
+
+  await openProject(page,file.bytes);
+  await page.locator('#calculate-button').click();
+  await page.locator('#charts-content').waitFor();
+  assert.equal(await page.locator('#charts-y2').inputValue(),'outlet_kg_s');
+  assert.equal(await page.locator('#charts-subtitle').inputValue(),'Ensayo de llenado');
+  assert.equal(await page.locator('#charts-color2').inputValue(),'#287a61');
+  assert.equal(await page.locator('#charts-width2').inputValue(),'3');
+  assert.equal(await page.locator('#calculate-button').getAttribute('data-state'),'valid');
+});

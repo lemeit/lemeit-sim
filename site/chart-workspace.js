@@ -3,6 +3,34 @@
 globalThis.SimChartWorkspace=(()=>{
  const $=id=>document.getElementById(id);
  let dataset=null,interval=null,dynamic=null,manual=null,model=null,getData=()=>({}),sources=[],preferredSource='',view=[0,0,785,340],dataPage=0,availableModels=[],modelContext=null;
+ const fields=['x','y','y2','title','subtitle-mode','subtitle','style','color','width','style2','color2','width2',
+  'grid','markers','legend','log-x','log','log-y2','zero','zero-y2','meta-subtitle','meta-reference','meta-date','compare'];
+ let defaults={},onFormatChange=()=>{};
+ const field=name=>$('charts-'+name);
+ const value=control=>control.type==='checkbox'?control.checked:control.value;
+ const formatKey=()=>preferredSource.startsWith('steady')?dataset.title:preferredSource;
+ function restoreFormat(){
+  const settings=getData().graph?.chart_settings?.[formatKey()];
+  const fallback={...defaults,x:field('x').value,y:field('y').value,style:dataset.categorical?'points':'both',markers:true};
+  for(const name of fields){
+   const control=field(name),saved=settings?.[name];
+   if(control.type==='checkbox')control.checked=typeof saved==='boolean'?saved:fallback[name];
+   else if(control.tagName==='SELECT')control.value=typeof saved==='string'&&Array.from(control.options).some(option=>option.value===saved)?saved:fallback[name];
+   else if(control.type==='hidden')control.value=typeof saved==='string'&&/^#[a-f0-9]{6}$/i.test(saved)?saved:fallback[name];
+   else control.value=typeof saved==='string'?saved.slice(0,115):fallback[name];
+  }
+  document.querySelectorAll('[data-palette]').forEach(button=>button.setAttribute('aria-pressed',String($(button.dataset.palette).value===button.dataset.color)));
+ }
+ function saveFormat(){
+  if(!dataset)return;
+  render();
+  const graph=getData().graph;
+  if(!graph)return;
+  const settings=Object.fromEntries(fields.map(name=>[name,value(field(name))]));
+  if(settings['subtitle-mode']!=='custom')settings.subtitle='';
+  graph.chart_settings={...graph.chart_settings,[formatKey()]:settings};
+  onFormatChange();
+ }
  const vars=[
   ['time_s','Tiempo','s'],['level_m','Nivel','m'],['volume_m3','Volumen','m³'],['fill_pct','Llenado','%'],
   ['inlet_m3_s','Entrada volumétrica','m³/s'],['outlet_m3_s','Salida volumétrica','m³/s'],
@@ -36,7 +64,7 @@ globalThis.SimChartWorkspace=(()=>{
   $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
   $('charts-y').value=dataset.columns.some(c=>c.key===dataset.defaultY)?dataset.defaultY:dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
   $('charts-y2').value='';$('charts-log-y2').checked=false;$('charts-zero-y2').checked=true;$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
-  const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
+  restoreFormat();const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
  }
  function render(){
   if(!dataset)return;
@@ -78,12 +106,12 @@ globalThis.SimChartWorkspace=(()=>{
  function modelFields(){const d=SimChartModels.definitions[$('charts-model').value],host=$('charts-model-params'),ctx=availableModels.find(m=>m.id===$('charts-model').value);host.replaceChildren();if(!d||!ctx)return;for(const [key,name,value] of d.params){const l=document.createElement('label'),input=document.createElement('input');l.textContent=name;input.type='number';input.step='any';input.value=String(ctx.params[key]??value);input.dataset.key=key;l.append(input);host.append(l);}}
  function bind(options={}){
   bindNavigation();
-  document.querySelectorAll('[data-palette]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.palette;$(id).value=button.dataset.color;document.querySelectorAll('[data-palette="'+id+'"]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();}));
-  $('charts-subtitle').addEventListener('input',render);
+  defaults=Object.fromEntries(fields.map(name=>[name,value(field(name))]));
+  if(typeof options.onFormatChange==='function')onFormatChange=options.onFormatChange;
+  document.querySelectorAll('[data-palette]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.palette;$(id).value=button.dataset.color;document.querySelectorAll('[data-palette="'+id+'"]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));saveFormat();}));
 
   $('charts-model').addEventListener('change',modelFields);
   $('charts-model-run').addEventListener('click',()=>{try{const p=Object.fromEntries([...$('charts-model-params').querySelectorAll('input')].map(e=>[e.dataset.key,e.valueAsNumber]));modelContext=availableModels.find(m=>m.id===$('charts-model').value);if(!modelContext)throw Error('No hay un modelo compatible con este proceso.');model=SimChartModels.generate(modelContext.id,p);$('charts-model-error').textContent='';refresh('model');}catch(e){$('charts-model-error').textContent=e.message;}});
-  $('charts-compare').addEventListener('change',render);
   if(typeof options.getData==='function')getData=options.getData;
   $('charts-dataset').addEventListener('change',()=>refresh($('charts-dataset').value));
   $('charts-load-data').addEventListener('click',()=>{try{manual=SimChartData.parse($('charts-paste').value);$('charts-import-error').textContent='';refresh('manual');}catch(e){$('charts-import-error').textContent=e.message;}});
@@ -91,8 +119,8 @@ globalThis.SimChartWorkspace=(()=>{
   for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',toggle);syncVisibility();
   $('charts-from-tank').addEventListener('click',()=>{globalThis.SimTankDynamicsUI?.publishCurrent?.();$('tank-dynamics-dialog').close();open('dynamic');});
   for(const id of ['charts-x','charts-y','charts-log-x','charts-log'])$(id).addEventListener('change',()=>{view=[0,0,785,340];});
-  for(const id of ['charts-x','charts-y','charts-y2','charts-log-y2','charts-zero-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-style2','charts-width2','charts-color2','charts-subtitle-mode','charts-legend','charts-meta-subtitle','charts-meta-reference','charts-meta-date'])$(id).addEventListener('change',render);
-  $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
+  for(const name of fields)field(name).addEventListener(['title','subtitle'].includes(name)?'input':'change',saveFormat);
+ $('charts-scrub').addEventListener('input',()=>{pause();render();});
   $('charts-play').addEventListener('click',play);for(const format of ['svg','png','jpg'])$('charts-export-'+format).addEventListener('click',async()=>{try{render();const name=(getData().graph?.title||dataset?.title||'sim-grafica').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,75);await SimScientificCharts.download($('charts-svg'),name+'.'+format,format);}catch(error){$('charts-error').textContent=error.message;}});
   $('charts-export-csv').addEventListener('click',csv);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('charts-dialog').hidden&&$('charts-dialog').contains(document.activeElement)&&!document.querySelector('dialog[open]'))close();});
  }
