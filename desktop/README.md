@@ -1,42 +1,77 @@
-# ΣIM Desktop — etapa inicial
+# ΣIM Desktop — prototipo de desarrollo
 
-Base revisada: main, portal 0.51.9 (26/11/2026). No constituye una distribución instalable ni una validación nueva del motor.
+Base científica y frontend compartido: ΣIM 0.51.9. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
 
-## Decisiones
+**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.1.0-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
 
-- Un único frontend en site/ y gateway server.py compartido.
-- Tauri 2 abre una ventana con la interfaz servida por el gateway local, manteniendo API y recursos del mismo origen. No exponer el servidor a la red.
-- Modo Desktop explícito, determinado por el lanzamiento local, nunca por un parámetro de URL que permita omitir autenticación online.
-- Prototipo con Python y DWSIM existentes antes del empaquetado. Evaluar PyInstaller one-directory y redistribución de DWSIM por plataforma.
-- Sin Cloudflare, D1, sesiones de clase ni motores remotos durante funcionamiento autónomo.
-- No cambiar el contrato científico ni simular resultados cuando el motor no está disponible.
+## Arquitectura actual
 
-## Auditoría inicial
+Tauri 2 / Rust abre la interfaz compartida desde el gateway Python propio en 127.0.0.1:5920. En esta etapa de desarrollo el gateway utiliza el DWSIM MCP existente de Debian (127.0.0.1:5901), compartido con el servicio Online; no arranca ni detiene ese MCP. El gateway Online permanece en 5910. El modo explícito `--desktop` evita las consultas de sesión, biblioteca cloud y registro del service worker. La capa visual Desktop se encuentra en `site/desktop-shell.js` y `site/desktop-theme.css`. No se modifica la lógica científica por duplicado.
 
-| Componente | Hallazgo y acción |
+## Estado funcional y evidencia
+
+| Función | Estado |
 | --- | --- |
-| server.py | Ya enlaza 127.0.0.1; admite argumentos de puerto y motor. Añadir modo explícito, recursos empaquetados y negociación segura de puerto. |
-| site/app.js | Usa /api/status, /api/catalog, /api/simulate y SimCloudProjects incluso sin guardar. Separar servicios por modalidad. |
-| site/cloud-projects.js | Usa /api/auth/me y servicios de proyectos D1; no iniciar llamadas en Desktop. Mantener contrato de métodos o adaptar consumidores. |
-| site/session-banner.js | Consulta sesión al inicio y periódicamente; excluir en modo local. |
-| site/engine-routing.js | Solo enumera Windows y Debian; adaptar selección para un motor propio. |
-| site/engines-monitor.js | Consulta motores identificados mediante cabecera; presentar estado local real. |
-| site/pwa.js | Registra service worker; deshabilitar en Desktop para evitar recursos obsoletos. |
-| site/index.html | Menús cloud, administración, sesión y enlaces externos; adaptar sin duplicar frontend. |
-| docs/roadmap.md | Conserva referencias históricas; agregar etapa Desktop sin borrar trazabilidad. |
+| Compilación Tauri y ventana nativa Debian | Comprobado por el desarrollador en su equipo |
+| Inicio del gateway y carga del editor completo | Comprobado |
+| Cálculo estacionario, Ejemplo 01 | Comprobado: 1,22 s en captura, 2 kg/s entrada y salida, residuo 0 kg/s |
+| Recirculaciones simples | Dos corridas correctas (1,132 y 1,005 s en respuesta HTTP); topología no admitida rechazada con HTTP 422 |
+| Ejemplo 20 dinámico | Integración finalizada en 6,832 s; validación numérica completa de puntos Desktop pendiente |
+| Acceso sin clase | Comprobado por uso del editor |
+| Menús, iconos y tema Desktop | Primera revisión visible en capturas; segunda revisión (d1d283a) implementada, pendiente de comprobación específica |
+| Guardar JSON | Botón conectado a exportación existente; guardado nativo y Guardar como pendientes |
+| Identificación del motor | Corrección Debian y ausencia de conmutación remota implementadas; diagnóstico inicial aún registraba windows erróneamente |
+| Cierre del gateway | Código de limpieza implementado; verificación de procesos pendientes |
+| Exploración paso a paso dinámica | Pendiente común Online/Desktop, postergada |
+| Instalación autónoma y prueba offline | Pendiente |
 
-## Secuencia de PR
+El registro de diagnóstico del 26/11 contiene también un cálculo estacionario con IAPWS-IF97 (1,270 s) y otro con Peng-Robinson (1,678 s). Son tiempos observados, no benchmarks. El adaptador dinámico solo admite el circuito de agua con tanque y dos válvulas. La recirculación solo admite el lazo simple sin reacción.
 
-1. Fundación: auditoría y contrato de modo explícito; luego prueba automatizada de aislamiento cloud y compatibilidad online.
-2. Prototipo Tauri: gestión de procesos propios, comprobación de disponibilidad, puerto local, cierre ordenado y archivos JSON mediante diálogos nativos.
-3. Empaquetado: Windows x64 y Debian amd64, dependencias, licencias, hashes y construcción reproducible.
-4. Validación offline: sistemas limpios sin Python/DWSIM, sin red; ejemplos estacionarios y Ejemplo 20 (121 muestras, 600 s, nivel final ~0.333 m, descarga ~10 kg/s), gráficas, reportes, archivos y cierre.
-5. Publicación: releases verificadas, manual local, descargas y actualización documental.
+## Ejecutar el prototipo en Debian 12
 
-## Seguridad y aceptación
+Requisitos: Git, Python existente, DWSIM MCP local operativo, Rust/Cargo, herramientas de compilación y WebKitGTK 4.1. El usuario final no deberá instalarlos manualmente en la futura distribución.
 
-No reutilizar credenciales de producción. Restringir origen, host, capacidades IPC y rutas de archivos; no conceder ejecución arbitraria desde JS. Resolver puertos sin matar procesos ajenos; autenticar la instancia propia antes de habilitar cálculo. Evaluar aislamiento de otras aplicaciones locales y navegación externa. No afirmar que el instalador funciona offline hasta probarlo desconectado. Mantener CI online sin regresiones. La dinámica actual solo cubre el adaptador específico de tanque con válvulas.
+En el repositorio existente, utilizar un worktree separado:
+```bash
+cd ~/lemeit-sim
+git fetch origin
+git worktree add --detach ~/lemeit-sim-desktop origin/feat/desktop-foundation
+cd ~/lemeit-sim-desktop
+bash desktop/scripts/check-debian.sh
+```
 
-## Estado
+Si faltan dependencias Tauri:
+```bash
+sudo apt update
+sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file pkg-config libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+```
+Instalar Rust desde [rustup.rs](https://rustup.rs/) si no está disponible. No detener los servicios Online.
 
-Auditoría parcial de archivos y propuesta registradas. Código Tauri, cambios funcionales, compilaciones, pruebas y distribución pendientes. No se modifica main en esta etapa.
+Para actualizar y ejecutar, con la ventana anterior cerrada:
+```bash
+cd ~/lemeit-sim-desktop
+git fetch origin
+git switch --detach origin/feat/desktop-foundation
+export SIM_DESKTOP_MCP_TOKEN_FILE="$(systemctl show lemeit-sim.service -p ExecStart --value | sed -n 's/.*--mcp-token-file[ =]\([^ ;}]*\).*/\1/p')"
+test -n "$SIM_DESKTOP_MCP_TOKEN_FILE" && test -r "$SIM_DESKTOP_MCP_TOKEN_FILE" && (
+  cd desktop/src-tauri
+  CARGO_BUILD_JOBS=2 cargo run
+)
+```
+Solo se necesita la ruta del token, nunca publicar su contenido. Si no se encuentra, revisar la configuración del servicio. El puerto 5920 debe estar libre. Evitar simulaciones simultáneas Online/Desktop mientras compartan MCP. No requiere Node.js en este prototipo.
+
+## Próximos hitos y criterios para liberar
+
+- Guardado y apertura con diálogos nativos, cambios sin guardar, revisión de cierre durante cálculo, barra de título compacta con controles funcionales y accesibles.
+- Motor MCP independiente, aislamiento del gateway local, puertos sin conflictos, navegación y permisos restringidos, credenciales propias.
+- Empaquetado de Python (evaluar PyInstaller), DWSIM y recursos locales con sus licencias y dependencias. Construcciones reproducibles Windows x64 y Debian amd64; evaluar AppImage.
+- Pruebas en sistemas limpios desconectados: estacionario, recirculaciones soportadas, Ejemplo 20 (121 muestras, 600 s, nivel final ≈0,333 m, descarga ≈10 kg/s), gráficas, archivos, exportaciones y cierre de procesos. CI compartido Online sin regresiones.
+- Al liberar: GitHub Releases con instaladores, SHA-256, requisitos, licencia, fuentes correspondientes, notas de versión, manual local y enlace de descarga en README principal. No publicar como autónomo antes de pasar las pruebas.
+
+## Documentación
+
+[Historial Desktop](CHANGELOG.md) · [Hoja de ruta general](../docs/roadmap.md) · [Ejemplo 20](../docs/ejemplo-20-tanque-dinamico-dwsim.md) · [README principal](../README.md).
+
+## Seguridad
+
+No reutilizar credenciales de producción en los paquetes. Restringir origen, host, capacidades IPC y rutas de archivos; no conceder ejecución arbitraria desde JS. Resolver puertos sin matar procesos ajenos; autenticar la instancia propia antes de habilitar cálculo. Evaluar aislamiento de otras aplicaciones locales y navegación externa. No afirmar que el instalador funciona offline hasta probarlo desconectado.
