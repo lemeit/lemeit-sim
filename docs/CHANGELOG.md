@@ -6,9 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.49.2 — 2026-11-25
+
+- Nombre del módulo simplificado a **Gráficas** en menús, ventana y documentación. Sin cambios en cálculos ni series.
+
 ## 0.49.1 — 2026-11-25
 
-- Ventana Gráficas científicas accesible desde Ver y barra de Simulación; apertura directa desde el diálogo del tanque. Ejes XY configurables, segunda curva de igual unidad, título, cursor, cuadrícula, marcadores, escala Y logarítmica y exportación SVG/CSV. Conserva la última serie en memoria hasta cambiar condiciones o proyecto.
+- Ventana Gráficas accesible desde Ver y barra de Simulación; apertura directa desde el diálogo del tanque. Ejes XY configurables, segunda curva de igual unidad, título, cursor, cuadrícula, marcadores, escala Y logarítmica y exportación SVG/CSV. Conserva la última serie en memoria hasta cambiar condiciones o proyecto.
 - Tipografía de los selectores del menú igualada a los botones (11 px y fuente del portal). Ventana gráfica redimensionable; no es todavía un panel acoplable ni guarda las series en nube.
 
 ## 0.49.0 — 2026-11-25 (en revisión)

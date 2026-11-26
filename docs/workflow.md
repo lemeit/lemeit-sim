@@ -13,7 +13,7 @@ Revisión: 25/11/2026 · 0.49.0 integrada; despliegue a verificar. Los apartados
 7. Guardá el proyecto **en la nube**; opcionalmente descargá una **copia JSON**. Para presentar, exportá tablas CSV/Excel o **Reporte PDF · diagrama y balances** con rótulo, actividad y tablas.
 8. Un valor cercano a cero en la energía neta de un intercambiador **no** implica transferencia térmica interna cero. Ver [interpretación energética](interpretacion-intercambiadores.md) (corrección integrada desde 0.47.5).
 
-## Dinámica y gráficas científicas
+## Dinámica y gráficas
 
 Para la práctica de acumulación abrí Ejemplo 20, fijá Debian, seleccioná T-01 y abrí Dinámica del tanque · nivel y curvas. La [guía de gráficas](graficas-cientificas.md) describe los controles, la lectura de series y la exportación SVG/CSV. No confundir con Explorar proceso, que recorre resultados estacionarios.
 
