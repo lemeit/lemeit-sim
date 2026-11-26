@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
 
-[![Portal 0.49.0](https://img.shields.io/badge/portal-0.49.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.50.0](https://img.shields.io/badge/portal-0.50.0-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -24,7 +24,9 @@ La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las f
 
 **Corrección 0.47.5 integrada:** para intercambiadores de dos circuitos, diferenciar calor cedido, recibido, transferencia interna y residuo neto del balance energético; no confundir una energía neta cercana a cero con ausencia de transferencia. Ver [criterios de lectura del balance térmico](docs/interpretacion-intercambiadores.md).
 
-## Novedades hasta 0.49.0
+## Novedades hasta 0.50.0
+
+- Gráficas generales de resultados estacionarios, dinámicos y datos propios, con ejes XY y edición visual.
 
 - Interfaz técnica negro/blanco/rojo con modo claro y oscuro común, barra reordenable, botón Calcular destacado y estados de cálculo.
 - Paneles acoplables y flotantes, separadores horizontales mínimos, ajuste de ancho y altura, controles +/− y explorador de proceso de tamaño estable.
@@ -34,7 +36,7 @@ La versión del portal se lee de `package.json` y **Ayuda → Acerca de**. Las f
 
 **Cómo empezar:** Ejemplos → 20 → seleccionar T-01 → Propiedades → Dinámica del tanque · nivel y curvas. Fijar Debian si está disponible, elegir DWSIM real, verificar condiciones y ejecutar. Consultar [guía de gráficas](docs/graficas-cientificas.md), [manual de uso](https://wiki.lemeit.ar/sim/manual-de-uso/) y [Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md).
 
-La versión 0.49.0 está fusionada y tiene CI aprobado; la publicación efectiva se confirma en Ayuda → Acerca de. No se atribuyen datos experimentales al cálculo de DWSIM.
+La versión 0.50.0 incorpora el módulo general; la publicación efectiva se confirma en Ayuda → Acerca de. No se atribuyen datos experimentales al cálculo de DWSIM.
 
 ## Versión y estado (historial anterior)
 
