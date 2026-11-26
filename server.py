@@ -623,5 +623,5 @@ if __name__ == '__main__':
     else:
         with IsolatedEngine(args.engine_root) as bootstrap:
             server.engine.catalog = bootstrap.get_catalog()
-    print(f'Simulador local: http://localhost:{args.port}', flush=True)
+    print(f'Simulador local: http://127.0.0.1:{server.server_port}', flush=True)
     server.serve_forever()
