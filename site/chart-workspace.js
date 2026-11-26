@@ -35,24 +35,25 @@ globalThis.SimChartWorkspace=(()=>{
   for(const c of dataset.columns)for(const id of ['charts-x','charts-y','charts-y2'])option($(id),c);
   $('charts-x').value=dataset.columns.some(c=>c.key==='time_s')?'time_s':dataset.columns[0].key;
   $('charts-y').value=dataset.columns.some(c=>c.key===dataset.defaultY)?dataset.defaultY:dataset.columns.some(c=>c.key==='level_m')?'level_m':dataset.columns.some(c=>c.key==='temperature')?'temperature':dataset.columns[1]?.key||dataset.columns[0].key;
-  $('charts-y2').value='';$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
+  $('charts-y2').value='';$('charts-log-y2').checked=false;$('charts-zero-y2').checked=true;$('charts-log').checked=false;$('charts-log-x').checked=false;$('charts-style').value=dataset.categorical?'points':'both';$('charts-markers').checked=true;$('charts-play').hidden=!!dataset.categorical;
   const scrub=$('charts-scrub');scrub.max=String(dataset.points.length-1);scrub.value='0';render();renderTable();
  }
  function render(){
   if(!dataset)return;
   const x=dataset.columns.find(c=>c.key===$('charts-x').value),y=dataset.columns.find(c=>c.key===$('charts-y').value);
   const y2=dataset.columns.find(c=>c.key===$('charts-y2').value);
-  const chosen=[y,...(y2&&y2.key!==y.key&&y2.unit===y.unit?[y2]:[])];
-  for(const option of $('charts-y2').options){const c=dataset.columns.find(v=>v.key===option.value);option.disabled=!!c&&(c.unit!==y.unit||c.key===y.key);}
+  const chosen=[y,...(y2&&y2.key!==y.key&&y2.key!==x.key?[y2]:[])];
+  for(const option of $('charts-y2').options){const c=dataset.columns.find(v=>v.key===option.value);option.disabled=!!c&&(c.key===y.key||c.key===x.key);}
   if(chosen.length===1)$('charts-y2').value='';
+  const dual=chosen.length===2&&y.unit!==chosen[1].unit;$('charts-y2-scale').hidden=!dual;
   const index=Number($('charts-scrub').value),p=dataset.points[index];
-  const config={points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),yLabel:chosen.length===1?y.name+(y.unit?' ['+y.unit+']':''):'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,color:i===0?$('charts-color').value:undefined})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked&&$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source,categories:dataset.categorical&&x.key==='index'?dataset.points.map(p=>p.label):null};
+  const graph=getData().graph;const imported=dataset===manual;const regime=dataset===dynamic?'Dinámico':dataset===model?'Modelo analítico':imported?'Datos importados':'Estacionario';const config={subtitle:$('charts-meta-subtitle').checked?[graph?.title,regime].filter(Boolean).join(' · '):'',reference:$('charts-meta-reference').checked?['ΣIM '+document.documentElement.dataset.portalVersion,!imported?graph?.model:null,dataset.points.length+' registros'].filter(Boolean).join(' · '):'',generated:$('charts-meta-date').checked?'Generado: '+new Date().toLocaleString('es-AR'):'',points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),y2Label:dual?chosen[1].name+(chosen[1].unit?' ['+chosen[1].unit+']':''):'',logY2:$('charts-log-y2').checked,zeroY2:$('charts-zero-y2').checked,yLabel:chosen.length===1||dual?y.name+(y.unit?' ['+y.unit+']':''):'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,axis:dual&&i===1?'right':'left',color:i===0?$('charts-color').value:($('charts-color').value==='#a33b35'?'#287a61':'#a33b35')})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked&&$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source,categories:dataset.categorical&&x.key==='index'?dataset.points.map(p=>p.label):null};
   const compare=$('charts-compare');compare.closest('label').hidden=dataset!==model;compare.disabled=dataset!==model||!sources.some(e=>e.id.startsWith('steady')&&e.d.columns.some(c=>c.key===x.key&&c.unit===x.unit)&&e.d.columns.some(c=>c.key===y.key&&c.unit===y.unit));
   if(!compare.disabled&&compare.checked){const other=sources.find(e=>e.id.startsWith('steady')&&e.d.columns.some(c=>c.key===x.key&&c.unit===x.unit)&&e.d.columns.some(c=>c.key===y.key&&c.unit===y.unit));config.extra=[{name:'Estados DWSIM · '+other.d.title,points:other.d.points.filter(p=>modelContext?.streamIds?.includes(p.objectId)).map(p=>({x:p[x.key],y:p[y.key]})),color:'#a33b35'}];}
   try{SimScientificCharts.render($('charts-svg'),config);applyView();$('charts-error').textContent='';}
   catch(e){$('charts-svg').replaceChildren();$('charts-error').textContent=e.message;}
   $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
-  $('charts-export-svg').disabled=!!$('charts-error').textContent;
+  for(const id of ['charts-export-svg','charts-export-png','charts-export-jpg'])$(id).disabled=!!$('charts-error').textContent;
  }
  function show(preferred){const panel=$('charts-dialog');if(!panel)return;if(document.body.classList.contains('diagram-focus')&&!document.body.classList.contains('diagram-window'))$('diagram-focus')?.click();panel.hidden=false;syncVisibility();try{refresh(typeof preferred==='string'?preferred:undefined);$('charts-open-error').hidden=true;}catch(error){$('charts-content').hidden=true;$('charts-empty').hidden=true;$('charts-open-error').textContent='No se pudieron preparar los datos de la gráfica: '+error.message;$('charts-open-error').hidden=false;console.error('Gráficas:',error);}globalThis.SimDockLayout?.reveal?.('charts');}
  function syncVisibility(){const open=!$('charts-dialog').hidden;for(const id of ['charts-open','charts-menu-open'])$(id)?.setAttribute('aria-pressed',String(open));}
@@ -87,9 +88,9 @@ globalThis.SimChartWorkspace=(()=>{
   for(const id of ['charts-open','charts-menu-open'])$(id).addEventListener('click',toggle);syncVisibility();
   $('charts-from-tank').addEventListener('click',()=>{globalThis.SimTankDynamicsUI?.publishCurrent?.();$('tank-dynamics-dialog').close();open('dynamic');});
   for(const id of ['charts-x','charts-y','charts-log-x','charts-log'])$(id).addEventListener('change',()=>{view=[0,0,785,340];});
-  for(const id of ['charts-x','charts-y','charts-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend'])$(id).addEventListener('change',render);
+  for(const id of ['charts-x','charts-y','charts-y2','charts-log-y2','charts-zero-y2','charts-grid','charts-markers','charts-log','charts-zero','charts-log-x','charts-style','charts-color','charts-width','charts-legend','charts-meta-subtitle','charts-meta-reference','charts-meta-date'])$(id).addEventListener('change',render);
   $('charts-title').addEventListener('input',render);$('charts-scrub').addEventListener('input',()=>{pause();render();});
-  $('charts-play').addEventListener('click',play);$('charts-export-svg').addEventListener('click',()=>SimScientificCharts.download($('charts-svg')));
+  $('charts-play').addEventListener('click',play);for(const format of ['svg','png','jpg'])$('charts-export-'+format).addEventListener('click',async()=>{try{render();const name=(getData().graph?.title||dataset?.title||'sim-grafica').replace(/[^\p{L}\p{N}._-]+/gu,'-').slice(0,75);await SimScientificCharts.download($('charts-svg'),name+'.'+format,format);}catch(error){$('charts-error').textContent=error.message;}});
   $('charts-export-csv').addEventListener('click',csv);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('charts-dialog').hidden&&$('charts-dialog').contains(document.activeElement)&&!document.querySelector('dialog[open]'))close();});
  }
  return Object.freeze({accept,reset,bind,open,close,completed});
