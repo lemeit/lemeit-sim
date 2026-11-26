@@ -45,7 +45,7 @@ globalThis.SimChartWorkspace=(()=>{
   for(const option of $('charts-y2').options){const c=dataset.columns.find(v=>v.key===option.value);option.disabled=!!c&&(c.unit!==y.unit||c.key===y.key);}
   if(chosen.length===1)$('charts-y2').value='';
   const index=Number($('charts-scrub').value),p=dataset.points[index];
-  const config={points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),yLabel:chosen.length===1?y.name+' ['+y.unit+']':'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,color:i===0?$('charts-color').value:undefined})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked||$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source};
+  const config={points:dataset.points,xKey:x.key,xLabel:x.name+(x.unit?' ['+x.unit+']':''),yLabel:chosen.length===1?y.name+(y.unit?' ['+y.unit+']':''):'Magnitud ['+y.unit+']',series:chosen.map((c,i)=>({key:c.key,name:c.name,color:i===0?$('charts-color').value:undefined})),index,grid:$('charts-grid').checked,markers:$('charts-markers').checked||$('charts-style').value!=='line',connect:$('charts-style').value!=='points',logX:$('charts-log-x').checked,strokeWidth:Number($('charts-width').value),legend:$('charts-legend').checked,logY:$('charts-log').checked,zeroY:$('charts-zero').checked,title:$('charts-title').value||dataset.title,source:dataset.source,categories:dataset.categorical&&x.key==='index'?dataset.points.map(p=>p.label):null};
   try{SimScientificCharts.render($('charts-svg'),config);$('charts-error').textContent='';}
   catch(e){$('charts-svg').replaceChildren();$('charts-error').textContent=e.message;}
   $('charts-reading').textContent=(p?.label?p.label+' · ':'')+[x,...chosen].map(c=>c.name+': '+fmt(p?.[c.key])+' '+c.unit).join(' · ');
@@ -55,7 +55,7 @@ globalThis.SimChartWorkspace=(()=>{
  function play(){if(interval!==null){pause();return;}const s=$('charts-scrub');if(Number(s.value)>=Number(s.max))s.value='0';$('charts-play').textContent='⏸ Pausar';interval=setInterval(()=>{s.value=String(Math.min(Number(s.max),Number(s.value)+1));render();if(s.value===s.max)pause();},80);}
  function csv(){
   if(!dataset)return;
-  const escape=s=>'"'+String(s).replace(/^[=+@\-\t\r]/,"'const escape=s=>'"'+String(s).replaceAll").replaceAll('"','""')+'"';
+  const escape=s=>{let v=String(s);if(/^[=+@\-\t\r]/.test(v))v="'"+v;return '"'+v.replaceAll('"','""')+'"';};
   const rows=['Origen;'+escape(dataset.source),'Objeto;'+dataset.columns.map(c=>escape(c.name+' ['+c.unit+']')).join(';'),...dataset.points.map(p=>escape(p.label||'')+';'+dataset.columns.map(c=>Number.isFinite(p[c.key])?String(p[c.key]).replace('.',','):'').join(';'))];
   const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='sim-series.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
  }
