@@ -1,5 +1,6 @@
 (()=>{
  'use strict';
+ if(globalThis.SimDesktop)return;
  const el=id=>document.getElementById(id),banner=el('session-banner');
  if(!banner)return;
  let session=null,clock=null,loading=false,expired=false;
