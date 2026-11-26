@@ -7,8 +7,8 @@ globalThis.SimDockLayout=(()=>{
   const EDGES=['left','right','top','bottom'];
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
-  const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'bottom'};
-  const DEFAULT_SIZES={left:186,right:336,top:200,bottom:240};
+  const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'float'};
+  const DEFAULT_SIZES={left:186,right:336,top:200,bottom:160};
   let revealPanel=()=>{};
   const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
   const safe=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
@@ -30,12 +30,12 @@ globalThis.SimDockLayout=(()=>{
     const fallback={
       equipment:{x:60,y:130,w:310,h:500},
       inspector:{x:Math.max(8,vw-390),y:130,w:355,h:500},
-      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},charts:{x:Math.max(8,(vw-700)/2),y:100,w:700,h:510}
+      results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},charts:{x:Math.max(8,vw-620),y:105,w:570,h:440}
     };
     return Object.fromEntries(IDS.map(id=>{
       const p=stored?.[id];
       return [id,{id,mode:MODES.includes(p?.mode)?p.mode:DEFAULT[id],
-        lastDock:EDGES.includes(p?.lastDock)?p.lastDock:DEFAULT[id],
+        lastDock:EDGES.includes(p?.lastDock)?p.lastDock:id==='charts'?'bottom':DEFAULT[id],
         box:fit(p?.box||fallback[id],vw,vh)}];
     }));
   }
@@ -57,6 +57,8 @@ globalThis.SimDockLayout=(()=>{
       saved.results?.mode==='bottom'&&saved.results.lastDock==='bottom'&&saved.sizes?.right===265&&
       saved.sizes?.left===186&&saved.sizes?.bottom===160&&saved.sizes?.top===200;
     if(!saved.revision&&oldDefault)saved={};
+    // Migra únicamente la posición automática de Gráficas; las demás ventanas conservan su distribución.
+    if(saved.charts&&!saved.chartsFloatingV1)delete saved.charts;
     const panels=recover(saved,innerWidth,innerHeight);
     for(const id of IDS)panels[id].el=elements[id];
     const sizes={...DEFAULT_SIZES,...saved.sizes};
@@ -73,14 +75,14 @@ globalThis.SimDockLayout=(()=>{
     indicator.setAttribute('aria-hidden','true');document.body.append(indicator);
     let z=900,gesture=null,saveTimer=null;
     const mobile=()=>innerWidth<=760;
-    const activeMode=p=>mobile()?DEFAULT[p.id]:p.mode;
+    const activeMode=p=>mobile()?(p.id==='charts'?'bottom':DEFAULT[p.id]):p.mode;
     const visible=p=>!p.el.hidden;
     function persist(){
       const value=Object.fromEntries(IDS.map(id=>[id,{mode:panels[id].mode,
         lastDock:panels[id].lastDock,box:panels[id].box}]));
       value.sizes=sizes;
       value.stackWeights=stackWeights;
-      value.revision=2;
+      value.revision=2;value.chartsFloatingV1=true;
       try{localStorage.setItem(KEY,JSON.stringify(value));}catch{}
     }
     function store(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,120);}
@@ -195,7 +197,7 @@ globalThis.SimDockLayout=(()=>{
     }
     function place(p,mode){
       if(mode==='reset'){
-        p.mode=DEFAULT[p.id];p.lastDock=DEFAULT[p.id];
+        p.mode=DEFAULT[p.id];p.lastDock=p.id==='charts'?'bottom':DEFAULT[p.id];
         p.box=recover(null,innerWidth,innerHeight)[p.id].box;
       }else if(MODES.includes(mode)){
         if(p.mode!=='float')p.lastDock=p.mode;
@@ -372,7 +374,7 @@ globalThis.SimDockLayout=(()=>{
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
     },true);
-    revealPanel=id=>{const p=panels[id];if(!p)return;p.el.hidden=false;apply(p,false);if(id==='charts'&&activeMode(p)==='bottom'&&sizes.bottom<200){setSize('bottom',240);store();}if(activeMode(p)==='float')p.el.style.zIndex=String(++z);};
+    revealPanel=id=>{const p=panels[id];if(!p)return;p.el.hidden=false;apply(p,false);if(activeMode(p)==='float')p.el.style.zIndex=String(++z);};
     updateSlots();store();
   }
   return Object.freeze({fit,targetEdge,recover,mount,reveal:id=>revealPanel(id)});
