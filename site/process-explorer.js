@@ -77,8 +77,10 @@ const SimProcessExplorer=(()=>{
     const status=document.createElement('p');const ok=Math.abs(residual)<=tolerance;status.className='explorer-closure';status.dataset.ok=String(ok);status.textContent=(ok?'✓ Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').';parent.append(status);
   }
   function explain(parent,node,graph,result,balance){
-    const operation=operations[node.type];
+    const root=parent;const group=kind=>{const el=document.createElement('section');el.dataset.explorerSection=kind;root.append(el);return el;};
+    parent=group('equations');const operation=operations[node.type];
     if(operation){const equation=document.createElement('div');equation.className='explorer-equation';equation.textContent=operation[0];parent.append(equation);paragraph(parent,operation[1]);}
+    parent=group('energy');const heading=document.createElement('h3');heading.textContent='Balance de energía';parent.append(heading);
     const material=new Set(graph.nodes.filter(n=>n.type==='MaterialStream').map(n=>n.id));
     const inlets=graph.edges.filter(e=>e.to===node.id&&material.has(e.from)).map(e=>e.from);
     const outlets=graph.edges.filter(e=>e.from===node.id&&material.has(e.to)).map(e=>e.to);
@@ -115,7 +117,7 @@ const SimProcessExplorer=(()=>{
     if(['Mixer','HeatExchanger','Valve'].includes(node.type)){
       appendClosure(parent,'Residuo energético bajo el supuesto adiabático',hIn,hOut,hOut-hIn,'kW',1e-4);
     }
-    const massTitle=document.createElement('h3');massTitle.textContent='Balance global de masa';parent.append(massTitle);const massEquation=document.createElement('div');massEquation.className='explorer-equation';massEquation.textContent='Σṁₑ − Σṁₛ';parent.append(massEquation);
+    parent=group('mass');const massTitle=document.createElement('h3');massTitle.textContent='Balance global de masa';parent.append(massTitle);const massEquation=document.createElement('div');massEquation.className='explorer-equation';massEquation.textContent='Σṁₑ − Σṁₛ';parent.append(massEquation);
     parent.append(row('Entrada − salida',value(balance?.mass_in,'kg/s')+' − '+value(balance?.mass_out,'kg/s')));
     appendClosure(parent,'Residuo global',balance?.mass_in,balance?.mass_out,balance?.mass_residual,'kg/s',1e-8);
     paragraph(parent,'Por componente · ṁₖ = ṁ · wₖ, donde wₖ es la fracción másica global.');
@@ -140,7 +142,7 @@ const SimProcessExplorer=(()=>{
   }
   function pause(){clearInterval(timer);timer=null;const b=$('process-explorer-play');b.textContent='▶';b.setAttribute('aria-label','Reproducir');b.setAttribute('aria-pressed','false');}
   function play(){if(timer!==null){pause();return;}if(!visible)return;if(position===steps.length-1)position=0;render();if(steps.length<2)return;const b=$('process-explorer-play');b.textContent='Ⅱ';b.setAttribute('aria-label','Pausar');b.setAttribute('aria-pressed','true');timer=setInterval(()=>{next();if(position===steps.length-1)pause();},Number($('process-explorer-speed').value)||4000);}
-  function setView(nextView){view=nextView;const panel=$('process-explorer-panel');panel.dataset.view=view;panel.querySelectorAll('[data-explorer-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.explorerView===view)));if(view==='technical'||view==='all')$('process-explorer-interpretation').open=true;}
+  function setView(nextView){view=nextView;const panel=$('process-explorer-panel');panel.dataset.view=view;panel.querySelectorAll('[data-explorer-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.explorerView===view)));if(['mass','energy','equations','all'].includes(view))$('process-explorer-interpretation').open=true;}
   function render(){
     const panel=$('process-explorer-panel'),active=visible&&steps.length>0;
     panel.hidden=!active;
@@ -149,11 +151,12 @@ const SimProcessExplorer=(()=>{
     const menuButton=document.querySelector('[data-toolbar-action="process-explorer-open"]');
     if(menuButton)menuButton.disabled=$('process-explorer-open').disabled;
     if(!active){emphasize();return;}
-    const {graph,result}=context.getData(),step=steps[position],node=graph.nodes.find(n=>n.id===step.id);
+    const {graph,result,dynamicResult}=context.getData(),step=steps[position],node=graph.nodes.find(n=>n.id===step.id);
     if(!node){close();return;}
-    $('process-explorer-counter').textContent='Etapa '+(position+1)+' de '+steps.length;
+    const dynamic=step.dynamic===true;panel.dataset.dynamic=String(dynamic);
+    $('process-explorer-counter').textContent=(dynamic?'Muestra ':'Etapa ')+(position+1)+' de '+steps.length;
     $('process-explorer-title').textContent=node.name;
-    $('process-explorer-type').textContent=step.stream?'Corriente calculada':'Operación unitaria';
+    $('process-explorer-type').textContent=dynamic?'Integración temporal · resultado registrado':step.stream?'Corriente calculada':'Operación unitaria';
     const body=$('process-explorer-readings');body.replaceChildren();
     const details=$('process-explorer-connections');details.replaceChildren();
     const interpretation=$('process-explorer-interpretation');
@@ -164,7 +167,16 @@ const SimProcessExplorer=(()=>{
     const progress=$('process-explorer-progress');progress.max=steps.length;progress.value=position+1;
     const analysis=$('process-explorer-analysis');
     analysis.replaceChildren();
-    if(step.stream){
+    if(dynamic){
+      const p=dynamicResult.points[step.sample];
+      for(const [key,label,unit] of [['time_s','Tiempo de simulación','s'],['level_m','Nivel calculado','m'],['volume_m3','Volumen derivado','m³'],['fill_pct','Llenado derivado','%'],['mass_kg','Masa estimada','kg'],['outlet_kg_s','Caudal de descarga','kg/s']])if(Number.isFinite(p[key]))body.append(row(label,value(p[key],unit)));
+      details.append(row('Tiempo registrado',value(p.time_s,'s')));paragraph(details,'Reproducción de muestras existentes; no integra nuevamente el proceso.');
+      const mass=document.createElement('section');mass.dataset.explorerSection='mass';analysis.append(mass);paragraph(mass,'Balance dinámico de masa: dM/dt = ṁₑ − ṁₛ. El inventario puede cambiar con el tiempo.');
+      if(Number.isFinite(p.mass_kg))mass.append(row('Inventario másico estimado',value(p.mass_kg,'kg')));
+      if(Number.isFinite(p.outlet_kg_s))mass.append(row('Descarga registrada',value(p.outlet_kg_s,'kg/s')));
+      const equations=document.createElement('section');equations.dataset.explorerSection='equations';analysis.append(equations);const eq=document.createElement('div');eq.className='explorer-equation';eq.textContent='dM/dt = ṁₑ − ṁₛ';equations.append(eq);paragraph(equations,'Ecuación general de acumulación sin reacción. No es una verificación numérica del integrador.');
+      const energy=document.createElement('section');energy.dataset.explorerSection='energy';analysis.append(energy);paragraph(energy,'No se dispone de un balance energético temporal completo en estas muestras.');
+    }else if(step.stream){
       const state=result.streams?.[step.id];
       if(state){
         body.append(row('Caudal másico',value(state.mass_flow_kg_s,'kg/s')),
@@ -189,11 +201,11 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-back').disabled=position===0;
     $('process-explorer-next').disabled=position===steps.length-1;
     $('process-explorer-cycles').hidden=!hadRecycle;
-    setView(view);emphasize();
+    if(step.stream&&!dynamic&&['mass','energy','equations'].includes(view))setView('variables');else setView(view);emphasize();
   }
   function open(){
     if(!context?.isValid?.())return;
-    const data=context.getData();steps=createSteps(data.graph,data.result);
+    const data=context.getData();hadRecycle=false;const tank=data.graph.nodes.find(n=>n.type==='Tank');steps=data.dynamicResult?.points?.length&&tank?data.dynamicResult.points.map((_,sample)=>({id:tank.id,dynamic:true,sample})):data.result?createSteps(data.graph,data.result):[];
     if(!steps.length)return;
     visible=true;position=0;render();globalThis.SimDockLayout?.reveal('explorer');
   }
