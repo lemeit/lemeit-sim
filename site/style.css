@@ -1,4 +1,4 @@
-/* ΣIM: componentes del simulador sobre el sistema visual propio simprox-theme.css. */
+/* ΣiM: componentes del simulador sobre el sistema visual propio simprox-theme.css. */
 body{
   margin:0;
   font-family:var(--spx-font-sans);
@@ -970,7 +970,7 @@ body.diagram-focus.diagram-library .equipment-panel .catalog-link{display:block}
 body.diagram-focus.diagram-library .diagram-panel{grid-column:2;min-width:0}
 @media(max-width:540px){body.diagram-focus.diagram-library .workspace{grid-template-columns:140px minmax(0,1fr)}}
 
-/* ΣIM: cabecera de aplicación y barra única de herramientas. */
+/* ΣiM: cabecera de aplicación y barra única de herramientas. */
 .sim-shell{background:var(--spx-bg)}
 
 .sim-shell .app-header{height:42px;min-height:42px;padding:0 10px;gap:20px;background:#090c0e;color:#f5f5f3;border-bottom:1px solid #333;box-shadow:none}
@@ -1044,7 +1044,7 @@ body.results-window .results-resizer{display:none}
 
 .sim-shell .results-panel{display:flex;flex-direction:column;overflow:hidden}.results-panel .results-heading{flex:0 0 auto}#results{flex:1;min-height:0;overflow:auto}body.results-window #results-panel{display:flex}
 
-/* Ventanas ΣIM: cabecera compacta y cierre discreto a la derecha. */
+/* Ventanas ΣiM: cabecera compacta y cierre discreto a la derecha. */
 dialog{padding:14px 16px 16px;border:1px solid var(--spx-border);border-radius:2px;box-shadow:0 16px 50px #0005;background:var(--spx-surface);color:var(--spx-text)}
 dialog::backdrop{background:#06090d99}
 .dialog-heading{position:sticky;top:-14px;z-index:2;display:flex;align-items:center;justify-content:space-between;min-height:34px;padding:4px 8px 4px 12px;margin:-14px -16px 14px;gap:12px;border:0;border-left:3px solid var(--spx-accent);border-bottom:1px solid var(--spx-border);border-radius:0;background:var(--spx-surface-2);color:var(--spx-text)}
@@ -1092,7 +1092,7 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 .stream-composition th:first-child{text-align:left;max-width:100px}
 .inspector-readings .reading-row{gap:8px}.inspector-readings .reading-row b{text-align:right;overflow-wrap:anywhere}
 
-/* Marca ΣIM · Retro técnico. */
+/* Marca ΣiM · Retro técnico. */
 .sim-shell .app-header{background:#101215;color:#F4F3EE}
 .sim-shell .sim-brand{width:auto;flex:0 0 auto;height:40px;display:flex;align-items:center;gap:10px}
 .sim-brand>img{display:block;width:86px;height:24px;object-fit:contain;flex:none}
@@ -1102,7 +1102,7 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #install-app-button[hidden]{display:none!important}
 
 
-/* ΣIM 0.6.0: selección de motor compacta junto al monitor del footer. */
+/* ΣiM 0.6.0: selección de motor compacta junto al monitor del footer. */
 .site-footer .footer-engine-label{font:inherit;color:var(--spx-text-dim);white-space:nowrap;margin-left:8px}
 .site-footer .footer-engine-select{font:inherit;color:var(--spx-text);background:var(--spx-surface);border:1px solid var(--spx-border);border-radius:3px;padding:3px 19px 3px 6px;min-height:24px;max-width:175px;cursor:pointer}
 .site-footer .footer-engine-select:focus-visible{outline:2px solid var(--spx-accent);outline-offset:2px}
@@ -1161,7 +1161,7 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-dialog .monitor-brand-copy a:hover{color:white}
 @media(max-width:540px){#server-dialog .monitor-brand{align-items:flex-start;flex-direction:column;gap:9px}#server-dialog .monitor-brand-copy small{font-size:9px}}
 
-/* Marca técnica ΣIM: sigma real + lettering monoespaciado IM. */
+/* Marca técnica ΣiM: sigma real + lettering monoespaciado IM. */
 #server-dialog .monitor-ascii{display:flex;align-items:center;gap:2px;flex:0 0 auto;white-space:nowrap}
 #server-dialog .monitor-sigma{display:block;font-family:Georgia,serif;font-size:69px;font-weight:700;line-height:1;color:#CF263B;letter-spacing:-6px}
 #server-dialog .monitor-ascii pre{font:700 11px/1.20 monospace;letter-spacing:-.6px;margin:0;white-space:pre;color:#F4F3EE}
@@ -1205,7 +1205,7 @@ footer .engine-state{margin:0;max-width:none!important;font-size:9px}.engine-met
 #server-dialog .console-boot .boot-ready{letter-spacing:0}
 @media(max-width:540px){#server-dialog .console-boot pre.boot-classic{font-size:8px}}
 
-/* Logo ASCII ΣIM en mayúsculas: tono cobre anaranjado, solo dentro del arranque del log. */
+/* Logo ASCII ΣiM en mayúsculas: tono cobre anaranjado, solo dentro del arranque del log. */
 #server-dialog .console-boot pre.boot-logo{color:#E88B5A;font:600 12px/1.16 monospace;letter-spacing:0;white-space:pre;overflow-x:auto;max-width:100%;text-shadow:0 0 9px #e88b5a22}
 #server-dialog .console-boot .boot-title{font-weight:500;color:#c6cdcb}
 @media(max-width:540px){#server-dialog .console-boot pre.boot-logo{font-size:9px}}
@@ -1861,7 +1861,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #cloud-project-dialog .exercise-form-body input{padding-right:10px}
 #cloud-project-dialog [hidden]{display:none!important}
 
-/* Identidad visual ΣIM: acciones de nube y autor de sesión, sin ensanchar iconos. */
+/* Identidad visual ΣiM: acciones de nube y autor de sesión, sin ensanchar iconos. */
 .command-bar .file-tools .cloud-toolbar-button{width:30px;min-width:30px;height:27px;padding:5px;color:var(--spx-accent);border:1px solid transparent}
 .command-bar .file-tools .cloud-toolbar-button:hover:not(:disabled){background:var(--spx-accent-dim);border-color:var(--spx-border)}
 .command-bar .file-tools #cloud-save-toolbar{width:auto;min-width:max-content;padding:4px 8px;border-color:var(--spx-border);background:var(--spx-surface)}
@@ -1901,7 +1901,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 #cloud-project-dialog #cloud-switch-student:hover{background:var(--spx-surface-2);border-color:var(--spx-accent)}
 #cloud-project-dialog #cloud-switch-student[hidden]{display:none!important}
 
-/* ΣIM 0.43 · Diálogos técnicos: pie de acciones común, sin botones a todo el ancho. */
+/* ΣiM 0.43 · Diálogos técnicos: pie de acciones común, sin botones a todo el ancho. */
 .sim-shell dialog .dialog-actions{box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:0;padding:12px 20px 16px;min-height:58px;border-top:1px solid var(--spx-border)}
 .sim-shell dialog .dialog-actions>button{box-sizing:border-box;flex:0 0 auto;width:auto!important;max-width:100%;min-width:74px;min-height:34px;margin:0!important;padding:7px 14px!important;line-height:1.3;border-radius:4px;font-weight:500}
 .sim-shell dialog .dialog-actions>button.primary-button{background:var(--spx-accent);color:var(--spx-accent-fg,#fff);border:1px solid var(--spx-accent)}
@@ -2081,7 +2081,7 @@ body.results-window #results-panel [data-results-content="streams"]:not([hidden]
 .results-card dd{max-width:54%;overflow-wrap:anywhere}
 
 
-/* ΣIM 0.47.7: interfaz técnica, sin ornamentos; barra reordenable. */
+/* ΣiM 0.47.7: interfaz técnica, sin ornamentos; barra reordenable. */
 .command-bar .command-group{position:relative}
 .command-bar .toolbar-grip{
   position:absolute;inset-inline-start:-6px;top:4px;z-index:2;
@@ -2235,7 +2235,7 @@ body.results-window .results-card h3{font-size:13px;margin-bottom:9px}
 }
 
 
-/* ΣIM 0.47.9 · Un único lenguaje de controles desplegables.
+/* ΣiM 0.47.9 · Un único lenguaje de controles desplegables.
    Menús de aplicación (.app-menu) conservan su comportamiento y no reciben +/−;
    detalles informativos sí. Evita flechas nativas de Firefox/Chrome. */
 details>summary{list-style:none}
@@ -2529,3 +2529,10 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 }
 .command-bar .toolbar-resize:is(:hover,:active,:focus-visible)::after{opacity:.65}
 .command-bar .toolbar-resize:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-2px}
+
+/* ΣiM: acción compacta, mantiene texto accesible y estado. */
+.command-bar #calculate-button.primary-calculate{width:48px;min-width:48px;max-width:48px;flex:0 0 48px;padding:4px 6px;gap:4px;justify-content:center}
+.command-bar #calculate-button .calculate-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.command-bar #calculate-button .calculation-lamp{margin-left:0}
+#diagram .node.dwsim.dwsim-calculated:not(.dwsim-energy){--dwsim-ink:#4682b4}
+[data-theme="dark"] #diagram .node.dwsim.dwsim-calculated:not(.dwsim-energy){--dwsim-ink:#8bbce4}
