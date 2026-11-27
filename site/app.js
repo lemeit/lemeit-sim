@@ -412,7 +412,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
     html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
     if(g){
       html+=`${exporting?'':`<path class="stream-hit" d="${g.d}"/>`}<path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${exporting?'':`<rect class="equipment-hit" x="-6" y="-6" width="${t.w+12}" height="${t.h+12}" rx="5"/>`}${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
     html+=renderCallout(n,g,r,feed,exportRoutes);
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
@@ -892,14 +892,14 @@ function bindEvents(){
     if(panning?.pointerId===e.pointerId)endPan();
   });
   svg.addEventListener('pointerdown',e=>{
-    if(busy||e.button!==0)return;
+    if(busy||e.button!==0||!e.isPrimary)return;
     e.preventDefault();
     // Una selección múltiple se arrastra desde cualquier parte de sus objetos,
     // incluidos puertos y controles; Shift conserva su función de sumar/quitar.
     const groupOwner=e.target.closest('[data-node]')?.dataset.node||e.target.closest('[data-owner]')?.dataset.owner;
     if(!e.shiftKey&&selection?.nodes?.includes(groupOwner)){
       dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};
-      svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;
+      svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;
     }
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
@@ -907,8 +907,8 @@ function bindEvents(){
     const node=e.target.closest('[data-node]');
     if(node){const id=node.dataset.node,existing=selection?.nodes||[selection?.node].filter(Boolean);
       if(e.shiftKey){selectNodes(existing.includes(id)?existing.filter(v=>v!==id):[...existing,id]);pending=null;renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
-      if(selection?.nodes?.includes(id)){dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;}
-      selection={node:id};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+      if(selection?.nodes?.includes(id)){dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;}
+      selection={node:id};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
     const edge=e.target.closest('[data-edge]');if(edge){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
     const original=selection;marquee={start:svgPoint(e),end:svgPoint(e),base:e.shiftKey?(selection?.nodes||[selection?.node].filter(Boolean)):[],original};if(!e.shiftKey)selection=null;pending=null;svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});
   });
@@ -941,6 +941,7 @@ function bindEvents(){
     const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     const visualChange=dragging?.moved||resizing||bending;
     dragging=null;resizing=null;bending=null;
+    svg.classList.remove('object-dragging');
     $('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;
     if(deleteDrag){removeSelected();notice('Objeto eliminado del diagrama. También podés seleccionar y pulsar Supr.');return;}
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
