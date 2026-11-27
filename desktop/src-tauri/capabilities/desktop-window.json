@@ -15,6 +15,26 @@
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     "core:window:allow-start-resize-dragging",
-    "core:window:allow-set-decorations"
+    "core:window:allow-set-decorations",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/lemeit/lemeit-sim*"
+        },
+        {
+          "url": "https://wiki.lemeit.ar/sim/*"
+        },
+        {
+          "url": "https://dwsim.org/"
+        },
+        {
+          "url": "https://dwsim.org/tutorials/*"
+        },
+        {
+          "url": "https://lemeit.ar/"
+        }
+      ]
+    }
   ]
 }
