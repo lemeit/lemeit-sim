@@ -1,14 +1,12 @@
 # Historial de ΣIM Desktop
 
-## En desarrollo · 2026-11-27
-
-- Integra la interfaz compartida 0.51.10 y adapta los textos de la biblioteca local para Desktop.
-
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
-- Ayuda Desktop: manual breve local (F1), atajos, catálogo integrado, acceso a ejemplos y guía de resoluciones existente. Wiki, DWSIM, GitHub y lemeit mediante Opener Tauri con permisos limitados a enlaces HTTPS del proyecto. Pie Información renombrado Licencias. Pendiente de recompilar y verificar en Windows y Debian; la wiki completa no está incluida.
+- Integra la interfaz compartida 0.51.10 y adapta los textos de la biblioteca local para Desktop. Se verificaron Acerca de, la biblioteca y F1 en una sesión aislada que solo permitió conexiones al gateway local del puerto 5920.
+
+- Ayuda Desktop: manual breve local (F1), atajos, catálogo integrado, acceso a ejemplos y guía de resoluciones existente. Wiki, DWSIM, GitHub y lemeit mediante Opener Tauri con permisos limitados a enlaces HTTPS del proyecto. Pie Información renombrado Licencias. En Windows, F1 mostró el manual incluido y Opener abrió la wiki en Chrome mientras el editor siguió en su ventana. La verificación en Debian sigue pendiente.
 
 - Primera compilación y apertura de la ventana principal en Windows confirmadas por captura, con catálogo HTTP 200. Rust 1.100, MSVC 14.29 y Windows SDK 10.0.26100.0. Cálculos Windows Desktop pendientes de validación específica.
 - Corrige contraste de iconos y foco en cabeceras oscuras bajo tema claro; conserva la familia tipográfica existente.
