@@ -3,11 +3,11 @@
 'use strict';
 globalThis.SimDockLayout=(()=>{
   const KEY='sim-dock-layout-cad-v3';
-  const IDS=['equipment','inspector','results','charts'];
+  const IDS=['equipment','inspector','results','charts','explorer'];
   const EDGES=['left','right','top','bottom'];
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
-  const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'float'};
+  const DEFAULT={equipment:'left',inspector:'right',results:'right',charts:'float',explorer:'float'};
   const DEFAULT_SIZES={left:186,right:336,top:200,bottom:160};
   let revealPanel=()=>{};
   const clamp=(n,a,b)=>Math.min(Math.max(n,a),b);
@@ -31,12 +31,13 @@ globalThis.SimDockLayout=(()=>{
       equipment:{x:60,y:130,w:310,h:500},
       inspector:{x:Math.max(8,vw-390),y:130,w:355,h:500},
       results:{x:Math.max(8,(vw-760)/2),y:Math.max(8,vh-410),w:760,h:350},
+      explorer:{x:Math.max(8,vw-580),y:90,w:550,h:Math.min(620,vh-110)},
       charts:{x:(vw-660)/2,y:Math.max(65,(vh-640)/2),w:660,h:Math.min(640,vh-90)}
     };
     return Object.fromEntries(IDS.map(id=>{
       const p=stored?.[id];
       return [id,{id,mode:MODES.includes(p?.mode)?p.mode:DEFAULT[id],
-        lastDock:EDGES.includes(p?.lastDock)?p.lastDock:id==='charts'?'bottom':DEFAULT[id],
+        lastDock:EDGES.includes(p?.lastDock)?p.lastDock:['charts','explorer'].includes(id)?'bottom':DEFAULT[id],
         box:fit(p?.box||fallback[id],vw,vh)}];
     }));
   }
@@ -48,7 +49,7 @@ globalThis.SimDockLayout=(()=>{
     const elements={
       equipment:workspace?.querySelector('.equipment-panel'),
       inspector:workspace?.querySelector('.inspector-panel'),
-      results:document.getElementById('results-panel'),charts:document.getElementById('charts-dialog')
+      results:document.getElementById('results-panel'),charts:document.getElementById('charts-dialog'),explorer:document.getElementById('process-explorer-panel')
     };
     if(!workspace||!diagram||IDS.some(id=>!elements[id]))return;
     let saved={};
@@ -81,7 +82,7 @@ globalThis.SimDockLayout=(()=>{
     indicator.setAttribute('aria-hidden','true');document.body.append(indicator);
     let z=900,gesture=null,saveTimer=null;
     const mobile=()=>innerWidth<=760;
-    const activeMode=p=>mobile()?(p.id==='charts'?'bottom':DEFAULT[p.id]):p.mode;
+    const activeMode=p=>mobile()?(['charts','explorer'].includes(p.id)?'bottom':DEFAULT[p.id]):p.mode;
     const visible=p=>!p.el.hidden;
     function persist(){
       const value=Object.fromEntries(IDS.map(id=>[id,{mode:panels[id].mode,
@@ -203,7 +204,7 @@ globalThis.SimDockLayout=(()=>{
     }
     function place(p,mode){
       if(mode==='reset'){
-        p.mode=DEFAULT[p.id];p.lastDock=p.id==='charts'?'bottom':DEFAULT[p.id];
+        p.mode=DEFAULT[p.id];p.lastDock=['charts','explorer'].includes(p.id)?'bottom':DEFAULT[p.id];
         p.box=recover(null,innerWidth,innerHeight)[p.id].box;
       }else if(MODES.includes(mode)){
         if(p.mode!=='float')p.lastDock=p.mode;
@@ -308,7 +309,7 @@ globalThis.SimDockLayout=(()=>{
     for(const id of IDS){
       const el=elements[id],p=panels[id];
       p.el=el;
-      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Balances y corrientes',charts:'Gráficas'}[id];
+      p.title={equipment:'Equipos y corrientes',inspector:'Propiedades',results:'Balances y corrientes',charts:'Gráficas',explorer:'Explorar proceso'}[id];
       const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
       heading.classList.add('sim-cad-heading');heading.tabIndex=0;
       if(id!=='results'&&id!=='charts')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
@@ -327,7 +328,7 @@ globalThis.SimDockLayout=(()=>{
       p.button=button;
       const tools=document.createElement('span');tools.className='sim-cad-controls';
       tools.append(select,button);
-      heading.insertBefore(tools,heading.querySelector('.results-tools,#charts-close'));
+      heading.insertBefore(tools,heading.querySelector('.results-tools,#charts-close,#process-explorer-expand'));
       const sizeGrip=makeButton('◢','Redimensionar '+p.title);
       sizeGrip.className='sim-cad-size-grip';el.append(sizeGrip);
       select.addEventListener('change',()=>place(p,select.value));
@@ -382,7 +383,7 @@ globalThis.SimDockLayout=(()=>{
     },true);
     revealPanel=(id,{presentation=false}={})=>{
       const p=panels[id];if(!p)return;
-      if(presentation&&id==='charts'){p.mode='float';p.box=recover(null,innerWidth,innerHeight).charts.box;}
+      if(presentation&&['charts','explorer'].includes(id)){p.mode='float';p.box=recover(null,innerWidth,innerHeight)[id].box;}
       p.el.hidden=false;apply(p,false);
     };
     updateSlots();store();
