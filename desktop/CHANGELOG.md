@@ -4,6 +4,8 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26/11/2026
 
+- Unifica tipografía de menús y desplegables de la barra Desktop a 12 px y ajusta altura y foco del selector de régimen; comprobación visual pendiente.
+
 - Corrige contraste de menús activos, foco visual de búsqueda y desbordamiento horizontal de herramientas. Ajuste automático de filas sin barra de desplazamiento.
 - Corrige selectores del acoplamiento CAD (data-sim-cad-mode) para distinguir ventanas flotantes oscuras de paneles acoplados neutros; unifica proporciones y hover de los controles de cierre. Cambios pendientes de comprobación visual.
 
