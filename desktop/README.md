@@ -1,6 +1,6 @@
 # ΣIM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣIM 0.51.9. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
+Base científica y frontend compartido: ΣIM 0.51.13 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
 
 **Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.1.0-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
 
@@ -87,7 +87,7 @@ El objetivo es instalar una vez con un instalador de Windows (.exe o .msi) o un 
 
 ## Documentación
 
-[Historial Desktop](CHANGELOG.md) · [Hoja de ruta general](../docs/roadmap.md) · [Ejemplo 20](../docs/ejemplo-20-tanque-dinamico-dwsim.md) · [README principal](../README.md).
+[Formato .sim y distribución](DISTRIBUTION.md) · [Historial Desktop](CHANGELOG.md) · [Hoja de ruta general](../docs/roadmap.md) · [Ejemplo 20](../docs/ejemplo-20-tanque-dinamico-dwsim.md) · [README principal](../README.md).
 
 ## Seguridad
 
