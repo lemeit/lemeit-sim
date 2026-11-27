@@ -3,7 +3,7 @@
 'use strict';
 const SimProcessExplorer=(()=>{
   const $=id=>document.getElementById(id);
-  let context=null,steps=[],position=0,visible=false,hadRecycle=false;
+  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary";
   const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
     maximumSignificantDigits:digits,
     notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
@@ -138,10 +138,13 @@ const SimProcessExplorer=(()=>{
       el.classList.toggle('explorer-muted',visible&&!current);
     });
   }
+  function pause(){clearInterval(timer);timer=null;const b=$('process-explorer-play');b.textContent='▶';b.setAttribute('aria-label','Reproducir');b.setAttribute('aria-pressed','false');}
+  function play(){if(timer!==null){pause();return;}if(!visible)return;if(position===steps.length-1)position=0;render();if(steps.length<2)return;const b=$('process-explorer-play');b.textContent='Ⅱ';b.setAttribute('aria-label','Pausar');b.setAttribute('aria-pressed','true');timer=setInterval(()=>{next();if(position===steps.length-1)pause();},Number($('process-explorer-speed').value)||4000);}
+  function setView(nextView){view=nextView;const panel=$('process-explorer-panel');panel.dataset.view=view;panel.querySelectorAll('[data-explorer-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.explorerView===view)));if(view==='technical'||view==='all')$('process-explorer-interpretation').open=true;}
   function render(){
     const panel=$('process-explorer-panel'),active=visible&&steps.length>0;
     panel.hidden=!active;
-    $('process-explorer-open').disabled=!context?.isValid?.()||!steps.length;
+    $('process-explorer-open').disabled=!context?.isValid?.();
     $('process-explorer-open').setAttribute('aria-pressed',String(active));
     const menuButton=document.querySelector('[data-toolbar-action="process-explorer-open"]');
     if(menuButton)menuButton.disabled=$('process-explorer-open').disabled;
@@ -157,7 +160,8 @@ const SimProcessExplorer=(()=>{
     const wasExpanded=interpretation.open;
     interpretation.hidden=step.stream;
     interpretation.open=!step.stream&&wasExpanded;
-    panel.scrollTop=0;
+    panel.querySelector('.explorer-scroll').scrollTop=0;
+    const progress=$('process-explorer-progress');progress.max=steps.length;progress.value=position+1;
     const analysis=$('process-explorer-analysis');
     analysis.replaceChildren();
     if(step.stream){
@@ -185,15 +189,15 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-back').disabled=position===0;
     $('process-explorer-next').disabled=position===steps.length-1;
     $('process-explorer-cycles').hidden=!hadRecycle;
-    emphasize();
+    setView(view);emphasize();
   }
   function open(){
     if(!context?.isValid?.())return;
     const data=context.getData();steps=createSteps(data.graph,data.result);
     if(!steps.length)return;
-    visible=true;position=0;render();
+    visible=true;position=0;render();globalThis.SimDockLayout?.reveal('explorer');
   }
-  function close(){visible=false;steps=[];position=0;render();}
+  function close(){pause();$('process-explorer-panel').classList.remove('explorer-expanded');visible=false;steps=[];position=0;render();}
   function invalidate(){if(visible)close();else render();}
   function next(){if(visible&&position<steps.length-1){position++;render();}}
   function back(){if(visible&&position>0){position--;render();}}
@@ -203,6 +207,11 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-close').addEventListener('click',close);
     $('process-explorer-back').addEventListener('click',back);
     $('process-explorer-next').addEventListener('click',next);
+    $('process-explorer-play').addEventListener('click',play);
+    $('process-explorer-stop').addEventListener('click',()=>{pause();position=0;render();});
+    $('process-explorer-speed').addEventListener('change',()=>{if(timer!==null){pause();play();}});
+    $('process-explorer-expand').addEventListener('click',()=>{const p=$('process-explorer-panel');if(!p.classList.contains('explorer-expanded')&&p.dataset.simCadMode!=='float')globalThis.SimDockLayout?.reveal('explorer',{presentation:true});p.classList.toggle('explorer-expanded');});
+    document.querySelectorAll('[data-explorer-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.explorerView)));
     render();
   }
   return {bind,open,close,invalidate,emphasize,createSteps};
