@@ -165,3 +165,47 @@
   border-color:var(--spx-text-dim);
   box-shadow:none;
 }
+
+/* Fixed dark chrome must not inherit light-theme icon or hover colors. */
+.sim-desktop .desktop-titlebar .desktop-window-controls button,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button,
+.sim-desktop .sim-shell dialog .dialog-heading button{
+  color:#ebedf0!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button{
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button:hover,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button:hover,
+.sim-desktop .sim-shell dialog .dialog-heading button:hover{
+  background:#363b42!important;color:#fff!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls .desktop-window-close:hover,
+.sim-desktop .sim-shell .sim-cad-heading :is(#results-close,#charts-close):hover,
+.sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)):hover{
+  background:#b91d32!important;color:white!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button:focus-visible{
+  outline:1px solid #aeb7c2!important;outline-offset:-3px!important;
+}
+.sim-desktop .desktop-titlebar button svg,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button svg,
+.sim-desktop .sim-shell dialog .dialog-heading button svg{
+  color:inherit!important;stroke:currentColor!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading :is(.sim-cad-move,.sim-cad-index){
+  color:#c2c8d0!important;opacity:.85!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading .sim-cad-position{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='4.5' r='1.25' fill='%23e2e6eb'/%3E%3Ccircle cx='10' cy='10' r='1.25' fill='%23e2e6eb'/%3E%3Ccircle cx='10' cy='15.5' r='1.25' fill='%23e2e6eb'/%3E%3C/svg%3E")!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button:disabled{
+  opacity:.45!important;
+}
+.sim-desktop[data-theme="light"] .sim-shell .command-bar button:not(:disabled){
+  color:#333b43;
+}
+.sim-desktop[data-theme="light"] .sim-shell .command-bar button:not(:disabled):focus-visible{
+  outline:1px solid #77828d;outline-offset:-2px;box-shadow:none;
+}
