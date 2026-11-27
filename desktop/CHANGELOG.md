@@ -4,6 +4,9 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
+- Debian: el usuario comprobó los doce puntos de validación funcional (PFD, conexiones, barras y persistencia, temas, F1, Wiki, ejemplos 01/20 y cierre); también recuperó un proyecto de biblioteca. Observó una ventana de resultados al inicio que no se reprodujo después de reiniciar y el color rojo tras dinámica. Se modifica la apertura de resultados flotantes sin proyecto y el estado visual del PFD dinámico. Correcciones pendientes de nueva prueba.
+- Primera exportación .sim (JSON de proyecto v1), importación .sim/.json y diseño de distribución en DISTRIBUTION.md. Diálogos nativos, asociaciones, paquetes y firmas pendientes.
+
 - Base 0.51.13. Confirma el cierre del proyecto o de la ventana cuando hay cambios sin guardar, incluida la última corrida.
 
 - Base 0.51.12. Evita que las consultas de catálogo y capacidades de Windows compitan con el cálculo local.
