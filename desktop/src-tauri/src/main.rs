@@ -13,14 +13,24 @@ impl Drop for Gateway {
 
 fn start_gateway() -> Result<Gateway, Box<dyn std::error::Error>> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let token = std::env::var_os("SIM_DESKTOP_MCP_TOKEN_FILE")
-        .ok_or("Definí SIM_DESKTOP_MCP_TOKEN_FILE con la ruta del token local MCP de Debian")?;
-    let mut gateway = Gateway(Command::new("python3")
-        .current_dir(&root)
-        .arg(root.join("server.py"))
-        .args(["--desktop", "--port", "5920", "--mcp-token-file"])
-        .arg(token)
-        .stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()?);
+    let python = std::env::var_os("SIM_DESKTOP_PYTHON")
+        .unwrap_or_else(|| if cfg!(windows) { "python".into() } else { "python3".into() });
+    let mut command = Command::new(python);
+    command.current_dir(&root).arg(root.join("server.py"))
+        .args(["--desktop", "--port", "5920"]);
+    if cfg!(windows) {
+        let runtime = std::env::var_os("SIM_DESKTOP_ENGINE_ROOT")
+            .ok_or("Definí SIM_DESKTOP_ENGINE_ROOT con la carpeta runtime de DWSIM")?;
+        if !PathBuf::from(&runtime).join("local-token.txt").is_file() {
+            return Err("No se encontró local-token.txt en el runtime de DWSIM".into());
+        }
+        command.arg("--engine-root").arg(runtime);
+    } else {
+        let token = std::env::var_os("SIM_DESKTOP_MCP_TOKEN_FILE")
+            .ok_or("Definí SIM_DESKTOP_MCP_TOKEN_FILE con la ruta del token local MCP de Debian")?;
+        command.arg("--mcp-token-file").arg(token);
+    }
+    let mut gateway = Gateway(command.stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()?);
     let stdout = gateway.0.stdout.take().ok_or("Sin salida del gateway")?;
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
