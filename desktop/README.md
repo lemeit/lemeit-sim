@@ -60,6 +60,17 @@ test -n "$SIM_DESKTOP_MCP_TOKEN_FILE" && test -r "$SIM_DESKTOP_MCP_TOKEN_FILE" &
 ```
 Solo se necesita la ruta del token, nunca publicar su contenido. Si no se encuentra, revisar la configuración del servicio. El puerto 5920 debe estar libre. Evitar simulaciones simultáneas Online/Desktop mientras compartan MCP. No requiere Node.js en este prototipo.
 
+## Ejecutar el prototipo en Windows x64
+
+Requiere Python, Rust MSVC x64, Visual Studio C++ Build Tools, Windows SDK y WebView2. Con el worktree Desktop actualizado:
+
+```powershell
+cd C:\GitHub\lemeit-sim-desktop
+powershell -NoProfile -ExecutionPolicy Bypass -File .\desktop\run-desktop.ps1
+```
+
+El script detecta MSVC y SDK instalados y usa por defecto el runtime existente en C:\GitHub\lemeit-sim\.local\runtime; admite parámetros -EngineRoot, -Python, -MsvcRoot y -SdkVersion. No cambia variables permanentes ni detiene Online. Windows usa procesos DWSIM aislados por trabajo. La primera apertura y el catálogo se comprobaron el 27/11; las pruebas de cálculo y el nuevo script aún requieren validación en Windows.
+
 ## Próximos hitos y criterios para liberar
 
 - Guardado y apertura con diálogos nativos, cambios sin guardar, revisión de cierre durante cálculo, barra de título compacta con controles funcionales y accesibles.
