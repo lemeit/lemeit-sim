@@ -2550,3 +2550,8 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 #process-explorer-panel #process-explorer-analysis{font:400 12px/1.65 var(--spx-font-sans)}#process-explorer-panel .explorer-reading{font:400 12px/1.5 var(--spx-font-sans);align-items:baseline}#process-explorer-panel .explorer-reading strong{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
 #process-explorer-panel .explorer-equation{font:400 19px/1.6 Georgia,serif;background:var(--spx-surface-2);border-left:2px solid var(--spx-accent);padding:8px 12px;margin:8px 0;overflow-wrap:anywhere}
 #process-explorer-panel #process-explorer-analysis h3{font:600 13px/1.4 var(--spx-font-sans);margin:16px 0 6px;color:var(--spx-text)}#process-explorer-panel #process-explorer-analysis .explorer-closure{font-size:11px;color:var(--spx-good);margin:4px 0 12px}#process-explorer-panel #process-explorer-analysis .explorer-closure[data-ok=false]{color:var(--spx-accent)}
+
+/* Secciones independientes de exploración estacionaria y temporal. */
+#process-explorer-panel:is([data-view=mass],[data-view=energy],[data-view=equations]) .explorer-content{display:none!important}
+#process-explorer-panel[data-view=mass] [data-explorer-section]:not([data-explorer-section=mass]),#process-explorer-panel[data-view=energy] [data-explorer-section]:not([data-explorer-section=energy]),#process-explorer-panel[data-view=equations] [data-explorer-section]:not([data-explorer-section=equations]){display:none!important}
+#process-explorer-panel [data-explorer-section]+[data-explorer-section]{margin-top:12px}#process-explorer-panel[data-dynamic=true] .explorer-reading strong{font-variant-numeric:tabular-nums}
