@@ -409,7 +409,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
     const g=isStream(n)?(exportRoutes?.get(n.id)??streamGeometry(n)):null;
     const selected=!exporting&&(selection?.node===n.id||selection?.nodes?.includes(n.id));
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${resultValidity==='valid'&&(result||dynamicResult)?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
     if(g){
       html+=`${exporting?'':`<path class="stream-hit" d="${g.d}"/>`}<path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
     }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${exporting?'':`<rect class="equipment-hit" x="-6" y="-6" width="${t.w+12}" height="${t.h+12}" rx="5"/>`}${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
@@ -703,10 +703,10 @@ async function calculateDynamic(){
     const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
     dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
-    $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
+    $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);renderDiagram();
     rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
-  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderDiagram();renderServerDetails();}
 }
 let calculationPending=false;
 async function calculate(){
@@ -1031,7 +1031,7 @@ function bindEvents(){
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
-  $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, el formato de Gráficas y la última corrida válida.');};
+  $('save-button').onclick=()=>{downloadLocal(exportStem()+(globalThis.SimDesktop?'.sim':'.json'),JSON.stringify(graph,null,2),'application/json');notice('Proyecto descargado con el diagrama, el formato de Gráficas y la última corrida válida.');};
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
