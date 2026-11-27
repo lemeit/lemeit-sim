@@ -698,12 +698,12 @@ function openDynamicSettings(){
 async function calculateDynamic(){
   if(!hasProject||busy)return;
   const started=performance.now(),version=revision,engine=selectedEngine;
-  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();notice('');
+  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();renderDiagram();notice('');
   try{
     const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
     dynamicResult=data;resultValidity='valid';lastCalculation={time:new Date().toISOString(),engine,state:'completed',ok:true,message:'Integración dinámica completada',duration_ms:Math.round(performance.now()-started)};
-    $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);renderDiagram();
+    $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
     rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderDiagram();renderServerDetails();}
