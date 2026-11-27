@@ -139,3 +139,29 @@
 .sim-desktop .sim-shell :is(.sim-cad-heading,.dialog-heading) :is(#charts-close,#results-close,.dialog-close,[data-close-dialog]:not(.guide-back)) svg{
   width:14px!important;height:14px!important;stroke-width:1.5!important;
 }
+
+/* Consistent Desktop combobox typography and focus. */
+.sim-desktop .sim-shell .app-header :is(.app-menu summary,.app-menu-trigger),
+.sim-desktop .sim-shell .command-bar select,
+.sim-desktop .sim-shell .command-bar select option{
+  font-family:var(--spx-font-sans);
+  font-size:12px;
+  font-weight:400;
+  letter-spacing:normal;
+}
+.sim-desktop .sim-shell .command-bar #simulation-regime{
+  font:400 12px/1.3 var(--spx-font-sans);
+  letter-spacing:normal;
+  height:28px;
+  min-width:112px;
+  max-width:none;
+  border-radius:3px;
+  padding:3px 8px;
+}
+.sim-desktop .sim-shell .command-bar #simulation-regime:focus,
+.sim-desktop .sim-shell .command-bar select:focus-visible{
+  outline:1px solid var(--spx-text-dim);
+  outline-offset:-1px;
+  border-color:var(--spx-text-dim);
+  box-shadow:none;
+}
