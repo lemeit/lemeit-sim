@@ -222,7 +222,7 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-play').addEventListener('click',play);
     $('process-explorer-stop').addEventListener('click',()=>{pause();position=0;render();});
     $('process-explorer-speed').addEventListener('change',()=>{if(timer!==null){pause();play();}});
-    $('process-explorer-expand').addEventListener('click',()=>{const p=$('process-explorer-panel');if(!p.classList.contains('explorer-expanded')&&p.dataset.simCadMode!=='float')globalThis.SimDockLayout?.reveal('explorer',{presentation:true});p.classList.toggle('explorer-expanded');});
+    $('process-explorer-expand').addEventListener('click',()=>{const p=$('process-explorer-panel');if(!p.classList.contains('explorer-expanded')&&p.dataset.simCadMode!=='float')globalThis.SimDockLayout?.reveal('explorer',{presentation:true});p.classList.toggle('explorer-expanded');const workspace=document.querySelector('.workspace');const r=workspace?.getBoundingClientRect();if(r){p.style.setProperty('--explorer-top',Math.max(8,r.top+4)+'px');p.style.setProperty('--explorer-bottom',Math.max(8,innerHeight-r.bottom+4)+'px');}});
     document.querySelectorAll('[data-explorer-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.explorerView)));
     render();
   }
