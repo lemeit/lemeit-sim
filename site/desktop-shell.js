@@ -2,6 +2,41 @@
 'use strict';
 globalThis.SimDesktopShell=(()=>{
   const $=id=>document.getElementById(id);
+  let project, closePending=false;
+  function bindProjectClose(options){project=options;}
+  function confirmClose(windowClosing){
+    if(closePending)return false;
+    if(project?.isBusy()){
+      project.notice('Hay un cálculo en curso. Esperá a que termine antes de cerrar.',true);
+      return false;
+    }
+    if(!project?.isDirty())return true;
+    const dialog=$('desktop-unsaved-dialog');
+    $('desktop-unsaved-title').textContent=windowClosing?'Cerrar ΣIM Desktop':'Cerrar proyecto';
+    $('desktop-unsaved-error').textContent='';
+    dialog.returnValue='cancel';
+    dialog.showModal();
+    closePending=true;
+    return new Promise(resolve=>{
+      dialog.addEventListener('close',()=>{
+        closePending=false;
+        resolve(dialog.returnValue==='close');
+      },{once:true});
+    });
+  }
+  async function closeProject(){if(await confirmClose(false))project.closeProject();}
+  function installCloseDialog(){
+    const dialog=document.createElement('dialog');
+    dialog.id='desktop-unsaved-dialog';
+    dialog.setAttribute('aria-labelledby','desktop-unsaved-title');
+    dialog.setAttribute('aria-describedby','desktop-unsaved-message');
+    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-unsaved-title"></h2></div><div class="dialog-body"><p id="desktop-unsaved-message">Hay cambios sin guardar en el proyecto o en su última corrida. Podés conservarlos en la biblioteca local antes de cerrar.</p><p id="desktop-unsaved-error" role="alert"></p><div class="dialog-actions"><button value="cancel" autofocus>Cancelar</button><button value="close">Cerrar sin guardar</button><button type="button" id="desktop-save-and-close">Guardar en biblioteca y cerrar</button></div></div></form>';
+    (document.querySelector('.sim-shell')||document.body).append(dialog);
+    $('desktop-save-and-close').onclick=()=>{
+      if(project.save())dialog.close('close');
+      else $('desktop-unsaved-error').textContent='No se pudo guardar en la biblioteca. Cancelá para volver al proyecto y guardar una copia JSON.';
+    };
+  }
   const icons={
     new:'<path d="M12 5v14M5 12h14"/>',
     open:'<path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2h7"/>',
@@ -28,7 +63,16 @@ globalThis.SimDesktopShell=(()=>{
     };
     action('Minimizar','<path d="M3 11h10"/>',()=>win.minimize());
     action('Maximizar o restaurar','<rect x="3.5" y="3.5" width="9" height="9"/>',()=>win.toggleMaximize());
-    action('Cerrar','<path d="m4 4 8 8m0-8-8 8"/>',()=>win.close()).classList.add('desktop-window-close');
+    let interceptsNativeClose=false;
+    try{
+      await win.onCloseRequested(async event=>{
+        if(!await confirmClose(true))event.preventDefault();
+      });
+      interceptsNativeClose=true;
+    }catch(error){fail(error);}
+    action('Cerrar','<path d="m4 4 8 8m0-8-8 8"/>',async()=>{
+      if(interceptsNativeClose||await confirmClose(true))await win.close();
+    }).classList.add('desktop-window-close');
     bar.addEventListener('mousedown',event=>{
       if(event.button!==0||event.target.closest('button'))return;
       if(event.detail===2){void win.toggleMaximize().catch(fail);return;}
@@ -128,9 +172,10 @@ globalThis.SimDesktopShell=(()=>{
       if(version)version.prepend('Desktop · prototipo alpha.2 | ');
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
+    installCloseDialog();
     installHelp();
     void installTitlebar();
   }
-  return {init};
+  return {init,bindProjectClose,closeProject};
 })();
 document.addEventListener('DOMContentLoaded',()=>SimDesktopShell.init());

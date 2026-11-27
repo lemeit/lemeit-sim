@@ -786,7 +786,8 @@ function updateCompound(name,remove){
   }
   changed();renderCompounds();renderInspector();
 }
-function loadGraph(data){
+let desktopSavedProject=null;
+function loadGraph(data,{saved=false}={}){
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
@@ -804,6 +805,7 @@ function loadGraph(data){
     if(applyingWorkspace)graph.saved_run=savedRun;else restoreRun(savedRun);
     persist();
   }
+  if(globalThis.SimDesktop&&!applyingWorkspace)desktopSavedProject=saved?JSON.stringify(graph):null;
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
 
@@ -1030,12 +1032,20 @@ function bindEvents(){
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
   $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, el formato de Gráficas y la última corrida válida.');};
-  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data);notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
+  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
   SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram,canEdit:()=>hasProject&&!busy});
-  SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
+  SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus,
+    onSave:()=>{if(globalThis.SimDesktop)desktopSavedProject=JSON.stringify(graph);}});
+  globalThis.SimDesktopShell?.bindProjectClose({
+    isDirty:()=>hasProject&&desktopSavedProject!==JSON.stringify(graph),
+    isBusy:()=>busy||calculationPending,
+    save:()=>SimProjectLibrary.save(),
+    closeProject:()=>clearLoadedProject(false),
+    notice
+  });
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
   SimChartWorkspace.bind({onFormatChange:()=>{if(hasProject){persist();SimCloudProjects.onChange();}},getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine,selectedId:selection?.node??(selection?.nodes?.length===1?selection.nodes[0]:null)})});
@@ -1071,7 +1081,7 @@ function clearLoadedProject(clearLocalDraft=false){
   globalThis.SimChartWorkspace?.reset();
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   SimExerciseEditor.reset();
-  graph=emptyProject();dynamicResult=null;
+  graph=emptyProject();dynamicResult=null;desktopSavedProject=null;
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();
   hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;
@@ -1612,7 +1622,13 @@ function bindWorkspaceTools(){
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
   $('unit-calculator-button').onclick=()=>{closeMenus();SimUnitCalculator.open(graph);};
   document.querySelectorAll('a[href="ejemplos.html"]').forEach(link=>link.onclick=e=>{e.preventDefault();closeMenus();document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());SimGuide.open($('guide-dialog'),$('guide-host'));});
-  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
+  $('close-project-button').onclick=()=>{
+    if(globalThis.SimDesktop&&globalThis.SimDesktopShell){
+      closeMenus();
+      void SimDesktopShell.closeProject();
+    }else $('close-project-dialog').showModal();
+  };
+  $('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
   const dock=$('results-panel');
   for(const button of dock.querySelectorAll('[data-results-view]')){
     button.onclick=()=>{selectResultsView(button.dataset.resultsView);$('results').scrollTop=0;};

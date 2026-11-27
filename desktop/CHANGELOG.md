@@ -4,6 +4,8 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
+- Base 0.51.13. Confirma el cierre del proyecto o de la ventana cuando hay cambios sin guardar, incluida la última corrida.
+
 - Base 0.51.12. Evita que las consultas de catálogo y capacidades de Windows compitan con el cálculo local.
 
 - Integra los tiradores discretos y el ajuste de ancho de grupos acoplados y flotantes de la base 0.51.11.

@@ -2,7 +2,7 @@
 'use strict';
 const SimProjectLibrary=(()=>{
   const KEY='sim-project-library-v1',LIMIT=30;
-  let getGraph,hasProject,loadGraph,notice,closeMenus,activeId=null;
+  let getGraph,hasProject,loadGraph,notice,closeMenus,onSave,activeId=null;
   const libraryLocation=()=>globalThis.SimDesktop?'en la biblioteca local de ΣIM Desktop':'en la biblioteca de este navegador';
   const $=id=>document.getElementById(id);
   const read=()=>{
@@ -22,7 +22,7 @@ const SimProjectLibrary=(()=>{
       const g=structuredClone(getGraph());
       const item={id,title:String(g.title||'Proceso sin título').trim().slice(0,70),modified:new Date().toISOString(),graph:g};
       const next=[item,...items.filter(i=>i.id!==id)];
-      write(next);activeId=id;
+      write(next);activeId=id;onSave?.();
       notice('Proyecto guardado '+libraryLocation()+'. Para usarlo en otra computadora, descargá el JSON.');
       render();return id;
     }catch(error){notice('No se pudo guardar '+libraryLocation()+': '+error.message+'. Descargá el JSON como copia de seguridad.',true);return null;}
@@ -47,7 +47,7 @@ const SimProjectLibrary=(()=>{
       const open=document.createElement('button');open.type='button';open.textContent='Abrir';
       open.onclick=()=>{
         if(hasProject()&&!window.confirm('¿Abrir este proyecto? Los cambios que no hayas guardado en la biblioteca o exportado pueden perderse.'))return;
-        try{loadGraph(structuredClone(item.graph));activeId=item.id;$('local-project-dialog').close();closeMenus();notice('Proyecto abierto desde la biblioteca local. Calculá para actualizar sus resultados.');}
+        try{loadGraph(structuredClone(item.graph),{saved:true});activeId=item.id;$('local-project-dialog').close();closeMenus();notice('Proyecto abierto desde la biblioteca local. Calculá para actualizar sus resultados.');}
         catch(error){notice('No se pudo abrir este proyecto: '+error.message,true);}
       };
       const remove=document.createElement('button');remove.type='button';remove.textContent='Eliminar';
@@ -60,7 +60,7 @@ const SimProjectLibrary=(()=>{
     }
   }
   function bind(options){
-    ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
+    ({getGraph,hasProject,loadGraph,notice,closeMenus,onSave}=options);
     $('local-projects-open').onclick=()=>{render();closeMenus();$('local-project-dialog').showModal();};
     $('local-projects-save').onclick=()=>save();
     $('local-project-save-current').onclick=()=>save();

@@ -79,7 +79,7 @@ El objetivo es instalar una vez con un instalador de Windows (.exe o .msi) o un 
 
 ## Próximos hitos y criterios para liberar
 
-- Guardado y apertura con diálogos nativos, cambios sin guardar, revisión de cierre durante cálculo, barra de título compacta con controles funcionales y accesibles.
+- Guardado y apertura con diálogos nativos. Desktop ya avisa al cerrar con cambios pendientes y permite guardarlos en la biblioteca local.
 - Motor MCP independiente, aislamiento del gateway local, puertos sin conflictos, navegación y permisos restringidos, credenciales propias.
 - Empaquetado de Python (evaluar PyInstaller), DWSIM y recursos locales con sus licencias y dependencias. Construcciones reproducibles Windows x64 y Debian amd64; evaluar AppImage.
 - Pruebas en sistemas limpios desconectados: estacionario, recirculaciones soportadas, Ejemplo 20 (121 muestras, 600 s, nivel final ≈0,333 m, descarga ≈10 kg/s), gráficas, archivos, exportaciones y cierre de procesos. CI compartido Online sin regresiones.
