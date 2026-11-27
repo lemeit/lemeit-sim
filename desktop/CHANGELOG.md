@@ -4,6 +4,9 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26/11/2026
 
+- Corrige contraste de menús activos, foco visual de búsqueda y desbordamiento horizontal de herramientas. Ajuste automático de filas sin barra de desplazamiento.
+- Corrige selectores del acoplamiento CAD (data-sim-cad-mode) para distinguir ventanas flotantes oscuras de paneles acoplados neutros; unifica proporciones y hover de los controles de cierre. Cambios pendientes de comprobación visual.
+
 - Barra de título propia visible y comprobada mediante captura en Debian; controles individuales aún pendientes de prueba documentada.
 - Unificación visual de diálogos internos y paneles flotantes con cabecera oscura compacta, cierre plano y contraste consistente. Paneles acoplados con fondo neutro. Se conservan eventos y comportamiento modal existentes; revisión visual pendiente.
 
