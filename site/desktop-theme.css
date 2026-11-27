@@ -58,19 +58,19 @@
 }
 .sim-desktop .sim-shell dialog::backdrop{background:#10151b66}
 .sim-desktop .sim-shell dialog .dialog-heading,
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading){
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading){
   background:#15181c!important;color:#ebedf0!important;
   border:0!important;border-bottom:1px solid #383d44!important;
   border-radius:0!important;box-sizing:border-box;
   min-height:30px!important;padding:0 0 0 10px!important;gap:8px!important;
 }
 .sim-desktop .sim-shell dialog .dialog-heading h2,
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) h2{
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) h2{
   color:inherit!important;font:500 12px/1.3 var(--spx-font-sans)!important;
   letter-spacing:0;margin:0!important;
 }
 .sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)),
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close){
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close){
   background:transparent!important;color:#ebedf0!important;border:0!important;
   border-radius:0!important;box-shadow:none!important;flex:0 0 36px!important;
   width:36px!important;min-width:36px!important;height:30px!important;min-height:30px!important;
@@ -78,11 +78,11 @@
   font:400 19px/1 system-ui,sans-serif!important;transform:none!important;
 }
 .sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)):hover,
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close):hover{
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close):hover{
   background:#b91d32!important;color:#fff!important;
 }
 .sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]):focus-visible,
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) button:focus-visible{
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) button:focus-visible{
   outline:1px solid #ebedf0!important;outline-offset:-3px!important;
 }
 .sim-desktop .sim-shell dialog .dialog-heading .dialog-close svg{width:14px;height:14px;stroke-width:1.5}
@@ -90,13 +90,52 @@
 .sim-desktop .sim-shell dialog .dialog-heading .guide-back{
   background:#292e35;color:#ebedf0;border:1px solid #454b53;border-radius:2px;
 }
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) button{
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) button{
   color:#ebedf0!important;
 }
-.sim-desktop .sim-shell .sim-panel-floating :is(.panel-heading,.results-heading) .sim-cad-position{
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) .sim-cad-position{
   background-color:transparent!important;
 }
-.sim-desktop .sim-shell .sim-cad-panel:not(.sim-panel-floating) :is(.panel-heading,.results-heading){
+.sim-desktop .sim-shell .sim-cad-panel:not([data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading){
   background:var(--spx-surface-2)!important;
   border-bottom:1px solid var(--spx-border)!important;
+}
+
+/* Desktop: actual CAD docking states and consistent interactive chrome. */
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):is(:hover,:active,:focus-visible),
+.desktop-custom-frame .sim-shell .app-header .app-menu[open] summary {
+  background:var(--spx-surface-2)!important;color:var(--spx-text)!important;
+}
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):focus-visible{
+  outline:1px solid var(--spx-text-dim);outline-offset:-2px;
+}
+.desktop-custom-frame .sim-shell .command-bar{
+  flex-wrap:wrap;overflow:visible;min-height:36px;gap:3px 6px;padding:3px 6px;
+}
+.desktop-custom-frame .sim-shell .command-bar .command-group{flex-shrink:0}
+.desktop-custom-frame .sim-shell .command-bar .project-title{min-width:85px;max-width:150px}
+.sim-desktop .sim-shell dialog #examples-search:focus-visible{
+  outline:1px solid var(--spx-text-dim);outline-offset:-1px;border-color:var(--spx-text-dim);box-shadow:none;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"]{
+  border-radius:3px!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading{
+  background:#15181c!important;color:#ebedf0!important;
+  padding:0 0 0 7px!important;min-height:30px!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading :is(.sim-cad-float,.sim-cad-position):hover{
+  background-color:#363b42!important;border-color:transparent!important;
+}
+.sim-desktop .sim-shell .sim-cad-heading :is(#charts-close,#results-close,.sim-cad-close){
+  width:30px!important;min-width:30px!important;height:27px!important;min-height:27px!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;
+  color:inherit!important;font:400 18px/1 system-ui,sans-serif!important;
+  padding:0!important;display:inline-flex;align-items:center;justify-content:center;
+}
+.sim-desktop .sim-shell .sim-cad-heading :is(#charts-close,#results-close,.sim-cad-close):hover{
+  background:#b91d32!important;color:white!important;
+}
+.sim-desktop .sim-shell :is(.sim-cad-heading,.dialog-heading) :is(#charts-close,#results-close,.dialog-close,[data-close-dialog]:not(.guide-back)) svg{
+  width:14px!important;height:14px!important;stroke-width:1.5!important;
 }
