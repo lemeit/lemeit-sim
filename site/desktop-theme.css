@@ -19,3 +19,33 @@
 .sim-desktop .menu-panel button{border-radius:2px}
 .sim-desktop[data-theme="light"] .canvas-wrap{background:#fff}
 .sim-desktop .site-footer{font-size:10px}
+
+/* Native chrome: only active after Tauri accepted setDecorations(false). */
+.desktop-titlebar{display:none}
+.desktop-custom-frame .desktop-titlebar{display:flex;align-items:center;flex:0 0 30px;min-height:30px;background:#15181c;color:#ebedf0;user-select:none;position:relative;z-index:21;gap:10px;padding-left:10px;box-sizing:border-box}
+.desktop-title-brand{display:flex;align-items:center;gap:9px;font-size:10px;flex:none;color:#bfc3c9}
+.desktop-title-brand img{width:69px;height:auto;pointer-events:none}
+.desktop-title-project{flex:1;min-width:0;text-align:center;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desktop-window-controls{display:flex;align-self:stretch;flex:none}
+.desktop-window-controls button{width:40px;border:0;border-radius:0;background:transparent;color:inherit;display:grid;place-items:center;padding:0;cursor:default}
+.desktop-window-controls button:hover{background:#363b42}
+.desktop-window-controls button.desktop-window-close:hover{background:#b91d32;color:white}
+.desktop-custom-frame .app-header .sim-brand{display:none}
+.desktop-custom-frame .sim-shell .app-header{height:29px;min-height:29px;gap:6px;background:var(--spx-surface);color:var(--spx-text);border-bottom:1px solid var(--spx-border)}
+.desktop-custom-frame .app-header .app-menu summary,.desktop-custom-frame .app-header .app-menu-trigger,.desktop-custom-frame .app-header #theme-toggle{color:var(--spx-text)}
+.desktop-custom-frame .app-header .app-menu[open] summary,.desktop-custom-frame .app-header .app-menu summary:hover{background:var(--spx-surface-2)}
+.desktop-custom-frame .app-header .app-menu summary{padding:4px 10px}
+.desktop-custom-frame .command-bar{flex-wrap:nowrap;overflow-x:auto;min-height:42px}
+.desktop-custom-frame .command-bar .command-group{flex-shrink:0}
+.desktop-custom-frame .command-bar .project-title{max-width:150px}
+.desktop-resize-edge{display:none;position:fixed;z-index:99999}
+.desktop-custom-frame .desktop-resize-edge{display:block}
+.desktop-resize-north{top:0;left:7px;right:7px;height:4px;cursor:n-resize}
+.desktop-resize-south{bottom:0;left:7px;right:7px;height:4px;cursor:s-resize}
+.desktop-resize-east{right:0;top:7px;bottom:7px;width:4px;cursor:e-resize}
+.desktop-resize-west{left:0;top:7px;bottom:7px;width:4px;cursor:w-resize}
+.desktop-resize-northeast,.desktop-resize-northwest,.desktop-resize-southeast,.desktop-resize-southwest{width:7px;height:7px}
+.desktop-resize-northeast{right:0;top:0;cursor:ne-resize}
+.desktop-resize-northwest{left:0;top:0;cursor:nw-resize}
+.desktop-resize-southeast{right:0;bottom:0;cursor:se-resize}
+.desktop-resize-southwest{left:0;bottom:0;cursor:sw-resize}
