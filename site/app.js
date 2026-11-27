@@ -159,7 +159,7 @@ function updateControls(){
   $('report-label-tool').disabled=!hasProject;
   $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
-  $('process-explorer-open').disabled=busy||!hasProject||!result||resultValidity!=='valid';
+  $('process-explorer-open').disabled=busy||!hasProject||!(result||dynamicResult?.points?.length)||resultValidity!=='valid';
   $('engine-select').disabled=busy||auxiliaryWorkspace;
   document.querySelectorAll('[data-toolbar-action]').forEach(button=>{
     button.disabled=$(button.dataset.toolbarAction).disabled;
@@ -1035,7 +1035,7 @@ async function init(){
   SimChartWorkspace.bind({onFormatChange:()=>{if(hasProject){persist();SimCloudProjects.onChange();}},getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine,selectedId:selection?.node??(selection?.nodes?.length===1?selection.nodes[0]:null)})});
   SimTankDynamicsUI.bind();
   SimTankDwsimMode.bind({getEngine:()=>selectedEngine});
-  $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
+  $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!(result||dynamicResult?.points?.length),getData:()=>({graph,result,dynamicResult})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
   if(!auxiliaryWorkspace&&!await checkEngine()){
     try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: los motores están desconectados o no son compatibles. Podés guardar y reintentar.');}
