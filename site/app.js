@@ -64,7 +64,7 @@ let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let resultValidity='none'; // none | stale | valid; solo resultados calculados pueden quedar obsoletos.
 let unitSystem='engineering';
-let selectedEngine=globalThis.SimDesktop?'debian':'windows',engineMode='auto',engineCheckGeneration=0; // Selección automática predeterminada.
+let selectedEngine=globalThis.SimDesktop?(globalThis.SimDesktopEngine||'debian'):'windows',engineMode='auto',engineCheckGeneration=0; // Selección automática predeterminada.
 let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 const diagnosticEvents=[];
@@ -1482,13 +1482,13 @@ function paintConnection(){
   const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
   $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
   const actual=resultValidity==='valid'&&lastCalculation?.state==='completed'&&['windows','debian'].includes(lastCalculation.engine)?' · cálculo: '+(lastCalculation.engine==='debian'?'Debian':'Windows'):'';
-  $('engine-current').textContent=globalThis.SimDesktop?'Motor local · Debian':(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
+  $('engine-current').textContent=globalThis.SimDesktop?('Motor local · '+(selectedEngine==='debian'?'Debian':'Windows')):(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
   $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
 }
 function renderServerDetails(){
   renderConnectionTrace();
-  const engineName=globalThis.SimDesktop?'Motor local · Debian':selectedEngine==='debian'?'Motor alternativo':'Motor principal';
+  const engineName=globalThis.SimDesktop?('Motor local · '+(selectedEngine==='debian'?'Debian':'Windows')):selectedEngine==='debian'?'Motor alternativo':'Motor principal';
   const state=connectionCheck?.state||(engineOnline?'online':'checking');
   const labels={online:'Servicio accesible',busy:'Motor ocupado',offline:'Sin conexión verificada',checking:'Comprobando conexión'};
   const status=labels[state]||state;
@@ -1517,7 +1517,7 @@ async function readGatewayStatus(engine,generation){
 }
 async function checkEngine({silent=false,exclude=[]}={}){
   if(busy)return engineOnline;
-  const generation=++engineCheckGeneration,order=(globalThis.SimDesktop?['debian']:SimEngineRouting.order(engineMode,selectedEngine)).filter(id=>!exclude.includes(id));
+  const generation=++engineCheckGeneration,order=(globalThis.SimDesktop?[globalThis.SimDesktopEngine||'debian']:SimEngineRouting.order(engineMode,selectedEngine)).filter(id=>!exclude.includes(id));
   monitorRequest=true;$('server-refresh').disabled=true;
   let lastError='Sin motores disponibles',lastHttp=null,successful=false;
   for(const engine of order){
