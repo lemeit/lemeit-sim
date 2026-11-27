@@ -2086,16 +2086,18 @@ body.results-window #results-panel [data-results-content="streams"]:not([hidden]
 .command-bar .toolbar-grip{
   position:absolute;inset-inline-start:-6px;top:4px;z-index:2;
   display:inline-grid;place-items:center;
-  width:10px!important;min-width:10px!important;height:23px!important;
-  padding:0!important;opacity:.24;color:var(--spx-text-dim);
+  width:12px!important;min-width:12px!important;height:23px!important;min-height:0!important;
+  padding:0!important;opacity:.18;color:var(--spx-text-dim);
   background:transparent!important;border:0!important;cursor:grab;
 }
-.command-bar .toolbar-grip:hover,.command-bar .toolbar-grip:focus-visible{opacity:.9;outline:1px solid var(--spx-border);outline-offset:-1px}
+.command-bar .command-group:hover>.toolbar-grip,.command-bar .toolbar-grip:focus-visible{opacity:.52}
+.command-bar .toolbar-grip:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-1px}
+.command-bar .toolbar-grip svg{fill:currentColor}
 .command-bar .toolbar-grip:active{cursor:grabbing}
 .command-bar .toolbar-grip svg{pointer-events:none}
 .command-bar .file-tools{padding-inline-start:9px}
 .command-bar .file-tools .toolbar-grip{inset-inline-start:0}
-.command-bar .toolbar-drop-target{outline:1px dashed var(--spx-accent);outline-offset:-2px;background:var(--spx-accent-dim)}
+.command-bar .toolbar-drop-target{box-shadow:inset 1px 0 var(--spx-accent)}
 .command-bar .simulation-tools{gap:5px;padding-inline:4px!important}
 .command-bar #calculate-button.primary-calculate{
   box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
@@ -2503,6 +2505,11 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .sim-shell :is(#charts-scrub,#tank-dynamic-scrub):disabled{cursor:default}
 
 .command-bar .toolbar-grip,.command-bar .toolbar-resize{touch-action:none}
+.sim-shell .command-bar[data-customizable] .command-group{padding-inline-end:14px}
+.sim-shell .command-bar .command-group.toolbar-sized{
+  box-sizing:border-box;width:var(--toolbar-width);flex-wrap:wrap;align-content:center;
+}
+.sim-shell .command-bar .toolbar-sized>*:not(.toolbar-grip):not(.toolbar-resize){flex-shrink:0}
 .sim-shell .command-bar .command-group.toolbar-floating{
   position:fixed;z-index:960;box-sizing:border-box;
   left:var(--toolbar-x);top:var(--toolbar-y);width:var(--toolbar-width);
@@ -2510,9 +2517,15 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
   border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface-2);
 }
 .command-bar .toolbar-floating .toolbar-grip{inset-inline-start:3px}
-.command-bar .toolbar-resize{display:none}
-.command-bar .toolbar-floating .toolbar-resize{
-  display:block;position:absolute;inset:3px 2px 3px auto;width:10px;min-width:0;height:auto;padding:0;
-  border:0;border-inline-end:2px solid var(--spx-border);border-radius:0;background:transparent;cursor:ew-resize;
+.sim-shell .command-bar .command-group > button.toolbar-resize{
+  display:block;position:absolute;z-index:3;inset:0 0 0 auto;
+  width:14px!important;min-width:0!important;height:auto!important;min-height:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;
+  cursor:ew-resize;
 }
-.command-bar .toolbar-floating .toolbar-resize:is(:hover,:focus-visible){border-color:var(--spx-accent)}
+.command-bar .toolbar-resize::after{
+  content:'';position:absolute;inset:25% 3px 25% auto;width:1px;
+  background:var(--spx-text-dim);opacity:0;pointer-events:none;
+}
+.command-bar .toolbar-resize:is(:hover,:active,:focus-visible)::after{opacity:.65}
+.command-bar .toolbar-resize:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-2px}
