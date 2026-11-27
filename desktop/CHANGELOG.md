@@ -2,7 +2,14 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
-## alpha.2 — en desarrollo · 26/11/2026
+## alpha.2 — en desarrollo · 26–27/11/2026
+
+- Primera compilación y apertura de la ventana principal en Windows confirmadas por captura, con catálogo HTTP 200. Rust 1.100, MSVC 14.29 y Windows SDK 10.0.26100.0. Cálculos Windows Desktop pendientes de validación específica.
+- Corrige contraste de iconos y foco en cabeceras oscuras bajo tema claro; conserva la familia tipográfica existente.
+- Genera iconos PNG e ICO nativos a partir de la geometría y colores del favicon oficial (Σ roja estilizada sobre fondo oscuro), sin dependencias externas.
+- Diagnóstico distingue conexión local disponible y plataforma; conserva estados internos de conectividad.
+- Añade desktop/run-desktop.ps1 para localizar MSVC x64 y SDK, configurar Python y runtime DWSIM y lanzar Cargo sin modificar el entorno permanente.
+- Estas últimas mejoras requieren recompilación y comprobación visual y funcional; no constituyen una release.
 
 - Unifica tipografía de menús y desplegables de la barra Desktop a 12 px y ajusta altura y foco del selector de régimen; comprobación visual pendiente.
 
