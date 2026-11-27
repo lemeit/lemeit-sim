@@ -535,7 +535,7 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if not self.valid_host(): return self.json_response(403, {'error': 'Acceso local únicamente.'})
         if self.path == '/desktop-mode.js' and getattr(self.server, 'desktop_mode', False):
-            body = b'globalThis.SimDesktop = true;\n'
+            body = ('globalThis.SimDesktop = true;\nglobalThis.SimDesktopEngine = ' + json.dumps('debian' if self.server.shared_mcp else 'windows') + ';\n').encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'application/javascript')
             self.send_header('Content-Length', str(len(body)))
