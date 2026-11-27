@@ -50,6 +50,7 @@ fn start_gateway() -> Result<Gateway, Box<dyn std::error::Error>> {
 
 fn main() {
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_opener::Builder::new().open_js_links_on_click(false).build())
         .setup(|app| {
             let gateway = start_gateway()?;
             app.manage(Mutex::new(Some(gateway)));
