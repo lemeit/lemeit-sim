@@ -154,12 +154,12 @@ globalThis.SimDesktopShell=(()=>{
     const save=$('cloud-save-toolbar');
     if(save){save.hidden=false;save.classList.remove('cloud-toolbar-button');save.classList.add('desktop-save-button');save.onclick=()=>$('save-button').click();}
     $('open-button').textContent='Abrir proyecto…';
-    $('save-button').textContent='Guardar copia JSON…';
+    $('save-button').textContent='Guardar copia de proyecto (.sim)…';
     $('recent-button').textContent='Recuperar borrador local';
     $('local-projects-open').textContent='Biblioteca local…';
     $('local-project-title').textContent='Mis proyectos · Biblioteca local';
     $('local-project-dialog').querySelector('.dialog-body > p').textContent=
-      'Los proyectos se guardan en la biblioteca de ΣIM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia JSON.';
+      'Los proyectos se guardan en la biblioteca de ΣIM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia de proyecto (.sim).';
     const menu=$('file-menu')?.querySelector('.menu-panel');
     const saveMenu=$('save-button');
     if(menu&&saveMenu)menu.insertBefore(saveMenu,$('close-project-button'));
