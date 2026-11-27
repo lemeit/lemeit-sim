@@ -4,6 +4,8 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
+- Integra los tiradores discretos y el ajuste de ancho de grupos acoplados y flotantes de la base 0.51.11.
+
 - Integra la interfaz compartida 0.51.10 y adapta los textos de la biblioteca local para Desktop. Se verificaron Acerca de, la biblioteca y F1 en una sesión aislada que solo permitió conexiones al gateway local del puerto 5920.
 
 - Ayuda Desktop: manual breve local (F1), atajos, catálogo integrado, acceso a ejemplos y guía de resoluciones existente. Wiki, DWSIM, GitHub y lemeit mediante Opener Tauri con permisos limitados a enlaces HTTPS del proyecto. Pie Información renombrado Licencias. En Windows, F1 mostró el manual incluido y Opener abrió la wiki en Chrome mientras el editor siguió en su ventana. La verificación en Debian sigue pendiente.

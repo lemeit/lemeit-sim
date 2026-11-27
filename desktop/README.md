@@ -71,6 +71,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\desktop\run-desktop.ps1
 
 El script detecta MSVC y SDK instalados y usa por defecto el runtime existente en C:\GitHub\lemeit-sim\.local\runtime; admite parámetros -EngineRoot, -Python, -MsvcRoot y -SdkVersion. No cambia variables permanentes ni detiene Online. Windows usa procesos DWSIM aislados por trabajo. La primera apertura y el catálogo se comprobaron el 27/11; las pruebas de cálculo y el nuevo script aún requieren validación en Windows.
 
+## Primera distribución y actualizaciones
+
+El objetivo es instalar una vez con un instalador de Windows (.exe o .msi) o un paquete .deb y abrir ΣIM desde el menú de aplicaciones. El script PowerShell corresponde al prototipo. Git solo se necesita para traer cambios al worktree de desarrollo.
+
+ΣIM Online se actualiza en el servidor al desplegar una versión. Desktop lleva su propia versión para funcionar sin Internet. Para que la aplicación avise de nuevas versiones y las instale, falta configurar y probar las actualizaciones firmadas de Tauri. En Debian, las actualizaciones del .deb se pueden distribuir con APT si se publica un repositorio o instalando un paquete nuevo. El actualizador integrado de Tauri para Linux usa AppImage.
+
 ## Próximos hitos y criterios para liberar
 
 - Guardado y apertura con diálogos nativos, cambios sin guardar, revisión de cierre durante cálculo, barra de título compacta con controles funcionales y accesibles.
