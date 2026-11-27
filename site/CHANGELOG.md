@@ -6,6 +6,12 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.10 — 2026-11-27 (en desarrollo)
+
+- Amplía las zonas invisibles de agarre de equipos y corrientes y muestra el cursor de desplazamiento durante el arrastre.
+- Reordena y desacopla grupos de herramientas con el puntero, permite ajustar el ancho flotante y recuerda la distribución.
+- Centra los signos de expansión y armoniza los controles de Gráficas, bibliotecas y deslizadores temporales.
+
 ## 0.51.9 — 2026-11-26
 
 - Gráficas abre el Ejemplo 14 con presión frente a volumen específico con marcadores más visibles y rótulos de entrada y salida. También explica cuándo los ejes no contienen pares válidos.

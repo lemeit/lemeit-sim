@@ -903,7 +903,10 @@ function bindEvents(){
     }
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
-    const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
+    // Los puertos siguen accesibles si una zona de agarre vecina los cubre.
+    const port=document.elementsFromPoint(e.clientX,e.clientY)
+      .map(el=>el.closest('[data-port]')).find(el=>el&&svg.contains(el));
+    if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
     if(node){const id=node.dataset.node,existing=selection?.nodes||[selection?.node].filter(Boolean);
       if(e.shiftKey){selectNodes(existing.includes(id)?existing.filter(v=>v!==id):[...existing,id]);pending=null;renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
@@ -936,8 +939,9 @@ function bindEvents(){
   const endDrag=e=>{
     if(panning){if(panning.pointerId===e.pointerId)endPan();return;}
     const hadGesture=endpointDrag||dragging||resizing||bending;
-    if(marquee){if(e.type==='pointercancel')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
-    if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type!=='pointercancel'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
+    if(!hadGesture&&!marquee)return;
+    if(marquee){if(e.type!=='pointerup')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
+    if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type==='pointerup'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
     const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     const visualChange=dragging?.moved||resizing||bending;
     dragging=null;resizing=null;bending=null;
@@ -946,7 +950,7 @@ function bindEvents(){
     if(deleteDrag){removeSelected();notice('Objeto eliminado del diagrama. También podés seleccionar y pulsar Supr.');return;}
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
     if(visualChange){changed({physical:false});renderInspector();}else renderDiagram();
-  };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+  };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);svg.addEventListener('lostpointercapture',endDrag);
   document.addEventListener('keydown',e=>{
     if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey)return;
     const control=e.target.closest?.('button,summary,a[href],[data-port],[data-node]');

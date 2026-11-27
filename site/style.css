@@ -924,14 +924,14 @@ footer.site-footer{font-family:var(--spx-font-sans)}.footer-wordmark{font-family
 @media(max-width:760px){.panel-resizer{display:none}}
 
 /* Símbolos genéricos de proceso y una única línea por corriente. */
-.node .stream-hit{fill:none;stroke:transparent;stroke-width:18;pointer-events:stroke}
+.node .stream-hit{fill:none;stroke:transparent;stroke-width:22;vector-effect:non-scaling-stroke;pointer-events:stroke}
 
 
 
 
 
 
-.node.stream-node .stream-label{pointer-events:all;cursor:move;paint-order:stroke;stroke:var(--spx-surface);stroke-width:5px;stroke-linejoin:round}
+.node.stream-node .stream-label{pointer-events:all;cursor:grab;paint-order:stroke;stroke:var(--spx-surface);stroke-width:5px;stroke-linejoin:round}
 .stream-node [data-port]{cursor:crosshair}
 .stream-node:not(.selected):not(:hover) .port{opacity:0}
 .node:not(.selected):not(:hover) .port.pending{opacity:1}
@@ -1736,7 +1736,7 @@ footer #session-banner #session-role{font:600 10px/1.4 var(--spx-font-sans);colo
 /* Llamadas instrumentales: trazo fino y flecha abierta, sin aspecto de puerto. */
 .diagram-callout .callout-leader,.diagram-callout .callout-tip{fill:none;stroke:var(--dwsim-ink,var(--spx-text-dim));stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none;stroke-linejoin:miter}
 .diagram-callout .callout-leader{opacity:.65}
-.node .diagram-callout text{text-anchor:start;paint-order:stroke;stroke:var(--spx-surface);stroke-width:3px;stroke-linejoin:round;pointer-events:all;cursor:move}
+.node .diagram-callout text{text-anchor:start;paint-order:stroke;stroke:var(--spx-surface);stroke-width:3px;stroke-linejoin:round;pointer-events:all;cursor:grab}
 .node .diagram-callout .node-kind{font-size:8px;letter-spacing:1px}
 .node .diagram-callout .node-reading{font-size:9px}
 
@@ -2470,3 +2470,49 @@ body.diagram-focus #charts-dialog,body.results-window #charts-dialog,body.diagra
 #charts-color{border-left:5px solid currentColor}#charts-dialog .tank-dynamic-actions{flex-wrap:wrap;gap:5px}
 
 .chart-palette{display:flex;flex-wrap:wrap;gap:4px}.chart-swatch{padding:3px;border:1px solid transparent;background:transparent;border-radius:4px;cursor:pointer}.chart-swatch[aria-pressed=true]{border-color:currentColor}.chart-swatch span{display:block;width:19px;height:19px;border-radius:2px}.swatch-0{background:#175b92}.swatch-1{background:#a33b35}.swatch-2{background:#287a61}.swatch-3{background:#b86b19}.swatch-4{background:#76559b}.swatch-5{background:#278399}.swatch-6{background:#87385b}.swatch-7{background:#39434d}#charts-series2-format[hidden]{display:none!important}#charts-series2-format h3{font-size:12px;margin:8px 0 4px}.recovery-help pre{white-space:pre-wrap;overflow-wrap:anywhere}.recovery-help details{margin:8px 0}
+
+
+#diagram .equipment-hit{fill:transparent;stroke:none;pointer-events:all}
+#diagram .node{cursor:grab}
+#diagram [data-port]{cursor:crosshair}
+#diagram.object-dragging,#diagram.object-dragging .node,
+#diagram.object-dragging .node *{cursor:grabbing}
+#diagram.panning,#diagram.panning .node,#diagram.panning .node *{cursor:grabbing}
+
+details:not(.app-menu)>summary::before{
+  content:'';background:
+    linear-gradient(currentColor,currentColor) center / 7px 1px no-repeat,
+    linear-gradient(currentColor,currentColor) center / 1px 7px no-repeat,
+    var(--spx-surface);
+}
+details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,0 0,auto}
+.results-card[open]>summary::before,
+.process-explorer-panel #process-explorer-interpretation[open]>summary::before,
+.process-explorer-panel #process-explorer-interpretation>summary::before{content:''}
+
+.sim-shell :is(.charts-body,#local-project-dialog,#cloud-project-dialog) :is(button:not(.chart-swatch):not(.dialog-close),select){
+  box-sizing:border-box;min-height:28px;padding:4px 8px;
+  border:1px solid var(--spx-border);border-radius:4px;
+  background-color:var(--spx-surface);color:var(--spx-text);
+  font:inherit;
+}
+.sim-shell :is(.charts-body,#local-project-dialog,#cloud-project-dialog) :is(button:not(.chart-swatch):not(.dialog-close),select):hover:not(:disabled){border-color:var(--spx-accent)}
+.sim-shell :is(.charts-body,#local-project-dialog,#cloud-project-dialog) :is(button,select):focus-visible,
+.sim-shell :is(#charts-scrub,#tank-dynamic-scrub):focus-visible{outline:2px solid var(--spx-accent);outline-offset:2px}
+.sim-shell :is(#charts-scrub,#tank-dynamic-scrub){width:100%;accent-color:var(--spx-accent);cursor:ew-resize}
+.sim-shell :is(#charts-scrub,#tank-dynamic-scrub):disabled{cursor:default}
+
+.command-bar .toolbar-grip,.command-bar .toolbar-resize{touch-action:none}
+.sim-shell .command-bar .command-group.toolbar-floating{
+  position:fixed;z-index:960;box-sizing:border-box;
+  left:var(--toolbar-x);top:var(--toolbar-y);width:var(--toolbar-width);
+  margin:0;min-height:36px;padding:4px 17px!important;flex-wrap:wrap;
+  border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface-2);
+}
+.command-bar .toolbar-floating .toolbar-grip{inset-inline-start:3px}
+.command-bar .toolbar-resize{display:none}
+.command-bar .toolbar-floating .toolbar-resize{
+  display:block;position:absolute;inset:3px 2px 3px auto;width:10px;min-width:0;height:auto;padding:0;
+  border:0;border-inline-end:2px solid var(--spx-border);border-radius:0;background:transparent;cursor:ew-resize;
+}
+.command-bar .toolbar-floating .toolbar-resize:is(:hover,:focus-visible){border-color:var(--spx-accent)}

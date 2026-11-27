@@ -1144,3 +1144,49 @@ test('Ejemplo 14 grafica los estados y el modelo de compresión',async t=>{
   assert.equal(await page.locator('#charts-dataset').inputValue(),'model');
   assert.ok(await page.locator('#charts-svg path').count());
 });
+
+test('La barra acepta puntero, recuerda tamaño y posición y puede volver a acoplarse',async t=>{
+  const page=await browserPage(t);
+  const group=page.locator('.drawing-tools');
+  const grip=group.locator('.toolbar-grip');
+  const drag=async(locator,x,y)=>{
+    const rect=await locator.boundingBox();
+    await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);
+    await page.mouse.down();
+    await page.mouse.move(x,y,{steps:8});
+    await page.mouse.up();
+  };
+  const previous=await page.locator('.project-tools').boundingBox();
+  await drag(grip,previous.x+previous.width/2,previous.y+previous.height/2);
+  assert.ok((await group.boundingBox()).x<=(await page.locator('.project-tools').boundingBox()).x);
+  await drag(grip,450,250);
+  assert.match(await group.getAttribute('class'),/toolbar-floating/);
+  const before=await group.boundingBox();
+  await drag(group.locator('.toolbar-resize'),before.x+before.width+80,before.y+before.height/2);
+  const resized=await group.boundingBox();
+  assert.ok(resized.width>before.width);
+  await page.reload({waitUntil:'networkidle'});
+  assert.deepEqual(await group.boundingBox(),resized);
+  const bar=await page.locator('.command-bar').boundingBox();
+  await drag(grip,bar.x+bar.width/2,bar.y+bar.height/2);
+  assert.doesNotMatch(await group.getAttribute('class'),/toolbar-floating/);
+});
+
+test('El margen invisible de un símbolo permite arrastrarlo y el cursor se restablece',async t=>{
+  const page=await browserPage(t);
+  await openProject(page,example);
+  const equipment=page.locator('.equipment-node').first();
+  const svg=page.locator('#diagram');
+  const point=await equipment.locator('.equipment-hit').evaluate(rect=>
+    new DOMPoint(-3,0).matrixTransform(rect.getScreenCTM()).toJSON());
+  const before=await equipment.getAttribute('transform');
+  await page.mouse.move(point.x,point.y);
+  assert.equal(await page.evaluate(({x,y})=>getComputedStyle(document.elementFromPoint(x,y)).cursor,point),'grab');
+  await page.mouse.down();
+  assert.match(await svg.getAttribute('class'),/object-dragging/);
+  await page.mouse.move(point.x+24,point.y+18,{steps:4});
+  await page.mouse.up();
+  assert.notEqual(await equipment.getAttribute('transform'),before);
+  assert.doesNotMatch(await svg.getAttribute('class')||'',/object-dragging/);
+  assert.equal(await svg.locator('.stream-hit').first().evaluate(el=>getComputedStyle(el).vectorEffect),'non-scaling-stroke');
+});
