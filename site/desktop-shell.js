@@ -51,6 +51,50 @@ globalThis.SimDesktopShell=(()=>{
       bar.remove();edges.forEach(e=>e.remove());fail(error);
     }
   }
+  function installHelp(){
+    const menu=$('help-menu')?.querySelector('.menu-panel');
+    if(!menu)return;
+    const closeMenus=()=>document.querySelectorAll('.app-menu[open],.footer-info[open]').forEach(e=>e.removeAttribute('open'));
+    const dialog=document.createElement('dialog');dialog.id='desktop-help-dialog';dialog.setAttribute('aria-labelledby','desktop-help-title');
+    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-help-title">Ayuda</h2><button class="dialog-close" aria-label="Cerrar" value="close">×</button></div><div class="dialog-body desktop-help-body"></div></form>';
+    document.body.append(dialog);
+    const body=dialog.querySelector('.dialog-body');
+    let request=0;
+    const show=async(title,path,selector)=>{
+      closeMenus();const id=++request;
+      $('desktop-help-title').textContent=title;body.textContent='Cargando…';
+      if(!dialog.open)dialog.showModal();
+      try{
+        const response=await fetch(path);if(!response.ok)throw Error('Documento no disponible');
+        const parsed=new DOMParser().parseFromString(await response.text(),'text/html');
+        const source=parsed.querySelector(selector);if(!source)throw Error('Documento sin contenido');
+        if(id!==request)return;
+        for(const el of source.querySelectorAll('script,iframe,object,embed,form,link,style'))el.remove();
+        body.replaceChildren(...source.childNodes);body.scrollTop=0;
+      }catch(error){if(id===request)body.textContent='No se pudo abrir la ayuda local: '+error.message;}
+    };
+    const manual=()=>show('Manual de usuario · ΣIM Desktop','desktop-help.html','main');
+    const catalog=()=>show('Catálogo de equipos','catalogo.html','main .table-wrap');
+    const shortcuts=()=>show('Atajos de teclado','desktop-help.html','#desktop-shortcuts');
+    const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',()=>{closeMenus();action();});return b;};
+    const external=(label,url)=>{const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;};
+    const about=$('about-button');
+    menu.replaceChildren(button('Manual de usuario · F1',manual),button('Tutoriales y ejemplos',()=>$('examples-browser-button').click()),button('Guía de resoluciones',()=>{if(!$('guide-dialog').open)SimGuide.open($('guide-dialog'),$('guide-host'));}),button('Catálogo de equipos',catalog),button('Atajos de teclado',shortcuts),document.createElement('hr'),external('Wiki de ΣIM','https://wiki.lemeit.ar/sim/'),external('Manual en línea','https://wiki.lemeit.ar/sim/manual-de-uso/'),external('Tutoriales DWSIM','https://dwsim.org/tutorials/en/index.html'),external('Repositorio','https://github.com/lemeit/lemeit-sim'),external('Informar un problema','https://github.com/lemeit/lemeit-sim/issues'),document.createElement('hr'),button('Licencias y créditos',()=>document.querySelector('.footer-info a[href="licenses/NOTICE.md"]')?.click()),about);
+    about.textContent='Acerca de ΣIM Desktop';
+    const footer=document.querySelector('.footer-info summary');if(footer)footer.textContent='Licencias';
+    document.addEventListener('keydown',event=>{if(event.key==='F1'&&!document.querySelector('dialog[open]')){event.preventDefault();void manual();}});
+    document.addEventListener('click',event=>{
+      const anchor=event.composedPath().find(node=>node instanceof HTMLAnchorElement);
+      if(!anchor||!anchor.hasAttribute('href')||anchor.hasAttribute('data-information'))return;
+      let url;try{url=new URL(anchor.href,location.href);}catch{return;}
+      if(url.origin===location.origin&&url.pathname==='/catalogo.html'){event.preventDefault();event.stopPropagation();void catalog();return;}
+      if(url.origin===location.origin)return;
+      event.preventDefault();event.stopPropagation();closeMenus();
+      const opener=globalThis.__TAURI__?.opener?.openUrl;
+      if(url.protocol!=='https:'||!opener){alert('Enlace externo no disponible: '+url.href);return;}
+      void opener(url.href).catch(error=>{console.error(error);alert('No se pudo abrir el navegador. Enlace: '+url.href);});
+    },true);
+  }
   function init(){
     if(!globalThis.SimDesktop)return;
     document.documentElement.classList.add('sim-desktop');
@@ -81,6 +125,7 @@ globalThis.SimDesktopShell=(()=>{
       if(version)version.textContent='Desktop · prototipo alpha.2 | Base científica 0.51.9';
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
+    installHelp();
     void installTitlebar();
   }
   return {init};
