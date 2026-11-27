@@ -32,12 +32,12 @@ test('corrientes se seleccionan por un tramo real y no por el espacio vacío ent
 test('arrastrar un puerto de una selección mueve el conjunto sin conectar ni editar extremos',()=>{
  const app=readFileSync(new URL('../../../site/app.js',import.meta.url),'utf8');
  const handlers={};const nodes=[{id:'p',type:'Pump',x:100,y:100},{id:'s',type:'MaterialStream',x:200,y:100,startX:200,startY:100,endX:300,endY:100}];
- const svg={addEventListener:(name,fn)=>handlers[name]=fn,setPointerCapture:()=>{},focus:()=>{}};
+ const svg={addEventListener:(name,fn)=>handlers[name]=fn,setPointerCapture:()=>{},focus:()=>{},classList:{add:()=>{}}};
  const env=vm.createContext({structuredClone,graph:{nodes},selection:{nodes:['p','s']},busy:false,marquee:null,dragging:null,$:()=>svg,svgPoint:e=>({x:e.clientX,y:e.clientY}),SimDiagramInteractions:g,queueDiagramMotion:()=>{}});
  const start=app.indexOf('function bindEvents(){'),move=app.indexOf("  svg.addEventListener('pointermove'",start),end=app.indexOf('    if(resizing)',move);
  vm.runInContext(app.slice(start,move)+app.slice(move,end)+'  });\n};bindEvents();',env);
  const target={closest:selector=>selector==='[data-node]'?{dataset:{node:'s'}}:selector==='[data-port]'?{dataset:{owner:'s',port:'out'}}:null};
- handlers.pointerdown({button:0,target,clientX:250,clientY:100,pointerId:1,preventDefault:()=>{}});
+ handlers.pointerdown({button:0,isPrimary:true,target,clientX:250,clientY:100,pointerId:1,preventDefault:()=>{}});
  assert.equal(env.dragging.group.length,2);
  handlers.pointermove({clientX:210,clientY:130});assert.equal(nodes[0].x,60);assert.equal(nodes[1].x,160);assert.equal(nodes[1].endX,260);assert.equal(nodes[1].endY,130);
  assert.deepEqual(env.selection.nodes,['p','s']);
