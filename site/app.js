@@ -805,7 +805,15 @@ function loadGraph(data,{saved=false}={}){
     if(applyingWorkspace)graph.saved_run=savedRun;else restoreRun(savedRun);
     persist();
   }
-  if(globalThis.SimDesktop&&!applyingWorkspace)desktopSavedProject=saved?JSON.stringify(graph):null;
+  if(globalThis.SimDesktop&&!applyingWorkspace){
+    desktopSavedProject=saved?JSON.stringify(graph):null;
+    const panel=$('results-panel');
+    if(panel.dataset.revealOnProject==='true'){
+      delete panel.dataset.revealOnProject;
+      globalThis.SimDockLayout?.reveal('results');
+      $('view-results').setAttribute('aria-pressed','true');
+    }
+  }
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
 
@@ -1085,6 +1093,7 @@ function clearLoadedProject(clearLocalDraft=false){
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();
   hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;
+  if(globalThis.SimDesktop){const panel=$('results-panel');if(!panel.hidden&&panel.dataset.simCadMode==='float'){panel.hidden=true;panel.dataset.revealOnProject='true';$('view-results').setAttribute('aria-pressed','false');}}
   $('project-title').value=graph.title;
   $('results').innerHTML=blankResults;
   $('result-meta').textContent='Sin resultados';
