@@ -4,6 +4,10 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26/11/2026
 
+- Barra de título propia de 30 px con logotipo, nombre del proyecto y controles Tauri de minimizar, maximizar/restaurar, cerrar, arrastrar y redimensionar. Conserva decoraciones del sistema si la API no está disponible o rechaza la activación.
+- Permisos de ventana limitados a la ventana principal y al origen local 127.0.0.1:5920; sin permisos de archivos ni ejecución de comandos. Menús claros/oscuros separados del título y toolbar horizontal desplazable.
+- Implementación pendiente de compilación y prueba real de controles, redimensionamiento, navegación y cierre en Debian. No constituye aún una release.
+
 - Capa visual exclusiva, iconos Nuevo/Abrir/Guardar, menú Archivo local, retirada de controles cloud, ajuste de densidad, fondo claro y ficha Acerca de.
 - Primera revisión visual comprobada mediante capturas; refinamiento d1d283a pendiente de comprobación específica.
 - Selección local Debian y corrección inicial de identificación; verificar diagnósticos y ausencia de conmutación.
