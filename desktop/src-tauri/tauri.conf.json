@@ -18,7 +18,8 @@
     ],
     "security": {
       "csp": "default-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'"
-    }
+    },
+    "withGlobalTauri": true
   },
   "bundle": {
     "active": false
