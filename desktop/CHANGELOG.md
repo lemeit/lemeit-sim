@@ -1,5 +1,9 @@
 # Historial de ΣIM Desktop
 
+## En desarrollo · 2026-11-27
+
+- Integra la interfaz compartida 0.51.10 y adapta los textos de la biblioteca local para Desktop.
+
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
 ## alpha.2 — en desarrollo · 26–27/11/2026

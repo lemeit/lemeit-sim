@@ -113,6 +113,9 @@ globalThis.SimDesktopShell=(()=>{
     $('save-button').textContent='Guardar copia JSON…';
     $('recent-button').textContent='Recuperar borrador local';
     $('local-projects-open').textContent='Biblioteca local…';
+    $('local-project-title').textContent='Mis proyectos · Biblioteca local';
+    $('local-project-dialog').querySelector('.dialog-body > p').textContent=
+      'Los proyectos se guardan en la biblioteca de ΣIM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia JSON.';
     const menu=$('file-menu')?.querySelector('.menu-panel');
     const saveMenu=$('save-button');
     if(menu&&saveMenu)menu.insertBefore(saveMenu,$('close-project-button'));
@@ -122,7 +125,7 @@ globalThis.SimDesktopShell=(()=>{
     if(about){
       about.querySelector('h2').textContent='Acerca de ΣIM Desktop';
       const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
-      if(version)version.textContent='Desktop · prototipo alpha.2 | Base científica 0.51.9';
+      if(version)version.prepend('Desktop · prototipo alpha.2 | ');
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
     installHelp();

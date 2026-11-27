@@ -86,3 +86,7 @@ El script detecta MSVC y SDK instalados y usa por defecto el runtime existente e
 ## Seguridad
 
 No reutilizar credenciales de producción en los paquetes. Restringir origen, host, capacidades IPC y rutas de archivos; no conceder ejecución arbitraria desde JS. Resolver puertos sin matar procesos ajenos; autenticar la instancia propia antes de habilitar cálculo. Evaluar aislamiento de otras aplicaciones locales y navegación externa. No afirmar que el instalador funciona offline hasta probarlo desconectado.
+
+## Interfaz compartida 0.51.10
+
+El PFD y la distribución de grupos de herramientas comparten la implementación de Online. F1 abre el manual incluido. Los enlaces externos permitidos se abren con Tauri Opener. La biblioteca local guarda proyectos en el perfil de ΣIM Desktop de este equipo. El menú Archivo permite guardar una copia JSON.
