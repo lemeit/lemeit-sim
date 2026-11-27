@@ -409,7 +409,7 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
     const g=isStream(n)?(exportRoutes?.get(n.id)??streamGeometry(n)):null;
     const selected=!exporting&&(selection?.node===n.id||selection?.nodes?.includes(n.id));
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${resultValidity==='valid'&&(result||dynamicResult)?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
     if(g){
       html+=`${exporting?'':`<path class="stream-hit" d="${g.d}"/>`}<path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
     }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${exporting?'':`<rect class="equipment-hit" x="-6" y="-6" width="${t.w+12}" height="${t.h+12}" rx="5"/>`}${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
@@ -698,7 +698,7 @@ function openDynamicSettings(){
 async function calculateDynamic(){
   if(!hasProject||busy)return;
   const started=performance.now(),version=revision,engine=selectedEngine;
-  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();notice('');
+  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();renderDiagram();notice('');
   try{
     const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
@@ -706,7 +706,7 @@ async function calculateDynamic(){
     $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
     rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
-  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderDiagram();renderServerDetails();}
 }
 async function calculate(){
   if(!hasProject||busy)return;
