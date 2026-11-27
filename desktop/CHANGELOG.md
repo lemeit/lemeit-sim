@@ -4,6 +4,8 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
+- Base 0.51.12. Evita que las consultas de catálogo y capacidades de Windows compitan con el cálculo local.
+
 - Integra los tiradores discretos y el ajuste de ancho de grupos acoplados y flotantes de la base 0.51.11.
 
 - Integra la interfaz compartida 0.51.10 y adapta los textos de la biblioteca local para Desktop. Se verificaron Acerca de, la biblioteca y F1 en una sesión aislada que solo permitió conexiones al gateway local del puerto 5920.

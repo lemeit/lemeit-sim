@@ -1,8 +1,9 @@
 """Pruebas sin DWSIM para el monitor de gateway."""
 import unittest
 from datetime import datetime
-from unittest.mock import patch
-from server import gateway_status, KINDS
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
+from server import gateway_status, Handler, KINDS, LOCK
 
 class GatewayStatusTests(unittest.TestCase):
     def test_status_snapshot_is_safe_and_complete(self):
@@ -21,6 +22,29 @@ class GatewayStatusTests(unittest.TestCase):
         with patch('server.LOCK') as mock:
             mock.locked.return_value=True
             self.assertEqual(gateway_status()['state'],'busy')
+
+    def test_desktop_catalog_is_available_during_a_calculation(self):
+        handler = object.__new__(Handler)
+        handler.path = '/api/catalog'
+        handler.valid_host = lambda: True
+        handler.json_response = Mock()
+        catalog = {'compounds': ['Water']}
+        handler.server = SimpleNamespace(
+            desktop_mode=True, engine=SimpleNamespace(catalog=catalog))
+        with LOCK:
+            handler.do_GET()
+        handler.json_response.assert_called_once_with(200, catalog)
+
+    def test_windows_desktop_capability_check_uses_an_independent_lock(self):
+        handler = object.__new__(Handler)
+        handler.path = '/api/dynamics/capabilities'
+        handler.valid_host = lambda: True
+        handler.json_response = Mock()
+        handler.server = SimpleNamespace(
+            desktop_mode=True, shared_mcp=False, engine=SimpleNamespace(root='test'))
+        with LOCK, patch('server.IsolatedEngine'), patch('server.dynamic_capabilities', return_value={'supported': True}):
+            handler.do_GET()
+        handler.json_response.assert_called_once_with(200, {'supported': True})
 
 if __name__=='__main__':
     unittest.main()

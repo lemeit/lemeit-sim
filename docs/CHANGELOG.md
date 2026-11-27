@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.12 — 2026-11-27 (Desktop en desarrollo)
+
+- La lectura del catálogo precargado y la consulta de capacidades dinámicas en Windows dejan libre el bloqueo del cálculo local. Una solicitud en preparación evita que el editor lance otra simultáneamente.
+
 ## 0.51.11 — 2026-11-27 (en desarrollo)
 
 - Permite ensanchar o achicar cada grupo de herramientas acoplado o flotante. Amplía la zona de agarre del borde derecho y suaviza el tirador de movimiento.

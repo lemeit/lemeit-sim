@@ -708,8 +708,14 @@ async function calculateDynamic(){
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
 }
+let calculationPending=false;
 async function calculate(){
-  if(!hasProject||busy)return;
+  if(!hasProject||busy||calculationPending)return;
+  calculationPending=true;
+  try{await calculateProject();}
+  finally{calculationPending=false;}
+}
+async function calculateProject(){
   if(SimDynamics.regime(graph)==='dynamic')return calculateDynamic();
   const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
   if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
@@ -1443,6 +1449,7 @@ function reviewGraph(){
   return [...new Set(issues)];
 }
 function failureHints(message){
+  if(/motor ocupado/i.test(message))return ['Hay otra operación en curso en el motor local. Esperá a que termine y volvé a calcular.'];
   const hints=[];
   if(/timeout|tiempo|45 s|timed out/i.test(message))hints.push('El cálculo o la conexión excedió el tiempo disponible. Probá un caso más pequeño y comprobá el estado del motor.');
   if(/conexi|connection|fetch|unavailable|no está disponible|HTTP 5|network/i.test(message))hints.push('Comprobá el motor desde Herramientas → Estado del motor. La PC y su conexión deben estar activas.');

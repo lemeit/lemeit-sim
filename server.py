@@ -20,6 +20,7 @@ from recycle import simple_recycle_shape, solve_simple_recycle, RecycleError
 ROOT = Path(__file__).resolve().parent
 GATEWAY_STARTED_AT = time.time()
 GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
+DESKTOP_CAPABILITIES_LOCK = threading.Lock()
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
 KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Expander', 'Tank', 'Valve', 'HeatExchanger'} | REACTORS
@@ -544,12 +545,17 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path == '/api/status': return self.json_response(200, gateway_status())
         if self.path == '/api/catalog':
+            # Desktop precarga el catálogo antes de aceptar solicitudes.
+            if self.server.desktop_mode and self.server.engine.catalog is not None:
+                return self.json_response(200, self.server.engine.catalog)
             if not LOCK.acquire(blocking=False): return self.json_response(409, {'error': 'Motor ocupado. Volvé a intentar en unos segundos.'})
             try: self.json_response(200, self.server.engine.get_catalog())
             except Exception as exc: self.json_response(503, {'error': str(exc)})
             finally: LOCK.release()
         elif self.path == '/api/dynamics/capabilities':
-            if not LOCK.acquire(blocking=False):
+            # En Windows la consulta usa su propio proceso de DWSIM.
+            lock = DESKTOP_CAPABILITIES_LOCK if self.server.desktop_mode and not self.server.shared_mcp else LOCK
+            if not lock.acquire(blocking=False):
                 return self.json_response(409, {'error': 'Motor ocupado.'})
             try:
                 if self.server.shared_mcp:
@@ -560,7 +566,7 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as exc:
                 self.json_response(503, {'error': str(exc)})
             finally:
-                LOCK.release()
+                lock.release()
         elif self.path.startswith('/api/'): self.json_response(404, {'error': 'Operación no disponible.'})
         else: super().do_GET()
 

@@ -57,11 +57,11 @@ test('una consulta periódica no borra un resultado ya calculado',async()=>{
  assert.equal(vm.runInContext('resultValidity',context),'valid');
  assert.equal(vm.runInContext('result!==null',context),true);
 });
-test('un cálculo exitoso se envía una sola vez al motor preseleccionado',async()=>{
+test('dos clics durante la preparación envían un solo cálculo al motor preseleccionado',async()=>{
  const routes={windows:{'/api/simulate':response(200,{elapsed_s:0.5,streams:{},equipment:{},balances:[],model:'NRTL'})}};
  const {context,calls}=monitor(routes);
  vm.runInContext("hasProject=true;graph={nodes:[],edges:[],model:'NRTL',compounds:['Water']};renderDiagram=()=>{};renderInspector=()=>{};renderResults=()=>{};renderDiagnostics=()=>{};notice=()=>{};publishWorkspace=()=>{};toolIcon=()=>'';",context);
- await vm.runInContext('calculate()',context);
+ await vm.runInContext('Promise.all([calculate(),calculate()])',context);
  assert.equal(vm.runInContext('lastCalculation.ok',context),true);
  assert.equal(calls.filter(x=>x.url==='/api/simulate').length,1);
 });
