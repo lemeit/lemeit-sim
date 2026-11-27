@@ -4,6 +4,8 @@ El historial de Desktop es independiente del [historial del portal](../docs/CHAN
 
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
+- Ayuda Desktop: manual breve local (F1), atajos, catálogo integrado, acceso a ejemplos y guía de resoluciones existente. Wiki, DWSIM, GitHub y lemeit mediante Opener Tauri con permisos limitados a enlaces HTTPS del proyecto. Pie Información renombrado Licencias. Pendiente de recompilar y verificar en Windows y Debian; la wiki completa no está incluida.
+
 - Primera compilación y apertura de la ventana principal en Windows confirmadas por captura, con catálogo HTTP 200. Rust 1.100, MSVC 14.29 y Windows SDK 10.0.26100.0. Cálculos Windows Desktop pendientes de validación específica.
 - Corrige contraste de iconos y foco en cabeceras oscuras bajo tema claro; conserva la familia tipográfica existente.
 - Genera iconos PNG e ICO nativos a partir de la geometría y colores del favicon oficial (Σ roja estilizada sobre fondo oscuro), sin dependencias externas.
