@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.51.11 — 2026-11-27 (en desarrollo)
+
+- Permite ensanchar o achicar cada grupo de herramientas acoplado o flotante. Amplía la zona de agarre del borde derecho y suaviza el tirador de movimiento.
+
 ## 0.51.10 — 2026-11-27 (en desarrollo)
 
 - Amplía las zonas invisibles de agarre de equipos y corrientes y muestra el cursor de desplazamiento durante el arrastre.

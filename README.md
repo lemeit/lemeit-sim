@@ -48,9 +48,9 @@ La integración también finalizó correctamente en el prototipo Desktop Debian 
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Versión en desarrollo · 0.51.10
+## Versión en desarrollo · 0.51.11
 
-En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. El borde derecho del grupo flotante ajusta su ancho. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
+En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. Arrastrá el borde derecho de un grupo para ajustar su ancho tanto en la barra como en el área de trabajo. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
 
 ## Versión publicada · 0.51.9
 

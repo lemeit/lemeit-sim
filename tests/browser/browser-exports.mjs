@@ -1159,6 +1159,16 @@ test('La barra acepta puntero, recuerda tamaño y posición y puede volver a aco
   const previous=await page.locator('.project-tools').boundingBox();
   await drag(grip,previous.x+previous.width/2,previous.y+previous.height/2);
   assert.ok((await group.boundingBox()).x<=(await page.locator('.project-tools').boundingBox()).x);
+  const docked=await group.boundingBox();
+  const edge=group.locator('.toolbar-resize');
+  await drag(edge,docked.x+docked.width+85,docked.y+docked.height/2);
+  const wider=await group.boundingBox();
+  assert.ok(wider.width>docked.width);
+  await drag(edge,wider.x+wider.width-42,wider.y+wider.height/2);
+  const narrower=await group.boundingBox();
+  assert.ok(narrower.width<wider.width);
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal((await group.boundingBox()).width,narrower.width);
   await drag(grip,450,250);
   assert.match(await group.getAttribute('class'),/toolbar-floating/);
   const before=await group.boundingBox();
@@ -1170,6 +1180,7 @@ test('La barra acepta puntero, recuerda tamaño y posición y puede volver a aco
   const bar=await page.locator('.command-bar').boundingBox();
   await drag(grip,bar.x+bar.width/2,bar.y+bar.height/2);
   assert.doesNotMatch(await group.getAttribute('class'),/toolbar-floating/);
+  assert.equal((await group.boundingBox()).width,resized.width);
 });
 
 test('El margen invisible de un símbolo permite arrastrarlo y el cursor se restablece',async t=>{
