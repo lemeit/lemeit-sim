@@ -57,7 +57,7 @@ globalThis.SimDesktopShell=(()=>{
     const closeMenus=()=>document.querySelectorAll('.app-menu[open],.footer-info[open]').forEach(e=>e.removeAttribute('open'));
     const dialog=document.createElement('dialog');dialog.id='desktop-help-dialog';dialog.setAttribute('aria-labelledby','desktop-help-title');
     dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-help-title">Ayuda</h2><button class="dialog-close" aria-label="Cerrar" value="close">×</button></div><div class="dialog-body desktop-help-body"></div></form>';
-    document.body.append(dialog);
+    (document.querySelector('.sim-shell')||document.body).append(dialog);
     const body=dialog.querySelector('.dialog-body');
     let request=0;
     const show=async(title,path,selector)=>{
