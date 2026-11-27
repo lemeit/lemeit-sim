@@ -2555,3 +2555,15 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 #process-explorer-panel:is([data-view=mass],[data-view=energy],[data-view=equations]) .explorer-content{display:none!important}
 #process-explorer-panel[data-view=mass] [data-explorer-section]:not([data-explorer-section=mass]),#process-explorer-panel[data-view=energy] [data-explorer-section]:not([data-explorer-section=energy]),#process-explorer-panel[data-view=equations] [data-explorer-section]:not([data-explorer-section=equations]){display:none!important}
 #process-explorer-panel [data-explorer-section]+[data-explorer-section]{margin-top:12px}#process-explorer-panel[data-dynamic=true] .explorer-reading strong{font-variant-numeric:tabular-nums}
+
+/* Ventanas de configuración: contraste, movimiento y tamaño. */
+:root[data-theme=dark]{color-scheme:dark;--spx-accent-fg:#fff}
+:root[data-theme=dark] .sim-shell dialog :is(select,input:not([type=checkbox]):not([type=radio]):not([type=color]),textarea){background-color:var(--spx-bg);color:var(--spx-text);border-color:var(--spx-border)}
+:root[data-theme=dark] .sim-shell dialog select option{background:var(--spx-surface);color:var(--spx-text)}
+:root[data-theme=dark] .sim-shell dialog :is(.calculate-button,.primary-button):not(:disabled){background:#b52236;color:#fff;border-color:#ef6374}
+:root[data-theme=dark] .sim-shell dialog :is(.calculate-button,.primary-button):disabled{background:var(--spx-surface-2);color:var(--spx-text-dim);border:1px solid var(--spx-border);opacity:1}
+.sim-shell dialog .sim-dialog-drag{cursor:move;touch-action:none;user-select:none}.sim-shell dialog .sim-dialog-drag :is(button,input,select,a){cursor:pointer}
+.sim-shell dialog.sim-dialog-positioned[open]{position:fixed!important;right:auto!important;bottom:auto!important;margin:0!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;transform:none!important;resize:none!important}
+.sim-shell dialog.sim-dialog-positioned[open]>form{max-height:none!important;min-height:0}.sim-shell dialog[open]>.sim-dialog-size{position:sticky;display:block;bottom:0;margin:0 0 0 auto;width:24px;height:24px;padding:0;color:var(--spx-text);background:var(--spx-surface-2);border:1px solid var(--spx-border);cursor:nwse-resize;touch-action:none;z-index:4}
+#process-explorer-panel.explorer-expanded[data-sim-cad-mode=float]{inset:var(--explorer-top,110px) 16px var(--explorer-bottom,35px)!important;width:auto!important;height:auto!important;z-index:890!important}
+#process-explorer-panel.explorer-expanded .explorer-top{flex-shrink:0;min-height:38px}#process-explorer-panel.explorer-expanded .explorer-scroll{min-height:0}
