@@ -209,3 +209,9 @@
 .sim-desktop[data-theme="light"] .sim-shell .command-bar button:not(:disabled):focus-visible{
   outline:1px solid #77828d;outline-offset:-2px;box-shadow:none;
 }
+
+.sim-desktop #desktop-help-dialog{width:min(880px,calc(100vw - 32px));max-width:calc(100vw - 32px)}
+.sim-desktop #desktop-help-dialog .desktop-help-body{padding:18px 24px;line-height:1.65}
+.sim-desktop #desktop-help-dialog .desktop-help-body h3{margin:16px 0 8px}
+.sim-desktop #desktop-help-dialog .desktop-help-body table{width:100%;border-collapse:collapse}
+.sim-desktop #desktop-help-dialog .desktop-help-body :is(th,td){padding:7px 9px;text-align:left;border-bottom:1px solid var(--spx-border)}
