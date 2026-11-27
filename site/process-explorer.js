@@ -7,7 +7,7 @@ const SimProcessExplorer=(()=>{
   const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
     maximumSignificantDigits:digits,
     notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
-  })+(unit?' '+unit:''):'—';
+  }).replace(/[eE]([+-]?\d+)/g,(_,exponent)=>' × 10'+String(Number(exponent)).replace(/[-0-9]/g,ch=>({'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'})[ch]))+(unit?' '+unit:''):'—';
   const isStream=n=>n.type==='MaterialStream'||n.type==='EnergyStream';
   function order(graph){
     const nodes=graph.nodes.filter(n=>!n.diagramOnly);
@@ -74,18 +74,18 @@ const SimProcessExplorer=(()=>{
     parent.append(row(label,value(residual,unit)));
     if(![inlet,outlet,residual].every(Number.isFinite))return;
     const tolerance=Math.max(floor,1e-6*Math.max(Math.abs(inlet),Math.abs(outlet)));
-    paragraph(parent,(Math.abs(residual)<=tolerance?'Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').');
+    const status=document.createElement('p');const ok=Math.abs(residual)<=tolerance;status.className='explorer-closure';status.dataset.ok=String(ok);status.textContent=(ok?'✓ Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').';parent.append(status);
   }
   function explain(parent,node,graph,result,balance){
     const operation=operations[node.type];
-    if(operation)for(const line of operation)paragraph(parent,line);
+    if(operation){const equation=document.createElement('div');equation.className='explorer-equation';equation.textContent=operation[0];parent.append(equation);paragraph(parent,operation[1]);}
     const material=new Set(graph.nodes.filter(n=>n.type==='MaterialStream').map(n=>n.id));
     const inlets=graph.edges.filter(e=>e.to===node.id&&material.has(e.from)).map(e=>e.from);
     const outlets=graph.edges.filter(e=>e.from===node.id&&material.has(e.to)).map(e=>e.to);
     const hIn=enthalpyFlow(inlets,result.streams),hOut=enthalpyFlow(outlets,result.streams);
     const reactive=Boolean(balance?.reactive||['ConversionReactor','EquilibriumReactor'].includes(node.type));
     const shaft=['Pump','Compressor','Expander'].includes(node.type);
-    paragraph(parent,'ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ. Se desprecia la variación de energía cinética y potencial.');
+    const energyEquation=document.createElement('div');energyEquation.className='explorer-equation';energyEquation.textContent='ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ';parent.append(energyEquation);paragraph(parent,'Se desprecia la variación de energía cinética y potencial.');
     parent.append(row('ΔḢ · salida − entrada',value(hOut,'kW')+' − '+value(hIn,'kW')+' = '+value(hOut-hIn,'kW')));
     parent.append(row(node.type==='HeatExchanger'?'Cambio neto de entalpía · no calor transferido entre lados':shaft?'Trabajo de eje hacia el fluido deducido por entalpía':reactive?'Calor del reactor informado por DWSIM':'Potencia térmica deducida por diferencia de entalpía',value(balance?.heat_to_fluid_kW,'kW')));
     if(node.type==='HeatExchanger'){
@@ -115,7 +115,7 @@ const SimProcessExplorer=(()=>{
     if(['Mixer','HeatExchanger','Valve'].includes(node.type)){
       appendClosure(parent,'Residuo energético bajo el supuesto adiabático',hIn,hOut,hOut-hIn,'kW',1e-4);
     }
-    paragraph(parent,'Balance global estacionario · Σṁₑ − Σṁₛ');
+    const massTitle=document.createElement('h3');massTitle.textContent='Balance global de masa';parent.append(massTitle);const massEquation=document.createElement('div');massEquation.className='explorer-equation';massEquation.textContent='Σṁₑ − Σṁₛ';parent.append(massEquation);
     parent.append(row('Entrada − salida',value(balance?.mass_in,'kg/s')+' − '+value(balance?.mass_out,'kg/s')));
     appendClosure(parent,'Residuo global',balance?.mass_in,balance?.mass_out,balance?.mass_residual,'kg/s',1e-8);
     paragraph(parent,'Por componente · ṁₖ = ṁ · wₖ, donde wₖ es la fracción másica global.');
