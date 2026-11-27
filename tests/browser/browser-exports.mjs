@@ -807,8 +807,8 @@ test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expa
  const expanded=await measure();
  assert.ok(Math.abs(expanded.panelHeight-initial.panelHeight)<1,'Abrir ecuaciones no aumenta el panel');
  assert.ok(Math.abs(expanded.canvasHeight-initial.canvasHeight)<1,'Abrir ecuaciones no reduce el lienzo');
- const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content);
- assert.match(marker,/−|\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
+ const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').backgroundSize);
+ assert.equal(marker,'7px 1px, 0px 0px, auto','El indicador abierto conserva solo el trazo horizontal');
  if(await panel.locator('#process-explorer-next').isEnabled()){
    await panel.locator('#process-explorer-next').click();
    const after=await measure();
@@ -841,17 +841,17 @@ test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas na
  assert.equal(await details.count(),1);
  const summary=details.locator('summary');
  assert.ok(await summary.evaluate(el=>getComputedStyle(el).listStyleType==='none'));
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ assert.equal(await summary.evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 1px 7px, auto');
  await summary.click();
  assert.equal(await details.getAttribute('open'),'');
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
+ assert.equal(await summary.evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 0px 0px, auto');
  const controls=page.locator('.app-menu>summary');
  assert.equal(await controls.first().evaluate(el=>getComputedStyle(el).listStyleType),'none');
  await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
  const history=page.locator('.services-history').first();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ assert.equal(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 1px 7px, auto');
  await history.locator('summary').click();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
+ assert.equal(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 0px 0px, auto');
 });
 
 test('Catálogo: acceso a nombres posteriores a C y carga paginada',async t=>{
