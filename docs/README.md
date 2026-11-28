@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión del 28/11/2026 · Guías para Online 0.53.3 y Desktop 0.53.3-alpha.1 · DWSIM 10.2.15.
+Revisión del 28/11/2026 · Guías para Online 0.53.4 y Desktop 0.53.4-alpha.1 · DWSIM 10.2.15.
 
 ## Empezar
 

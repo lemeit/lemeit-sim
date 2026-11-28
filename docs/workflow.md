@@ -1,6 +1,6 @@
 # Trabajar con un proyecto
 
-Revisión del 28/11/2026 · Online 0.53.3 y Desktop 0.53.3-alpha.1. Los apartados históricos se complementan con el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
+Revisión del 28/11/2026 · Online 0.53.4 y Desktop 0.53.4-alpha.1. Los apartados históricos se complementan con el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
 
 ## Flujo recomendado actual
 
@@ -25,7 +25,7 @@ Para la práctica de acumulación abrí Ejemplo 20, fijá Debian, seleccioná T-
 
 ## Organización visual reciente
 
-Arrastrá las cabeceras para mover paneles flotantes y los bordes para ajustar tamaños. El separador horizontal ↕ dentro de cada lateral ajusta alturas de paneles apilados; doble clic lo centra. Los grupos de la barra se reordenan por arrastre o Alt + flechas; Ver permite restablecer. El tema se selecciona en cabecera; los detalles +/− y el desplazamiento interno mantienen estable el explorador de proceso.
+Arrastrá las cabeceras para mover paneles flotantes y los bordes para ajustar tamaños. El separador horizontal ↕ dentro de cada lateral ajusta alturas de paneles apilados; doble clic lo centra. La barra mantiene los grupos en un orden fijo y pasa a otra fila si falta espacio. En Desktop, F1 abre el manual local. En Online, usá Ayuda → Manual de uso para ir a la wiki. El tema se selecciona en cabecera; los detalles +/− y el desplazamiento interno mantienen estable el explorador de proceso.
 
 ## Registro histórico de comandos y paneles previos
 
