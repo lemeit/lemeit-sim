@@ -1,8 +1,8 @@
-# ΣIM Desktop — prototipo de desarrollo
+# ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣIM 0.51.13 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
+Base científica y frontend compartido: ΣiM 0.52.0 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
 
-**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.1.0-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
+**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.52.0-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
 
 ## Arquitectura actual
 
@@ -73,9 +73,9 @@ El script detecta MSVC y SDK instalados y usa por defecto el runtime existente e
 
 ## Primera distribución y actualizaciones
 
-El objetivo es instalar una vez con un instalador de Windows (.exe o .msi) o un paquete .deb y abrir ΣIM desde el menú de aplicaciones. El script PowerShell corresponde al prototipo. Git solo se necesita para traer cambios al worktree de desarrollo.
+El objetivo es instalar una vez con un instalador de Windows (.exe o .msi) o un paquete .deb y abrir ΣiM desde el menú de aplicaciones. El script PowerShell corresponde al prototipo. Git solo se necesita para traer cambios al worktree de desarrollo.
 
-ΣIM Online se actualiza en el servidor al desplegar una versión. Desktop lleva su propia versión para funcionar sin Internet. Para que la aplicación avise de nuevas versiones y las instale, falta configurar y probar las actualizaciones firmadas de Tauri. En Debian, las actualizaciones del .deb se pueden distribuir con APT si se publica un repositorio o instalando un paquete nuevo. El actualizador integrado de Tauri para Linux usa AppImage.
+ΣiM Online se actualiza en el servidor al desplegar una versión. Desktop lleva su propia versión para funcionar sin Internet. Para que la aplicación avise de nuevas versiones y las instale, falta configurar y probar las actualizaciones firmadas de Tauri. En Debian, las actualizaciones del .deb se pueden distribuir con APT si se publica un repositorio o instalando un paquete nuevo. El actualizador integrado de Tauri para Linux usa AppImage.
 
 ## Próximos hitos y criterios para liberar
 
@@ -95,4 +95,4 @@ No reutilizar credenciales de producción en los paquetes. Restringir origen, ho
 
 ## Interfaz compartida 0.51.10
 
-El PFD y la distribución de grupos de herramientas comparten la implementación de Online. F1 abre el manual incluido. Los enlaces externos permitidos se abren con Tauri Opener. La biblioteca local guarda proyectos en el perfil de ΣIM Desktop de este equipo. El menú Archivo permite guardar una copia JSON.
+El PFD y la distribución de grupos de herramientas comparten la implementación de Online. F1 abre el manual incluido. Los enlaces externos permitidos se abren con Tauri Opener. La biblioteca local guarda proyectos en el perfil de ΣiM Desktop de este equipo. El menú Archivo permite guardar una copia JSON.
