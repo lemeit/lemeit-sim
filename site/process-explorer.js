@@ -79,6 +79,8 @@ const SimProcessExplorer=(()=>{
   function explain(parent,node,graph,result,balance){
     const root=parent;const group=kind=>{const el=document.createElement('section');el.dataset.explorerSection=kind;root.append(el);return el;};
     parent=group('equations');const operation=operations[node.type];
+    const general=document.createElement('div');general.className='explorer-equation';general.textContent='Σṁₑ = Σṁₛ';parent.append(general);paragraph(parent,'Conservación de masa total en régimen estacionario.');
+    const enthalpy=document.createElement('div');enthalpy.className='explorer-equation';enthalpy.textContent='ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ';parent.append(enthalpy);paragraph(parent,'ṁ: caudal másico (kg/s); h: entalpía específica (kJ/kg); Ḣ: flujo de entalpía (kW).');
     if(operation){const equation=document.createElement('div');equation.className='explorer-equation';equation.textContent=operation[0];parent.append(equation);paragraph(parent,operation[1]);}
     parent=group('energy');const heading=document.createElement('h3');heading.textContent='Balance de energía';parent.append(heading);
     const material=new Set(graph.nodes.filter(n=>n.type==='MaterialStream').map(n=>n.id));
@@ -161,8 +163,8 @@ const SimProcessExplorer=(()=>{
     const details=$('process-explorer-connections');details.replaceChildren();
     const interpretation=$('process-explorer-interpretation');
     const wasExpanded=interpretation.open;
-    interpretation.hidden=step.stream;
-    interpretation.open=!step.stream&&wasExpanded;
+    interpretation.hidden=false;
+    interpretation.open=wasExpanded;
     panel.querySelector('.explorer-scroll').scrollTop=0;
     const progress=$('process-explorer-progress');progress.max=steps.length;progress.value=position+1;
     const analysis=$('process-explorer-analysis');
@@ -178,6 +180,10 @@ const SimProcessExplorer=(()=>{
       const energy=document.createElement('section');energy.dataset.explorerSection='energy';analysis.append(energy);paragraph(energy,'No se dispone de un balance energético temporal completo en estas muestras.');
     }else if(step.stream){
       const state=result.streams?.[step.id];
+      const group=kind=>{const el=document.createElement('section');el.dataset.explorerSection=kind;analysis.append(el);return el;};
+      const eq=(parent,text)=>{const el=document.createElement('div');el.className='explorer-equation';el.textContent=text;parent.append(el);};
+      const mass=group('mass'),energy=group('energy'),equations=group('equations');
+      if(node.type==='MaterialStream'){eq(mass,'ṁₖ = ṁ · wₖ');paragraph(mass,'Caudal de cada componente = caudal total por fracción másica.');mass.append(row('Caudal total',value(state?.mass_flow_kg_s,'kg/s')));eq(energy,'Ḣ = ṁ · h');const h=mixture(state)?.enthalpy_kJ_kg;energy.append(row('Flujo de entalpía',value(state?.mass_flow_kg_s*h,'kW')));eq(equations,'ṁ = ṅ · M');eq(equations,'ṁₖ = ṁ · wₖ');eq(equations,'Ḣ = ṁ · h');paragraph(equations,'M: masa molar media; wₖ: fracción másica; h: entalpía específica. Una corriente no es una operación unitaria.');}else{paragraph(mass,'Una corriente de energía no transporta materia.');paragraph(energy,'Transferencia de energía: potencia térmica o mecánica según las conexiones.');paragraph(equations,'No corresponde un balance de materia para una corriente de energía.');}
       if(state){
         body.append(row('Caudal másico',value(state.mass_flow_kg_s,'kg/s')),
           row('Temperatura',value(Number.isFinite(state.temperature_K)?state.temperature_K-273.15:NaN,'°C')),
@@ -201,7 +207,7 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-back').disabled=position===0;
     $('process-explorer-next').disabled=position===steps.length-1;
     $('process-explorer-cycles').hidden=!hadRecycle;
-    if(step.stream&&!dynamic&&['mass','energy','equations'].includes(view))setView('variables');else setView(view);emphasize();
+    setView(view);emphasize();
   }
   function open(){
     if(!context?.isValid?.())return;
