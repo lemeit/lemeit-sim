@@ -2619,3 +2619,8 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .sim-shell .command-bar .project-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto;max-width:190px}
 .sim-shell .command-bar .project-title{width:100px;max-width:100px;min-width:65px}
 .sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){margin-inline-start:0!important;flex:0 0 auto}
+
+/* Nested examples headings belong to the menu surface, never the dark app header. */
+.sim-shell #examples-menu .menu-panel .examples-category>summary{background:var(--spx-surface)!important;color:var(--spx-text)!important;border:0;border-radius:3px;box-shadow:none}
+.sim-shell #examples-menu .menu-panel .examples-category[open]>summary,.sim-shell #examples-menu .menu-panel .examples-category>summary:hover{background:var(--spx-accent-dim)!important;color:var(--spx-text)!important}
+.sim-shell #examples-menu .menu-panel .examples-category>summary::before{color:var(--spx-text);border-color:var(--spx-border);background-color:var(--spx-surface-2)}

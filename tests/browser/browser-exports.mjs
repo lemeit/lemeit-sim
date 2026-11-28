@@ -1262,3 +1262,26 @@ test('Desktop avisa tras calcular y guarda la última corrida antes de cerrar',a
   assert.equal(await warning.isVisible(),false);
   await page.waitForFunction(()=>!document.querySelector('#diagram .node'));
 });
+
+test('Ejemplos: contraste de categorías en ambos temas',async t=>{
+ const page=await browserPage(t);
+ for(const theme of ['light','dark']){
+   await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+   await page.locator('#examples-menu > summary').click();
+   const color=await page.locator('#examples-quick-menu .examples-category > summary').first().evaluate(el=>{
+     const s=getComputedStyle(el),a=document.createElement('span');a.style.color='var(--spx-text)';a.style.backgroundColor='var(--spx-surface)';el.append(a);const ref=getComputedStyle(a),ok=s.color===ref.color&&s.backgroundColor===ref.backgroundColor;a.remove();return ok;
+   });
+   assert.ok(color,'Las categorías usan los colores de superficie y texto del tema '+theme);
+   await page.locator('#examples-menu > summary').click();
+ }
+});
+test('Desktop migra una vez los grupos antiguos sin perder proyectos',async t=>{
+ const page=await browserPage(t,result,async page=>{
+   await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='windows';"}));
+   await page.addInitScript(()=>{localStorage.setItem('sim-toolbar-layout-v1',JSON.stringify(['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']));localStorage.setItem('sim-toolbar-widths-v1',JSON.stringify({'project-tools':650}));});
+ });
+ const order=await page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
+ assert.deepEqual(order,['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
+ assert.equal(await page.locator('.project-tools').evaluate(el=>el.classList.contains('toolbar-sized')),false);
+ assert.equal(await page.evaluate(()=>localStorage.getItem('sim-desktop-toolbar-0531')),'1');
+});

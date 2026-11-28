@@ -1,8 +1,8 @@
 # ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣiM 0.53.0 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
+Base científica y frontend compartido: ΣiM 0.53.1 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
 
-**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.53.0-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
+**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.53.1-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
 
 ## Arquitectura actual
 

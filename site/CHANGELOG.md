@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.53.1 — 2026-11-28
+
+- Corrige el contraste de las categorías del menú Ejemplos en tema claro y oscuro.
+- Compacta la barra Desktop y migra una sola vez su distribución local anterior; no modifica proyectos ni motores.
+
 ## 0.53.0 — 2026-11-28
 
 - Viñetas de exploración ancladas al PFD, con flecha, arrastre, tamaño ajustable y escala de texto.
