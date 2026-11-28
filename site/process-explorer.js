@@ -162,7 +162,15 @@ const SimProcessExplorer=(()=>{
       if(!best||cost<best.cost)best={x,y,cost};}
     const x=Number.isFinite(pref.dx)?clamp(cx+pref.dx,8,xMax):best.x,y=Number.isFinite(pref.dy)?clamp(cy+pref.dy,8,yMax):best.y;panel.style.left=x+'px';panel.style.top=y+'px';
     const ax=clamp(cx,8,canvas.clientWidth-8),ay=clamp(cy,8,canvas.clientHeight-8),bx=clamp(ax,x,x+w),by=clamp(ay,y,y+h);
-    leader.hidden=false;Object.assign(leader.style,{left:bx+'px',top:by+'px',width:Math.hypot(ax-bx,ay-by)+'px',transform:'rotate('+Math.atan2(ay-by,ax-bx)+'rad)'});
+    const rightward=x+w/2>=ax, edge=rightward?x:x+w;
+    const lineY=clamp(y+Math.min(28,h/2),8,canvas.clientHeight-8);
+    const elbowX=edge+(rightward?-12:12);
+    const ink=getComputedStyle(target).getPropertyValue('--dwsim-ink').trim()||'var(--spx-text-dim)';
+    leader.style.setProperty('--dwsim-ink',ink);
+    leader.setAttribute('viewBox','0 0 '+canvas.clientWidth+' '+canvas.clientHeight);
+    leader.querySelector('path').setAttribute('d',`M${ax} ${ay} L${elbowX} ${lineY} H${edge}`);
+    leader.querySelector('circle').setAttribute('cx',ax);leader.querySelector('circle').setAttribute('cy',ay);
+    leader.hidden=false;leader.removeAttribute('hidden');
   }
   function follow(){if(!visible)return;positionCard();frame=requestAnimationFrame(follow);}
   function emphasize(){
@@ -259,7 +267,11 @@ const SimProcessExplorer=(()=>{
   function bind(options){
     context=options;
     const panel=$('process-explorer-panel'),canvas=$('canvas-wrap');canvas.append(panel);panel.classList.add('explorer-inline');
-    leader=document.createElement('div');leader.className='explorer-leader';leader.hidden=true;canvas.append(leader);
+    const ns='http://www.w3.org/2000/svg';
+    leader=document.createElementNS(ns,'svg');leader.setAttribute('class','explorer-leader diagram-callout');leader.setAttribute('aria-hidden','true');leader.setAttribute('hidden','');
+    const line=document.createElementNS(ns,'path');line.setAttribute('class','callout-leader');
+    const tip=document.createElementNS(ns,'circle');tip.setAttribute('class','callout-tip');tip.setAttribute('r','3');leader.append(line,tip);canvas.append(leader);
+    Object.defineProperty(leader,'hidden',{get(){return this.hasAttribute('hidden');},set(value){this.toggleAttribute('hidden',Boolean(value));}});
     controls=document.createElement('div');controls.className='explorer-inline-controls';controls.hidden=true;controls.append(panel.querySelector('.explorer-actions'),$('process-explorer-progress'));document.querySelector('.diagram-toolbar').append(controls);
     const header=panel.querySelector('.explorer-top'),resize=document.createElement('button');
     resize.type='button';resize.className='callout-resize';resize.setAttribute('aria-label','Cambiar tamaño de viñeta');resize.title='Arrastrar para cambiar tamaño';resize.textContent='◢';panel.append(resize);
