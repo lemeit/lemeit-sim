@@ -30,7 +30,7 @@ globalThis.SimDesktopShell=(()=>{
     dialog.id='desktop-unsaved-dialog';
     dialog.setAttribute('aria-labelledby','desktop-unsaved-title');
     dialog.setAttribute('aria-describedby','desktop-unsaved-message');
-    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-unsaved-title"></h2></div><div class="dialog-body"><p id="desktop-unsaved-message">Hay cambios sin guardar en el proyecto o en su última corrida. Podés conservarlos en la biblioteca local antes de cerrar.</p><p id="desktop-unsaved-error" role="alert"></p><div class="dialog-actions"><button type="submit" class="outline-button" value="cancel" autofocus>Cancelar</button><button type="submit" class="outline-button" value="close">Cerrar sin guardar</button><button type="button" class="calculate-button" id="desktop-save-and-close">Guardar y cerrar</button></div></div></form>';
+    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-unsaved-title"></h2></div><div class="dialog-body"><p id="desktop-unsaved-message">Hay cambios sin guardar en el proyecto o en su última corrida. Podés conservarlos en la biblioteca local antes de cerrar.</p><p id="desktop-unsaved-error" role="alert"></p><div class="dialog-actions"><button type="submit" class="outline-button" value="cancel" autofocus>Cancelar</button><button type="submit" class="outline-button" value="close">Cerrar sin guardar</button><button type="button" class="calculate-button" id="desktop-save-and-close">Guardar en biblioteca y cerrar</button></div></div></form>';
     (document.querySelector('.sim-shell')||document.body).append(dialog);
     $('desktop-save-and-close').onclick=()=>{
       if(project.save())dialog.close('close');
@@ -150,17 +150,20 @@ globalThis.SimDesktopShell=(()=>{
     if(cloudLabel?.classList.contains('menu-section-label'))cloudLabel.classList.add('desktop-hidden');
     icon($('new-project-toolbar'),'new','Nuevo proyecto (Ctrl+N)');
     icon($('open-project-toolbar'),'open','Abrir proyecto (Ctrl+O)');
-    icon($('cloud-save-toolbar'),'save','Guardar copia de proyecto (.sim) · Ctrl+S');
+    icon($('cloud-save-toolbar'),'save','Guardar · Ctrl+S');
     const save=$('cloud-save-toolbar');
     if(save){save.hidden=false;save.classList.remove('cloud-toolbar-button');save.classList.add('desktop-save-button');save.onclick=()=>$('save-button').click();}
-    $('open-button').textContent='Abrir proyecto…';
-    $('save-button').textContent='Guardar copia de proyecto (.sim)…';
+    $('open-button').textContent='Abrir…';
+    $('save-button').textContent='Guardar…';
     $('recent-button').textContent='Recuperar borrador local';
     $('local-projects-open').textContent='Biblioteca local…';
     $('local-project-title').textContent='Mis proyectos · Biblioteca local';
     $('local-project-dialog').querySelector('.dialog-body > p').textContent=
-      'Los proyectos se guardan en la biblioteca de ΣiM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia de proyecto (.sim).';
+      'Los proyectos se guardan en la biblioteca de ΣiM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar.';
+    $('report-pdf-menu').textContent='Exportar PDF…';
     const menu=$('file-menu')?.querySelector('.menu-panel');
+    const backupLabel=$('recent-button').previousElementSibling;
+    if(backupLabel?.classList.contains('menu-section-label'))backupLabel.textContent='Recuperación';
     const saveMenu=$('save-button');
     if(menu&&saveMenu)menu.insertBefore(saveMenu,$('close-project-button'));
     const cloudStart=cloudLabel?.previousElementSibling;
@@ -169,13 +172,13 @@ globalThis.SimDesktopShell=(()=>{
     if(about){
       about.querySelector('h2').textContent='Acerca de ΣiM Desktop';
       const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
-      if(version)version.prepend('Desktop · alpha.2 | ');
+      if(version)version.prepend('Desktop · alpha.3 | ');
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
     installCloseDialog();
     installHelp();
     void installTitlebar();
   }
-  return {init,bindProjectClose,closeProject};
+  return {init,bindProjectClose,closeProject,confirmClose};
 })();
 document.addEventListener('DOMContentLoaded',()=>SimDesktopShell.init());

@@ -1301,3 +1301,28 @@ test('Desktop: Ctrl+S confirms a .sim copy only after a successful native write'
  await page.locator('#cloud-save-toolbar').click();
  await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('/home/alumno/Proceso.sim'));
 });
+
+test('Desktop: Abrir usa el selector nativo y Exportar PDF confirma el archivo escrito',async t=>{
+ const page=await browserPage(t,result,async page=>{
+   await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='debian';"}));
+   await page.addInitScript(contents=>{
+     globalThis.__TAURI__={core:{invoke:async(command,args)=>{
+       if(command==='open_project'&&!args.fromLaunch)return contents;
+       if(command==='save_pdf'){
+         globalThis.pdfSignature=String.fromCharCode(...args.contents.slice(0,5));
+         return '/home/alumno/'+args.filename;
+       }
+       throw new Error('Comando inesperado: '+command);
+     }}};
+   },example.toString());
+ });
+ await page.keyboard.press('Control+o');
+ await page.locator('#diagram .node').first().waitFor();
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
+ await page.locator('#file-menu > summary').click();
+ await page.locator('#report-pdf-menu').click();
+ await page.getByRole('button',{name:'Guardar PDF…',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('PDF guardado en /home/alumno/'));
+ assert.equal(await page.evaluate(()=>globalThis.pdfSignature),'%PDF-');
+});

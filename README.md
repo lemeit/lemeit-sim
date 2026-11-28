@@ -23,7 +23,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 | Proyectos | Nube y copias JSON | Copias JSON y biblioteca local |
 | Estado | Portal 0.53.3 | Prototipo funcional en Debian; 0.53.4-alpha.1 |
 
-En Desktop, **Archivo → Guardar copia de proyecto (.sim)…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
+En Desktop, **Archivo → Guardar…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
 
 El [paquete piloto Debian](desktop/README.md#paquete-piloto-debian-12-amd64) instala el editor y el gateway para probarlos con un motor MCP local ya configurado.
 
