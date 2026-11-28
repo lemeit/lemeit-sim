@@ -8,6 +8,15 @@ globalThis.SimExamplesBrowser=(()=>{
  }
  function mount({openGuide}){
   const dialog=document.getElementById('examples-dialog'),search=document.getElementById('examples-search'),rows=[...dialog.querySelectorAll('.example-entry')];let filter='all';
+  const quick=document.getElementById('examples-quick-menu');
+  if(quick){
+   const names={balances:'Balances de materia',energia:'Energía',mezclas:'Mezcla y separación',reacciones:'Reactores',recirculacion:'Recirculación',dinamica:'Dinámica',equipos:'Equipos'};
+   const groups=new Map();
+   for(const row of rows){const category=row.dataset.category;if(!groups.has(category))groups.set(category,[]);groups.get(category).push(row);}
+   for(const [category,items] of groups){const section=document.createElement('details');section.className='examples-category';const title=document.createElement('summary');title.textContent=names[category]||category.charAt(0).toUpperCase()+category.slice(1);section.append(title);
+    for(const row of items){const b=document.createElement('button');b.type='button';b.textContent=row.dataset.number+' · '+row.querySelector('[data-example-title]').textContent;b.addEventListener('click',()=>row.querySelector('[data-example]').click());section.append(b);}
+    section.addEventListener('toggle',()=>{if(section.open)for(const other of quick.querySelectorAll('details'))if(other!==section)other.open=false;});quick.append(section);}
+  }
   function refresh(){let count=0;for(const row of rows){row.hidden=!matches({number:row.dataset.number,category:row.dataset.category,text:row.textContent},search.value,filter);if(!row.hidden)count++;}document.getElementById('examples-count').textContent=count+' de '+rows.length+' ejemplos';document.getElementById('examples-empty').hidden=count!==0;}
   dialog.querySelectorAll('[data-example-title]').forEach(button=>button.onclick=()=>{const row=button.closest('.example-entry');row.querySelector('[data-example]').click();});
   search.addEventListener('input',refresh);search.addEventListener('keydown',event=>{if(event.key==='Enter')event.preventDefault();});
