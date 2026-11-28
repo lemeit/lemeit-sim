@@ -2575,3 +2575,8 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 #process-explorer-panel .explorer-top :is(button,.sim-cad-position):hover{background:#424850!important;color:#fff!important;border-color:#b4bac2!important}#process-explorer-panel .explorer-top #process-explorer-close:hover{background:#b52236!important;color:#fff!important}
 #process-explorer-panel .explorer-top .sim-cad-position option{background:#25292d;color:#f4f3ee}
 #process-explorer-panel.explorer-expanded[data-sim-cad-mode=float]{inset:var(--explorer-top,110px) var(--explorer-right,16px) var(--explorer-bottom,35px) var(--explorer-left,16px)!important;width:auto!important;height:auto!important;z-index:890!important}
+
+/* Menú de ejemplos integrado y barra de simulación contigua a Vista. */
+.command-bar .zoom-controls{margin-left:0!important}.command-bar .simulation-tools{margin-left:0!important}
+#examples-menu>.menu-panel{min-width:280px;max-height:min(70dvh,540px);overflow:auto}#examples-quick-menu .examples-category>summary{cursor:pointer;padding:7px 9px;color:var(--spx-text);font:500 12px var(--spx-font-sans)}#examples-quick-menu .examples-category>button{display:block;width:100%;text-align:left;padding-left:22px;white-space:normal}#examples-quick-menu .examples-category[open]>summary{background:var(--spx-accent-dim)}
+#process-explorer-panel .explorer-equation{font-family:var(--spx-font-sans);font-weight:500;font-size:18px}
