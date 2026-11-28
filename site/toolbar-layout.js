@@ -18,6 +18,8 @@ globalThis.SimToolbarLayout=(()=>{
    const bar=document.querySelector('.command-bar');if(!bar||bar.dataset.customizable)return;
    bar.dataset.customizable='true';
    const groups=new Map(current(bar).map(el=>[groupId(el),el]));if(groups.size!==ORDER.length)return;
+   // One-time Desktop migration: old workstation layouts may retain oversized project groups or floating simulation controls.
+   if(globalThis.SimDesktop){try{const migration='sim-desktop-toolbar-0531';if(!localStorage.getItem(migration)){localStorage.removeItem(KEY);localStorage.removeItem(WIDTH_KEY);localStorage.removeItem(FLOAT_KEY);localStorage.setItem(migration,'1');}}catch{}}
    let saved=null;try{saved=JSON.parse(localStorage.getItem(KEY)||'null');}catch{}
    function apply(keys){
      const input=bar.querySelector('#file-input');
