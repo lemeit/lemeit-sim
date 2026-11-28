@@ -6,6 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.52.0 — 2026-11-27
+
+- Exploración contextual en el PFD: tarjeta anclada, navegación, reproducción y detalle técnico, también para muestras dinámicas.
+- Identidad ΣiM, menú de ejemplos por categoría, barra compacta, contraste y ventanas de configuración ajustables.
+- Corrección del estado visual del cálculo dinámico. Sin cambios en el motor DWSIM.
+- Validación visual del nuevo recorrido pendiente; Desktop continúa en etapa alpha.
+
 ## 0.51.13 — 2026-11-27 (Desktop en desarrollo)
 
 - Al cerrar Desktop o el proyecto, avisa si el proyecto o la última corrida tienen cambios sin guardar. Permite cancelar, cerrar sin guardar o guardar en la biblioteca local y cerrar.
