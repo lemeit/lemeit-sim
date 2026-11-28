@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${SIM_DESKTOP_MCP_TOKEN_FILE:-}" ]; then
+    SIM_DESKTOP_MCP_TOKEN_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/sim-desktop/mcp-token"
+    export SIM_DESKTOP_MCP_TOKEN_FILE
+fi
+
+if [ ! -r "$SIM_DESKTOP_MCP_TOKEN_FILE" ]; then
+    message='Configurá el motor DWSIM MCP local y la ruta a su archivo de token. Consultá /usr/share/doc/sim-desktop/README.md.'
+    if command -v zenity >/dev/null && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+        zenity --error --title='ΣIM Desktop' --text="$message"
+    else
+        printf '%s\n' "$message" >&2
+    fi
+    exit 1
+fi
+
+exec /usr/lib/sim-desktop/sim-desktop "$@"

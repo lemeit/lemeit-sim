@@ -14,11 +14,17 @@ impl Drop for Gateway {
 }
 
 fn start_gateway() -> Result<Gateway, Box<dyn std::error::Error>> {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let root = if cfg!(target_os = "linux")
+        && std::env::current_exe()?.parent() == Some(Path::new("/usr/lib/sim-desktop"))
+    {
+        PathBuf::from("/usr/share/sim-desktop")
+    } else {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
+    };
     let python = std::env::var_os("SIM_DESKTOP_PYTHON")
         .unwrap_or_else(|| if cfg!(windows) { "python".into() } else { "python3".into() });
     let mut command = Command::new(python);
-    command.current_dir(&root).arg(root.join("server.py"))
+    command.current_dir(&root).arg("-B").arg(root.join("server.py"))
         .args(["--desktop", "--port", "5920"]);
     if cfg!(windows) {
         let runtime = std::env::var_os("SIM_DESKTOP_ENGINE_ROOT")
