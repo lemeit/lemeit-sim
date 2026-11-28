@@ -3,7 +3,7 @@
 'use strict';
 const SimProcessExplorer=(()=>{
   const $=id=>document.getElementById(id);
-  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary",frame=0,controls=null,leader=null,expanded=false;
+  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary",frame=0,controls=null,leader=null,expanded=false,layout={},gesture=null,layoutKey='';
   const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
     maximumSignificantDigits:digits,
     notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
@@ -134,11 +134,20 @@ const SimProcessExplorer=(()=>{
     }
     paragraph(parent,'Tolerancia didáctica de cierre: el mayor valor entre 10⁻⁶ veces el mayor flujo absoluto y un mínimo de 10⁻⁸ kg/s para materia o 10⁻⁴ kW para energía.');
   }
+  // Layout is local presentation only. Keyed by project topology and object.
+  function projectLayoutKey(graph){return 'sim-explorer-callouts-v1:'+JSON.stringify([graph.name||graph.title||'',graph.nodes.map(n=>[n.id,n.type,n.name])]);}
+  function restoreLayout(graph){layoutKey=projectLayoutKey(graph);try{layout=JSON.parse(localStorage.getItem(layoutKey)||'{}')||{};}catch{layout={};}}
+  function saveLayout(){try{localStorage.setItem(layoutKey,JSON.stringify(layout));}catch{}}
+  function currentLayout(){return layout[steps[position]?.id]||{};}
   function positionCard(){
     if(!visible)return;
     const canvas=$('canvas-wrap'),panel=$('process-explorer-panel'),svg=$('diagram');
     const target=[...svg.querySelectorAll('[data-node]')].find(el=>el.dataset.node===steps[position]?.id);
     if(!target||!canvas.clientWidth||!canvas.clientHeight){leader.hidden=true;return;}
+    const pref=currentLayout();
+    panel.style.setProperty('--callout-width',Number.isFinite(pref.width)?pref.width+'px':expanded?'350px':'250px');
+    panel.style.setProperty('--callout-height',Number.isFinite(pref.height)?pref.height+'px':expanded?'380px':'280px');
+    panel.style.setProperty('--callout-scale',Number.isFinite(pref.scale)?String(pref.scale):'1');
     const bounds=canvas.getBoundingClientRect(),r=target.getBoundingClientRect(),w=panel.offsetWidth,h=panel.offsetHeight;
     const left=r.left-bounds.left,top=r.top-bounds.top,right=r.right-bounds.left,bottom=r.bottom-bounds.top;
     const cx=(left+right)/2,cy=(top+bottom)/2;
@@ -151,9 +160,17 @@ const SimProcessExplorer=(()=>{
       let cost=Math.abs(x-rawX)+Math.abs(y-rawY);
       for(const q of rects)cost+=q.weight*Math.max(0,Math.min(x+w,q.right)-Math.max(x,q.left))*Math.max(0,Math.min(y+h,q.bottom)-Math.max(y,q.top))/40;
       if(!best||cost<best.cost)best={x,y,cost};}
-    const {x,y}=best;panel.style.left=x+'px';panel.style.top=y+'px';
+    const x=Number.isFinite(pref.dx)?clamp(cx+pref.dx,8,xMax):best.x,y=Number.isFinite(pref.dy)?clamp(cy+pref.dy,8,yMax):best.y;panel.style.left=x+'px';panel.style.top=y+'px';
     const ax=clamp(cx,8,canvas.clientWidth-8),ay=clamp(cy,8,canvas.clientHeight-8),bx=clamp(ax,x,x+w),by=clamp(ay,y,y+h);
-    leader.hidden=false;Object.assign(leader.style,{left:ax+'px',top:ay+'px',width:Math.hypot(bx-ax,by-ay)+'px',transform:'rotate('+Math.atan2(by-ay,bx-ax)+'rad)'});
+    const rightward=x+w/2>=ax, edge=rightward?x:x+w;
+    const lineY=clamp(y+Math.min(28,h/2),8,canvas.clientHeight-8);
+    const elbowX=edge+(rightward?-12:12);
+    const ink=getComputedStyle(target).getPropertyValue('--dwsim-ink').trim()||'var(--spx-text-dim)';
+    leader.style.setProperty('--dwsim-ink',ink);
+    leader.setAttribute('viewBox','0 0 '+canvas.clientWidth+' '+canvas.clientHeight);
+    leader.querySelector('path').setAttribute('d',`M${ax} ${ay} L${elbowX} ${lineY} H${edge}`);
+    leader.querySelector('circle').setAttribute('cx',ax);leader.querySelector('circle').setAttribute('cy',ay);
+    leader.hidden=false;leader.removeAttribute('hidden');
   }
   function follow(){if(!visible)return;positionCard();frame=requestAnimationFrame(follow);}
   function emphasize(){
@@ -235,11 +252,11 @@ const SimProcessExplorer=(()=>{
     else{const b=result.balances?.find(b=>b.id===step.id);summary.append(row('Entrada',value(b?.mass_in,'kg/s')),row('Salida',value(b?.mass_out,'kg/s')),row('Residuo',value(b?.mass_residual,'kg/s')));}
     const formula=document.createElement('div');formula.className='explorer-equation';formula.textContent=dynamic?'dM/dt = ṁₑ − ṁₛ':step.stream?(node.type==='MaterialStream'?'Ḣ = ṁ · h':''):(operations[node.type]?.[0]||'Σṁₑ = Σṁₛ');if(formula.textContent)summary.append(formula);
     panel.querySelector('.explorer-inline-summary')?.remove();panel.querySelector('.explorer-heading').after(summary);
-    setView(view);emphasize();positionCard();
+    globalThis.SimCalloutMath?.render(panel);setView(view);emphasize();positionCard();
   }
   function open(){
     if(!context?.isValid?.())return;
-    const data=context.getData();hadRecycle=false;const tank=data.graph.nodes.find(n=>n.type==='Tank');steps=data.dynamicResult?.points?.length&&tank?data.dynamicResult.points.map((_,sample)=>({id:tank.id,dynamic:true,sample})):data.result?createSteps(data.graph,data.result):[];
+    const data=context.getData();restoreLayout(data.graph);hadRecycle=false;const tank=data.graph.nodes.find(n=>n.type==='Tank');steps=data.dynamicResult?.points?.length&&tank?data.dynamicResult.points.map((_,sample)=>({id:tank.id,dynamic:true,sample})):data.result?createSteps(data.graph,data.result):[];
     if(!steps.length)return;
     visible=true;position=0;expanded=false;view='summary';$('process-explorer-panel').classList.remove('explorer-detail');$('process-explorer-expand').textContent='+';$('process-explorer-expand').setAttribute('aria-pressed','false');render();cancelAnimationFrame(frame);frame=requestAnimationFrame(follow);
   }
@@ -250,8 +267,22 @@ const SimProcessExplorer=(()=>{
   function bind(options){
     context=options;
     const panel=$('process-explorer-panel'),canvas=$('canvas-wrap');canvas.append(panel);panel.classList.add('explorer-inline');
-    leader=document.createElement('div');leader.className='explorer-leader';leader.hidden=true;canvas.append(leader);
+    const ns='http://www.w3.org/2000/svg';
+    leader=document.createElementNS(ns,'svg');leader.setAttribute('class','explorer-leader diagram-callout');leader.setAttribute('aria-hidden','true');leader.setAttribute('hidden','');
+    const line=document.createElementNS(ns,'path');line.setAttribute('class','callout-leader');
+    const tip=document.createElementNS(ns,'circle');tip.setAttribute('class','callout-tip');tip.setAttribute('r','3');leader.append(line,tip);canvas.append(leader);
+    Object.defineProperty(leader,'hidden',{get(){return this.hasAttribute('hidden');},set(value){this.toggleAttribute('hidden',Boolean(value));}});
     controls=document.createElement('div');controls.className='explorer-inline-controls';controls.hidden=true;controls.append(panel.querySelector('.explorer-actions'),$('process-explorer-progress'));document.querySelector('.diagram-toolbar').append(controls);
+    const header=panel.querySelector('.explorer-top'),resize=document.createElement('button');
+    resize.type='button';resize.className='callout-resize';resize.setAttribute('aria-label','Cambiar tamaño de viñeta');resize.title='Arrastrar para cambiar tamaño';resize.textContent='◢';panel.append(resize);
+    const reset=document.createElement('button');reset.type='button';reset.textContent='↺';reset.title='Restablecer posición y tamaño';reset.setAttribute('aria-label',reset.title);header.insertBefore(reset,$('process-explorer-expand'));
+    reset.onclick=()=>{delete layout[steps[position]?.id];saveLayout();positionCard();};
+    const scale=document.createElement('button');scale.type='button';scale.textContent='Aa';scale.title='Cambiar escala del texto';scale.setAttribute('aria-label',scale.title);header.insertBefore(scale,reset);
+    scale.onclick=()=>{const id=steps[position]?.id,pref=currentLayout();if(!id)return;layout[id]={...pref,scale:pref.scale===1.15?1.3:pref.scale===1.3?.9:pref.scale===.9?1:1.15};saveLayout();positionCard();};
+    function begin(e,mode){if(e.button!==0||!visible||gesture||(mode==='move'&&e.target.closest('button')))return;const id=steps[position]?.id,target=[...$('diagram').querySelectorAll('[data-node]')].find(el=>el.dataset.node===id);if(!target)return;pause();e.preventDefault();e.stopPropagation();const p=panel.getBoundingClientRect(),r=target.getBoundingClientRect();gesture={id,mode,x:e.clientX,y:e.clientY,w:p.width,h:p.height,dx:p.left-(r.left+r.right)/2,dy:p.top-(r.top+r.bottom)/2,initial:{...currentLayout()}};e.currentTarget.setPointerCapture(e.pointerId);}
+    function move(e){if(!gesture)return;const g=gesture,dx=e.clientX-g.x,dy=e.clientY-g.y;layout[g.id]={...g.initial,...(g.mode==='move'?{dx:g.dx+dx,dy:g.dy+dy}:{width:Math.max(160,g.w+dx),height:Math.max(90,g.h+dy)})};positionCard();}
+    function finish(e){if(!gesture)return;if(e.type==='pointercancel')layout[gesture.id]=gesture.initial;gesture=null;saveLayout();positionCard();}
+    for(const [el,mode] of [[header,'move'],[resize,'size']]){el.addEventListener('pointerdown',e=>begin(e,mode));el.addEventListener('pointermove',move);el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('lostpointercapture',finish);}
     $('process-explorer-open').addEventListener('click',()=>visible?close():open());
     $('process-explorer-close').addEventListener('click',close);
     $('process-explorer-back').addEventListener('click',back);
