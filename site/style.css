@@ -2610,3 +2610,12 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto}
 .sim-shell .command-bar #calculate-button{order:-1}
 .sim-shell .command-bar .simulation-tools .toolbar-grip{order:-2}
+
+/* Use the established PFD callout geometry: oblique segment, horizontal landing and circular tip. */
+#canvas-wrap>svg.explorer-leader{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:none;background:none;transform:none;pointer-events:none;overflow:hidden;z-index:6}
+#canvas-wrap>svg.explorer-leader .callout-tip{fill:var(--spx-surface);stroke-width:1}
+#canvas-wrap>svg.explorer-leader[hidden]{display:none!important}
+/* Calculation precedes drawing and view commands in the default toolbar. */
+.sim-shell .command-bar .project-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto;max-width:190px}
+.sim-shell .command-bar .project-title{width:100px;max-width:100px;min-width:65px}
+.sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){margin-inline-start:0!important;flex:0 0 auto}
