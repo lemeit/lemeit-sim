@@ -35,7 +35,9 @@ test('reporte presenta HTTP, etapa y motor, sin datos de proceso ni credenciales
 });
 test('los scripts de la consola se cargan antes de iniciar app.js',()=>{
  const html=readFileSync(new URL('../../../site/index.html',import.meta.url),'utf8');
- assert.ok(html.indexOf('src="diagnostics-console.js"')<html.search(/src="app\.js(?:\?[^"]*)?"/));
+ const scripts=[...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(m=>m[1].split('?')[0]);
+ const diagnostics=scripts.indexOf('diagnostics-console.js'),app=scripts.indexOf('app.js');
+ assert.ok(diagnostics>=0 && app>diagnostics,'La consola debe cargarse antes de app.js');
  for(const id of ['diagnostics-log','diagnostics-filter','diagnostics-clear','diagnostics-download'])assert.ok(html.includes('id="'+id+'"'));
 });
 test('el cálculo no registra un POST hasta que pasa la comprobación de capacidades',()=>{
