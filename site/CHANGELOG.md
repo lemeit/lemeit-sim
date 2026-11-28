@@ -6,6 +6,11 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.53.3 — 2026-11-28
+
+- Desktop abre un diálogo nativo para guardar copias .sim y confirma la ruta cuando termina la escritura.
+- Actualiza las guías de guardado, recuperación y flujo de trabajo.
+
 ## 0.53.2 — 2026-11-28
 
 - Las categorías de Ejemplos en Desktop usan el fondo del menú en los temas claro y oscuro.

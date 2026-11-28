@@ -1,6 +1,6 @@
 # Trabajar con un proyecto
 
-Revisión: 25/11/2026 · 0.49.0 integrada; despliegue a verificar. Los apartados históricos se complementan con el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
+Revisión del 28/11/2026 · Online 0.53.3 y Desktop 0.53.3-alpha.1. Los apartados históricos se complementan con el [manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/).
 
 ## Flujo recomendado actual
 
@@ -12,6 +12,12 @@ Revisión: 25/11/2026 · 0.49.0 integrada; despliegue a verificar. Los apartados
 6. Abrí **Explorar proceso…** para estudiar ecuaciones, balances y valores de DWSIM ya calculados, sin relanzar la simulación.
 7. Guardá el proyecto **en la nube**; opcionalmente descargá una **copia JSON**. Para presentar, exportá tablas CSV/Excel o **Reporte PDF · diagrama y balances** con rótulo, actividad y tablas.
 8. Un valor cercano a cero en la energía neta de un intercambiador **no** implica transferencia térmica interna cero. Ver [interpretación energética](interpretacion-intercambiadores.md) (corrección integrada desde 0.47.5).
+
+## Guardar y abrir en Desktop
+
+**Archivo → Guardar copia de proyecto (.sim)…**, el disquete o **Ctrl + S** abren el selector de carpeta y nombre. La confirmación muestra la ruta escrita. Para abrir una copia `.sim` o un proyecto Online `.json`, usá **Archivo → Abrir proyecto…**. Los archivos incluyen la última corrida válida y el formato de Gráficas cuando el proyecto los tiene.
+
+**Biblioteca local…** y **Recuperar borrador local** permiten retomar el trabajo en el mismo equipo. Consultá la [guía Desktop](../desktop/README.md) para ejecutar el prototipo y seleccionar el motor local.
 
 ## Dinámica y gráficas
 
@@ -45,8 +51,7 @@ Abrir el simulador, elegir **Alumno** e ingresar el código de clase. No se nece
    su estequiometría son una elección separada del paquete de propiedades físicas.
 8. Calcular y revisar corrientes y balances en el panel inferior. Los cambios de
    datos físicos invalidan resultados; mover un símbolo no cambia el cálculo.
-9. Guardar proyecto descarga JSON. La copia automática del navegador no sustituye
-   ese archivo. Recuperar último proyecto es una acción explícita del menú Archivo.
+9. En Online, usá **Guardar en nube** o descargá una **copia JSON** desde Archivo. **Recuperar último proyecto** recupera el borrador del navegador.
 
 Los ejemplos se abren opcionalmente desde el menú Ejemplos. Si hay un proyecto
 activo, la aplicación avisa antes de reemplazarlo. No son resultados experimentales.

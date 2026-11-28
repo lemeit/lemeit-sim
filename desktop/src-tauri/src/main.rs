@@ -1,7 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{io::{BufRead, BufReader}, path::PathBuf, process::{Child, Command, Stdio}, sync::{mpsc, Mutex}, time::Duration};
+use std::{io::Write, path::Path};
 use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 
 struct Gateway(Child);
 impl Drop for Gateway {
@@ -48,8 +50,48 @@ fn start_gateway() -> Result<Gateway, Box<dyn std::error::Error>> {
     Ok(gateway)
 }
 
+#[tauri::command]
+async fn save_project_copy(
+    window: tauri::WebviewWindow,
+    filename: String,
+    contents: String,
+) -> Result<Option<String>, String> {
+    let suggested = Path::new(&filename);
+    if suggested.file_name().and_then(|name| name.to_str()) != Some(filename.as_str())
+        || suggested.extension().and_then(|ext| ext.to_str()) != Some("sim")
+    {
+        return Err("El nombre sugerido debe ser un archivo .sim.".into());
+    }
+
+    let Some(selection) = window
+        .dialog()
+        .file()
+        .set_parent(&window)
+        .set_title("Guardar copia de proyecto")
+        .set_file_name(filename)
+        .add_filter("Proyecto ΣIM", &["sim"])
+        .blocking_save_file()
+    else {
+        return Ok(None);
+    };
+
+    let path = selection.into_path().map_err(|error| error.to_string())?;
+    if !path.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| ext.eq_ignore_ascii_case("sim")) {
+        return Err("Elegí un nombre de archivo que termine en .sim.".into());
+    }
+    let directory = path.parent().ok_or("La carpeta seleccionada no es válida.")?;
+    // Write beside the destination so a failed export cannot truncate an existing copy.
+    let mut file = tempfile::NamedTempFile::new_in(directory).map_err(|error| error.to_string())?;
+    file.write_all(contents.as_bytes()).map_err(|error| error.to_string())?;
+    file.as_file().sync_all().map_err(|error| error.to_string())?;
+    file.persist(&path).map_err(|error| error.error.to_string())?;
+    Ok(Some(path.display().to_string()))
+}
+
 fn main() {
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![save_project_copy])
         .plugin(tauri_plugin_opener::Builder::new().open_js_links_on_click(false).build())
         .setup(|app| {
             let gateway = start_gateway()?;

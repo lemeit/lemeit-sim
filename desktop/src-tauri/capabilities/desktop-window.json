@@ -1,6 +1,6 @@
 {
   "identifier": "desktop-window",
-  "description": "Window chrome only for the Desktop development gateway",
+  "description": "Window chrome and project export for the Desktop development gateway",
   "windows": [
     "main"
   ],
@@ -10,6 +10,7 @@
     ]
   },
   "permissions": [
+    "allow-save-project-copy",
     "core:window:allow-minimize",
     "core:window:allow-toggle-maximize",
     "core:window:allow-close",

@@ -1299,3 +1299,37 @@ test('Desktop migra una vez los grupos antiguos sin perder proyectos',async t=>{
  assert.equal(await page.locator('.project-tools').evaluate(el=>el.classList.contains('toolbar-sized')),false);
  assert.equal(await page.evaluate(()=>localStorage.getItem('sim-desktop-toolbar-0531')),'1');
 });
+
+test('Desktop: Ctrl+S confirms a .sim copy only after a successful native write',async t=>{
+ const page=await browserPage(t,result,async page=>{
+   await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='debian';"}));
+   await page.addInitScript(()=>{
+     globalThis.saveRequests=[];
+     globalThis.__TAURI__={core:{invoke:async (command,args)=>{
+       globalThis.saveRequests.push({command,...args});
+       if(globalThis.saveOutcome==='error')throw new Error('Carpeta sin permiso');
+       return globalThis.saveOutcome||null;
+     }}};
+   });
+ });
+ await openProject(page,example);
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
+ const notice=page.locator('#notice');
+ const previous=await notice.textContent();
+ await page.keyboard.press('Control+s');
+ await page.waitForFunction(()=>globalThis.saveRequests.length===1);
+ assert.equal(await notice.textContent(),previous);
+ const request=await page.evaluate(()=>globalThis.saveRequests[0]);
+ assert.equal(request.command,'save_project_copy');
+ assert.match(request.filename,/\.sim$/);
+ const copy=JSON.parse(request.contents);
+ assert.ok(copy.nodes.length>0&&copy.saved_run);
+
+ await page.evaluate(()=>{globalThis.saveOutcome='error';});
+ await page.keyboard.press('Control+s');
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Carpeta sin permiso'));
+ await page.evaluate(()=>{globalThis.saveOutcome='/home/alumno/Proceso.sim';});
+ await page.locator('#cloud-save-toolbar').click();
+ await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('/home/alumno/Proceso.sim'));
+});

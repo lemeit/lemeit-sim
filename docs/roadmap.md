@@ -208,3 +208,11 @@ no equivale a validar el equipo. **Cada PR que cambia una capacidad debe revisar
 - Validar modo local sin Internet, acceso local y almacenamiento de archivos; no sustituir autenticación de nube por acceso público.
 - Reorganizar pruebas por etapas preservando descubrimiento de unittest, rutas de imports, CI y scripts de arranque.
 - Extender adaptadores dinámicos a cinética de reacción y reactores discontinuos tras validar sus modelos.
+
+## Próxima etapa de Desktop
+
+1. Verificar el ciclo completo de archivos `.sim` en Debian y Windows, incluida la cancelación, la reapertura y la recuperación de resultados.
+2. Preparar una instalación que inicie el gateway y el motor local con sus dependencias.
+3. Probar el instalador en equipos limpios y comprobar creación, cálculo, guardado y reapertura sin conexión.
+
+El alcance y la distribución se detallan en [Desktop](../desktop/README.md) y [Distribución](../desktop/DISTRIBUTION.md).

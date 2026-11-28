@@ -62,5 +62,9 @@ fn main(){
         for img in images{ico.extend_from_slice(&img);}
         write_if_changed("icons/icon.ico",&ico);
     }
-    tauri_build::build();
+    tauri_build::try_build(
+        tauri_build::Attributes::new()
+            .app_manifest(tauri_build::AppManifest::new().commands(&["save_project_copy"])),
+    )
+    .expect("configure Desktop permissions");
 }

@@ -1039,7 +1039,33 @@ function bindEvents(){
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
-  $('save-button').onclick=()=>{downloadLocal(exportStem()+(globalThis.SimDesktop?'.sim':'.json'),JSON.stringify(graph,null,2),'application/json');notice('Proyecto descargado con el diagrama, el formato de Gráficas y la última corrida válida.');};
+  let savingCopy=false;
+  $('save-button').onclick=async()=>{
+    if(!hasProject||savingCopy)return;
+    const snapshot=graph,savedState=JSON.stringify(snapshot),contents=JSON.stringify(snapshot,null,2);
+    if(!globalThis.SimDesktop){
+      downloadLocal(exportStem()+'.json',contents,'application/json');
+      notice('Se solicitó la descarga de la copia JSON del proyecto.');
+      return;
+    }
+    const invoke=globalThis.__TAURI__?.core?.invoke;
+    if(!invoke){
+      notice('Abrí el proyecto en la aplicación ΣIM Desktop para guardar un archivo .sim.',true);
+      return;
+    }
+    savingCopy=true;
+    closeMenus();
+    try{
+      const path=await invoke('save_project_copy',{filename:exportStem()+'.sim',contents});
+      if(!path)return;
+      if(hasProject&&graph===snapshot)desktopSavedProject=savedState;
+      notice('Proyecto guardado en '+path);
+    }catch(error){
+      notice('No se pudo guardar el archivo .sim: '+(error?.message||String(error)),true);
+    }finally{
+      savingCopy=false;
+    }
+  };
   $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){

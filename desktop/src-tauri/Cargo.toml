@@ -1,6 +1,6 @@
 [package]
 name = "sim-desktop"
-version = "0.53.2-alpha.1"
+version = "0.53.3-alpha.1"
 edition = "2021"
 license = "GPL-3.0-or-later"
 
@@ -11,3 +11,5 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 
 tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tempfile = "3"
