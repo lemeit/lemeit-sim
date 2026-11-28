@@ -3,7 +3,7 @@
 'use strict';
 globalThis.SimDockLayout=(()=>{
   const KEY='sim-dock-layout-cad-v3';
-  const IDS=['equipment','inspector','results','charts','explorer'];
+  const IDS=['equipment','inspector','results','charts'];
   const EDGES=['left','right','top','bottom'];
   const MODES=['float',...EDGES];
   const LABELS={left:'Izquierda',right:'Derecha',top:'Arriba',bottom:'Abajo',float:'Flotante',reset:'Restaurar'};
@@ -397,7 +397,6 @@ globalThis.SimDockLayout=(()=>{
       if(gesture)stopGesture(true);
       for(const id of IDS)apply(panels[id],false);
     });
-    if(typeof ResizeObserver==='function'){new ResizeObserver(()=>{const p=panels.explorer;if(p.mode==='float'&&!gesture){p.box=workspaceBox(p.box);updateExplorerBounds(p);Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',width:p.box.w+'px',height:p.box.h+'px'});}}).observe(workspace);}
     window.addEventListener('pagehide',persist);
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
