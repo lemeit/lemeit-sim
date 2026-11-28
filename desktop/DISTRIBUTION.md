@@ -1,6 +1,6 @@
 # Formato de proyectos y distribución oficial de ΣIM Desktop
 
-Estado: diseño inicial y primera implementación de intercambio .sim, 27/11/2026. No es una release ni un repositorio APT operativo.
+Estado al 28/11/2026: intercambio .sim con selector nativo de guardado en el prototipo. La publicación de instaladores y del repositorio APT está pendiente.
 
 ## Formato .sim (versión 1)
 
@@ -22,7 +22,7 @@ Paquete sim-desktop amd64 .deb construido para Debian 12. Publicar primero el .d
 
 ## Orden de implementación
 
-1. Validar .sim en Windows/Debian, apertura y guardado nativo, protección de cambios, asociación de extensión.
+1. Verificar apertura, guardado, cancelación, reemplazo y protección de cambios en Windows y Debian. Incorporar la asociación del sistema para la extensión .sim al preparar los instaladores.
 2. Completar aislamiento del motor, empaquetado de Python/DWSIM y pruebas offline.
 3. Configurar CI de compilación en ambas plataformas, versionado y release borrador.
 4. Configurar claves de actualización, endpoint Windows y repositorio APT de prueba.

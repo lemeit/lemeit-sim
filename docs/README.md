@@ -1,6 +1,6 @@
 # Documentación de ΣIM
 
-Revisión: 26/11/2026 · Portal 0.51.1 integrado, CI aprobado; despliegue a verificar · DWSIM 10.2.15.
+Revisión del 28/11/2026 · Guías para Online 0.53.3 y Desktop 0.53.3-alpha.1 · DWSIM 10.2.15.
 
 ## Empezar
 
@@ -13,7 +13,8 @@ Revisión: 26/11/2026 · Portal 0.51.1 integrado, CI aprobado; despliegue a veri
 | Estudiar dinámica y gráficas | [Gráficas](graficas-cientificas.md) · [Ejemplo 20](ejemplo-20-tanque-dinamico-dwsim.md) |
 | Usar unidades y composición | [Unidades y calculadora](unidades-y-calculadora.md) |
 | Distinguir transferencia de calor de cierre energético | [Balances de intercambiadores](interpretacion-intercambiadores.md) |
-| Guardar proyectos individuales | [Manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/) y [acceso](acceso-clases-admin.md) |
+| Guardar proyectos individuales en Online | [Manual de la wiki](https://wiki.lemeit.ar/sim/manual-de-uso/) y [acceso](acceso-clases-admin.md) |
+| Guardar copias .sim y trabajar con motor local | [Guía de Desktop](../desktop/README.md) · [Formato .sim](../desktop/DISTRIBUTION.md) |
 | Revisar ejemplos y referencias | [Ejemplos validados](ejemplos-validados.md) y [guía web](../site/ejemplos.html) |
 
 ## Operación y mantenimiento

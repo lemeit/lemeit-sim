@@ -2,6 +2,12 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
+## 0.53.3-alpha.1 · 28/11/2026
+
+- Guardar copia abre el selector del sistema y confirma la ubicación del archivo .sim al terminar.
+- La ayuda local explica la copia portable, la biblioteca y la recuperación del borrador.
+
+
 ## alpha.2 — en desarrollo · 26–27/11/2026
 
 - Debian: el usuario comprobó los doce puntos de validación funcional (PFD, conexiones, barras y persistencia, temas, F1, Wiki, ejemplos 01/20 y cierre); también recuperó un proyecto de biblioteca. Observó una ventana de resultados al inicio que no se reprodujo después de reiniciar y el color rojo tras dinámica. Se modifica la apertura de resultados flotantes sin proyecto y el estado visual del PFD dinámico. Correcciones pendientes de nueva prueba.

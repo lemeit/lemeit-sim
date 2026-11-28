@@ -1,8 +1,8 @@
 # ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣiM 0.53.2 (rama de desarrollo). Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later. Rama `feat/desktop-foundation`, [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
+Base científica y frontend compartido: ΣIM 0.53.3, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
 
-**Estado al 26/11/2026:** alpha.1 funcional en Debian x86_64, revisión de interfaz alpha.2 en curso. La numeración del ejecutable Cargo sigue siendo 0.53.2-alpha.1. No es todavía una distribución autónoma ni existe un instalador publicado.
+**Estado al 28/11/2026:** prototipo 0.53.3-alpha.1. El editor se probó en Debian x86_64 con el motor local. No es todavía una distribución autónoma ni existe un instalador publicado.
 
 ## Arquitectura actual
 
@@ -19,13 +19,19 @@ Tauri 2 / Rust abre la interfaz compartida desde el gateway Python propio en 127
 | Ejemplo 20 dinámico | Integración finalizada en 6,832 s; validación numérica completa de puntos Desktop pendiente |
 | Acceso sin clase | Comprobado por uso del editor |
 | Menús, iconos y tema Desktop | Primera revisión visible en capturas; segunda revisión (d1d283a) implementada, pendiente de comprobación específica |
-| Guardar JSON | Botón conectado a exportación existente; guardado nativo y Guardar como pendientes |
+| Copia .sim | Selector nativo y confirmación de ruta después de escribir |
 | Identificación del motor | Corrección Debian y ausencia de conmutación remota implementadas; diagnóstico inicial aún registraba windows erróneamente |
 | Cierre del gateway | Código de limpieza implementado; verificación de procesos pendientes |
 | Exploración paso a paso dinámica | Pendiente común Online/Desktop, postergada |
 | Instalación autónoma y prueba offline | Pendiente |
 
 El registro de diagnóstico del 26/11 contiene también un cálculo estacionario con IAPWS-IF97 (1,270 s) y otro con Peng-Robinson (1,678 s). Son tiempos observados, no benchmarks. El adaptador dinámico solo admite el circuito de agua con tanque y dos válvulas. La recirculación solo admite el lazo simple sin reacción.
+
+## Guardar y recuperar proyectos
+
+- **Archivo → Guardar copia de proyecto (.sim)…**, el icono de disquete o **Ctrl + S** abren el selector del sistema. Elegí la carpeta y confirmá el nombre. El aviso muestra la ruta cuando la escritura termina. Cancelar deja el proyecto abierto.
+- **Archivo → Abrir proyecto…** o **Ctrl + O** admite copias `.sim` y proyectos `.json` de Online. El archivo conserva el diagrama, el formato de Gráficas y la última corrida válida, si está disponible.
+- **Biblioteca local…** conserva proyectos dentro de la aplicación. **Recuperar borrador local** permite volver al último borrador. Para llevar el proyecto a otro equipo, guardá una copia `.sim`.
 
 ## Ejecutar el prototipo en Debian 12
 
@@ -35,7 +41,7 @@ En el repositorio existente, utilizar un worktree separado:
 ```bash
 cd ~/lemeit-sim
 git fetch origin
-git worktree add --detach ~/lemeit-sim-desktop origin/feat/desktop-foundation
+git worktree add --detach ~/lemeit-sim-desktop origin/main
 cd ~/lemeit-sim-desktop
 bash desktop/scripts/check-debian.sh
 ```
@@ -51,7 +57,7 @@ Para actualizar y ejecutar, con la ventana anterior cerrada:
 ```bash
 cd ~/lemeit-sim-desktop
 git fetch origin
-git switch --detach origin/feat/desktop-foundation
+git switch --detach origin/main
 export SIM_DESKTOP_MCP_TOKEN_FILE="$(systemctl show lemeit-sim.service -p ExecStart --value | sed -n 's/.*--mcp-token-file[ =]\([^ ;}]*\).*/\1/p')"
 test -n "$SIM_DESKTOP_MCP_TOKEN_FILE" && test -r "$SIM_DESKTOP_MCP_TOKEN_FILE" && (
   cd desktop/src-tauri

@@ -34,7 +34,7 @@ globalThis.SimDesktopShell=(()=>{
     (document.querySelector('.sim-shell')||document.body).append(dialog);
     $('desktop-save-and-close').onclick=()=>{
       if(project.save())dialog.close('close');
-      else $('desktop-unsaved-error').textContent='No se pudo guardar en la biblioteca. Cancelá para volver al proyecto y guardar una copia JSON.';
+      else $('desktop-unsaved-error').textContent='No se pudo guardar en la biblioteca. Cancelá para volver al proyecto y guardar una copia .sim.';
     };
   }
   const icons={
@@ -150,7 +150,7 @@ globalThis.SimDesktopShell=(()=>{
     if(cloudLabel?.classList.contains('menu-section-label'))cloudLabel.classList.add('desktop-hidden');
     icon($('new-project-toolbar'),'new','Nuevo proyecto (Ctrl+N)');
     icon($('open-project-toolbar'),'open','Abrir proyecto (Ctrl+O)');
-    icon($('cloud-save-toolbar'),'save','Guardar proyecto (Ctrl+S)');
+    icon($('cloud-save-toolbar'),'save','Guardar copia de proyecto (.sim) · Ctrl+S');
     const save=$('cloud-save-toolbar');
     if(save){save.hidden=false;save.classList.remove('cloud-toolbar-button');save.classList.add('desktop-save-button');save.onclick=()=>$('save-button').click();}
     $('open-button').textContent='Abrir proyecto…';
