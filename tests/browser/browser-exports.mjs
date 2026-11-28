@@ -796,6 +796,13 @@ test('Explorador contextual: el lienzo permanece fijo al avanzar y ampliar detal
  });
  const initial=await measure();
  assert.ok(initial.panelHeight>50);
+ assert.equal(await panel.locator('math').count()>0,true,'Las ecuaciones usan MathML local');
+ assert.equal(await panel.locator('.callout-resize').count(),1);
+ const scale=panel.getByRole('button',{name:'Cambiar escala del texto'});
+ await scale.click();
+ assert.equal(await panel.evaluate(el=>el.style.getPropertyValue('--callout-scale')),'1.15');
+ await panel.getByRole('button',{name:'Restablecer posición y tamaño'}).click();
+ assert.equal(await panel.evaluate(el=>el.style.getPropertyValue('--callout-scale')),'1');
  const stable=async()=>{await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const now=await measure();assert.ok(Math.abs(now.height-initial.height)<1,'El alto del lienzo permanece fijo');assert.ok(Math.abs(now.top-initial.top)<1,'El lienzo no se desplaza');assert.ok(now.inside,'La tarjeta permanece dentro del lienzo');};
  await stable();
  for(let i=0;i<4&&await next.isEnabled();i++){await next.click();await stable();}
