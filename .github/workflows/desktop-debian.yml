@@ -25,7 +25,7 @@ jobs:
           apt-get install -y --no-install-recommends "./$package"
           test -x /usr/lib/sim-desktop/sim-desktop
           test -f /usr/share/sim-desktop/site/index.html
-          python3 /usr/share/sim-desktop/server.py --help >/dev/null
+          python3 -B /usr/share/sim-desktop/server.py --help >/dev/null
           test -z "$(ldd /usr/lib/sim-desktop/sim-desktop | grep 'not found' || true)"
           export GNUPGHOME=$(mktemp -d)
           trap 'rm -rf "$GNUPGHOME"' EXIT
@@ -33,6 +33,7 @@ jobs:
           fingerprint=$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1=="fpr" {print $10; exit}')
           aptroot=$(mktemp -d)
           chmod 755 "$aptroot"
+          mkdir -p "$aptroot/lists/partial"
           aptopts=(-o "Dir::Etc::sourcelist=$aptroot/source.list" -o Dir::Etc::sourceparts=- -o "Dir::State::lists=$aptroot/lists")
           gpg --batch --export "$fingerprint" > "$aptroot/key.gpg"
           printf 'deb [signed-by=%s] file:%s bookworm main\n' "$aptroot/key.gpg" "$aptroot/repo" > "$aptroot/source.list"
