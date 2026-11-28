@@ -752,25 +752,15 @@ test('Ventana de balances respeta motor Debian fijado en ventana principal',asyn
  await popup.close();
 });
 
-test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación integrada',async t=>{
+test('Calcular propio, tema único y navegación integrada',async t=>{
   const page=await browserPage(t);
   assert.equal(await page.locator('#theme-toggle').count(),1);
   assert.equal(await page.locator('[data-toolbar-action="theme-toggle"]').count(),0);
   assert.equal(await page.locator('#calculate-button .calculate-play path').count(),2);
   assert.equal(await page.locator('#calculate-button.primary-calculate').count(),1);
-  assert.equal(await page.locator('#toolbar-layout-reset').count(),1);
   assert.equal(await page.locator('#view-menu [data-toolbar-action="fit-button"]').count(),0,'Vista no repite el encuadre de la barra');
   const admin=page.locator('#admin-nav-link');
   assert.equal(await admin.getAttribute('target'),null,'Administración no abre otra pestaña');
-  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
-  const original=await order();
-  await page.locator('.simulation-tools .toolbar-grip').evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',altKey:true,bubbles:true})));
-  const changed=await order();
-  assert.notDeepEqual(changed,original);
-  assert.equal(changed.indexOf('simulation-tools'),original.indexOf('simulation-tools')-1);
-  await page.locator('#view-menu > summary').click();
-  await page.locator('#toolbar-layout-reset').click();
-  assert.deepEqual(await order(),['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
   await page.locator('#theme-toggle').click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
@@ -1151,44 +1141,6 @@ test('Ejemplo 14 grafica los estados y el modelo de compresión',async t=>{
   assert.ok(await page.locator('#charts-svg path').count());
 });
 
-test('La barra acepta puntero, recuerda tamaño y posición y puede volver a acoplarse',async t=>{
-  const page=await browserPage(t);
-  const group=page.locator('.drawing-tools');
-  const grip=group.locator('.toolbar-grip');
-  const drag=async(locator,x,y)=>{
-    const rect=await locator.boundingBox();
-    await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);
-    await page.mouse.down();
-    await page.mouse.move(x,y,{steps:8});
-    await page.mouse.up();
-  };
-  const previous=await page.locator('.project-tools').boundingBox();
-  await drag(grip,previous.x+previous.width/2,previous.y+previous.height/2);
-  assert.ok((await group.boundingBox()).x<=(await page.locator('.project-tools').boundingBox()).x);
-  const docked=await group.boundingBox();
-  const edge=group.locator('.toolbar-resize');
-  await drag(edge,docked.x+docked.width+85,docked.y+docked.height/2);
-  const wider=await group.boundingBox();
-  assert.ok(wider.width>docked.width);
-  await drag(edge,wider.x+wider.width-42,wider.y+wider.height/2);
-  const narrower=await group.boundingBox();
-  assert.ok(narrower.width<wider.width);
-  await page.reload({waitUntil:'networkidle'});
-  assert.equal((await group.boundingBox()).width,narrower.width);
-  await drag(grip,450,250);
-  assert.match(await group.getAttribute('class'),/toolbar-floating/);
-  const before=await group.boundingBox();
-  await drag(group.locator('.toolbar-resize'),before.x+before.width+80,before.y+before.height/2);
-  const resized=await group.boundingBox();
-  assert.ok(resized.width>before.width);
-  await page.reload({waitUntil:'networkidle'});
-  assert.deepEqual(await group.boundingBox(),resized);
-  const bar=await page.locator('.command-bar').boundingBox();
-  await drag(grip,bar.x+bar.width/2,bar.y+bar.height/2);
-  assert.doesNotMatch(await group.getAttribute('class'),/toolbar-floating/);
-  assert.equal((await group.boundingBox()).width,resized.width);
-});
-
 test('El margen invisible de un símbolo permite arrastrarlo y el cursor se restablece',async t=>{
   const page=await browserPage(t);
   await openProject(page,example);
@@ -1289,16 +1241,32 @@ test('Desktop: las categorías de Ejemplos comparten el fondo de los menús',asy
    await page.locator('#examples-menu > summary').click();
  }
 });
-test('Desktop migra una vez los grupos antiguos sin perder proyectos',async t=>{
- const page=await browserPage(t,result,async page=>{
-   await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='windows';"}));
-   await page.addInitScript(()=>{localStorage.setItem('sim-toolbar-layout-v1',JSON.stringify(['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']));localStorage.setItem('sim-toolbar-widths-v1',JSON.stringify({'project-tools':650}));});
+for(const desktop of [false,true]){
+ test(`Barra fija y adaptable en ${desktop?'Desktop':'Online'}`,async t=>{
+  const page=await browserPage(t,result,async page=>{
+    if(desktop)await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='debian';"}));
+    await page.addInitScript(()=>{
+      localStorage.setItem('sim-toolbar-widths-v1','{"project-tools":650}');
+      localStorage.setItem('sim-toolbar-floating-v1','{"simulation-tools":{"x":640,"y":480,"width":200}}');
+    });
+  });
+  const groups=page.locator('.command-bar > .command-group');
+  assert.deepEqual(await groups.evaluateAll(els=>els.map(el=>el.classList[1])),
+    ['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
+  assert.equal(await page.locator('.toolbar-grip,.toolbar-resize,.toolbar-floating,#toolbar-layout-reset').count(),0);
+  await page.setViewportSize({width:800,height:750});
+  const bar=await page.locator('.command-bar').boundingBox();
+  const calculate=await page.locator('#calculate-button').boundingBox();
+  const drawing=await page.locator('.drawing-tools').boundingBox();
+  assert.ok(calculate.y>=bar.y&&calculate.y+calculate.height<=bar.y+bar.height);
+  assert.ok(calculate.y<drawing.y||calculate.x<drawing.x,'Calcular precede a Diagrama');
+  assert.ok(await groups.evaluateAll(els=>els.every(el=>el.getBoundingClientRect().right<=window.innerWidth)));
+  if(desktop){
+    await page.keyboard.press('F1');
+    await page.locator('#desktop-help-dialog').getByText('Barra y paneles',{exact:true}).waitFor();
+  }
  });
- const order=await page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
- assert.deepEqual(order,['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
- assert.equal(await page.locator('.project-tools').evaluate(el=>el.classList.contains('toolbar-sized')),false);
- assert.equal(await page.evaluate(()=>localStorage.getItem('sim-desktop-toolbar-0531')),'1');
-});
+}
 
 test('Desktop: Ctrl+S confirms a .sim copy only after a successful native write',async t=>{
  const page=await browserPage(t,result,async page=>{

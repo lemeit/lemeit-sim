@@ -2081,23 +2081,6 @@ body.results-window #results-panel [data-results-content="streams"]:not([hidden]
 .results-card dd{max-width:54%;overflow-wrap:anywhere}
 
 
-/* ΣiM 0.47.7: interfaz técnica, sin ornamentos; barra reordenable. */
-.command-bar .command-group{position:relative}
-.command-bar .toolbar-grip{
-  position:absolute;inset-inline-start:-6px;top:4px;z-index:2;
-  display:inline-grid;place-items:center;
-  width:12px!important;min-width:12px!important;height:23px!important;min-height:0!important;
-  padding:0!important;opacity:.18;color:var(--spx-text-dim);
-  background:transparent!important;border:0!important;cursor:grab;
-}
-.command-bar .command-group:hover>.toolbar-grip,.command-bar .toolbar-grip:focus-visible{opacity:.52}
-.command-bar .toolbar-grip:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-1px}
-.command-bar .toolbar-grip svg{fill:currentColor}
-.command-bar .toolbar-grip:active{cursor:grabbing}
-.command-bar .toolbar-grip svg{pointer-events:none}
-.command-bar .file-tools{padding-inline-start:9px}
-.command-bar .file-tools .toolbar-grip{inset-inline-start:0}
-.command-bar .toolbar-drop-target{box-shadow:inset 1px 0 var(--spx-accent)}
 .command-bar .simulation-tools{gap:5px;padding-inline:4px!important}
 .command-bar #calculate-button.primary-calculate{
   box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
@@ -2504,32 +2487,6 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .sim-shell :is(#charts-scrub,#tank-dynamic-scrub){width:100%;accent-color:var(--spx-accent);cursor:ew-resize}
 .sim-shell :is(#charts-scrub,#tank-dynamic-scrub):disabled{cursor:default}
 
-.command-bar .toolbar-grip,.command-bar .toolbar-resize{touch-action:none}
-.sim-shell .command-bar[data-customizable] .command-group{padding-inline-end:14px}
-.sim-shell .command-bar .command-group.toolbar-sized{
-  box-sizing:border-box;width:var(--toolbar-width);flex-wrap:wrap;align-content:center;
-}
-.sim-shell .command-bar .toolbar-sized>*:not(.toolbar-grip):not(.toolbar-resize){flex-shrink:0}
-.sim-shell .command-bar .command-group.toolbar-floating{
-  position:fixed;z-index:960;box-sizing:border-box;
-  left:var(--toolbar-x);top:var(--toolbar-y);width:var(--toolbar-width);
-  margin:0;min-height:36px;padding:4px 17px!important;flex-wrap:wrap;
-  border:1px solid var(--spx-border);border-radius:4px;background:var(--spx-surface-2);
-}
-.command-bar .toolbar-floating .toolbar-grip{inset-inline-start:3px}
-.sim-shell .command-bar .command-group > button.toolbar-resize{
-  display:block;position:absolute;z-index:3;inset:0 0 0 auto;
-  width:14px!important;min-width:0!important;height:auto!important;min-height:0!important;
-  padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;
-  cursor:ew-resize;
-}
-.command-bar .toolbar-resize::after{
-  content:'';position:absolute;inset:25% 3px 25% auto;width:1px;
-  background:var(--spx-text-dim);opacity:0;pointer-events:none;
-}
-.command-bar .toolbar-resize:is(:hover,:active,:focus-visible)::after{opacity:.65}
-.command-bar .toolbar-resize:focus-visible{outline:1px solid var(--spx-accent);outline-offset:-2px}
-
 /* ΣiM: acción compacta, mantiene texto accesible y estado. */
 .command-bar #calculate-button.primary-calculate{width:48px;min-width:48px;max-width:48px;flex:0 0 48px;padding:4px 6px;gap:4px;justify-content:center}
 .command-bar #calculate-button .calculate-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -2604,21 +2561,18 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .explorer-leader{background:var(--spx-text-dim);height:1px}
 .explorer-leader::after{content:'';position:absolute;right:0;top:-3px;border-left:6px solid var(--spx-text-dim);border-top:3px solid transparent;border-bottom:3px solid transparent}
 /* Avoid the expanding project group pushing Calculate to the far edge. */
-.sim-shell .command-bar .project-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 1 auto;min-width:0;max-width:240px}
-.sim-shell .command-bar .project-title{width:clamp(85px,12vw,150px);min-width:75px;max-width:150px}
-.sim-shell .command-bar .file-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto}
-.sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto}
+.sim-shell .command-bar .file-tools{flex:0 0 auto}
+.sim-shell .command-bar .simulation-tools{flex:0 0 auto}
 .sim-shell .command-bar #calculate-button{order:-1}
-.sim-shell .command-bar .simulation-tools .toolbar-grip{order:-2}
 
 /* Use the established PFD callout geometry: oblique segment, horizontal landing and circular tip. */
 #canvas-wrap>svg.explorer-leader{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:none;background:none;transform:none;pointer-events:none;overflow:hidden;z-index:6}
 #canvas-wrap>svg.explorer-leader .callout-tip{fill:var(--spx-surface);stroke-width:1}
 #canvas-wrap>svg.explorer-leader[hidden]{display:none!important}
 /* Calculation precedes drawing and view commands in the default toolbar. */
-.sim-shell .command-bar .project-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto;max-width:190px}
+.sim-shell .command-bar .project-tools{flex:0 0 auto;min-width:0;max-width:190px}
 .sim-shell .command-bar .project-title{width:100px;max-width:100px;min-width:65px}
-.sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){margin-inline-start:0!important;flex:0 0 auto}
+.sim-shell .command-bar .simulation-tools{margin-inline-start:0!important;flex:0 0 auto}
 
 /* Nested examples headings belong to the menu surface, never the dark app header. */
 .sim-shell #examples-menu .menu-panel .examples-category>summary{background:var(--spx-surface)!important;color:var(--spx-text)!important;border:0;border-radius:3px;box-shadow:none}

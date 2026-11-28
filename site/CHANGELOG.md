@@ -6,6 +6,10 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.53.4 — 2026-11-28
+
+- Orden fijo de herramientas en Online y Desktop, con Calcular antes de Diagrama y ajuste automático al ancho.
+
 ## 0.53.3 — 2026-11-28
 
 - Desktop abre un diálogo nativo para guardar copias .sim y confirma la ruta cuando termina la escritura.

@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣiM · Simulación de procesos" width="360">
 
-[![Portal 0.53.2](https://img.shields.io/badge/portal-0.53.2-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.53.3](https://img.shields.io/badge/portal-0.53.3-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -21,7 +21,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 | Acceso | [sim.lemeit.ar](https://sim.lemeit.ar) | Aplicación nativa Tauri 2, en desarrollo |
 | Cálculo | Gateway y DWSIM MCP | Gateway local y DWSIM MCP local |
 | Proyectos | Nube y copias JSON | Copias JSON y biblioteca local |
-| Estado | Portal 0.53.2 | Prototipo funcional en Debian; 0.53.3-alpha.1 |
+| Estado | Portal 0.53.3 | Prototipo funcional en Debian; 0.53.4-alpha.1 |
 
 En Desktop, **Archivo → Guardar copia de proyecto (.sim)…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
 
@@ -50,16 +50,11 @@ La integración también finalizó correctamente en el prototipo Desktop Debian 
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣiM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Versión Desktop en desarrollo · 0.53.3
+## Barra de herramientas · 0.53.4
 
-En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. Arrastrá el borde derecho de un grupo para ajustar su ancho tanto en la barra como en el área de trabajo. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
+Archivo, Proyecto, Simulación, Diagrama, Vista y Herramientas tienen el mismo orden en Online y Desktop. Los grupos pasan a otra fila automáticamente cuando hace falta espacio. Los paneles de trabajo se ajustan desde sus cabeceras y el menú Ver.
 
-
-## Versión en desarrollo · 0.53.3
-
-En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. Arrastrá el borde derecho de un grupo para ajustar su ancho tanto en la barra como en el área de trabajo. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
-
-## Versión publicada · 0.53.2
+## Versión publicada · 0.53.3
 
 **Revalidación Debian (26/11):** Ejemplo 20 y Gráficas vuelven a funcionar tras actualizar el gateway desde 0.47.5. Un estado HTTP 200 no garantiza soporte dinámico; consultar `/api/dynamics/capabilities` y [recuperación](docs/operacion-local.md).
 

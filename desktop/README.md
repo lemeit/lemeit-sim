@@ -1,8 +1,8 @@
 # ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣIM 0.53.3, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
+Base científica y frontend compartido: ΣIM 0.53.4, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
 
-**Estado al 28/11/2026:** prototipo 0.53.3-alpha.1. El editor se probó en Debian x86_64 con el motor local. No es todavía una distribución autónoma ni existe un instalador publicado.
+**Estado al 28/11/2026:** prototipo 0.53.4-alpha.1. El editor se probó en Debian x86_64 con el motor local. No es todavía una distribución autónoma ni existe un instalador publicado.
 
 ## Arquitectura actual
 

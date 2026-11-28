@@ -2,6 +2,10 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
+## 0.53.4-alpha.1 — 2026-11-28
+
+- Orden fijo de herramientas en Online y Desktop, con Calcular antes de Diagrama y ajuste automático al ancho.
+
 ## 0.53.3-alpha.1 · 28/11/2026
 
 - Guardar copia abre el selector del sistema y confirma la ubicación del archivo .sim al terminar.
