@@ -22,7 +22,7 @@ install -Dm755 "$target/build/release/sim-desktop" "$stage/usr/lib/sim-desktop/s
 install -Dm755 desktop/debian/sim-desktop "$stage/usr/bin/sim-desktop"
 install -Dm644 desktop/debian/ar.lemeit.sim.desktop "$stage/usr/share/applications/ar.lemeit.sim.desktop"
 install -Dm644 desktop/src-tauri/icons/icon.png "$stage/usr/share/icons/hicolor/256x256/apps/ar.lemeit.sim.desktop.png"
-install -m644 server.py dynamic_tank_mcp.py recycle.py "$stage/usr/share/sim-desktop/"
+install -m644 server.py dynamic_tank_mcp.py recycle.py package.json "$stage/usr/share/sim-desktop/"
 cp -R site "$stage/usr/share/sim-desktop/"
 install -m644 desktop/README.md desktop/DISTRIBUTION.md "$stage/usr/share/doc/sim-desktop/"
 install -m644 LICENSE "$stage/usr/share/doc/sim-desktop/copyright"
