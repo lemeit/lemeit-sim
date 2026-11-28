@@ -8,6 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.53.4 — 2026-11-28
 
+- Desktop alpha.3 incorpora una bienvenida interactiva con el estado real del arranque y la opción de reintentar.
 - Desktop alpha.2 prepara el paquete piloto para Debian 12 y el índice APT de prueba.
 - Orden fijo de herramientas en Online y Desktop, con Calcular antes de Diagrama y ajuste automático al ancho.
 

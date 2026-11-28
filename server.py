@@ -632,14 +632,19 @@ if __name__ == '__main__':
     server = BoundedServer(('127.0.0.1', args.port), partial(Handler, directory=str(ROOT / 'site')))
     server.desktop_mode = args.desktop
     server.shared_mcp = bool(args.mcp_token_file)
+    if args.desktop: print('ΣIM Desktop: engine', flush=True)
     server.engine = RemoteMcpEngine(args.mcp_token_file, args.mcp_url) if server.shared_mcp else Engine(args.engine_root)
     server.public_origin = args.public_origin
     server.origin_key = Path(args.origin_key_file).read_text(encoding='utf-8').strip() if args.origin_key_file else None
     if args.public_origin and not server.origin_key: parser.error('La publicación requiere --origin-key-file.')
     if server.shared_mcp:
+        if args.desktop:
+            server.engine.rpc('tools/list')
+            print('ΣIM Desktop: catalog', flush=True)
         server.engine.get_catalog()
     else:
         with IsolatedEngine(args.engine_root) as bootstrap:
+            if args.desktop: print('ΣIM Desktop: catalog', flush=True)
             server.engine.catalog = bootstrap.get_catalog()
     print(f'Simulador local: http://127.0.0.1:{server.server_port}', flush=True)
     server.serve_forever()

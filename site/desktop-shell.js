@@ -167,9 +167,14 @@ globalThis.SimDesktopShell=(()=>{
     if(cloudStart?.tagName==='HR')cloudStart.classList.add('desktop-hidden');
     const about=$('about-dialog');
     if(about){
-      about.querySelector('h2').textContent='Acerca de ΣiM Desktop';
+      about.querySelector('h2').textContent='Acerca de ΣIM Desktop';
       const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
-      if(version)version.prepend('Desktop · alpha.2 | ');
+      if(version){
+        version.prepend('Desktop · 0.53.4-alpha.3 | ');
+        const startupNote=document.createElement('p');
+        startupNote.textContent='Bienvenida interactiva con el estado del servicio local, del motor DWSIM y del catálogo termodinámico.';
+        version.parentElement.after(startupNote);
+      }
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
     installCloseDialog();

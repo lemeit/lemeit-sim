@@ -49,6 +49,9 @@ fn write_if_changed(path:&str,data:&[u8]){
     if std::fs::read(path).ok().as_deref()!=Some(data){std::fs::write(path,data).expect("write generated icon");}
 }
 fn main(){
+    let logo = "../../site/assets/sim-logo.svg";
+    println!("cargo:rerun-if-changed={logo}");
+    write_if_changed("../bootstrap/sim-logo.svg", &std::fs::read(logo).expect("read ΣIM logo"));
     std::fs::create_dir_all("icons").expect("create icons");
     write_if_changed("icons/icon.png",&png(256));
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref()==Ok("windows"){
@@ -64,7 +67,7 @@ fn main(){
     }
     tauri_build::try_build(
         tauri_build::Attributes::new()
-            .app_manifest(tauri_build::AppManifest::new().commands(&["save_project_copy"])),
+            .app_manifest(tauri_build::AppManifest::new().commands(&["save_project_copy", "startup_status", "retry_startup", "open_editor"])),
     )
     .expect("configure Desktop permissions");
 }

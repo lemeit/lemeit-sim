@@ -1,5 +1,48 @@
 <!doctype html>
-<html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ΣIM Desktop</title><link rel="stylesheet" href="style.css"></head>
-<body><main><h1>ΣIM Desktop</h1><p>Prototipo de ventana nativa</p><p>El motor científico todavía no está conectado. No se ejecutan simulaciones en esta etapa.</p></main></body>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>ΣIM Desktop</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="startup.js" defer></script>
+</head>
+<body>
+  <main class="welcome">
+    <section class="identity" aria-label="ΣIM Desktop">
+      <img class="logo" src="sim-logo.svg" alt="ΣIM · Simulación de procesos" width="840" height="240">
+      <div class="schematic" aria-hidden="true">
+        <div class="process">
+          <span class="inlet"></span>
+          <span class="vessel"></span>
+          <span class="pipe"></span>
+          <span class="exchanger"></span>
+          <span class="outlet"></span>
+        </div>
+      </div>
+      <footer><span>Desktop</span><span id="version"></span></footer>
+    </section>
+
+    <section class="startup" aria-labelledby="heading">
+      <div class="status">
+        <h1 id="heading">Bienvenido a ΣIM</h1>
+        <p id="message" role="status">Preparando el servicio local…</p>
+        <progress id="progress" max="3" value="0" aria-label="Etapas completadas"></progress>
+      </div>
+      <details open>
+        <summary>Detalles del arranque</summary>
+        <ol class="stages">
+          <li data-phase="service" data-state="active"><span>Servicio local</span><span>En curso</span></li>
+          <li data-phase="engine" data-state="pending"><span>Motor DWSIM</span><span>En espera</span></li>
+          <li data-phase="catalog" data-state="pending"><span>Catálogo termodinámico</span><span>En espera</span></li>
+        </ol>
+      </details>
+      <div class="actions">
+        <button id="retry" type="button" hidden>Reintentar</button>
+        <button id="open" type="button" disabled>Abrir editor <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+  </main>
+</body>
 </html>

@@ -1,6 +1,6 @@
 {
-  "productName": "ΣiM Desktop",
-  "version": "0.53.4-alpha.2",
+  "productName": "ΣIM Desktop",
+  "version": "0.53.4-alpha.3",
   "identifier": "ar.lemeit.sim.desktop",
   "build": {
     "frontendDist": "../bootstrap"
@@ -9,7 +9,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "ΣiM Desktop · prototipo",
+        "title": "ΣIM Desktop",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

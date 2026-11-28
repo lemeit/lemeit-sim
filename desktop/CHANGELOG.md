@@ -2,6 +2,10 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
+## 0.53.4-alpha.3 — 2026-11-28
+
+- Bienvenida de ΣIM Desktop con las etapas del servicio local, el motor DWSIM y el catálogo termodinámico. Permite reintentar y abrir el editor al completar el arranque.
+
 ## 0.53.4-alpha.2 — 2026-11-28
 
 - Compilación de un paquete piloto Debian 12 amd64 para el motor MCP existente y preparación de índices APT firmados.
