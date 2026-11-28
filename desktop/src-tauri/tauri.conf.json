@@ -1,6 +1,6 @@
 {
   "productName": "ΣiM Desktop",
-  "version": "0.52.0-alpha.1",
+  "version": "0.53.0-alpha.1",
   "identifier": "ar.lemeit.sim.desktop",
   "build": {
     "frontendDist": "../bootstrap"
