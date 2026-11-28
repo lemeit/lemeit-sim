@@ -176,6 +176,21 @@ globalThis.SimDockLayout=(()=>{
       }
       refreshStackSeparators();
     }
+    function workspaceBox(b){
+      const r=workspace.getBoundingClientRect();
+      const left=Math.max(8,r.left+4),top=Math.max(8,r.top+4);
+      const right=Math.min(innerWidth-8,r.right-4),bottom=Math.min(innerHeight-8,r.bottom-4);
+      const w=clamp(b.w,Math.min(240,Math.max(1,right-left)),Math.max(1,right-left));
+      const h=clamp(b.h,Math.min(180,Math.max(1,bottom-top)),Math.max(1,bottom-top));
+      return {x:clamp(b.x,left,Math.max(left,right-w)),y:clamp(b.y,top,Math.max(top,bottom-h)),w,h};
+    }
+    function updateExplorerBounds(p){
+      const r=workspace.getBoundingClientRect();
+      p.el.style.setProperty('--explorer-top',Math.max(8,r.top+4)+'px');
+      p.el.style.setProperty('--explorer-bottom',Math.max(8,innerHeight-r.bottom+4)+'px');
+      p.el.style.setProperty('--explorer-left',Math.max(8,r.left+4)+'px');
+      p.el.style.setProperty('--explorer-right',Math.max(8,innerWidth-r.right+4)+'px');
+    }
     function apply(p,save=true){
       const mode=activeMode(p);
       const parent=mode==='float'?document.body:slots[mode];
@@ -183,6 +198,7 @@ globalThis.SimDockLayout=(()=>{
       p.el.classList.add('sim-cad-panel');
       if(p.el.parentNode!==parent)parent.append(p.el);
       p.box=fit(p.box,innerWidth,innerHeight);
+      if(p.id==='explorer'){p.box=workspaceBox(p.box);updateExplorerBounds(p);}
       for(const key of ['left','top','width','height','zIndex'])p.el.style.removeProperty(key);
       if(mode==='float'){
         Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',
@@ -198,6 +214,7 @@ globalThis.SimDockLayout=(()=>{
       updateSlots();if(save)store();
     }
     function place(p,mode){
+      if(p.id==='explorer')p.el.classList.remove('explorer-expanded');
       if(mode==='reset'){
         p.mode=DEFAULT[p.id];p.lastDock=['charts','explorer'].includes(p.id)?'bottom':DEFAULT[p.id];
         p.box=recover(null,innerWidth,innerHeight)[p.id].box;
@@ -236,6 +253,7 @@ globalThis.SimDockLayout=(()=>{
       const g=gesture,p=g.panel;
       if(g.mode==='move'){
         p.box=fit({...p.box,x:e.clientX-g.dx,y:e.clientY-g.dy},innerWidth,innerHeight);
+        if(p.id==='explorer')p.box=workspaceBox(p.box);
         p.el.style.left=p.box.x+'px';p.el.style.top=p.box.y+'px';
         g.edge=e.altKey||mobile()?null:targetEdge(e.clientX,e.clientY,workspace.getBoundingClientRect());
         preview(g.edge);
@@ -243,6 +261,7 @@ globalThis.SimDockLayout=(()=>{
         p.box=fit({...g.before.box,
           w:g.before.box.w+e.clientX-g.x,
           h:g.before.box.h+e.clientY-g.y},innerWidth,innerHeight);
+        if(p.id==='explorer')p.box=workspaceBox(p.box);
         Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',width:p.box.w+'px',height:p.box.h+'px'});
       }
     }
@@ -251,6 +270,7 @@ globalThis.SimDockLayout=(()=>{
     function begin(e,p,mode){
       if(e.button!==0||mobile()||gesture)return;
       e.preventDefault();e.stopPropagation();
+      if(p.id==='explorer'&&p.el.classList.contains('explorer-expanded')){p.el.classList.remove('explorer-expanded');apply(p,false);}
       const r=p.el.getBoundingClientRect();
       const before={mode:p.mode,box:{...p.box}};
       let dx=clamp(e.clientX-r.left,0,Math.max(30,r.width-30));
@@ -308,7 +328,7 @@ globalThis.SimDockLayout=(()=>{
       const heading=el.querySelector(id==='results'?'.results-heading':'.panel-heading');
       heading.classList.add('sim-cad-heading');heading.tabIndex=0;
       if(id!=='results'&&id!=='charts')heading.querySelector('.panel-heading>span')?.classList.add('sim-cad-index');
-      heading.title='Arrastrar para mover o acoplar; Alt evita el acoplamiento; doble clic para flotar o volver';
+      heading.title=id==='explorer'?'':'Arrastrar para mover o acoplar; Alt evita el acoplamiento; doble clic para flotar o volver';
       const grip=document.createElement('span');grip.className='sim-cad-move';
       grip.textContent='⠿';grip.setAttribute('aria-hidden','true');grip.title='Arrastrar panel';heading.prepend(grip);
       const select=document.createElement('select');select.className='sim-cad-position';
@@ -372,6 +392,7 @@ globalThis.SimDockLayout=(()=>{
       if(gesture)stopGesture(true);
       for(const id of IDS)apply(panels[id],false);
     });
+    if(typeof ResizeObserver==='function'){new ResizeObserver(()=>{const p=panels.explorer;if(p.mode==='float'&&!gesture){p.box=workspaceBox(p.box);updateExplorerBounds(p);Object.assign(p.el.style,{left:p.box.x+'px',top:p.box.y+'px',width:p.box.w+'px',height:p.box.h+'px'});}}).observe(workspace);}
     window.addEventListener('pagehide',persist);
     document.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&gesture){e.preventDefault();stopGesture(true);}
