@@ -3,7 +3,7 @@
 'use strict';
 const SimProcessExplorer=(()=>{
   const $=id=>document.getElementById(id);
-  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary";
+  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary",frame=0,controls=null,leader=null,expanded=false;
   const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
     maximumSignificantDigits:digits,
     notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
@@ -134,6 +134,28 @@ const SimProcessExplorer=(()=>{
     }
     paragraph(parent,'Tolerancia didáctica de cierre: el mayor valor entre 10⁻⁶ veces el mayor flujo absoluto y un mínimo de 10⁻⁸ kg/s para materia o 10⁻⁴ kW para energía.');
   }
+  function positionCard(){
+    if(!visible)return;
+    const canvas=$('canvas-wrap'),panel=$('process-explorer-panel'),svg=$('diagram');
+    const target=[...svg.querySelectorAll('[data-node]')].find(el=>el.dataset.node===steps[position]?.id);
+    if(!target||!canvas.clientWidth||!canvas.clientHeight){leader.hidden=true;return;}
+    const bounds=canvas.getBoundingClientRect(),r=target.getBoundingClientRect(),w=panel.offsetWidth,h=panel.offsetHeight;
+    const left=r.left-bounds.left,top=r.top-bounds.top,right=r.right-bounds.left,bottom=r.bottom-bounds.top;
+    const cx=(left+right)/2,cy=(top+bottom)/2;
+    const clamp=(v,a,b)=>Math.max(a,Math.min(v,Math.max(a,b)));
+    const xMax=canvas.clientWidth-w-8,yMax=canvas.clientHeight-h-8;
+    const candidates=[[right+20,cy-h/2],[left-w-20,cy-h/2],[cx-w/2,top-h-20],[cx-w/2,bottom+20]];
+    const rects=[...svg.querySelectorAll('[data-node]')].map(el=>{const q=el.getBoundingClientRect();return {left:q.left-bounds.left,right:q.right-bounds.left,top:q.top-bounds.top,bottom:q.bottom-bounds.top,weight:el===target?12:1};});
+    let best=null;
+    for(const [rawX,rawY] of candidates){const x=clamp(rawX,8,xMax),y=clamp(rawY,8,yMax);
+      let cost=Math.abs(x-rawX)+Math.abs(y-rawY);
+      for(const q of rects)cost+=q.weight*Math.max(0,Math.min(x+w,q.right)-Math.max(x,q.left))*Math.max(0,Math.min(y+h,q.bottom)-Math.max(y,q.top))/40;
+      if(!best||cost<best.cost)best={x,y,cost};}
+    const {x,y}=best;panel.style.left=x+'px';panel.style.top=y+'px';
+    const ax=clamp(cx,8,canvas.clientWidth-8),ay=clamp(cy,8,canvas.clientHeight-8),bx=clamp(ax,x,x+w),by=clamp(ay,y,y+h);
+    leader.hidden=false;Object.assign(leader.style,{left:ax+'px',top:ay+'px',width:Math.hypot(bx-ax,by-ay)+'px',transform:'rotate('+Math.atan2(by-ay,bx-ax)+'rad)'});
+  }
+  function follow(){if(!visible)return;positionCard();frame=requestAnimationFrame(follow);}
   function emphasize(){
     const svg=$('diagram');if(!svg)return;
     svg.querySelectorAll('[data-node]').forEach(el=>{
@@ -147,7 +169,7 @@ const SimProcessExplorer=(()=>{
   function setView(nextView){view=nextView;const panel=$('process-explorer-panel');panel.dataset.view=view;panel.querySelectorAll('[data-explorer-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.explorerView===view)));if(['mass','energy','equations','all'].includes(view))$('process-explorer-interpretation').open=true;}
   function render(){
     const panel=$('process-explorer-panel'),active=visible&&steps.length>0;
-    panel.hidden=!active;
+    panel.hidden=!active;if(controls)controls.hidden=!active;if(!active&&leader)leader.hidden=true;
     $('process-explorer-open').disabled=!context?.isValid?.();
     $('process-explorer-open').setAttribute('aria-pressed',String(active));
     const menuButton=document.querySelector('[data-toolbar-action="process-explorer-open"]');
@@ -207,20 +229,29 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-back').disabled=position===0;
     $('process-explorer-next').disabled=position===steps.length-1;
     $('process-explorer-cycles').hidden=!hadRecycle;
-    setView(view);emphasize();
+    const summary=document.createElement('div');summary.className='explorer-inline-summary';
+    if(dynamic){const p=dynamicResult.points[step.sample];summary.append(row('Tiempo',value(p.time_s,'s')),row('Nivel',value(p.level_m,'m')),row('Descarga',value(p.outlet_kg_s,'kg/s')));}
+    else if(step.stream){const s=result.streams?.[step.id];if(node.type==='MaterialStream')summary.append(row('Caudal',value(s?.mass_flow_kg_s,'kg/s')),row('Temperatura',value(Number.isFinite(s?.temperature_K)?s.temperature_K-273.15:NaN,'°C')),row('Presión',value(Number.isFinite(s?.pressure_Pa)?s.pressure_Pa/1000:NaN,'kPa')));else paragraph(summary,'Corriente de energía');}
+    else{const b=result.balances?.find(b=>b.id===step.id);summary.append(row('Entrada',value(b?.mass_in,'kg/s')),row('Salida',value(b?.mass_out,'kg/s')),row('Residuo',value(b?.mass_residual,'kg/s')));}
+    const formula=document.createElement('div');formula.className='explorer-equation';formula.textContent=dynamic?'dM/dt = ṁₑ − ṁₛ':step.stream?(node.type==='MaterialStream'?'Ḣ = ṁ · h':''):(operations[node.type]?.[0]||'Σṁₑ = Σṁₛ');if(formula.textContent)summary.append(formula);
+    panel.querySelector('.explorer-inline-summary')?.remove();panel.querySelector('.explorer-heading').after(summary);
+    setView(view);emphasize();positionCard();
   }
   function open(){
     if(!context?.isValid?.())return;
     const data=context.getData();hadRecycle=false;const tank=data.graph.nodes.find(n=>n.type==='Tank');steps=data.dynamicResult?.points?.length&&tank?data.dynamicResult.points.map((_,sample)=>({id:tank.id,dynamic:true,sample})):data.result?createSteps(data.graph,data.result):[];
     if(!steps.length)return;
-    visible=true;position=0;render();globalThis.SimDockLayout?.reveal('explorer');
+    visible=true;position=0;expanded=false;view='summary';$('process-explorer-panel').classList.remove('explorer-detail');$('process-explorer-expand').textContent='+';$('process-explorer-expand').setAttribute('aria-pressed','false');render();cancelAnimationFrame(frame);frame=requestAnimationFrame(follow);
   }
-  function close(){pause();$('process-explorer-panel').classList.remove('explorer-expanded');visible=false;steps=[];position=0;render();}
+  function close(){pause();cancelAnimationFrame(frame);$('process-explorer-panel').classList.remove('explorer-expanded');visible=false;steps=[];position=0;render();}
   function invalidate(){if(visible)close();else render();}
   function next(){if(visible&&position<steps.length-1){position++;render();}}
   function back(){if(visible&&position>0){position--;render();}}
   function bind(options){
     context=options;
+    const panel=$('process-explorer-panel'),canvas=$('canvas-wrap');canvas.append(panel);panel.classList.add('explorer-inline');
+    leader=document.createElement('div');leader.className='explorer-leader';leader.hidden=true;canvas.append(leader);
+    controls=document.createElement('div');controls.className='explorer-inline-controls';controls.hidden=true;controls.append(panel.querySelector('.explorer-actions'),$('process-explorer-progress'));document.querySelector('.diagram-toolbar').append(controls);
     $('process-explorer-open').addEventListener('click',()=>visible?close():open());
     $('process-explorer-close').addEventListener('click',close);
     $('process-explorer-back').addEventListener('click',back);
@@ -228,7 +259,7 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-play').addEventListener('click',play);
     $('process-explorer-stop').addEventListener('click',()=>{pause();position=0;render();});
     $('process-explorer-speed').addEventListener('change',()=>{if(timer!==null){pause();play();}});
-    $('process-explorer-expand').addEventListener('click',()=>{const p=$('process-explorer-panel');if(!p.classList.contains('explorer-expanded')&&p.dataset.simCadMode!=='float')globalThis.SimDockLayout?.reveal('explorer',{presentation:true});const expanded=p.classList.toggle('explorer-expanded');$('process-explorer-expand').textContent=expanded?'❐':'⛶';$('process-explorer-expand').setAttribute('aria-label',expanded?'Restaurar tamaño':'Ampliar ventana');});
+    $('process-explorer-expand').addEventListener('click',()=>{expanded=!expanded;panel.classList.toggle('explorer-detail',expanded);$('process-explorer-expand').textContent=expanded?'−':'+';$('process-explorer-expand').setAttribute('aria-pressed',String(expanded));if(!expanded)setView('summary');else setView('all');positionCard();});
     document.querySelectorAll('[data-explorer-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.explorerView)));
     render();
   }
