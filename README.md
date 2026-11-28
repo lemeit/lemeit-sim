@@ -25,6 +25,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 En Desktop, **Archivo → Guardar copia de proyecto (.sim)…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
 
+El [paquete piloto Debian](desktop/README.md#paquete-piloto-debian-12-amd64) instala el editor y el gateway para probarlos con un motor MCP local ya configurado.
+
 Desktop comparte el código científico y el formato de proyectos de Online, pero dispone de una capa visual específica. No hay todavía instaladores autónomos publicados. El prototipo requiere Python y un servicio DWSIM MCP existente; la independencia completa y las pruebas sin Internet siguen pendientes.
 
 [Desarrollo de Desktop](desktop/README.md) · [Historial de Desktop](desktop/CHANGELOG.md) · [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).

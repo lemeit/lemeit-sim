@@ -169,7 +169,7 @@ globalThis.SimDesktopShell=(()=>{
     if(about){
       about.querySelector('h2').textContent='Acerca de ΣiM Desktop';
       const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
-      if(version)version.prepend('Desktop · alpha.1 | ');
+      if(version)version.prepend('Desktop · alpha.2 | ');
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
     installCloseDialog();
