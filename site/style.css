@@ -2592,3 +2592,21 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 #process-explorer-panel.explorer-inline .explorer-top{background:var(--spx-surface-2)!important;color:var(--spx-text)!important;min-height:24px;padding:3px!important;gap:3px;cursor:default}#process-explorer-panel.explorer-inline .explorer-top .mini{display:none}#process-explorer-panel.explorer-inline .explorer-top button{width:23px;height:23px;flex:0 0 23px;color:var(--spx-text)!important;background:var(--spx-surface)!important;border-color:var(--spx-border)!important;font-size:15px!important}#process-explorer-panel.explorer-inline .explorer-scroll{padding:3px;overflow:auto}#process-explorer-panel.explorer-inline .explorer-heading{flex-wrap:wrap;gap:3px}#process-explorer-panel.explorer-inline .explorer-inline-summary .explorer-reading{font-size:11px;padding:2px 0}#process-explorer-panel.explorer-inline .explorer-inline-summary .explorer-equation{font-size:14px;padding:4px 6px;margin:4px 0}
 #process-explorer-panel.explorer-inline:not(.explorer-detail) :is(.explorer-tabs,.explorer-content,#process-explorer-interpretation,#process-explorer-cycles){display:none!important}#process-explorer-panel.explorer-inline.explorer-detail .explorer-inline-summary{display:none}.explorer-leader{position:absolute;height:1px;transform-origin:0 50%;background:var(--spx-accent);pointer-events:none;z-index:6}
 #diagram .node.explorer-muted{opacity:.65}
+
+/* 0.53: engineering annotations, not docking windows. */
+#canvas-wrap>#process-explorer-panel.explorer-inline:not([hidden]){width:min(var(--callout-width,250px),calc(100% - 16px));max-height:min(var(--callout-height,280px),calc(100% - 16px));border:1px solid var(--spx-border);border-radius:3px;box-shadow:none;background:var(--spx-surface);padding:4px 6px 12px!important;font-size:calc(11px * var(--callout-scale,1))}
+#canvas-wrap>#process-explorer-panel.explorer-inline .explorer-top{background:transparent!important;border:0!important;border-bottom:1px solid var(--spx-border)!important;color:var(--spx-text)!important;cursor:move;touch-action:none;padding:2px!important;min-height:22px}
+#process-explorer-panel.explorer-inline .explorer-top button{background:transparent!important;border-color:transparent!important;font-size:12px!important}
+#process-explorer-panel.explorer-inline .explorer-reading{font-size:calc(11px * var(--callout-scale,1))!important}
+#process-explorer-panel.explorer-inline .explorer-equation{font-size:calc(15px * var(--callout-scale,1))!important;background:transparent;border:0;overflow-x:auto;line-height:1.5}
+#process-explorer-panel .explorer-equation math{font-family:math,serif;font-size:1em}
+#process-explorer-panel .callout-resize{position:absolute;bottom:0;right:0;width:16px;height:16px;min-height:0;padding:0;border:0;background:transparent;color:var(--spx-text-dim);font-size:12px;cursor:nwse-resize;touch-action:none}
+.explorer-leader{background:var(--spx-text-dim);height:1px}
+.explorer-leader::after{content:'';position:absolute;right:0;top:-3px;border-left:6px solid var(--spx-text-dim);border-top:3px solid transparent;border-bottom:3px solid transparent}
+/* Avoid the expanding project group pushing Calculate to the far edge. */
+.sim-shell .command-bar .project-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 1 auto;min-width:0;max-width:240px}
+.sim-shell .command-bar .project-title{width:clamp(85px,12vw,150px);min-width:75px;max-width:150px}
+.sim-shell .command-bar .file-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto}
+.sim-shell .command-bar .simulation-tools:not(.toolbar-floating):not(.toolbar-sized){flex:0 0 auto}
+.sim-shell .command-bar #calculate-button{order:-1}
+.sim-shell .command-bar .simulation-tools .toolbar-grip{order:-2}
