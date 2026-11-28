@@ -215,3 +215,8 @@
 .sim-desktop #desktop-help-dialog .desktop-help-body h3{margin:16px 0 8px}
 .sim-desktop #desktop-help-dialog .desktop-help-body table{width:100%;border-collapse:collapse}
 .sim-desktop #desktop-help-dialog .desktop-help-body :is(th,td){padding:7px 9px;text-align:left;border-bottom:1px solid var(--spx-border)}
+
+/* Keep the default desktop toolbar compact and identical in order to Online. */
+.desktop-custom-frame .sim-shell .command-bar .project-tools:not(.toolbar-sized):not(.toolbar-floating){flex:0 0 auto!important;min-width:0!important;max-width:190px!important}
+.desktop-custom-frame .sim-shell .command-bar .project-tools .project-title{width:100px;min-width:65px;max-width:100px;flex:0 1 100px}
+.desktop-custom-frame .sim-shell .command-bar .simulation-tools:not(.toolbar-sized):not(.toolbar-floating){flex:0 0 auto!important;margin-left:0!important}
