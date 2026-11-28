@@ -159,7 +159,7 @@ function updateControls(){
   $('report-label-tool').disabled=!hasProject;
   $('diagram-note-insert').disabled=!hasProject||busy;
   $('calculate-button').disabled=busy||!engineOnline||!hasProject||graph.nodes.length<2;
-  $('process-explorer-open').disabled=busy||!hasProject||!result||resultValidity!=='valid';
+  $('process-explorer-open').disabled=busy||!hasProject||!(result||dynamicResult?.points?.length)||resultValidity!=='valid';
   $('engine-select').disabled=busy||auxiliaryWorkspace;
   document.querySelectorAll('[data-toolbar-action]').forEach(button=>{
     button.disabled=$(button.dataset.toolbarAction).disabled;
@@ -409,10 +409,10 @@ function diagramMarkup(nodes=graph.nodes,exporting=false){
     const t=TYPES[n.type], r=result?.streams[n.id],feed=isFeed(n),scale=symbolScale(n);
     const g=isStream(n)?(exportRoutes?.get(n.id)??streamGeometry(n)):null;
     const selected=!exporting&&(selection?.node===n.id||selection?.nodes?.includes(n.id));
-    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${result?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
+    html+=`<g transform="translate(${isStream(n)?0:n.x} ${isStream(n)?0:n.y})" class="node dwsim ${resultValidity==='valid'&&(result||dynamicResult)?'dwsim-calculated':''} ${n.type==='EnergyStream'?'dwsim-energy':''} ${isStream(n)?'stream-node':'equipment-node'} ${selected?'selected':''}" ${exporting?'':`data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(t.label+': '+n.name)}"`}>`;
     if(g){
       html+=`${exporting?'':`<path class="stream-hit" d="${g.d}"/>`}<path class="stream-line" d="${g.d}" stroke-dasharray="${n.type==='EnergyStream'?'7 4':'none'}"/>${DwsimSymbols.arrow(g.arrow??'scale(0)')}`;
-    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
+    }else html+=`<g class="equipment-symbol" transform="scale(${scale})">${exporting?'':`<rect class="equipment-hit" x="-6" y="-6" width="${t.w+12}" height="${t.h+12}" rx="5"/>`}${selected?`<rect class="equipment-selection" x="-12" y="-12" width="${t.w+24}" height="${t.h+24}" rx="6"/>`:''}${DwsimSymbols.equipment(n.type,t.w,t.h)}</g>`;
     html+=renderCallout(n,g,r,feed,exportRoutes);
     for(const raw of portList(n)){
       const p=isStream(n)?{...raw,x:raw.x+n.x,y:raw.y+n.y}:raw;
@@ -698,7 +698,7 @@ function openDynamicSettings(){
 async function calculateDynamic(){
   if(!hasProject||busy)return;
   const started=performance.now(),version=revision,engine=selectedEngine;
-  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();notice('');
+  busy=true;dynamicResult=null;result=null;globalThis.SimChartWorkspace?.reset();if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'running',ok:null};document.body.classList.add('calculating');$('calculation-state').textContent='DWSIM está integrando el proceso…';$('results').innerHTML=blankResults;$('result-meta').textContent='Integración temporal…';updateControls();renderDiagram();notice('');
   try{
     const prepared=SimDynamics.prepare(graph),data=await SimDynamics.run(prepared,engine);
     if(version!==revision)throw Error('El proyecto cambió durante la integración.');
@@ -706,7 +706,7 @@ async function calculateDynamic(){
     $('calculation-state').textContent='Resultados dinámicos vigentes';renderDynamicResults(prepared);
     rememberRun('dynamic',data);recordActivity('Integración dinámica completada');notice('Integración temporal completada con DWSIM.');showDynamicChart(data,prepared);
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
-  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderServerDetails();}
+  finally{busy=false;document.body.classList.remove('calculating');updateControls();renderDiagram();renderServerDetails();}
 }
 async function calculate(){
   if(!hasProject||busy)return;
@@ -892,23 +892,26 @@ function bindEvents(){
     if(panning?.pointerId===e.pointerId)endPan();
   });
   svg.addEventListener('pointerdown',e=>{
-    if(busy||e.button!==0)return;
+    if(busy||e.button!==0||!e.isPrimary)return;
     e.preventDefault();
     // Una selección múltiple se arrastra desde cualquier parte de sus objetos,
     // incluidos puertos y controles; Shift conserva su función de sumar/quitar.
     const groupOwner=e.target.closest('[data-node]')?.dataset.node||e.target.closest('[data-owner]')?.dataset.owner;
     if(!e.shiftKey&&selection?.nodes?.includes(groupOwner)){
       dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};
-      svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;
+      svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;
     }
     const resize=e.target.closest('[data-resize]');if(resize){const n=nodeById(resize.dataset.resize);resizing={node:n.id,start:svgPoint(e),scale:symbolScale(n)};svg.setPointerCapture(e.pointerId);return;}
     const bend=e.target.closest('[data-bend]');if(bend){bending={node:bend.dataset.bend,start:svgPoint(e),axis:null};svg.setPointerCapture(e.pointerId);return;}
-    const port=e.target.closest('[data-port]');if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
+    // Los puertos siguen accesibles si una zona de agarre vecina los cubre.
+    const port=document.elementsFromPoint(e.clientX,e.clientY)
+      .map(el=>el.closest('[data-port]')).find(el=>el&&svg.contains(el));
+    if(port){e.preventDefault();const n=nodeById(port.dataset.owner);if(isStream(n)){selection={node:n.id};endpointDrag={node:n.id,side:port.dataset.port,start:svgPoint(e),preview:svgPoint(e),original:streamGeometry(n),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();}else connect(port.dataset.owner,port.dataset.port,Number(port.dataset.index));return;}
     const node=e.target.closest('[data-node]');
     if(node){const id=node.dataset.node,existing=selection?.nodes||[selection?.node].filter(Boolean);
       if(e.shiftKey){selectNodes(existing.includes(id)?existing.filter(v=>v!==id):[...existing,id]);pending=null;renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
-      if(selection?.nodes?.includes(id)){dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;}
-      selection={node:id};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
+      if(selection?.nodes?.includes(id)){dragging={group:structuredClone(graph.nodes.filter(n=>selection.nodes.includes(n.id))),start:svgPoint(e),moved:false};svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);svg.focus({preventScroll:true});return;}
+      selection={node:id};const p=svgPoint(e),n=nodeById(selection.node);dragging={node:n.id,start:p,clientX:e.clientX,clientY:e.clientY,outside:false,x:n.x,y:n.y,routeX:n.routeX??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='x'?streamGeometry(n).mid:undefined),routeY:n.routeY??(isStream(n)&&graph.edges.some(e=>e.to===n.id)&&graph.edges.some(e=>e.from===n.id)&&streamGeometry(n).bend.axis==='y'?streamGeometry(n).mid:undefined),endpoints:Object.fromEntries(['startX','startY','endX','endY'].filter(k=>n[k]!==undefined).map(k=>[k,n[k]])),moved:false};svg.classList.add('object-dragging');svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
     const edge=e.target.closest('[data-edge]');if(edge){selection={edge:Number(edge.dataset.edge)};renderDiagram();renderInspector();svg.focus({preventScroll:true});return;}
     const original=selection;marquee={start:svgPoint(e),end:svgPoint(e),base:e.shiftKey?(selection?.nodes||[selection?.node].filter(Boolean)):[],original};if(!e.shiftKey)selection=null;pending=null;svg.setPointerCapture(e.pointerId);renderDiagram();renderInspector();svg.focus({preventScroll:true});
   });
@@ -936,16 +939,18 @@ function bindEvents(){
   const endDrag=e=>{
     if(panning){if(panning.pointerId===e.pointerId)endPan();return;}
     const hadGesture=endpointDrag||dragging||resizing||bending;
-    if(marquee){if(e.type==='pointercancel')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
-    if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type!=='pointercancel'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
+    if(!hadGesture&&!marquee)return;
+    if(marquee){if(e.type!=='pointerup')selection=marquee.original;marquee=null;renderDiagram();renderInspector();return;}
+    if(endpointDrag){const drag=endpointDrag;endpointDrag=null;if(e.type==='pointerup'){if(drag.moved)finishEndpointDrag(drag);else connect(drag.node,drag.side,0);}}
     const deleteDrag=!!dragging?.outside&&e.type==='pointerup'&&SimDiagramInteractions.shouldRemoveAfterDrag({startX:dragging.clientX,startY:dragging.clientY,x:e.clientX,y:e.clientY,rect:$('canvas-wrap').getBoundingClientRect()});
     const visualChange=dragging?.moved||resizing||bending;
     dragging=null;resizing=null;bending=null;
+    svg.classList.remove('object-dragging');
     $('canvas-wrap').classList.remove('object-drop-delete');$('diagram-trash-zone').hidden=true;
     if(deleteDrag){removeSelected();notice('Objeto eliminado del diagrama. También podés seleccionar y pulsar Supr.');return;}
     if(hadGesture)suppressPaletteUntil=performance.now()+500;
     if(visualChange){changed({physical:false});renderInspector();}else renderDiagram();
-  };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+  };svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);svg.addEventListener('lostpointercapture',endDrag);
   document.addEventListener('keydown',e=>{
     if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey)return;
     const control=e.target.closest?.('button,summary,a[href],[data-port],[data-node]');
@@ -1030,7 +1035,7 @@ async function init(){
   SimChartWorkspace.bind({onFormatChange:()=>{if(hasProject){persist();SimCloudProjects.onChange();}},getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine,selectedId:selection?.node??(selection?.nodes?.length===1?selection.nodes[0]:null)})});
   SimTankDynamicsUI.bind();
   SimTankDwsimMode.bind({getEngine:()=>selectedEngine});
-  $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!result,getData:()=>({graph,result})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
+  $('project-title').value=graph.title;try{localStorage.removeItem('lemeit-visual-palette-v1');}catch{/* Preferencia obsoleta. */}SimProcessExplorer.bind({isValid:()=>hasProject&&!busy&&resultValidity==='valid'&&!!(result||dynamicResult?.points?.length),getData:()=>({graph,result,dynamicResult})});renderPalette();renderDiagram();renderInspector();renderCompounds();bindEvents();bindProjectEvents();bindPanelResize();bindDiagramWindow();bindWorkspaceTools();
   $('engine-select').value=engineMode;
   if(!auxiliaryWorkspace&&!await checkEngine()){
     try{catalog=await(await fetch('catalog-cache.json')).json();notice('Modo de edición: los motores están desconectados o no son compatibles. Podés guardar y reintentar.');}

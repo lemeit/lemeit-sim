@@ -3,11 +3,11 @@
 'use strict';
 const SimProcessExplorer=(()=>{
   const $=id=>document.getElementById(id);
-  let context=null,steps=[],position=0,visible=false,hadRecycle=false;
+  let context=null,steps=[],position=0,visible=false,hadRecycle=false,timer=null,view="summary",frame=0,controls=null,leader=null,expanded=false;
   const toNumber=(v,unit='',digits=5)=>Number.isFinite(v)?v.toLocaleString('es-AR',{
     maximumSignificantDigits:digits,
     notation:v!==0&&Math.abs(v)<1e-5?'scientific':'standard'
-  })+(unit?' '+unit:''):'—';
+  }).replace(/[eE]([+-]?\d+)/g,(_,exponent)=>' × 10'+String(Number(exponent)).replace(/[-0-9]/g,ch=>({'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'})[ch]))+(unit?' '+unit:''):'—';
   const isStream=n=>n.type==='MaterialStream'||n.type==='EnergyStream';
   function order(graph){
     const nodes=graph.nodes.filter(n=>!n.diagramOnly);
@@ -74,18 +74,22 @@ const SimProcessExplorer=(()=>{
     parent.append(row(label,value(residual,unit)));
     if(![inlet,outlet,residual].every(Number.isFinite))return;
     const tolerance=Math.max(floor,1e-6*Math.max(Math.abs(inlet),Math.abs(outlet)));
-    paragraph(parent,(Math.abs(residual)<=tolerance?'Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').');
+    const status=document.createElement('p');const ok=Math.abs(residual)<=tolerance;status.className='explorer-closure';status.dataset.ok=String(ok);status.textContent=(ok?'✓ Dentro de tolerancia':'Fuera de tolerancia')+' (±'+toNumber(tolerance,unit)+').';parent.append(status);
   }
   function explain(parent,node,graph,result,balance){
-    const operation=operations[node.type];
-    if(operation)for(const line of operation)paragraph(parent,line);
+    const root=parent;const group=kind=>{const el=document.createElement('section');el.dataset.explorerSection=kind;root.append(el);return el;};
+    parent=group('equations');const operation=operations[node.type];
+    const general=document.createElement('div');general.className='explorer-equation';general.textContent='Σṁₑ = Σṁₛ';parent.append(general);paragraph(parent,'Conservación de masa total en régimen estacionario.');
+    const enthalpy=document.createElement('div');enthalpy.className='explorer-equation';enthalpy.textContent='ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ';parent.append(enthalpy);paragraph(parent,'ṁ: caudal másico (kg/s); h: entalpía específica (kJ/kg); Ḣ: flujo de entalpía (kW).');
+    if(operation){const equation=document.createElement('div');equation.className='explorer-equation';equation.textContent=operation[0];parent.append(equation);paragraph(parent,operation[1]);}
+    parent=group('energy');const heading=document.createElement('h3');heading.textContent='Balance de energía';parent.append(heading);
     const material=new Set(graph.nodes.filter(n=>n.type==='MaterialStream').map(n=>n.id));
     const inlets=graph.edges.filter(e=>e.to===node.id&&material.has(e.from)).map(e=>e.from);
     const outlets=graph.edges.filter(e=>e.from===node.id&&material.has(e.to)).map(e=>e.to);
     const hIn=enthalpyFlow(inlets,result.streams),hOut=enthalpyFlow(outlets,result.streams);
     const reactive=Boolean(balance?.reactive||['ConversionReactor','EquilibriumReactor'].includes(node.type));
     const shaft=['Pump','Compressor','Expander'].includes(node.type);
-    paragraph(parent,'ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ. Se desprecia la variación de energía cinética y potencial.');
+    const energyEquation=document.createElement('div');energyEquation.className='explorer-equation';energyEquation.textContent='ΔḢ = Σ(ṁh)ₛ − Σ(ṁh)ₑ';parent.append(energyEquation);paragraph(parent,'Se desprecia la variación de energía cinética y potencial.');
     parent.append(row('ΔḢ · salida − entrada',value(hOut,'kW')+' − '+value(hIn,'kW')+' = '+value(hOut-hIn,'kW')));
     parent.append(row(node.type==='HeatExchanger'?'Cambio neto de entalpía · no calor transferido entre lados':shaft?'Trabajo de eje hacia el fluido deducido por entalpía':reactive?'Calor del reactor informado por DWSIM':'Potencia térmica deducida por diferencia de entalpía',value(balance?.heat_to_fluid_kW,'kW')));
     if(node.type==='HeatExchanger'){
@@ -115,7 +119,7 @@ const SimProcessExplorer=(()=>{
     if(['Mixer','HeatExchanger','Valve'].includes(node.type)){
       appendClosure(parent,'Residuo energético bajo el supuesto adiabático',hIn,hOut,hOut-hIn,'kW',1e-4);
     }
-    paragraph(parent,'Balance global estacionario · Σṁₑ − Σṁₛ');
+    parent=group('mass');const massTitle=document.createElement('h3');massTitle.textContent='Balance global de masa';parent.append(massTitle);const massEquation=document.createElement('div');massEquation.className='explorer-equation';massEquation.textContent='Σṁₑ − Σṁₛ';parent.append(massEquation);
     parent.append(row('Entrada − salida',value(balance?.mass_in,'kg/s')+' − '+value(balance?.mass_out,'kg/s')));
     appendClosure(parent,'Residuo global',balance?.mass_in,balance?.mass_out,balance?.mass_residual,'kg/s',1e-8);
     paragraph(parent,'Por componente · ṁₖ = ṁ · wₖ, donde wₖ es la fracción másica global.');
@@ -130,6 +134,28 @@ const SimProcessExplorer=(()=>{
     }
     paragraph(parent,'Tolerancia didáctica de cierre: el mayor valor entre 10⁻⁶ veces el mayor flujo absoluto y un mínimo de 10⁻⁸ kg/s para materia o 10⁻⁴ kW para energía.');
   }
+  function positionCard(){
+    if(!visible)return;
+    const canvas=$('canvas-wrap'),panel=$('process-explorer-panel'),svg=$('diagram');
+    const target=[...svg.querySelectorAll('[data-node]')].find(el=>el.dataset.node===steps[position]?.id);
+    if(!target||!canvas.clientWidth||!canvas.clientHeight){leader.hidden=true;return;}
+    const bounds=canvas.getBoundingClientRect(),r=target.getBoundingClientRect(),w=panel.offsetWidth,h=panel.offsetHeight;
+    const left=r.left-bounds.left,top=r.top-bounds.top,right=r.right-bounds.left,bottom=r.bottom-bounds.top;
+    const cx=(left+right)/2,cy=(top+bottom)/2;
+    const clamp=(v,a,b)=>Math.max(a,Math.min(v,Math.max(a,b)));
+    const xMax=canvas.clientWidth-w-8,yMax=canvas.clientHeight-h-8;
+    const candidates=[[right+20,cy-h/2],[left-w-20,cy-h/2],[cx-w/2,top-h-20],[cx-w/2,bottom+20]];
+    const rects=[...svg.querySelectorAll('[data-node]')].map(el=>{const q=el.getBoundingClientRect();return {left:q.left-bounds.left,right:q.right-bounds.left,top:q.top-bounds.top,bottom:q.bottom-bounds.top,weight:el===target?12:1};});
+    let best=null;
+    for(const [rawX,rawY] of candidates){const x=clamp(rawX,8,xMax),y=clamp(rawY,8,yMax);
+      let cost=Math.abs(x-rawX)+Math.abs(y-rawY);
+      for(const q of rects)cost+=q.weight*Math.max(0,Math.min(x+w,q.right)-Math.max(x,q.left))*Math.max(0,Math.min(y+h,q.bottom)-Math.max(y,q.top))/40;
+      if(!best||cost<best.cost)best={x,y,cost};}
+    const {x,y}=best;panel.style.left=x+'px';panel.style.top=y+'px';
+    const ax=clamp(cx,8,canvas.clientWidth-8),ay=clamp(cy,8,canvas.clientHeight-8),bx=clamp(ax,x,x+w),by=clamp(ay,y,y+h);
+    leader.hidden=false;Object.assign(leader.style,{left:ax+'px',top:ay+'px',width:Math.hypot(bx-ax,by-ay)+'px',transform:'rotate('+Math.atan2(by-ay,bx-ax)+'rad)'});
+  }
+  function follow(){if(!visible)return;positionCard();frame=requestAnimationFrame(follow);}
   function emphasize(){
     const svg=$('diagram');if(!svg)return;
     svg.querySelectorAll('[data-node]').forEach(el=>{
@@ -138,30 +164,48 @@ const SimProcessExplorer=(()=>{
       el.classList.toggle('explorer-muted',visible&&!current);
     });
   }
+  function pause(){clearInterval(timer);timer=null;const b=$('process-explorer-play');b.textContent='▶';b.setAttribute('aria-label','Reproducir');b.setAttribute('aria-pressed','false');}
+  function play(){if(timer!==null){pause();return;}if(!visible)return;if(position===steps.length-1)position=0;render();if(steps.length<2)return;const b=$('process-explorer-play');b.textContent='Ⅱ';b.setAttribute('aria-label','Pausar');b.setAttribute('aria-pressed','true');timer=setInterval(()=>{next();if(position===steps.length-1)pause();},Number($('process-explorer-speed').value)||4000);}
+  function setView(nextView){view=nextView;const panel=$('process-explorer-panel');panel.dataset.view=view;panel.querySelectorAll('[data-explorer-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.explorerView===view)));if(['mass','energy','equations','all'].includes(view))$('process-explorer-interpretation').open=true;}
   function render(){
     const panel=$('process-explorer-panel'),active=visible&&steps.length>0;
-    panel.hidden=!active;
-    $('process-explorer-open').disabled=!context?.isValid?.()||!steps.length;
+    panel.hidden=!active;if(controls)controls.hidden=!active;if(!active&&leader)leader.hidden=true;
+    $('process-explorer-open').disabled=!context?.isValid?.();
     $('process-explorer-open').setAttribute('aria-pressed',String(active));
     const menuButton=document.querySelector('[data-toolbar-action="process-explorer-open"]');
     if(menuButton)menuButton.disabled=$('process-explorer-open').disabled;
     if(!active){emphasize();return;}
-    const {graph,result}=context.getData(),step=steps[position],node=graph.nodes.find(n=>n.id===step.id);
+    const {graph,result,dynamicResult}=context.getData(),step=steps[position],node=graph.nodes.find(n=>n.id===step.id);
     if(!node){close();return;}
-    $('process-explorer-counter').textContent='Etapa '+(position+1)+' de '+steps.length;
+    const dynamic=step.dynamic===true;panel.dataset.dynamic=String(dynamic);
+    $('process-explorer-counter').textContent=(dynamic?'Muestra ':'Etapa ')+(position+1)+' de '+steps.length;
     $('process-explorer-title').textContent=node.name;
-    $('process-explorer-type').textContent=step.stream?'Corriente calculada':'Operación unitaria';
+    $('process-explorer-type').textContent=dynamic?'Integración temporal · resultado registrado':step.stream?'Corriente calculada':'Operación unitaria';
     const body=$('process-explorer-readings');body.replaceChildren();
     const details=$('process-explorer-connections');details.replaceChildren();
     const interpretation=$('process-explorer-interpretation');
     const wasExpanded=interpretation.open;
-    interpretation.hidden=step.stream;
-    interpretation.open=!step.stream&&wasExpanded;
-    panel.scrollTop=0;
+    interpretation.hidden=false;
+    interpretation.open=wasExpanded;
+    panel.querySelector('.explorer-scroll').scrollTop=0;
+    const progress=$('process-explorer-progress');progress.max=steps.length;progress.value=position+1;
     const analysis=$('process-explorer-analysis');
     analysis.replaceChildren();
-    if(step.stream){
+    if(dynamic){
+      const p=dynamicResult.points[step.sample];
+      for(const [key,label,unit] of [['time_s','Tiempo de simulación','s'],['level_m','Nivel calculado','m'],['volume_m3','Volumen derivado','m³'],['fill_pct','Llenado derivado','%'],['mass_kg','Masa estimada','kg'],['outlet_kg_s','Caudal de descarga','kg/s']])if(Number.isFinite(p[key]))body.append(row(label,value(p[key],unit)));
+      details.append(row('Tiempo registrado',value(p.time_s,'s')));paragraph(details,'Reproducción de muestras existentes; no integra nuevamente el proceso.');
+      const mass=document.createElement('section');mass.dataset.explorerSection='mass';analysis.append(mass);paragraph(mass,'Balance dinámico de masa: dM/dt = ṁₑ − ṁₛ. El inventario puede cambiar con el tiempo.');
+      if(Number.isFinite(p.mass_kg))mass.append(row('Inventario másico estimado',value(p.mass_kg,'kg')));
+      if(Number.isFinite(p.outlet_kg_s))mass.append(row('Descarga registrada',value(p.outlet_kg_s,'kg/s')));
+      const equations=document.createElement('section');equations.dataset.explorerSection='equations';analysis.append(equations);const eq=document.createElement('div');eq.className='explorer-equation';eq.textContent='dM/dt = ṁₑ − ṁₛ';equations.append(eq);paragraph(equations,'Ecuación general de acumulación sin reacción. No es una verificación numérica del integrador.');
+      const energy=document.createElement('section');energy.dataset.explorerSection='energy';analysis.append(energy);paragraph(energy,'No se dispone de un balance energético temporal completo en estas muestras.');
+    }else if(step.stream){
       const state=result.streams?.[step.id];
+      const group=kind=>{const el=document.createElement('section');el.dataset.explorerSection=kind;analysis.append(el);return el;};
+      const eq=(parent,text)=>{const el=document.createElement('div');el.className='explorer-equation';el.textContent=text;parent.append(el);};
+      const mass=group('mass'),energy=group('energy'),equations=group('equations');
+      if(node.type==='MaterialStream'){eq(mass,'ṁₖ = ṁ · wₖ');paragraph(mass,'Caudal de cada componente = caudal total por fracción másica.');mass.append(row('Caudal total',value(state?.mass_flow_kg_s,'kg/s')));eq(energy,'Ḣ = ṁ · h');const h=mixture(state)?.enthalpy_kJ_kg;energy.append(row('Flujo de entalpía',value(state?.mass_flow_kg_s*h,'kW')));eq(equations,'ṁ = ṅ · M');eq(equations,'ṁₖ = ṁ · wₖ');eq(equations,'Ḣ = ṁ · h');paragraph(equations,'M: masa molar media; wₖ: fracción másica; h: entalpía específica. Una corriente no es una operación unitaria.');}else{paragraph(mass,'Una corriente de energía no transporta materia.');paragraph(energy,'Transferencia de energía: potencia térmica o mecánica según las conexiones.');paragraph(equations,'No corresponde un balance de materia para una corriente de energía.');}
       if(state){
         body.append(row('Caudal másico',value(state.mass_flow_kg_s,'kg/s')),
           row('Temperatura',value(Number.isFinite(state.temperature_K)?state.temperature_K-273.15:NaN,'°C')),
@@ -185,24 +229,38 @@ const SimProcessExplorer=(()=>{
     $('process-explorer-back').disabled=position===0;
     $('process-explorer-next').disabled=position===steps.length-1;
     $('process-explorer-cycles').hidden=!hadRecycle;
-    emphasize();
+    const summary=document.createElement('div');summary.className='explorer-inline-summary';
+    if(dynamic){const p=dynamicResult.points[step.sample];summary.append(row('Tiempo',value(p.time_s,'s')),row('Nivel',value(p.level_m,'m')),row('Descarga',value(p.outlet_kg_s,'kg/s')));}
+    else if(step.stream){const s=result.streams?.[step.id];if(node.type==='MaterialStream')summary.append(row('Caudal',value(s?.mass_flow_kg_s,'kg/s')),row('Temperatura',value(Number.isFinite(s?.temperature_K)?s.temperature_K-273.15:NaN,'°C')),row('Presión',value(Number.isFinite(s?.pressure_Pa)?s.pressure_Pa/1000:NaN,'kPa')));else paragraph(summary,'Corriente de energía');}
+    else{const b=result.balances?.find(b=>b.id===step.id);summary.append(row('Entrada',value(b?.mass_in,'kg/s')),row('Salida',value(b?.mass_out,'kg/s')),row('Residuo',value(b?.mass_residual,'kg/s')));}
+    const formula=document.createElement('div');formula.className='explorer-equation';formula.textContent=dynamic?'dM/dt = ṁₑ − ṁₛ':step.stream?(node.type==='MaterialStream'?'Ḣ = ṁ · h':''):(operations[node.type]?.[0]||'Σṁₑ = Σṁₛ');if(formula.textContent)summary.append(formula);
+    panel.querySelector('.explorer-inline-summary')?.remove();panel.querySelector('.explorer-heading').after(summary);
+    setView(view);emphasize();positionCard();
   }
   function open(){
     if(!context?.isValid?.())return;
-    const data=context.getData();steps=createSteps(data.graph,data.result);
+    const data=context.getData();hadRecycle=false;const tank=data.graph.nodes.find(n=>n.type==='Tank');steps=data.dynamicResult?.points?.length&&tank?data.dynamicResult.points.map((_,sample)=>({id:tank.id,dynamic:true,sample})):data.result?createSteps(data.graph,data.result):[];
     if(!steps.length)return;
-    visible=true;position=0;render();
+    visible=true;position=0;expanded=false;view='summary';$('process-explorer-panel').classList.remove('explorer-detail');$('process-explorer-expand').textContent='+';$('process-explorer-expand').setAttribute('aria-pressed','false');render();cancelAnimationFrame(frame);frame=requestAnimationFrame(follow);
   }
-  function close(){visible=false;steps=[];position=0;render();}
+  function close(){pause();cancelAnimationFrame(frame);$('process-explorer-panel').classList.remove('explorer-expanded');visible=false;steps=[];position=0;render();}
   function invalidate(){if(visible)close();else render();}
   function next(){if(visible&&position<steps.length-1){position++;render();}}
   function back(){if(visible&&position>0){position--;render();}}
   function bind(options){
     context=options;
+    const panel=$('process-explorer-panel'),canvas=$('canvas-wrap');canvas.append(panel);panel.classList.add('explorer-inline');
+    leader=document.createElement('div');leader.className='explorer-leader';leader.hidden=true;canvas.append(leader);
+    controls=document.createElement('div');controls.className='explorer-inline-controls';controls.hidden=true;controls.append(panel.querySelector('.explorer-actions'),$('process-explorer-progress'));document.querySelector('.diagram-toolbar').append(controls);
     $('process-explorer-open').addEventListener('click',()=>visible?close():open());
     $('process-explorer-close').addEventListener('click',close);
     $('process-explorer-back').addEventListener('click',back);
     $('process-explorer-next').addEventListener('click',next);
+    $('process-explorer-play').addEventListener('click',play);
+    $('process-explorer-stop').addEventListener('click',()=>{pause();position=0;render();});
+    $('process-explorer-speed').addEventListener('change',()=>{if(timer!==null){pause();play();}});
+    $('process-explorer-expand').addEventListener('click',()=>{expanded=!expanded;panel.classList.toggle('explorer-detail',expanded);$('process-explorer-expand').textContent=expanded?'−':'+';$('process-explorer-expand').setAttribute('aria-pressed',String(expanded));if(!expanded)setView('summary');else setView('all');positionCard();});
+    document.querySelectorAll('[data-explorer-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.explorerView)));
     render();
   }
   return {bind,open,close,invalidate,emphasize,createSteps};

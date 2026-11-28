@@ -463,21 +463,24 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  assert.equal(await page.locator('#diagram .explorer-current').count(),1);
  assert.ok((await panel.locator('.explorer-reading').count())>0);
  const first=await panel.locator('#process-explorer-title').textContent();
- await panel.locator('#process-explorer-next').click();
+ await page.locator('#process-explorer-next').click();
  assert.notEqual(await panel.locator('#process-explorer-title').textContent(),first);
  assert.equal(await page.locator('#diagram .explorer-current').count(),1);
  const interpretation=panel.locator('#process-explorer-interpretation');
- while(!await interpretation.isVisible()&&await panel.locator('#process-explorer-next').isEnabled()){
-   await panel.locator('#process-explorer-next').click();
+ while(!await page.locator('#diagram .explorer-current[data-node="m1"]').count()&&await page.locator('#process-explorer-next').isEnabled()){
+   await page.locator('#process-explorer-next').click();
  }
- await interpretation.locator('summary').click();
+ assert.equal(await page.locator('#diagram .explorer-current[data-node="m1"]').count(),1);
+ await panel.locator('#process-explorer-expand').click();
+ assert.equal(await interpretation.isVisible(),true);
+ assert.equal(await interpretation.getAttribute('open'),'');
  assert.match(await interpretation.innerText(),/Mezcla adiabática/);
  assert.match(await interpretation.innerText(),/Water · entrada − salida\s+0,83 kg\/s − 0,83 kg\/s/);
  assert.match(await interpretation.innerText(),/ΔḢ · salida − entrada/);
  assert.match(await interpretation.innerText(),/Dentro de tolerancia/);
- const next=panel.locator('#process-explorer-next');
+ const next=page.locator('#process-explorer-next');
  const analysis=interpretation.locator('#process-explorer-analysis');
- assert.ok(await analysis.evaluate(el=>el.scrollHeight>el.clientHeight));
+ assert.ok(await analysis.evaluate(el=>el.textContent.length>0));
  assert.ok(await next.evaluate(button=>{
    const {x,y,width,height,bottom}=button.getBoundingClientRect();
    return bottom<document.querySelector('#process-explorer-summary').getBoundingClientRect().top
@@ -487,8 +490,8 @@ test('Play de Calcular y exploración posterior sin nuevos POST: equipos, corrie
  await next.click();
  assert.notEqual(await panel.locator('#process-explorer-title').textContent(),current);
  assert.equal(requests,1,'Explorar nunca vuelve a enviar la simulación');
- while(await panel.locator('#process-explorer-back').isEnabled()){
-   await panel.locator('#process-explorer-back').click();
+ while(await page.locator('#process-explorer-back').isEnabled()){
+   await page.locator('#process-explorer-back').click();
  }
  assert.equal(await panel.locator('#process-explorer-title').textContent(),first);
  await panel.locator('#process-explorer-close').click();
@@ -512,10 +515,12 @@ test('Explorador: diferencia cero de datos faltantes en los balances',async t=>{
  await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
  await page.locator('#process-explorer-open').click();
  const interpretation=page.locator('#process-explorer-interpretation');
- while(!await interpretation.isVisible()&&await page.locator('#process-explorer-next').isEnabled()){
+ while(!await page.locator('#diagram .explorer-current[data-node="m1"]').count()&&await page.locator('#process-explorer-next').isEnabled()){
    await page.locator('#process-explorer-next').click();
  }
- await interpretation.locator('summary').click();
+ assert.equal(await page.locator('#diagram .explorer-current[data-node="m1"]').count(),1);
+ await page.locator('#process-explorer-expand').click();
+ assert.equal(await interpretation.getAttribute('open'),'');
  const text=await interpretation.innerText();
  assert.match(text,/Residuo global\s+0 kg\/s/);
  assert.match(text,/Ethanol · entrada − salida\s+Sin dato de DWSIM − Sin dato de DWSIM/);
@@ -600,7 +605,7 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
  assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
-   ['Archivo','Proyecto','Simulación','Diagrama','Vista','Portal']);
+   ['Archivo','Proyecto','Diagrama','Simulación','Vista','Portal']);
  for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
    assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
  }
@@ -756,7 +761,7 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(await page.locator('#view-menu [data-toolbar-action="fit-button"]').count(),0,'Vista no repite el encuadre de la barra');
   const admin=page.locator('#admin-nav-link');
   assert.equal(await admin.getAttribute('target'),null,'Administración no abre otra pestaña');
-  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
+  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools'].includes(k))));
   const original=await order();
   await page.locator('.simulation-tools .toolbar-grip').evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',altKey:true,bubbles:true})));
   const changed=await order();
@@ -764,7 +769,7 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(changed.indexOf('simulation-tools'),original.indexOf('simulation-tools')-1);
   await page.locator('#view-menu > summary').click();
   await page.locator('#toolbar-layout-reset').click();
-  assert.deepEqual(await order(),['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
+  assert.deepEqual(await order(),['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']);
   await page.locator('#theme-toggle').click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
@@ -775,46 +780,37 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(await page.locator('.access-brand').count(),0,'Acceso usa un solo logotipo');
 });
 
-test('Explorador estable: no cambia altura del lienzo al recorrer etapas ni expandir ecuaciones',async t=>{
+test('Explorador contextual: el lienzo permanece fijo al avanzar y ampliar detalle',async t=>{
  const page=await browserPage(t);
  await openProject(page,example);
  await page.locator('#calculate-button').click();
  await page.waitForFunction(()=>document.querySelector('#result-validity')?.dataset.state==='valid');
  await page.locator('#process-explorer-open').click();
- const panel=page.locator('#process-explorer-panel'),canvas=page.locator('#canvas-wrap');
+ const panel=page.locator('#process-explorer-panel'),next=page.locator('#process-explorer-next'),controls=page.locator('.diagram-toolbar .explorer-inline-controls');
+ assert.equal(await controls.isVisible(),true);
+ assert.equal(await page.locator('#canvas-wrap > #process-explorer-panel').count(),1);
  const measure=()=>page.evaluate(()=>{
-   const panel=document.querySelector('#process-explorer-panel').getBoundingClientRect();
-   const canvas=document.querySelector('#canvas-wrap').getBoundingClientRect();
-   return {panelHeight:panel.height,canvasHeight:canvas.height,canvasTop:canvas.top};
+   const p=document.querySelector('#process-explorer-panel').getBoundingClientRect();
+   const c=document.querySelector('#canvas-wrap').getBoundingClientRect();
+   return {height:c.height,top:c.top,inside:p.left>=c.left-1&&p.top>=c.top-1&&p.right<=c.right+1&&p.bottom<=c.bottom+1,panelHeight:p.height};
  });
  const initial=await measure();
- assert.ok(initial.panelHeight>100);
- for(let i=0;i<4;i++){
-   const next=panel.locator('#process-explorer-next');
-   if(!await next.isEnabled())break;
-   await next.click();
-   const now=await measure();
-   assert.ok(Math.abs(now.panelHeight-initial.panelHeight)<1,'La altura del explorador no varía al avanzar');
-   assert.ok(Math.abs(now.canvasHeight-initial.canvasHeight)<1,'El alto del lienzo permanece fijo');
-   assert.ok(Math.abs(now.canvasTop-initial.canvasTop)<1,'El lienzo no se desplaza');
- }
+ assert.ok(initial.panelHeight>50);
+ const stable=async()=>{await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const now=await measure();assert.ok(Math.abs(now.height-initial.height)<1,'El alto del lienzo permanece fijo');assert.ok(Math.abs(now.top-initial.top)<1,'El lienzo no se desplaza');assert.ok(now.inside,'La tarjeta permanece dentro del lienzo');};
+ await stable();
+ for(let i=0;i<4&&await next.isEnabled();i++){await next.click();await stable();}
+ await panel.locator('#process-explorer-expand').click();
  const details=panel.locator('#process-explorer-interpretation');
- while(!await details.isVisible()&&await panel.locator('#process-explorer-next').isEnabled())
-   await panel.locator('#process-explorer-next').click();
  assert.equal(await details.isVisible(),true);
- await details.locator('summary').click();
  assert.equal(await details.getAttribute('open'),'');
- const expanded=await measure();
- assert.ok(Math.abs(expanded.panelHeight-initial.panelHeight)<1,'Abrir ecuaciones no aumenta el panel');
- assert.ok(Math.abs(expanded.canvasHeight-initial.canvasHeight)<1,'Abrir ecuaciones no reduce el lienzo');
- const marker=await details.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content);
- assert.match(marker,/−|\2212/,'El detalle usa signo menos en lugar del triángulo nativo');
- if(await panel.locator('#process-explorer-next').isEnabled()){
-   await panel.locator('#process-explorer-next').click();
-   const after=await measure();
-   assert.ok(Math.abs(after.panelHeight-initial.panelHeight)<1);
-   assert.ok(Math.abs(after.canvasHeight-initial.canvasHeight)<1);
- }
+ await stable();
+ if(await next.isEnabled()){await next.click();await stable();}
+ await panel.locator('#process-explorer-expand').click();
+ assert.equal(await details.isVisible(),false);
+ await stable();
+ await panel.locator('#process-explorer-close').click();
+ assert.equal(await panel.isVisible(),false);
+ assert.equal(await controls.isVisible(),false);
 });
 
 test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas nativas',async t=>{
@@ -841,17 +837,17 @@ test('ΣIM 0.47.9: iconografía coherente y detalles informativos sin flechas na
  assert.equal(await details.count(),1);
  const summary=details.locator('summary');
  assert.ok(await summary.evaluate(el=>getComputedStyle(el).listStyleType==='none'));
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ assert.equal(await summary.evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 1px 7px, auto');
  await summary.click();
  assert.equal(await details.getAttribute('open'),'');
- assert.match(await summary.evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
+ assert.equal(await summary.evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 0px 0px, auto');
  const controls=page.locator('.app-menu>summary');
  assert.equal(await controls.first().evaluate(el=>getComputedStyle(el).listStyleType),'none');
  await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
  const history=page.locator('.services-history').first();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/\+/);
+ assert.equal(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 1px 7px, auto');
  await history.locator('summary').click();
- assert.match(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').content),/−|\2212/);
+ assert.equal(await history.locator('summary').evaluate(el=>getComputedStyle(el,'::before').backgroundSize),'7px 1px, 0px 0px, auto');
 });
 
 test('Catálogo: acceso a nombres posteriores a C y carga paginada',async t=>{
@@ -1143,4 +1139,61 @@ test('Ejemplo 14 grafica los estados y el modelo de compresión',async t=>{
   assert.equal(await page.locator('#charts-error').textContent(),'');
   assert.equal(await page.locator('#charts-dataset').inputValue(),'model');
   assert.ok(await page.locator('#charts-svg path').count());
+});
+
+test('La barra acepta puntero, recuerda tamaño y posición y puede volver a acoplarse',async t=>{
+  const page=await browserPage(t);
+  const group=page.locator('.drawing-tools');
+  const grip=group.locator('.toolbar-grip');
+  const drag=async(locator,x,y)=>{
+    const rect=await locator.boundingBox();
+    await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);
+    await page.mouse.down();
+    await page.mouse.move(x,y,{steps:8});
+    await page.mouse.up();
+  };
+  const previous=await page.locator('.project-tools').boundingBox();
+  await drag(grip,previous.x+previous.width/2,previous.y+previous.height/2);
+  assert.ok((await group.boundingBox()).x<=(await page.locator('.project-tools').boundingBox()).x);
+  const docked=await group.boundingBox();
+  const edge=group.locator('.toolbar-resize');
+  await drag(edge,docked.x+docked.width+85,docked.y+docked.height/2);
+  const wider=await group.boundingBox();
+  assert.ok(wider.width>docked.width);
+  await drag(edge,wider.x+wider.width-42,wider.y+wider.height/2);
+  const narrower=await group.boundingBox();
+  assert.ok(narrower.width<wider.width);
+  await page.reload({waitUntil:'networkidle'});
+  assert.equal((await group.boundingBox()).width,narrower.width);
+  await drag(grip,450,250);
+  assert.match(await group.getAttribute('class'),/toolbar-floating/);
+  const before=await group.boundingBox();
+  await drag(group.locator('.toolbar-resize'),before.x+before.width+80,before.y+before.height/2);
+  const resized=await group.boundingBox();
+  assert.ok(resized.width>before.width);
+  await page.reload({waitUntil:'networkidle'});
+  assert.deepEqual(await group.boundingBox(),resized);
+  const bar=await page.locator('.command-bar').boundingBox();
+  await drag(grip,bar.x+bar.width/2,bar.y+bar.height/2);
+  assert.doesNotMatch(await group.getAttribute('class'),/toolbar-floating/);
+  assert.equal((await group.boundingBox()).width,resized.width);
+});
+
+test('El margen invisible de un símbolo permite arrastrarlo y el cursor se restablece',async t=>{
+  const page=await browserPage(t);
+  await openProject(page,example);
+  const equipment=page.locator('.equipment-node').first();
+  const svg=page.locator('#diagram');
+  const point=await equipment.locator('.equipment-hit').evaluate(rect=>
+    new DOMPoint(-3,0).matrixTransform(rect.getScreenCTM()).toJSON());
+  const before=await equipment.getAttribute('transform');
+  await page.mouse.move(point.x,point.y);
+  assert.equal(await page.evaluate(({x,y})=>getComputedStyle(document.elementFromPoint(x,y)).cursor,point),'grab');
+  await page.mouse.down();
+  assert.match(await svg.getAttribute('class'),/object-dragging/);
+  await page.mouse.move(point.x+24,point.y+18,{steps:4});
+  await page.mouse.up();
+  assert.notEqual(await equipment.getAttribute('transform'),before);
+  assert.doesNotMatch(await svg.getAttribute('class')||'',/object-dragging/);
+  assert.equal(await svg.locator('.stream-hit').first().evaluate(el=>getComputedStyle(el).vectorEffect),'non-scaling-stroke');
 });

@@ -1,4 +1,4 @@
-<img src="site/assets/sim-logo.svg" alt="ΣIM · Simulación de procesos" width="360">
+<img src="site/assets/sim-logo.svg" alt="ΣiM · Simulación de procesos" width="360">
 
 [![Portal 0.51.9](https://img.shields.io/badge/portal-0.51.9-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
@@ -8,17 +8,21 @@
 [![Documentación de proyectos](https://img.shields.io/badge/docs-wiki.lemeit.ar-F4F3EE?style=flat-square&labelColor=101215)](https://wiki.lemeit.ar/sim/)
 
 Simulador de procesos con interfaz web en español y motor DWSIM, desarrollado con fines pedagógicos y sin finalidad comercial.
-Marca: ΣIM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
-Sitio: https://sim.lemeit.ar · Identidad propia ΣIM, inspirada en tecnología retro: negro, blanco y rojo.
+Marca: ΣiM · Simulación de procesos. El repositorio conserva el nombre lemeit-sim.
+Sitio: https://sim.lemeit.ar · Identidad propia ΣiM, inspirada en tecnología retro: negro, blanco y rojo.
 
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
 ## Ejercicios 18 y 19 · Recirculación
 
-Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣIM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
+Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣiM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Estado actual · 0.51.9
+## Versión en desarrollo · 0.52.0
+
+En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. Arrastrá el borde derecho de un grupo para ajustar su ancho tanto en la barra como en el área de trabajo. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
+
+## Versión publicada · 0.51.9
 
 **Revalidación Debian (26/11):** Ejemplo 20 y Gráficas vuelven a funcionar tras actualizar el gateway desde 0.47.5. Un estado HTTP 200 no garantiza soporte dinámico; consultar `/api/dynamics/capabilities` y [recuperación](docs/operacion-local.md).
 
@@ -47,7 +51,7 @@ Como alumno, usá **Guardar en nube** en la barra y retomá el trabajo desde **M
 
 **0.27.1 — Corrientes más claras**. Energía con línea de trazos en el listado y el diagrama DWSIM, también al seleccionar. El ajuste del recorrido usa un pequeño cuadrado visible solo en la corriente seleccionada; se conservan conexiones y arrastre.
 
-**0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣIM.
+**0.27.0 — Símbolos de DWSIM en el PFD.** Las columnas, el CSTR, los reactores tubular y de polimerización y la válvula de seguridad se pueden dibujar y conectar. Sus cálculos todavía no están disponibles en ΣiM.
 
 **0.26.2 — Identificación técnica de los motores**. Estado de motores muestra Windows 11 Home Single Language 25H2 y GNU/Linux Debian (versión pendiente de confirmar), con características declaradas del equipo principal. Estos datos descriptivos no indican disponibilidad ni se obtienen mediante detección remota. El selector conserva Motor principal y Motor alternativo; las guías siguen centradas en el uso del simulador.
 
@@ -73,7 +77,7 @@ Como alumno, usá **Guardar en nube** en la barra y retomá el trabajo desde **M
 
 **0.19.0 — Ejemplo 13 guiado**, 16/11/2026. El menú Ejemplos ofrece una actividad para predecir las temperaturas del intercambiador, calcular con el motor seleccionado y comparar las predicciones con resultados vigentes y balances. No calcula de forma autónoma ni modifica DWSIM.
 
-**0.18.0 — Ayuda contextual desde el inspector**, 16/11/2026. Los equipos y corrientes enlazan al capítulo correspondiente de la wiki de ΣIM sin transmitir datos del proyecto. El menú Ayuda lleva al índice de 16 capítulos. No altera el cálculo DWSIM ni los motores.
+**0.18.0 — Ayuda contextual desde el inspector**, 16/11/2026. Los equipos y corrientes enlazan al capítulo correspondiente de la wiki de ΣiM sin transmitir datos del proyecto. El menú Ayuda lleva al índice de 16 capítulos. No altera el cálculo DWSIM ni los motores.
 
 **0.17.5 — Revisión previa de especificaciones**, 16/11/2026. El diagnóstico del proyecto indica parámetros de operaciones ausentes o fuera de rango antes de solicitar un cálculo. No modifica las ecuaciones, los motores ni el contrato del gateway. [Grados de libertad y especificaciones en la wiki](https://wiki.lemeit.ar/sim/grados-libertad-especificaciones/).
 
@@ -83,7 +87,7 @@ La versión del portal es independiente de **DWSIM 10.2.15**. La versión efecti
 
 ## Ingreso y administración
 
-- **Alumnos:** abrir [ΣIM](https://sim.lemeit.ar/acceso.html), elegir Alumno e ingresar el código de clase de 12 caracteres. No se necesita correo ni cuenta individual.
+- **Alumnos:** abrir [ΣiM](https://sim.lemeit.ar/acceso.html), elegir Alumno e ingresar el código de clase de 12 caracteres. No se necesita correo ni cuenta individual.
 - **Administrador:** elegir Administrador e ingresar la contraseña privada. El panel permite crear clases, consultar/copiar sus códigos activos y desactivar accesos.
 - El pie muestra rol, nombre de clase, tiempo restante del alumnado y **Salir**. El administrador no muestra contador. La sesión de alumno dura hasta 4 horas o hasta el vencimiento/desactivación de la clase, lo que ocurra primero; la administrativa dura hasta 8 horas.
 - Los códigos creados desde 0.17.0 quedan disponibles para el administrador mientras estén activos. Los anteriores siguen funcionando, pero no pueden recuperarse si no se conservaron.
@@ -96,7 +100,7 @@ La versión del portal es independiente de **DWSIM 10.2.15**. La versión efecti
 
 Desde Ejemplos se abre cada caso con sus condiciones y una consigna breve. Son
 modelos calculados, no mediciones experimentales. La [guía](docs/ejemplos-validados.md)
-permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
+permite descargar el JSON de ΣiM y el DWXML equivalente para DWSIM.
 
 | Caso | Qué permite estudiar | Referencia calculada |
 | --- | --- | --- |
@@ -115,7 +119,7 @@ permite descargar el JSON de ΣIM y el DWXML equivalente para DWSIM.
 | 13 · Intercambiador de calor | Dos corrientes de agua sin mezcla | 40 kW; referencia contrastada Windows–Debian en 0.14.0 |
 
 
-Los casos 01–05 se recalcularon con el motor de ΣIM y la API oficial del DWSIM
+Los casos 01–05 se recalcularon con el motor de ΣiM y la API oficial del DWSIM
 Open Source 10.2.15.0 instalado. Coincidieron las propiedades comprobadas dentro
 de las tolerancias documentadas; el [informe](docs/validation/examples-0.5.0.json)
 conserva los valores sin redondear. Mezclado de agua y calentamiento se ejecutaron
@@ -143,7 +147,7 @@ preparar archivos sin calcular. No contiene propiedades físicas ni resultados.
 
 ## Selección automática de motores
 
-ΣIM elige antes de cada cálculo un gateway disponible y compatible con las operaciones del diagrama. Los administradores pueden fijar Windows o Debian. Nunca se reenvía automáticamente un POST incierto: si se pierde el gateway después del envío, se prepara el alternativo para el próximo intento.
+ΣiM elige antes de cada cálculo un gateway disponible y compatible con las operaciones del diagrama. Los administradores pueden fijar Windows o Debian. Nunca se reenvía automáticamente un POST incierto: si se pierde el gateway después del envío, se prepara el alternativo para el próximo intento.
 
 ## Disponible
 
@@ -194,7 +198,7 @@ El SVG es una reconstrucción vectorial de la referencia aprobada. El nombre y l
 bajada están convertidos en curvas: no dependen de fuentes instaladas ni contienen
 un PNG incrustado. Ver [guía de identidad](docs/brand-sim.md).
 Las claves y los identificadores técnicos del tema anterior se conservan para
-mantener compatibilidad; la marca visible es ΣIM.
+mantener compatibilidad; la marca visible es ΣiM.
 
 ### Edición directa de corrientes · 0.3.0
 
@@ -244,8 +248,8 @@ original y sugerencias orientativas, que no prueban su causa.
 
 ## Instalar como aplicación · 0.4.0
 
-En Chrome y Edge compatibles, ΣIM puede ofrecer instalación desde el icono de la
-barra de direcciones o el menú del navegador. Ayuda → Instalar ΣIM aparece cuando
+En Chrome y Edge compatibles, ΣiM puede ofrecer instalación desde el icono de la
+barra de direcciones o el menú del navegador. Ayuda → Instalar ΣiM aparece cuando
 el navegador habilita esa opción; si ya está instalada o el navegador no la ofrece,
 el botón permanece oculto. La presentación depende del navegador y del dispositivo.
 
@@ -429,13 +433,13 @@ Las comprobaciones de acceso y de interfaz no equivalen a una nueva validación 
 
 ## Accesos del proyecto
 
-- [ΣIM](https://sim.lemeit.ar/): aplicación y versión visible en Ayuda → Acerca de.
+- [ΣiM](https://sim.lemeit.ar/): aplicación y versión visible en Ayuda → Acerca de.
 - [Ejemplos](https://sim.lemeit.ar/ejemplos.html) y [catálogo](https://sim.lemeit.ar/catalogo.html).
 - [Ficha en Profe Lamaita](https://profe.lemeit.ar/projects/sim/).
 - [Wiki de proyectos](https://wiki.lemeit.ar/sim/).
 - [Portal Lemeit](https://lemeit.ar/#sim).
 
-La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣIM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Las fichas externas son presentaciones del proyecto; el estado operativo y las guías vigentes se mantienen en este repositorio y la wiki.
+La aplicación conserva su identidad propia negro/blanco/rojo. La portada y las fichas aplican el diseño del portal que las contiene. ΣiM no es Bestiario · Seres Térmicos, cuyo recorrido está en Profe Lamaita y cuya documentación vive en `lemeit/simus`. Las fichas externas son presentaciones del proyecto; el estado operativo y las guías vigentes se mantienen en este repositorio y la wiki.
 
 ## Herramientas de unidades · 0.9.0
 
@@ -467,15 +471,15 @@ Desde Archivo → Abrir biblioteca en la nube, «Cambiar alumno…» libera la i
 
 ### Ajustes de legibilidad en reportes A4 (0.47.4)
 
-Los reportes priorizan el espacio del diagrama y reducen los altos de tablas. Las celdas miden su texto para no invadir márgenes; números prácticamente cero se muestran con ≈ 0 por legibilidad, sin modificar los valores almacenados en los resultados ni exportados en Excel o CSV. Si un reporte es demasiado grande, ΣIM ofrece reducir tablas o elegir un papel mayor.
+Los reportes priorizan el espacio del diagrama y reducen los altos de tablas. Las celdas miden su texto para no invadir márgenes; números prácticamente cero se muestran con ≈ 0 por legibilidad, sin modificar los valores almacenados en los resultados ni exportados en Excel o CSV. Si un reporte es demasiado grande, ΣiM ofrece reducir tablas o elegir un papel mayor.
 
 ### Ficha integral del proyecto (0.47.4)
 
-La barra de ΣIM ofrece «Editar proyecto…» y el menú Proyecto da acceso a «Editar ficha y actividad…» o «Preparar reporte PDF…». En la ficha se integran tres pestañas: Actividad (enunciado, consignas, observaciones), Anotaciones del diagrama y Datos del informe (autor, ID, clase, institución y rótulo). Un solo «Guardar cambios» persiste estos metadatos no físicos junto con el proyecto; «Cancelar» descarta los cambios pendientes. «Preparar reporte PDF…» guarda esos datos y abre el mismo generador de reportes que se utiliza en Archivo. No modifica el motor ni la estructura de proyectos cloud.
+La barra de ΣiM ofrece «Editar proyecto…» y el menú Proyecto da acceso a «Editar ficha y actividad…» o «Preparar reporte PDF…». En la ficha se integran tres pestañas: Actividad (enunciado, consignas, observaciones), Anotaciones del diagrama y Datos del informe (autor, ID, clase, institución y rótulo). Un solo «Guardar cambios» persiste estos metadatos no físicos junto con el proyecto; «Cancelar» descarta los cambios pendientes. «Preparar reporte PDF…» guarda esos datos y abre el mismo generador de reportes que se utiliza en Archivo. No modifica el motor ni la estructura de proyectos cloud.
 
 ### Enunciado, consignas y observaciones en el reporte (0.47.4)
 
-Al preparar un Reporte PDF, la opción «Incluir actividad: enunciado, consignas y observaciones» aparece activada por defecto. ΣIM toma el contenido guardado en Editar proyecto → Actividad e incluye esas tres secciones en la propia lámina si pueden leerse claramente. Si son demasiado extensas, mantiene el diagrama y las tablas en la primera hoja y agrega el texto íntegro en un anexo paginado. La vista previa informa cuándo habrá anexos. No se alteran los resultados físicos ni los datos guardados en la nube.
+Al preparar un Reporte PDF, la opción «Incluir actividad: enunciado, consignas y observaciones» aparece activada por defecto. ΣiM toma el contenido guardado en Editar proyecto → Actividad e incluye esas tres secciones en la propia lámina si pueden leerse claramente. Si son demasiado extensas, mantiene el diagrama y las tablas en la primera hoja y agrega el texto íntegro en un anexo paginado. La vista previa informa cuándo habrá anexos. No se alteran los resultados físicos ni los datos guardados en la nube.
 
 ### Edición de anotaciones sobre el diagrama (0.47.4)
 
