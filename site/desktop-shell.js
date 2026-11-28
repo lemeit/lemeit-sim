@@ -12,7 +12,7 @@ globalThis.SimDesktopShell=(()=>{
     }
     if(!project?.isDirty())return true;
     const dialog=$('desktop-unsaved-dialog');
-    $('desktop-unsaved-title').textContent=windowClosing?'Cerrar ΣIM Desktop':'Cerrar proyecto';
+    $('desktop-unsaved-title').textContent=windowClosing?'Cerrar ΣiM Desktop':'Cerrar proyecto';
     $('desktop-unsaved-error').textContent='';
     dialog.returnValue='cancel';
     dialog.showModal();
@@ -30,7 +30,7 @@ globalThis.SimDesktopShell=(()=>{
     dialog.id='desktop-unsaved-dialog';
     dialog.setAttribute('aria-labelledby','desktop-unsaved-title');
     dialog.setAttribute('aria-describedby','desktop-unsaved-message');
-    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-unsaved-title"></h2></div><div class="dialog-body"><p id="desktop-unsaved-message">Hay cambios sin guardar en el proyecto o en su última corrida. Podés conservarlos en la biblioteca local antes de cerrar.</p><p id="desktop-unsaved-error" role="alert"></p><div class="dialog-actions"><button value="cancel" autofocus>Cancelar</button><button value="close">Cerrar sin guardar</button><button type="button" id="desktop-save-and-close">Guardar en biblioteca y cerrar</button></div></div></form>';
+    dialog.innerHTML='<form method="dialog"><div class="dialog-heading"><h2 id="desktop-unsaved-title"></h2></div><div class="dialog-body"><p id="desktop-unsaved-message">Hay cambios sin guardar en el proyecto o en su última corrida. Podés conservarlos en la biblioteca local antes de cerrar.</p><p id="desktop-unsaved-error" role="alert"></p><div class="dialog-actions"><button type="submit" class="outline-button" value="cancel" autofocus>Cancelar</button><button type="submit" class="outline-button" value="close">Cerrar sin guardar</button><button type="button" class="calculate-button" id="desktop-save-and-close">Guardar y cerrar</button></div></div></form>';
     (document.querySelector('.sim-shell')||document.body).append(dialog);
     $('desktop-save-and-close').onclick=()=>{
       if(project.save())dialog.close('close');
@@ -52,7 +52,7 @@ globalThis.SimDesktopShell=(()=>{
     const header=document.querySelector('.app-header');
     if(!win||!header||location.origin!=='http://127.0.0.1:5920'||location.pathname!=='/'||location.search)return;
     const bar=document.createElement('div');bar.className='desktop-titlebar';
-    bar.innerHTML='<div class="desktop-title-brand"><img src="assets/sim-wordmark.svg" alt="ΣIM"><span>Desktop</span></div><div class="desktop-title-project" aria-label="Proyecto actual"></div><div class="desktop-window-controls"></div>';
+    bar.innerHTML='<div class="desktop-title-brand"><img src="assets/sim-wordmark.svg" alt="ΣiM"><span>Desktop</span></div><div class="desktop-title-project" aria-label="Proyecto actual"></div><div class="desktop-window-controls"></div>';
     const title=bar.querySelector('.desktop-title-project');
     const controls=bar.querySelector('.desktop-window-controls');
     const fail=error=>console.error('Control de ventana Desktop:',error);
@@ -117,14 +117,14 @@ globalThis.SimDesktopShell=(()=>{
         body.replaceChildren(...source.childNodes);body.scrollTop=0;
       }catch(error){if(id===request)body.textContent='No se pudo abrir la ayuda local: '+error.message;}
     };
-    const manual=()=>show('Manual de usuario · ΣIM Desktop','desktop-help.html','main');
+    const manual=()=>show('Manual de usuario · ΣiM Desktop','desktop-help.html','main');
     const catalog=()=>show('Catálogo de equipos','catalogo.html','main .table-wrap');
     const shortcuts=()=>show('Atajos de teclado','desktop-help.html','#desktop-shortcuts');
     const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',()=>{closeMenus();action();});return b;};
     const external=(label,url)=>{const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;};
     const about=$('about-button');
-    menu.replaceChildren(button('Manual de usuario · F1',manual),button('Tutoriales y ejemplos',()=>$('examples-browser-button').click()),button('Guía de resoluciones',()=>{if(!$('guide-dialog').open)SimGuide.open($('guide-dialog'),$('guide-host'));}),button('Catálogo de equipos',catalog),button('Atajos de teclado',shortcuts),document.createElement('hr'),external('Wiki de ΣIM','https://wiki.lemeit.ar/sim/'),external('Manual en línea','https://wiki.lemeit.ar/sim/manual-de-uso/'),external('Tutoriales DWSIM','https://dwsim.org/tutorials/en/index.html'),external('Repositorio','https://github.com/lemeit/lemeit-sim'),external('Informar un problema','https://github.com/lemeit/lemeit-sim/issues'),document.createElement('hr'),button('Licencias y créditos',()=>document.querySelector('.footer-info a[href="licenses/NOTICE.md"]')?.click()),about);
-    about.textContent='Acerca de ΣIM Desktop';
+    menu.replaceChildren(button('Manual de usuario · F1',manual),button('Tutoriales y ejemplos',()=>$('examples-browser-button').click()),button('Guía de resoluciones',()=>{if(!$('guide-dialog').open)SimGuide.open($('guide-dialog'),$('guide-host'));}),button('Catálogo de equipos',catalog),button('Atajos de teclado',shortcuts),document.createElement('hr'),external('Wiki de ΣiM','https://wiki.lemeit.ar/sim/'),external('Manual en línea','https://wiki.lemeit.ar/sim/manual-de-uso/'),external('Tutoriales DWSIM','https://dwsim.org/tutorials/en/index.html'),external('Repositorio','https://github.com/lemeit/lemeit-sim'),external('Informar un problema','https://github.com/lemeit/lemeit-sim/issues'),document.createElement('hr'),button('Licencias y créditos',()=>document.querySelector('.footer-info a[href="licenses/NOTICE.md"]')?.click()),about);
+    about.textContent='Acerca de ΣiM Desktop';
     const footer=document.querySelector('.footer-info summary');if(footer)footer.textContent='Licencias';
     document.addEventListener('keydown',event=>{if(event.key==='F1'&&!document.querySelector('dialog[open]')){event.preventDefault();void manual();}});
     document.addEventListener('click',event=>{
@@ -142,7 +142,7 @@ globalThis.SimDesktopShell=(()=>{
   function init(){
     if(!globalThis.SimDesktop)return;
     document.documentElement.classList.add('sim-desktop');
-    document.title='ΣIM Desktop';
+    document.title='ΣiM Desktop';
     const hide=id=>{const el=$(id);if(el)el.classList.add('desktop-hidden');};
     for(const id of ['cloud-projects-open','cloud-save-menu','cloud-open-toolbar','admin-nav-link','session-banner','engine-select','services-button','install-app-button'])hide(id);
     document.querySelector('label[for="engine-select"]')?.classList.add('desktop-hidden');
@@ -159,7 +159,7 @@ globalThis.SimDesktopShell=(()=>{
     $('local-projects-open').textContent='Biblioteca local…';
     $('local-project-title').textContent='Mis proyectos · Biblioteca local';
     $('local-project-dialog').querySelector('.dialog-body > p').textContent=
-      'Los proyectos se guardan en la biblioteca de ΣIM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia de proyecto (.sim).';
+      'Los proyectos se guardan en la biblioteca de ΣiM Desktop de este equipo. Para llevar un proyecto a otro equipo, usá Archivo → Guardar copia de proyecto (.sim).';
     const menu=$('file-menu')?.querySelector('.menu-panel');
     const saveMenu=$('save-button');
     if(menu&&saveMenu)menu.insertBefore(saveMenu,$('close-project-button'));
@@ -167,9 +167,9 @@ globalThis.SimDesktopShell=(()=>{
     if(cloudStart?.tagName==='HR')cloudStart.classList.add('desktop-hidden');
     const about=$('about-dialog');
     if(about){
-      about.querySelector('h2').textContent='Acerca de ΣIM Desktop';
+      about.querySelector('h2').textContent='Acerca de ΣiM Desktop';
       const version=[...about.querySelectorAll('strong')].find(e=>e.textContent.startsWith('Versión del portal'));
-      if(version)version.prepend('Desktop · prototipo alpha.2 | ');
+      if(version)version.prepend('Desktop · alpha.1 | ');
     }
     const brand=document.querySelector('.brand-description');if(brand)brand.textContent='Desktop';
     installCloseDialog();
