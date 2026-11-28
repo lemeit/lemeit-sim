@@ -5,7 +5,7 @@ globalThis.SimToolbarLayout=(()=>{
  const KEY='sim-toolbar-layout-v1';
  const WIDTH_KEY='sim-toolbar-widths-v1';
  const FLOAT_KEY='sim-toolbar-floating-v1';
- const ORDER=['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools'];
+ const ORDER=['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'];
  const label={ 'file-tools':'Archivo','project-tools':'Proyecto','simulation-tools':'Simulación','drawing-tools':'Diagrama','zoom-controls':'Vista','portal-tools':'Herramientas' };
  const current=bar=>[...bar.children].filter(el=>el.classList.contains('command-group')&&ORDER.some(k=>el.classList.contains(k)));
  const groupId=el=>ORDER.find(k=>el.classList.contains(k));
@@ -24,7 +24,7 @@ globalThis.SimToolbarLayout=(()=>{
      for(const key of ordered(keys))bar.insertBefore(groups.get(key),input);
    }
    function save(){try{localStorage.setItem(KEY,JSON.stringify(current(bar).map(groupId)));}catch{}}
-   if(JSON.stringify(saved)===JSON.stringify(['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']))saved=null;
+   if(JSON.stringify(saved)===JSON.stringify(['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']))saved=null;
    apply(ordered(saved));
    const floating=new Map(),widths=new Map();
    try{
