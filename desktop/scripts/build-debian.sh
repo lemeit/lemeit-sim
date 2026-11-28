@@ -35,7 +35,6 @@ Priority: optional
 Architecture: amd64
 Maintainer: Lemeit <contacto@lemeit.ar>
 Depends: python3 (>= 3.11), libwebkit2gtk-4.1-0, libgtk-3-0, libglib2.0-0, libc6, libgcc-s1, shared-mime-info
-Recommends: zenity
 Homepage: https://github.com/lemeit/lemeit-sim
 Description: Simulador educativo de procesos (paquete piloto Desktop)
  Incluye el editor y gateway local. Requiere un motor DWSIM MCP

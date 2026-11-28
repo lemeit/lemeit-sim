@@ -25,7 +25,7 @@ if (-not $SdkVersion) {
         Select-Object -First 1 -ExpandProperty Name
 }
 if (-not $MsvcRoot -or -not $SdkVersion) { throw 'MSVC x64 or Windows SDK not found.' }
-foreach ($file in @("$MsvcRoot\bin\HostX64\x64\cl.exe","$MsvcRoot\bin\HostX64\x64\link.exe","$MsvcRoot\lib\x64\libcmt.lib","$sdk\Lib\$SdkVersion\um\x64\kernel32.lib","$sdk\Lib\$SdkVersion\ucrt\x64\ucrt.lib","$EngineRoot\server\dwsim-mcp.exe","$EngineRoot\local-token.txt",$Python)) {
+foreach ($file in @("$MsvcRoot\bin\HostX64\x64\cl.exe","$MsvcRoot\bin\HostX64\x64\link.exe","$MsvcRoot\lib\x64\libcmt.lib","$sdk\Lib\$SdkVersion\um\x64\kernel32.lib","$sdk\Lib\$SdkVersion\ucrt\x64\ucrt.lib",$Python)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing: $file" }
 }
 $env:PATH = "$MsvcRoot\bin\HostX64\x64;$sdk\bin\$SdkVersion\x64;$env:PATH"

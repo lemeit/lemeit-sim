@@ -21,7 +21,7 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 | Acceso | [sim.lemeit.ar](https://sim.lemeit.ar) | Aplicación nativa Tauri 2, en desarrollo |
 | Cálculo | Gateway y DWSIM MCP | Gateway local y DWSIM MCP local |
 | Proyectos | Nube y copias JSON | Copias JSON y biblioteca local |
-| Estado | Portal 0.53.3 | Prototipo funcional en Debian; 0.53.4-alpha.1 |
+| Estado | Portal 0.53.5 | Prototipo funcional en Debian; 0.53.5-alpha.4 en desarrollo |
 
 En Desktop, **Archivo → Guardar…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
 

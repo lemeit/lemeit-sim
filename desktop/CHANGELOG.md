@@ -2,6 +2,10 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
+## 0.53.5-alpha.4 — 2026-11-28
+
+- Bienvenida de ΣIM Desktop con las etapas del servicio local, el motor DWSIM y el catálogo termodinámico. Permite reintentar y abrir el editor al completar el arranque.
+
 ## 0.53.5-alpha.3 — 2026-11-28
 
 - Apertura nativa de proyectos .sim y .json. El paquete Debian registra .sim para abrirlo desde el explorador con ΣIM cerrado.

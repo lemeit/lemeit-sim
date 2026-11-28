@@ -1,0 +1,6 @@
+{
+  "identifier": "desktop-startup",
+  "description": "Arranque en la bienvenida incorporada en ΣIM Desktop",
+  "windows": ["main"],
+  "permissions": ["allow-startup-status", "allow-retry-startup", "allow-open-editor"]
+}

@@ -8,6 +8,7 @@ La versión del portal es independiente de la versión del motor DWSIM.
 
 ## 0.53.5 — 2026-11-28
 
+- Desktop alpha.4 incorpora una bienvenida interactiva con el estado real del arranque y la opción de reintentar.
 - El panel inicial de resultados muestra las formas generales de los balances de materia y energía.
 - Desktop alpha.3 abre proyectos y guarda PDF mediante diálogos del sistema. Debian registra la extensión .sim.
 
