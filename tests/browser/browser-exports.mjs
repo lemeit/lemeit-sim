@@ -769,7 +769,7 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(changed.indexOf('simulation-tools'),original.indexOf('simulation-tools')-1);
   await page.locator('#view-menu > summary').click();
   await page.locator('#toolbar-layout-reset').click();
-  assert.deepEqual(await order(),['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
+  assert.deepEqual(await order(),['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']);
   await page.locator('#theme-toggle').click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
