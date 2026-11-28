@@ -1185,7 +1185,7 @@ test('Desktop avisa tras calcular y guarda la última corrida antes de cerrar',a
   assert.equal(await warning.isVisible(),false);
   assert.ok(await page.locator('#diagram .node').count());
   await closeProject();
-  const save=warning.getByRole('button',{name:'Guardar y cerrar'});
+  const save=warning.getByRole('button',{name:'Guardar en biblioteca y cerrar'});
   await page.evaluate(()=>{
     const setItem=Storage.prototype.setItem;
     Storage.prototype.setItem=function(key,value){
@@ -1300,4 +1300,32 @@ test('Desktop: Ctrl+S confirms a .sim copy only after a successful native write'
  await page.evaluate(()=>{globalThis.saveOutcome='/home/alumno/Proceso.sim';});
  await page.locator('#cloud-save-toolbar').click();
  await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('/home/alumno/Proceso.sim'));
+});
+
+test('Desktop: Abrir usa el selector nativo y Exportar PDF confirma el archivo escrito',async t=>{
+ const page=await browserPage(t,result,async page=>{
+   await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='debian';"}));
+   await page.addInitScript(contents=>{
+     globalThis.__TAURI__={core:{invoke:async(command,args)=>{
+       if(command==='open_project'&&!args.fromLaunch)return contents;
+       if(command==='save_pdf'){
+         globalThis.pdfSignature=String.fromCharCode(...args.contents.slice(0,5));
+         return '/home/alumno/'+args.filename;
+       }
+       throw new Error('Comando inesperado: '+command);
+     }}};
+   },example.toString());
+ });
+ await page.keyboard.press('Control+o');
+ await page.locator('#diagram .node').first().waitFor();
+ await page.locator('#calculate-button').click();
+ await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
+ await page.locator('#file-menu > summary').click();
+ await page.locator('#report-pdf-menu').click();
+ await page.locator("#diagram-export-dialog [name=paper]").selectOption("a3");
+ await page.getByRole('button',{name:'Guardar PDF…',exact:true}).click();
+ await page.waitForFunction(()=>!document.querySelector('#diagram-export-submit').disabled);
+ assert.match(await page.locator('#notice').textContent(),/PDF guardado en \/home\/alumno\//,
+   await page.locator('#diagram-export-status').textContent());
+ assert.equal(await page.evaluate(()=>globalThis.pdfSignature),'%PDF-');
 });

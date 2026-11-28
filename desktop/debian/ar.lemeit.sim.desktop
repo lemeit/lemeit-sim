@@ -2,7 +2,8 @@
 Type=Application
 Name=ΣIM Desktop
 Comment=Simulación educativa de procesos
-Exec=sim-desktop
+Exec=sim-desktop %f
 Icon=ar.lemeit.sim.desktop
 Terminal=false
+MimeType=application/x-lemeit-sim;
 Categories=Education;Science;
