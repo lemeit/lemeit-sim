@@ -1,8 +1,8 @@
 # ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣIM 0.53.4, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
+Base científica y frontend compartido: ΣIM 0.53.5, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
 
-**Estado al 28/11/2026:** prototipo 0.53.4-alpha.3. El editor se probó en Debian x86_64 con el motor local. El flujo de CI genera un paquete piloto Debian para el motor local existente. La distribución autónoma sigue pendiente.
+**Estado al 28/11/2026:** prototipo 0.53.5-alpha.3. El editor se probó en Debian x86_64 con el motor local. El flujo de CI genera un paquete piloto Debian para el motor local existente. La distribución autónoma sigue pendiente.
 
 ## Paquete piloto Debian 12 amd64
 
@@ -12,7 +12,7 @@ Para construirlo en Debian 12 con las dependencias de desarrollo ya instaladas:
 
 ```bash
 bash desktop/scripts/build-debian.sh
-sudo apt install ./desktop/dist/sim-desktop_0.53.4~alpha.3_amd64.deb
+sudo apt install ./desktop/dist/sim-desktop_0.53.5~alpha.3_amd64.deb
 ```
 
 Para iniciarlo desde la terminal, exportá `SIM_DESKTOP_MCP_TOKEN_FILE` como en las instrucciones de desarrollo y ejecutá `sim-desktop`. Para usar el menú de aplicaciones, configurá un enlace en `~/.config/sim-desktop/mcp-token` que apunte al archivo autorizado del motor local. El paquete no copia tokens ni modifica servicios.

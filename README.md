@@ -25,6 +25,8 @@ Es un piloto, no una réplica completa del editor de DWSIM.
 
 En Desktop, **Archivo → Guardar…** abre el selector del sistema. La ruta del archivo aparece al terminar. En Online, **Guardar en nube** conserva el proyecto por alumno y **Descargar copia JSON** crea un archivo portable. [Guía Desktop](desktop/README.md) · [Guía de trabajo](docs/workflow.md).
 
+El panel inicial de resultados muestra los balances generales de materia por componente y energía.
+
 El [paquete piloto Debian](desktop/README.md#paquete-piloto-debian-12-amd64) instala el editor y el gateway para probarlos con un motor MCP local ya configurado.
 
 Desktop comparte el código científico y el formato de proyectos de Online, pero dispone de una capa visual específica. No hay todavía instaladores autónomos publicados. El prototipo requiere Python y un servicio DWSIM MCP existente; la independencia completa y las pruebas sin Internet siguen pendientes.
@@ -52,7 +54,7 @@ La integración también finalizó correctamente en el prototipo Desktop Debian 
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣiM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
 
-## Barra de herramientas · 0.53.4
+## Interfaz · 0.53.5
 
 Archivo, Proyecto, Simulación, Diagrama, Vista y Herramientas tienen el mismo orden en Online y Desktop. Los grupos pasan a otra fila automáticamente cuando hace falta espacio. Los paneles de trabajo se ajustan desde sus cabeceras y el menú Ver.
 

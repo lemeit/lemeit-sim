@@ -2,7 +2,7 @@
 
 El historial de Desktop es independiente del [historial del portal](../docs/CHANGELOG.md). Las entradas alpha son hitos de desarrollo, no distribuciones publicadas.
 
-## 0.53.4-alpha.3 — 2026-11-28
+## 0.53.5-alpha.3 — 2026-11-28
 
 - Apertura nativa de proyectos .sim y .json. El paquete Debian registra .sim para abrirlo desde el explorador con ΣIM cerrado.
 - Menú Archivo con Abrir, Guardar y Exportar PDF. El aviso muestra la ruta del PDF una vez guardado.

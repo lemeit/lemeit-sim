@@ -2578,3 +2578,11 @@ details:not(.app-menu)[open]>summary::before{content:'';background-size:7px 1px,
 .sim-shell #examples-menu .menu-panel .examples-category>summary{background:var(--spx-surface)!important;color:var(--spx-text)!important;border:0;border-radius:3px;box-shadow:none}
 .sim-shell #examples-menu .menu-panel .examples-category[open]>summary,.sim-shell #examples-menu .menu-panel .examples-category>summary:hover{background:var(--spx-accent-dim)!important;color:var(--spx-text)!important}
 .sim-shell #examples-menu .menu-panel .examples-category>summary::before{color:var(--spx-text);border-color:var(--spx-border);background-color:var(--spx-surface-2)}
+
+/* Balance references in the empty results panel wrap to fit its docked width. */
+.sim-shell .results-empty{min-height:0;justify-content:flex-start;text-align:left}
+.empty-balances{display:grid;gap:6px;color:var(--spx-text-dim)}
+.empty-balances strong{display:block;color:var(--spx-text);font-size:11px}
+.empty-balances span{font-size:13px}
+.empty-balances span span{display:inline-block}
+.empty-balances p{margin:0}

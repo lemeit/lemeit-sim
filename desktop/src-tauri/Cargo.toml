@@ -1,6 +1,6 @@
 [package]
 name = "sim-desktop"
-version = "0.53.4-alpha.3"
+version = "0.53.5-alpha.3"
 edition = "2021"
 license = "GPL-3.0-or-later"
 

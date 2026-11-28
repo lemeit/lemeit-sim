@@ -6,9 +6,13 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.53.5 — 2026-11-28
+
+- El panel inicial de resultados muestra las formas generales de los balances de materia y energía.
+- Desktop alpha.3 abre proyectos y guarda PDF mediante diálogos del sistema. Debian registra la extensión .sim.
+
 ## 0.53.4 — 2026-11-28
 
-- Desktop alpha.3 abre proyectos y guarda PDF mediante diálogos del sistema. Debian registra la extensión .sim.
 - Desktop alpha.2 prepara el paquete piloto para Debian 12 y el índice APT de prueba.
 - Orden fijo de herramientas en Online y Desktop, con Calcular antes de Diagrama y ajuste automático al ancho.
 
