@@ -8,7 +8,7 @@
 
 /* Desktop engineering workstation: flat surfaces, tighter menus and a neutral canvas. */
 .sim-desktop .sim-shell .app-header{height:33px;min-height:33px;padding:0 9px;gap:14px}
-.sim-desktop .app-header .app-menu summary{padding:5px 9px;font-size:12px}
+.sim-desktop .app-header .app-menu > summary{padding:5px 9px;font-size:12px}
 .sim-desktop .sim-brand img{width:70px;height:auto}
 .sim-desktop .app-header #theme-toggle{width:25px;height:25px}
 .sim-desktop .command-bar{padding:5px 8px;gap:7px}
@@ -32,9 +32,9 @@
 .desktop-window-controls button.desktop-window-close:hover{background:#b91d32;color:white}
 .desktop-custom-frame .app-header .sim-brand{display:none}
 .desktop-custom-frame .sim-shell .app-header{height:29px;min-height:29px;gap:6px;background:var(--spx-surface);color:var(--spx-text);border-bottom:1px solid var(--spx-border)}
-.desktop-custom-frame .app-header .app-menu summary,.desktop-custom-frame .app-header .app-menu-trigger,.desktop-custom-frame .app-header #theme-toggle{color:var(--spx-text)}
-.desktop-custom-frame .app-header .app-menu[open] summary,.desktop-custom-frame .app-header .app-menu summary:hover{background:var(--spx-surface-2)}
-.desktop-custom-frame .app-header .app-menu summary{padding:4px 10px}
+.desktop-custom-frame .app-header .app-menu > summary,.desktop-custom-frame .app-header .app-menu-trigger,.desktop-custom-frame .app-header #theme-toggle{color:var(--spx-text)}
+.desktop-custom-frame .app-header .app-menu[open] > summary,.desktop-custom-frame .app-header .app-menu > summary:hover{background:var(--spx-surface-2)}
+.desktop-custom-frame .app-header .app-menu > summary{padding:4px 10px}
 .desktop-custom-frame .command-bar{flex-wrap:nowrap;overflow-x:auto;min-height:42px}
 .desktop-custom-frame .command-bar .command-group{flex-shrink:0}
 .desktop-custom-frame .command-bar .project-title{max-width:150px}
@@ -102,11 +102,11 @@
 }
 
 /* Desktop: actual CAD docking states and consistent interactive chrome. */
-.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):is(:hover,:active,:focus-visible),
-.desktop-custom-frame .sim-shell .app-header .app-menu[open] summary {
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu > summary):is(:hover,:active,:focus-visible),
+.desktop-custom-frame .sim-shell .app-header .app-menu[open] > summary {
   background:var(--spx-surface-2)!important;color:var(--spx-text)!important;
 }
-.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):focus-visible{
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu > summary):focus-visible{
   outline:1px solid var(--spx-text-dim);outline-offset:-2px;
 }
 .desktop-custom-frame .sim-shell .command-bar{
@@ -141,7 +141,7 @@
 }
 
 /* Consistent Desktop combobox typography and focus. */
-.sim-desktop .sim-shell .app-header :is(.app-menu summary,.app-menu-trigger),
+.sim-desktop .sim-shell .app-header :is(.app-menu > summary,.app-menu-trigger),
 .sim-desktop .sim-shell .command-bar select,
 .sim-desktop .sim-shell .command-bar select option{
   font-family:var(--spx-font-sans);
