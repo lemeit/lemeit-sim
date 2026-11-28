@@ -2,7 +2,8 @@
 'use strict';
 const SimProjectLibrary=(()=>{
   const KEY='sim-project-library-v1',LIMIT=30;
-  let getGraph,hasProject,loadGraph,notice,closeMenus,activeId=null;
+  let getGraph,hasProject,loadGraph,notice,closeMenus,onSave,activeId=null;
+  const libraryLocation=()=>globalThis.SimDesktop?'en la biblioteca local de ΣIM Desktop':'en la biblioteca de este navegador';
   const $=id=>document.getElementById(id);
   const read=()=>{
     const data=JSON.parse(localStorage.getItem(KEY)||'[]');
@@ -21,10 +22,10 @@ const SimProjectLibrary=(()=>{
       const g=structuredClone(getGraph());
       const item={id,title:String(g.title||'Proceso sin título').trim().slice(0,70),modified:new Date().toISOString(),graph:g};
       const next=[item,...items.filter(i=>i.id!==id)];
-      write(next);activeId=id;
-      notice('Proyecto guardado en la biblioteca de este navegador. Para usarlo en otra computadora, descargá el JSON.');
+      write(next);activeId=id;onSave?.();
+      notice('Proyecto guardado '+libraryLocation()+'. Para usarlo en otra computadora, descargá el JSON.');
       render();return id;
-    }catch(error){notice('No se pudo guardar en este navegador: '+error.message+'. Descargá el JSON como copia de seguridad.',true);return null;}
+    }catch(error){notice('No se pudo guardar '+libraryLocation()+': '+error.message+'. Descargá el JSON como copia de seguridad.',true);return null;}
   }
   function render(){
     const list=$('local-project-list');if(!list)return;
@@ -32,7 +33,7 @@ const SimProjectLibrary=(()=>{
     let items;
     try{items=read();}catch(error){list.textContent=error.message;return;}
     $('local-project-count').textContent=items.length+' de '+LIMIT+' proyectos locales';
-    if(!items.length){list.textContent='No hay proyectos guardados en este navegador. Abrí o creá uno y elegí «Guardar en biblioteca».';
+    if(!items.length){list.textContent='No hay proyectos guardados '+libraryLocation()+'. Abrí o creá uno y elegí «Guardar en biblioteca».';
       return;}
     for(const item of items){
       const row=document.createElement('div');row.className='local-project-entry';
@@ -46,12 +47,12 @@ const SimProjectLibrary=(()=>{
       const open=document.createElement('button');open.type='button';open.textContent='Abrir';
       open.onclick=()=>{
         if(hasProject()&&!window.confirm('¿Abrir este proyecto? Los cambios que no hayas guardado en la biblioteca o exportado pueden perderse.'))return;
-        try{loadGraph(structuredClone(item.graph));activeId=item.id;$('local-project-dialog').close();closeMenus();notice('Proyecto abierto desde la biblioteca local. Calculá para actualizar sus resultados.');}
+        try{loadGraph(structuredClone(item.graph),{saved:true});activeId=item.id;$('local-project-dialog').close();closeMenus();notice('Proyecto abierto desde la biblioteca local. Calculá para actualizar sus resultados.');}
         catch(error){notice('No se pudo abrir este proyecto: '+error.message,true);}
       };
       const remove=document.createElement('button');remove.type='button';remove.textContent='Eliminar';
       remove.onclick=()=>{
-        if(!window.confirm('¿Eliminar «'+item.title+'» de la biblioteca de este navegador?'))return;
+        if(!window.confirm('¿Eliminar «'+item.title+'» '+(globalThis.SimDesktop?'de la biblioteca local de ΣIM Desktop':'de la biblioteca de este navegador')+'?'))return;
         try{write(read().filter(i=>i.id!==item.id));if(activeId===item.id)activeId=null;render();}
         catch(error){notice('No se pudo eliminar: '+error.message,true);}
       };
@@ -59,7 +60,7 @@ const SimProjectLibrary=(()=>{
     }
   }
   function bind(options){
-    ({getGraph,hasProject,loadGraph,notice,closeMenus}=options);
+    ({getGraph,hasProject,loadGraph,notice,closeMenus,onSave}=options);
     $('local-projects-open').onclick=()=>{render();closeMenus();$('local-project-dialog').showModal();};
     $('local-projects-save').onclick=()=>save();
     $('local-project-save-current').onclick=()=>save();

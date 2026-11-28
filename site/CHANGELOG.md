@@ -19,7 +19,15 @@ La versión del portal es independiente de la versión del motor DWSIM.
 - Exploración contextual en el PFD: tarjeta anclada, navegación, reproducción y detalle técnico, también para muestras dinámicas.
 - Identidad ΣiM, menú de ejemplos por categoría, barra compacta, contraste y ventanas de configuración ajustables.
 - Corrección del estado visual del cálculo dinámico. Sin cambios en el motor DWSIM.
-- Validación visual del nuevo recorrido pendiente.
+- Validación visual del nuevo recorrido pendiente; Desktop continúa en etapa alpha.
+
+## 0.51.13 — 2026-11-27 (Desktop en desarrollo)
+
+- Al cerrar Desktop o el proyecto, avisa si el proyecto o la última corrida tienen cambios sin guardar. Permite cancelar, cerrar sin guardar o guardar en la biblioteca local y cerrar.
+
+## 0.51.12 — 2026-11-27 (Desktop en desarrollo)
+
+- La lectura del catálogo precargado y la consulta de capacidades dinámicas en Windows dejan libre el bloqueo del cálculo local. Una solicitud en preparación evita que el editor lance otra simultáneamente.
 
 ## 0.51.11 — 2026-11-27 (en desarrollo)
 

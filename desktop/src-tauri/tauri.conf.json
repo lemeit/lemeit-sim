@@ -1,0 +1,27 @@
+{
+  "productName": "ΣiM Desktop",
+  "version": "0.53.0-alpha.1",
+  "identifier": "ar.lemeit.sim.desktop",
+  "build": {
+    "frontendDist": "../bootstrap"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "ΣiM Desktop · prototipo",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'"
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": false
+  }
+}

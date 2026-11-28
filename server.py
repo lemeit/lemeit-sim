@@ -20,6 +20,7 @@ from recycle import simple_recycle_shape, solve_simple_recycle, RecycleError
 ROOT = Path(__file__).resolve().parent
 GATEWAY_STARTED_AT = time.time()
 GATEWAY_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
+DESKTOP_CAPABILITIES_LOCK = threading.Lock()
 LOCK = threading.Lock()  # El motor tiene estado global: serializar una simulación completa.
 REACTORS = {'ConversionReactor', 'EquilibriumReactor'}
 KINDS = {'MaterialStream', 'EnergyStream', 'Mixer', 'Splitter', 'Heater', 'Cooler', 'Separator', 'Pump', 'Compressor', 'Expander', 'Tank', 'Valve', 'HeatExchanger'} | REACTORS
@@ -534,14 +535,27 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if not self.valid_host(): return self.json_response(403, {'error': 'Acceso local únicamente.'})
+        if self.path == '/desktop-mode.js' and getattr(self.server, 'desktop_mode', False):
+            body = ('globalThis.SimDesktop = true;\nglobalThis.SimDesktopEngine = ' + json.dumps('debian' if self.server.shared_mcp else 'windows') + ';\n').encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/javascript')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.path == '/api/status': return self.json_response(200, gateway_status())
         if self.path == '/api/catalog':
+            # Desktop precarga el catálogo antes de aceptar solicitudes.
+            if self.server.desktop_mode and self.server.engine.catalog is not None:
+                return self.json_response(200, self.server.engine.catalog)
             if not LOCK.acquire(blocking=False): return self.json_response(409, {'error': 'Motor ocupado. Volvé a intentar en unos segundos.'})
             try: self.json_response(200, self.server.engine.get_catalog())
             except Exception as exc: self.json_response(503, {'error': str(exc)})
             finally: LOCK.release()
         elif self.path == '/api/dynamics/capabilities':
-            if not LOCK.acquire(blocking=False):
+            # En Windows la consulta usa su propio proceso de DWSIM.
+            lock = DESKTOP_CAPABILITIES_LOCK if self.server.desktop_mode and not self.server.shared_mcp else LOCK
+            if not lock.acquire(blocking=False):
                 return self.json_response(409, {'error': 'Motor ocupado.'})
             try:
                 if self.server.shared_mcp:
@@ -552,7 +566,7 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as exc:
                 self.json_response(503, {'error': str(exc)})
             finally:
-                LOCK.release()
+                lock.release()
         elif self.path.startswith('/api/'): self.json_response(404, {'error': 'Operación no disponible.'})
         else: super().do_GET()
 
@@ -605,7 +619,10 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=5910)
     parser.add_argument('--public-origin', default=None, help='Origen HTTPS autorizado, por ejemplo https://sim.lemeit.ar')
     parser.add_argument('--origin-key-file', default=None, help='Archivo privado para autenticar al Worker de Cloudflare')
+    parser.add_argument('--desktop', action='store_true', help='Modo local de desarrollo sin servicios cloud')
     args = parser.parse_args()
+    if args.desktop and (args.public_origin or args.origin_key_file):
+        parser.error('Desktop no admite publicación ni clave de origen.')
     if bool(args.engine_root) == bool(args.mcp_token_file):
         parser.error('Indicá --engine-root (Windows) o --mcp-token-file (Debian), pero no ambos.')
     if args.mcp_token_file and args.mcp_url != 'http://127.0.0.1:5901/mcp':
@@ -613,6 +630,7 @@ if __name__ == '__main__':
     if args.public_origin and not re.fullmatch(r'https://[a-z0-9.-]+', args.public_origin):
         parser.error('--public-origin debe ser un origen HTTPS sin ruta ni puerto.')
     server = BoundedServer(('127.0.0.1', args.port), partial(Handler, directory=str(ROOT / 'site')))
+    server.desktop_mode = args.desktop
     server.shared_mcp = bool(args.mcp_token_file)
     server.engine = RemoteMcpEngine(args.mcp_token_file, args.mcp_url) if server.shared_mcp else Engine(args.engine_root)
     server.public_origin = args.public_origin
@@ -623,5 +641,5 @@ if __name__ == '__main__':
     else:
         with IsolatedEngine(args.engine_root) as bootstrap:
             server.engine.catalog = bootstrap.get_catalog()
-    print(f'Simulador local: http://localhost:{args.port}', flush=True)
+    print(f'Simulador local: http://127.0.0.1:{server.server_port}', flush=True)
     server.serve_forever()

@@ -62,6 +62,11 @@ globalThis.SimDockLayout=(()=>{
     // Migra únicamente la posición automática de Gráficas; las demás ventanas conservan su distribución.
     if(saved.charts&&!saved.chartsFloatingV1)delete saved.charts;
     const panels=recover(saved,innerWidth,innerHeight);
+    // Desktop abre sin proyecto: conserva geometría, pero no muestra resultados flotantes vacíos.
+    if(globalThis.SimDesktop&&panels.results.mode==='float'&&!elements.results.hidden){
+      elements.results.hidden=true;elements.results.dataset.revealOnProject='true';
+      document.getElementById('view-results')?.setAttribute('aria-pressed','false');
+    }
     for(const id of IDS)panels[id].el=elements[id];
     const sizes={...DEFAULT_SIZES,...saved.sizes};
     const stackWeights=Object.fromEntries(IDS.map(id=>[id,clamp(safe(saved.stackWeights?.[id],1),.15,20)]));

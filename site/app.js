@@ -64,7 +64,7 @@ let graph, catalog, selection=null, pending=null, dragging=null, zoom=1, result=
 let hasProject=false,engineOnline=false,draftCompounds=[];
 let resultValidity='none'; // none | stale | valid; solo resultados calculados pueden quedar obsoletos.
 let unitSystem='engineering';
-let selectedEngine='windows',engineMode='auto',engineCheckGeneration=0; // Selección automática predeterminada.
+let selectedEngine=globalThis.SimDesktop?(globalThis.SimDesktopEngine||'debian'):'windows',engineMode='auto',engineCheckGeneration=0; // Selección automática predeterminada.
 let lastCalculation=null,connectionCheck=null,gatewayCheck=null,activity=[],resultDigits=3;
 let connectionTrace=[],monitorRequest=false,monitorTimer=null,connectionPaintTimer=null;
 const diagnosticEvents=[];
@@ -172,7 +172,7 @@ function updateControls(){
   document.querySelectorAll('.palette-item').forEach(b=>b.disabled=!hasProject||busy);
   try{$('recent-button').disabled=!localStorage.getItem('lemeit-process-v1');}catch{$('recent-button').disabled=true;}
   const panel=$('start-panel');panel.hidden=graph.nodes.length>0;
-  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · Abrir biblioteca en la nube</p>';
+  panel.innerHTML=hasProject?'<div class="blank-diagram-icon">⌁</div><h2>Diagrama vacío</h2><p>Agregá corrientes y equipos desde la biblioteca.<br>Después conectá sus puertos y definí las condiciones.</p>':'<div class="blank-diagram-icon">▱</div><h2>Ningún proyecto abierto</h2><p>Creá un proyecto, elegí componentes y modelo,<br>y empezá a construir el proceso.</p><p class="start-shortcut">Archivo → Nuevo proyecto · '+(globalThis.SimDesktop?'Abrir proyecto local':'Abrir biblioteca en la nube')+'</p>';
   document.body.classList.toggle('no-project',!hasProject);
 }
 function nodeById(id){return graph.nodes.find(n=>n.id===id);}
@@ -708,8 +708,14 @@ async function calculateDynamic(){
   }catch(error){resultValidity='none';lastCalculation={time:new Date().toISOString(),engine,state:'failed',ok:false,message:error.message,duration_ms:Math.round(performance.now()-started)};$('calculation-state').textContent='Integración fallida';$('result-meta').textContent='Sin resultados dinámicos';notice(error.message,true);recordActivity('Integración dinámica fallida',error.message);}
   finally{busy=false;document.body.classList.remove('calculating');updateControls();renderDiagram();renderServerDetails();}
 }
+let calculationPending=false;
 async function calculate(){
-  if(!hasProject||busy)return;
+  if(!hasProject||busy||calculationPending)return;
+  calculationPending=true;
+  try{await calculateProject();}
+  finally{calculationPending=false;}
+}
+async function calculateProject(){
   if(SimDynamics.regime(graph)==='dynamic')return calculateDynamic();
   const drawingOnly=graph.nodes.find(n=>TYPES[n.type].diagramOnly);
   if(drawingOnly)return notice(`«${drawingOnly.name}» está disponible para dibujar el PFD. Quitalo para calcular este proyecto.`,true);
@@ -780,7 +786,8 @@ function updateCompound(name,remove){
   }
   changed();renderCompounds();renderInspector();
 }
-function loadGraph(data){
+let desktopSavedProject=null;
+function loadGraph(data,{saved=false}={}){
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
   if(data.compounds.some(c=>typeof c!=='string'||c.length>150)||typeof data.model!=='string')throw new Error('Catálogo del archivo inválido.');
@@ -797,6 +804,15 @@ function loadGraph(data){
   if(savedRun){
     if(applyingWorkspace)graph.saved_run=savedRun;else restoreRun(savedRun);
     persist();
+  }
+  if(globalThis.SimDesktop&&!applyingWorkspace){
+    desktopSavedProject=saved?JSON.stringify(graph):null;
+    const panel=$('results-panel');
+    if(panel.dataset.revealOnProject==='true'){
+      delete panel.dataset.revealOnProject;
+      globalThis.SimDockLayout?.reveal('results');
+      $('view-results').setAttribute('aria-pressed','true');
+    }
   }
 }
 async function resetExample(){if(busy)return;if(hasProject&&!$('replace-example-dialog').open){$('replace-example-dialog').showModal();return;}$('replace-example-dialog').close();try{const type=$('example-select').value;const response=await fetch(`examples/${type}.json`);if(!response.ok)throw new Error('No se pudo cargar el ejemplo.');const data=await response.json();loadGraph(data);$('fit-button').click();if(type==='HeatExchangerWater'){selection={node:'hx'};renderDiagram();renderInspector();}notice((data.learning?data.learning+' ':'')+'Ejemplo de modelo, no mediciones experimentales. Calculá para consultar el resultado.');}catch(error){notice(error.message,true);}}
@@ -1023,13 +1039,21 @@ function bindEvents(){
   svg.addEventListener('wheel',e=>{e.preventDefault();if(dragging||panning||endpointDrag||resizing||bending)return;const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?520:1);changeZoom(zoom*Math.exp(-Math.max(-200,Math.min(200,delta))*.003),e);},{passive:false});
   $('zoom-in').onclick=()=>changeZoom(zoom*1.2);$('zoom-out').onclick=()=>changeZoom(zoom/1.2);
   $('fit-button').onclick=fitDiagram;
-  $('save-button').onclick=()=>{downloadLocal(exportStem()+'.json',JSON.stringify(graph,null,2),'application/json');notice('Proceso descargado. El JSON conserva el diagrama, el formato de Gráficas y la última corrida válida.');};
-  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data);notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
+  $('save-button').onclick=()=>{downloadLocal(exportStem()+(globalThis.SimDesktop?'.sim':'.json'),JSON.stringify(graph,null,2),'application/json');notice('Proyecto descargado con el diagrama, el formato de Gráficas y la última corrida válida.');};
+  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
   SimExerciseEditor.bind({getGraph:()=>graph,nonPhysical:()=>changed({physical:false}),getSVG:()=>$('diagram'),getPoint:svgPoint,render:renderDiagram,canEdit:()=>hasProject&&!busy});
-  SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus});
+  SimProjectLibrary.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,notice,closeMenus,
+    onSave:()=>{if(globalThis.SimDesktop)desktopSavedProject=JSON.stringify(graph);}});
+  globalThis.SimDesktopShell?.bindProjectClose({
+    isDirty:()=>hasProject&&desktopSavedProject!==JSON.stringify(graph),
+    isBusy:()=>busy||calculationPending,
+    save:()=>SimProjectLibrary.save(),
+    closeProject:()=>clearLoadedProject(false),
+    notice
+  });
   SimCloudProjects.bind({getGraph:()=>graph,hasProject:()=>hasProject,loadGraph,clearWorkspace:()=>clearLoadedProject(true),notice,closeMenus});
   SimProjectReport.bind({getGraph:()=>graph,getIdentity:()=>SimCloudProjects.identity()});
   SimChartWorkspace.bind({onFormatChange:()=>{if(hasProject){persist();SimCloudProjects.onChange();}},getData:()=>({graph,result:resultValidity==='valid'&&!busy?result:null,engine:lastCalculation?.engine,selectedId:selection?.node??(selection?.nodes?.length===1?selection.nodes[0]:null)})});
@@ -1065,10 +1089,11 @@ function clearLoadedProject(clearLocalDraft=false){
   globalThis.SimChartWorkspace?.reset();
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   SimExerciseEditor.reset();
-  graph=emptyProject();dynamicResult=null;
+  graph=emptyProject();dynamicResult=null;desktopSavedProject=null;
   SimProjectLibrary.resetActive();
   SimCloudProjects.resetActive();
   hasProject=false;resultValidity='none';lastCalculation=null;selection=pending=result=null;
+  if(globalThis.SimDesktop){const panel=$('results-panel');if(!panel.hidden&&panel.dataset.simCadMode==='float'){panel.hidden=true;panel.dataset.revealOnProject='true';$('view-results').setAttribute('aria-pressed','false');}}
   $('project-title').value=graph.title;
   $('results').innerHTML=blankResults;
   $('result-meta').textContent='Sin resultados';
@@ -1443,6 +1468,7 @@ function reviewGraph(){
   return [...new Set(issues)];
 }
 function failureHints(message){
+  if(/motor ocupado/i.test(message))return ['Hay otra operación en curso en el motor local. Esperá a que termine y volvé a calcular.'];
   const hints=[];
   if(/timeout|tiempo|45 s|timed out/i.test(message))hints.push('El cálculo o la conexión excedió el tiempo disponible. Probá un caso más pequeño y comprobá el estado del motor.');
   if(/conexi|connection|fetch|unavailable|no está disponible|HTTP 5|network/i.test(message))hints.push('Comprobá el motor desde Herramientas → Estado del motor. La PC y su conexión deben estar activas.');
@@ -1458,7 +1484,7 @@ function renderDiagnostics(){
   const status=lastCalculation?calculationLabel(lastCalculation):'Sin cálculos';
   const http=lastCalculation?.http?(' · HTTP '+lastCalculation.http):'';
   const duration=calculationDuration(lastCalculation);
-  $('diagnostics-content').innerHTML=`<p class="diagnostics-status"><strong>Proyecto:</strong> ${esc(graph.title)} · <strong>Motor:</strong> ${selectedEngine==='debian'?'Debian':'Windows'} · <strong>Último cálculo:</strong> ${esc(status+http+duration)}</p><p class="diagnostics-status"><strong>Conexión:</strong> ${esc(connectionCheck?.state||'No comprobada')} · <strong>Gateway:</strong> ${esc(gatewayCheck?.version||'Versión no confirmada')} · <strong>Resultado:</strong> ${resultValidity==='valid'?'Vigente':resultValidity==='stale'?'Recalcular':'Sin resultados'}</p><details ${issues.length?'open':''}><summary>Validación del proyecto · ${issues.length?issues.length+' observaciones':'sin problemas básicos'}</summary>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>Los puertos y parámetros básicos no presentan observaciones. No garantiza convergencia en DWSIM.</p>'}</details>${failed?`<p class="diagnostics-status"><strong>Error:</strong> ${esc(lastCalculation.message)}</p><details><summary>Posibles causas</summary><ul>${failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>`:''}`;
+  $('diagnostics-content').innerHTML=`<p class="diagnostics-status"><strong>Proyecto:</strong> ${esc(graph.title)} · <strong>Motor:</strong> ${globalThis.SimDesktop?'Local · ':''}${selectedEngine==='debian'?'Debian':'Windows'} · <strong>Último cálculo:</strong> ${esc(status+http+duration)}</p><p class="diagnostics-status"><strong>Conexión:</strong> ${esc(globalThis.SimDesktop&&connectionCheck?.state==='online'?'Local · disponible':connectionCheck?.state||'No comprobada')} · <strong>Gateway:</strong> ${esc(gatewayCheck?.version||'Versión no confirmada')} · <strong>Resultado:</strong> ${resultValidity==='valid'?'Vigente':resultValidity==='stale'?'Recalcular':'Sin resultados'}</p><details ${issues.length?'open':''}><summary>Validación del proyecto · ${issues.length?issues.length+' observaciones':'sin problemas básicos'}</summary>${issues.length?'<ul>'+issues.map(v=>`<li>${esc(v)}</li>`).join('')+'</ul>':'<p>Los puertos y parámetros básicos no presentan observaciones. No garantiza convergencia en DWSIM.</p>'}</details>${failed?`<p class="diagnostics-status"><strong>Error:</strong> ${esc(lastCalculation.message)}</p><details><summary>Posibles causas</summary><ul>${failureHints(lastCalculation.message).map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>`:''}`;
   renderDiagnosticLog();
 }
 function calculationLabel(entry){return entry?.state==='running'?'En curso':entry?.ok?'Completado':'Fallido';}
@@ -1487,13 +1513,13 @@ function paintConnection(){
   const labels={online:'DWSIM · servicio disponible',busy:'DWSIM · motor ocupado',offline:'DWSIM · sin conexión',checking:'DWSIM · comprobando',stale:'DWSIM · señal sin actualizar'};
   $('engine-state').textContent=labels[state];$('engine-state').className='engine-state '+state;
   const actual=resultValidity==='valid'&&lastCalculation?.state==='completed'&&['windows','debian'].includes(lastCalculation.engine)?' · cálculo: '+(lastCalculation.engine==='debian'?'Debian':'Windows'):'';
-  $('engine-current').textContent=(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
+  $('engine-current').textContent=globalThis.SimDesktop?('Motor local · '+(selectedEngine==='debian'?'Debian':'Windows')):(engineMode==='auto'?'Automático · '+(engineOnline?(selectedEngine==='debian'?'Debian':'Windows'):'sin motor'):'Fijado · '+(selectedEngine==='debian'?'Debian':'Windows'))+actual;
   $('engine-metrics').textContent=connectionCheck?`${connectionCheck.http?'HTTP '+connectionCheck.http:'sin HTTP'} · ${connectionCheck.ms} ms · hace ${age} s`:'';
   $('connection-monitor-button').title=`Abrir monitor de conexión · ${labels[state]}`;
 }
 function renderServerDetails(){
   renderConnectionTrace();
-  const engineName=selectedEngine==='debian'?'Motor alternativo':'Motor principal';
+  const engineName=globalThis.SimDesktop?('Motor local · '+(selectedEngine==='debian'?'Debian':'Windows')):selectedEngine==='debian'?'Motor alternativo':'Motor principal';
   const state=connectionCheck?.state||(engineOnline?'online':'checking');
   const labels={online:'Servicio accesible',busy:'Motor ocupado',offline:'Sin conexión verificada',checking:'Comprobando conexión'};
   const status=labels[state]||state;
@@ -1505,7 +1531,7 @@ function renderServerDetails(){
   const gatewayInfo=gatewayCheck?.ok
     ?`<dt>Versión del gateway</dt><dd>${esc(gatewayCheck.version)}</dd><dt>Inicio del proceso</dt><dd>${esc(gatewayCheck.startedAt)}</dd><dt>Tiempo activo</dt><dd>${esc(gatewayCheck.uptime)}</dd><dt>Estado del gateway</dt><dd>${esc(gatewayCheck.state)}</dd><dt>Equipos reconocidos</dt><dd>${esc(gatewayCheck.equipment)}</dd>`
     :`<dt>Versión del gateway</dt><dd>No confirmada${gatewayCheck?.reason?' · '+esc(gatewayCheck.reason):''}</dd>`;
-  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>${engineMode==='auto'?'Selección automática antes del cálculo; no se reenvían cálculos ambiguos.':'Motor fijado por administración; sin conmutación automática.'}</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
+  $('server-details').innerHTML=`<section class="monitor-summary"><div><span class="monitor-kicker">Motor seleccionado</span><strong>${esc(engineName)}</strong></div><span class="monitor-status monitor-status-${esc(state)}">${esc(status)}</span></section><p class="monitor-explanation">${esc(meaning)} <strong>${globalThis.SimDesktop?'Motor local, sin conmutación a servicios remotos.':engineMode==='auto'?'Selección automática antes del cálculo; no se reenvían cálculos ambiguos.':'Motor fijado por administración; sin conmutación automática.'}</strong></p><dl><dt>Última comprobación</dt><dd>${esc(checked)}</dd><dt>Respuesta HTTP y latencia</dt><dd>${esc(elapsed)}</dd><dt>Detalle</dt><dd>${connectionCheck?esc(connectionCheck.message):'Usá Comprobar conexión para actualizar.'}</dd>${catalogInfo}${gatewayInfo}<dt>Último cálculo de esta sesión</dt><dd>${esc(latest)}</dd></dl>`;
 }
 async function readGatewayStatus(engine,generation){
   // Endpoint independiente: una respuesta 404 de un gateway antiguo no invalida el catálogo.
@@ -1522,7 +1548,7 @@ async function readGatewayStatus(engine,generation){
 }
 async function checkEngine({silent=false,exclude=[]}={}){
   if(busy)return engineOnline;
-  const generation=++engineCheckGeneration,order=SimEngineRouting.order(engineMode,selectedEngine).filter(id=>!exclude.includes(id));
+  const generation=++engineCheckGeneration,order=(globalThis.SimDesktop?[globalThis.SimDesktopEngine||'debian']:SimEngineRouting.order(engineMode,selectedEngine)).filter(id=>!exclude.includes(id));
   monitorRequest=true;$('server-refresh').disabled=true;
   let lastError='Sin motores disponibles',lastHttp=null,successful=false;
   for(const engine of order){
@@ -1545,7 +1571,7 @@ async function checkEngine({silent=false,exclude=[]}={}){
       selectedEngine=engine;engineOnline=true;catalog=data;successful=true;
       const date=Date.parse(status.started_at);
       gatewayCheck={ok:true,version:status.gateway_version,startedAt:Number.isFinite(date)?new Date(date).toLocaleString('es-AR'):'Sin datos',uptime:fmt(status.uptime_s/3600,1)+' h',state:'Disponible',equipment:status.supported_equipment.join(', ')};
-      connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:(engineMode==='auto'?'Selección automática':'Motor fijado')+' · '+(engine==='debian'?'Debian':'Windows')+' · compatible con el proceso.',ms:Math.round(performance.now()-started),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};
+      connectionCheck={time:new Date().toISOString(),ok:true,state:'online',http:response.status,message:(globalThis.SimDesktop?'Motor local':engineMode==='auto'?'Selección automática':'Motor fijado')+' · '+(engine==='debian'?'Debian':'Windows')+' · compatible con el proceso.',ms:Math.round(performance.now()-started),compounds:data.compound_count??data.compounds?.length,models:data.models?.length};
       if(changedMotor&&!silent&&document.body.dataset.sessionRole==='admin')recordActivity('Motor elegido: '+(engine==='debian'?'Debian':'Windows'));
       const modelSelect=$('model-select'),savedModel=modelSelect.value||graph.model;
       if(data.models?.length&&(!modelSelect.options.length||modelSelect.options.length<=1)){
@@ -1605,7 +1631,13 @@ function bindWorkspaceTools(){
   const saveSettings=()=>{const chosen=$('settings-unit-system').value;if(chosen!==unitSystem&&Object.hasOwn(SimproxStreams.systems,chosen)){unitSystem=chosen;SimproxStreams.setSystem(chosen);graph.unit_system=chosen;for(const n of graph.nodes)n.units={};changed({physical:false});renderInspector();renderDiagram();}const digits=Number($('settings-digits').value);if(!Number.isInteger(digits)||digits<0||digits>8)return;resultDigits=digits;const hints=$('settings-hints').checked;document.body.classList.toggle('hide-canvas-hints',!hints);try{localStorage.setItem('simprox-ui',JSON.stringify({digits,hints,units:unitSystem}));}catch{}if(result)renderResults();};$('settings-unit-system').onchange=saveSettings;$('settings-digits').onchange=saveSettings;$('settings-hints').onchange=saveSettings;
   $('unit-calculator-button').onclick=()=>{closeMenus();SimUnitCalculator.open(graph);};
   document.querySelectorAll('a[href="ejemplos.html"]').forEach(link=>link.onclick=e=>{e.preventDefault();closeMenus();document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());SimGuide.open($('guide-dialog'),$('guide-host'));});
-  $('close-project-button').onclick=()=>$('close-project-dialog').showModal();$('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
+  $('close-project-button').onclick=()=>{
+    if(globalThis.SimDesktop&&globalThis.SimDesktopShell){
+      closeMenus();
+      void SimDesktopShell.closeProject();
+    }else $('close-project-dialog').showModal();
+  };
+  $('confirm-close-project').onclick=()=>{$('close-project-dialog').close();clearLoadedProject(false);};
   const dock=$('results-panel');
   for(const button of dock.querySelectorAll('[data-results-view]')){
     button.onclick=()=>{selectResultsView(button.dataset.resultsView);$('results').scrollTop=0;};

@@ -14,7 +14,7 @@ const catalog=await load('../../site/catalog-cache.json');
 const csp="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; script-src 'self'; connect-src 'self'; base-uri 'none'";
 const types={html:'text/html',css:'text/css',js:'text/javascript',svg:'image/svg+xml',json:'application/json',ttf:'font/ttf',png:'image/png'};
 
-async function browserPage(t, simulationResult=result){
+async function browserPage(t, simulationResult=result,setup){
   const server=createServer(async (request,response)=>{
     const path=new URL(request.url,'http://localhost').pathname;
     response.setHeader('Content-Security-Policy',csp);
@@ -37,6 +37,7 @@ async function browserPage(t, simulationResult=result){
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   t.after(()=>assert.deepEqual(errors,[]));
+  await setup?.(page);
   await page.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'networkidle'});
   return page;
 }
@@ -1205,4 +1206,59 @@ test('El margen invisible de un símbolo permite arrastrarlo y el cursor se rest
   assert.notEqual(await equipment.getAttribute('transform'),before);
   assert.doesNotMatch(await svg.getAttribute('class')||'',/object-dragging/);
   assert.equal(await svg.locator('.stream-hit').first().evaluate(el=>getComputedStyle(el).vectorEffect),'non-scaling-stroke');
+});
+
+
+test('Desktop avisa tras calcular y guarda la última corrida antes de cerrar',async t=>{
+  const page=await browserPage(t,result,async page=>{
+    await page.route('**/desktop-mode.js',route=>route.fulfill({
+      contentType:'application/javascript',
+      body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='windows';"
+    }));
+  });
+  page.setDefaultTimeout(10000);
+  assert.equal(await page.evaluate(()=>globalThis.SimDesktop),true);
+  const closeProject=()=>page.locator('#close-project-button').evaluate(button=>button.click());
+  await openProject(page,example);
+  await closeProject();
+  const warning=page.locator('#desktop-unsaved-dialog');
+  assert.equal(await warning.isVisible(),false);
+  await openProject(page,example);
+  await page.locator('#calculate-button').click();
+  await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
+  await closeProject();
+  const canceled=warning.evaluate(dialog=>new Promise(resolve=>dialog.addEventListener('close',resolve,{once:true})));
+  await warning.getByRole('button',{name:'Cancelar'}).click();
+  await canceled;
+  assert.equal(await warning.isVisible(),false);
+  assert.ok(await page.locator('#diagram .node').count());
+  await closeProject();
+  const save=warning.getByRole('button',{name:'Guardar y cerrar'});
+  await page.evaluate(()=>{
+    const setItem=Storage.prototype.setItem;
+    Storage.prototype.setItem=function(key,value){
+      if(key==='sim-project-library-v1'){
+        Storage.prototype.setItem=setItem;
+        throw new DOMException('Biblioteca llena','QuotaExceededError');
+      }
+      return setItem.call(this,key,value);
+    };
+  });
+  await save.click();
+  assert.match(await page.locator('#desktop-unsaved-error').innerText(),/No se pudo guardar/);
+  assert.ok(await warning.isVisible());
+  assert.ok(await page.locator('#diagram .node').count());
+  await save.click();
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('sim-project-library-v1')));
+  assert.ok(saved,await page.locator('#desktop-unsaved-error').textContent());
+  await page.waitForFunction(()=>!document.querySelector('#diagram .node'));
+  assert.equal(saved.length,1);
+  assert.equal(saved[0].graph.saved_run.regime,'steady');
+  assert.ok(Object.keys(saved[0].graph.saved_run.data.streams).length);
+  await page.locator('#local-projects-open').evaluate(button=>button.click());
+  await page.locator('#local-project-list').getByRole('button',{name:'Abrir',exact:true}).click();
+  assert.equal(await page.locator('#result-validity').getAttribute('data-state'),'valid');
+  await closeProject();
+  assert.equal(await warning.isVisible(),false);
+  await page.waitForFunction(()=>!document.querySelector('#diagram .node'));
 });

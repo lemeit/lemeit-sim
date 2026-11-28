@@ -1,0 +1,217 @@
+.sim-desktop .desktop-hidden{display:none!important}
+.sim-desktop .desktop-save-button{display:inline-flex!important;align-items:center;justify-content:center;min-width:34px}
+.sim-desktop .file-tools button:not(.toolbar-menu-button){min-width:34px;min-height:32px;border-radius:5px}
+.sim-desktop .file-tools button svg{width:19px;height:19px;flex:none}
+.sim-desktop .app-menu .menu-panel{border-radius:7px;padding:5px;box-shadow:0 6px 20px #0002}
+.sim-desktop .menu-panel button{border-radius:4px}
+.sim-desktop .menu-section-label{letter-spacing:.06em;font-size:10px}
+
+/* Desktop engineering workstation: flat surfaces, tighter menus and a neutral canvas. */
+.sim-desktop .sim-shell .app-header{height:33px;min-height:33px;padding:0 9px;gap:14px}
+.sim-desktop .app-header .app-menu summary{padding:5px 9px;font-size:12px}
+.sim-desktop .sim-brand img{width:70px;height:auto}
+.sim-desktop .app-header #theme-toggle{width:25px;height:25px}
+.sim-desktop .command-bar{padding:5px 8px;gap:7px}
+.sim-desktop .command-bar button:not(:disabled):hover{border-color:var(--spx-border)}
+.sim-desktop .command-bar .file-tools{gap:3px;padding-right:8px}
+.sim-desktop .command-bar .file-tools button:not(.toolbar-menu-button){width:32px;min-width:32px;min-height:30px;border-radius:3px}
+.sim-desktop .app-menu .menu-panel{border-radius:4px;padding:5px 4px;box-shadow:0 4px 14px #0002}
+.sim-desktop .menu-panel button{border-radius:2px}
+.sim-desktop[data-theme="light"] .canvas-wrap{background:#fff}
+.sim-desktop .site-footer{font-size:10px}
+
+/* Native chrome: only active after Tauri accepted setDecorations(false). */
+.desktop-titlebar{display:none}
+.desktop-custom-frame .desktop-titlebar{display:flex;align-items:center;flex:0 0 30px;min-height:30px;background:#15181c;color:#ebedf0;user-select:none;position:relative;z-index:21;gap:10px;padding-left:10px;box-sizing:border-box}
+.desktop-title-brand{display:flex;align-items:center;gap:9px;font-size:10px;flex:none;color:#bfc3c9}
+.desktop-title-brand img{width:69px;height:auto;pointer-events:none}
+.desktop-title-project{flex:1;min-width:0;text-align:center;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desktop-window-controls{display:flex;align-self:stretch;flex:none}
+.desktop-window-controls button{width:40px;border:0;border-radius:0;background:transparent;color:inherit;display:grid;place-items:center;padding:0;cursor:default}
+.desktop-window-controls button:hover{background:#363b42}
+.desktop-window-controls button.desktop-window-close:hover{background:#b91d32;color:white}
+.desktop-custom-frame .app-header .sim-brand{display:none}
+.desktop-custom-frame .sim-shell .app-header{height:29px;min-height:29px;gap:6px;background:var(--spx-surface);color:var(--spx-text);border-bottom:1px solid var(--spx-border)}
+.desktop-custom-frame .app-header .app-menu summary,.desktop-custom-frame .app-header .app-menu-trigger,.desktop-custom-frame .app-header #theme-toggle{color:var(--spx-text)}
+.desktop-custom-frame .app-header .app-menu[open] summary,.desktop-custom-frame .app-header .app-menu summary:hover{background:var(--spx-surface-2)}
+.desktop-custom-frame .app-header .app-menu summary{padding:4px 10px}
+.desktop-custom-frame .command-bar{flex-wrap:nowrap;overflow-x:auto;min-height:42px}
+.desktop-custom-frame .command-bar .command-group{flex-shrink:0}
+.desktop-custom-frame .command-bar .project-title{max-width:150px}
+.desktop-resize-edge{display:none;position:fixed;z-index:99999}
+.desktop-custom-frame .desktop-resize-edge{display:block}
+.desktop-resize-north{top:0;left:7px;right:7px;height:4px;cursor:n-resize}
+.desktop-resize-south{bottom:0;left:7px;right:7px;height:4px;cursor:s-resize}
+.desktop-resize-east{right:0;top:7px;bottom:7px;width:4px;cursor:e-resize}
+.desktop-resize-west{left:0;top:7px;bottom:7px;width:4px;cursor:w-resize}
+.desktop-resize-northeast,.desktop-resize-northwest,.desktop-resize-southeast,.desktop-resize-southwest{width:7px;height:7px}
+.desktop-resize-northeast{right:0;top:0;cursor:ne-resize}
+.desktop-resize-northwest{left:0;top:0;cursor:nw-resize}
+.desktop-resize-southeast{right:0;bottom:0;cursor:se-resize}
+.desktop-resize-southwest{left:0;bottom:0;cursor:sw-resize}
+
+/* Internal windows share the Desktop chrome, not the OS window controls.
+   Keep existing modal/docking behavior and all original event handlers. */
+.sim-desktop .sim-shell dialog{
+  border:1px solid var(--spx-border);border-radius:3px;
+  box-shadow:0 12px 36px #0005;
+}
+.sim-desktop .sim-shell dialog::backdrop{background:#10151b66}
+.sim-desktop .sim-shell dialog .dialog-heading,
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading){
+  background:#15181c!important;color:#ebedf0!important;
+  border:0!important;border-bottom:1px solid #383d44!important;
+  border-radius:0!important;box-sizing:border-box;
+  min-height:30px!important;padding:0 0 0 10px!important;gap:8px!important;
+}
+.sim-desktop .sim-shell dialog .dialog-heading h2,
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) h2{
+  color:inherit!important;font:500 12px/1.3 var(--spx-font-sans)!important;
+  letter-spacing:0;margin:0!important;
+}
+.sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)),
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close){
+  background:transparent!important;color:#ebedf0!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;flex:0 0 36px!important;
+  width:36px!important;min-width:36px!important;height:30px!important;min-height:30px!important;
+  padding:0!important;margin:0!important;display:inline-flex;align-items:center;justify-content:center;
+  font:400 19px/1 system-ui,sans-serif!important;transform:none!important;
+}
+.sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)):hover,
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) :is(#charts-close,#results-close,.dialog-close,.sim-cad-close):hover{
+  background:#b91d32!important;color:#fff!important;
+}
+.sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]):focus-visible,
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) button:focus-visible{
+  outline:1px solid #ebedf0!important;outline-offset:-3px!important;
+}
+.sim-desktop .sim-shell dialog .dialog-heading .dialog-close svg{width:14px;height:14px;stroke-width:1.5}
+.sim-desktop .sim-shell dialog .dialog-heading .dialog-copy,
+.sim-desktop .sim-shell dialog .dialog-heading .guide-back{
+  background:#292e35;color:#ebedf0;border:1px solid #454b53;border-radius:2px;
+}
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) button{
+  color:#ebedf0!important;
+}
+.sim-desktop .sim-shell :is(.sim-panel-floating,.sim-cad-panel[data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading) .sim-cad-position{
+  background-color:transparent!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel:not([data-sim-cad-mode="float"]) :is(.panel-heading,.results-heading){
+  background:var(--spx-surface-2)!important;
+  border-bottom:1px solid var(--spx-border)!important;
+}
+
+/* Desktop: actual CAD docking states and consistent interactive chrome. */
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):is(:hover,:active,:focus-visible),
+.desktop-custom-frame .sim-shell .app-header .app-menu[open] summary {
+  background:var(--spx-surface-2)!important;color:var(--spx-text)!important;
+}
+.desktop-custom-frame .sim-shell .app-header :is(.app-menu-trigger,.app-menu summary):focus-visible{
+  outline:1px solid var(--spx-text-dim);outline-offset:-2px;
+}
+.desktop-custom-frame .sim-shell .command-bar{
+  flex-wrap:wrap;overflow:visible;min-height:36px;gap:3px 6px;padding:3px 6px;
+}
+.desktop-custom-frame .sim-shell .command-bar .command-group{flex-shrink:0}
+.desktop-custom-frame .sim-shell .command-bar .project-title{min-width:85px;max-width:150px}
+.sim-desktop .sim-shell dialog #examples-search:focus-visible{
+  outline:1px solid var(--spx-text-dim);outline-offset:-1px;border-color:var(--spx-text-dim);box-shadow:none;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"]{
+  border-radius:3px!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading{
+  background:#15181c!important;color:#ebedf0!important;
+  padding:0 0 0 7px!important;min-height:30px!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading :is(.sim-cad-float,.sim-cad-position):hover{
+  background-color:#363b42!important;border-color:transparent!important;
+}
+.sim-desktop .sim-shell .sim-cad-heading :is(#charts-close,#results-close,.sim-cad-close){
+  width:30px!important;min-width:30px!important;height:27px!important;min-height:27px!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;
+  color:inherit!important;font:400 18px/1 system-ui,sans-serif!important;
+  padding:0!important;display:inline-flex;align-items:center;justify-content:center;
+}
+.sim-desktop .sim-shell .sim-cad-heading :is(#charts-close,#results-close,.sim-cad-close):hover{
+  background:#b91d32!important;color:white!important;
+}
+.sim-desktop .sim-shell :is(.sim-cad-heading,.dialog-heading) :is(#charts-close,#results-close,.dialog-close,[data-close-dialog]:not(.guide-back)) svg{
+  width:14px!important;height:14px!important;stroke-width:1.5!important;
+}
+
+/* Consistent Desktop combobox typography and focus. */
+.sim-desktop .sim-shell .app-header :is(.app-menu summary,.app-menu-trigger),
+.sim-desktop .sim-shell .command-bar select,
+.sim-desktop .sim-shell .command-bar select option{
+  font-family:var(--spx-font-sans);
+  font-size:12px;
+  font-weight:400;
+  letter-spacing:normal;
+}
+.sim-desktop .sim-shell .command-bar #simulation-regime{
+  font:400 12px/1.3 var(--spx-font-sans);
+  letter-spacing:normal;
+  height:28px;
+  min-width:112px;
+  max-width:none;
+  border-radius:3px;
+  padding:3px 8px;
+}
+.sim-desktop .sim-shell .command-bar #simulation-regime:focus,
+.sim-desktop .sim-shell .command-bar select:focus-visible{
+  outline:1px solid var(--spx-text-dim);
+  outline-offset:-1px;
+  border-color:var(--spx-text-dim);
+  box-shadow:none;
+}
+
+/* Fixed dark chrome must not inherit light-theme icon or hover colors. */
+.sim-desktop .desktop-titlebar .desktop-window-controls button,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button,
+.sim-desktop .sim-shell dialog .dialog-heading button{
+  color:#ebedf0!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button{
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button:hover,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button:hover,
+.sim-desktop .sim-shell dialog .dialog-heading button:hover{
+  background:#363b42!important;color:#fff!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls .desktop-window-close:hover,
+.sim-desktop .sim-shell .sim-cad-heading :is(#results-close,#charts-close):hover,
+.sim-desktop .sim-shell dialog .dialog-heading :is(.dialog-close,[data-close-dialog]:not(.guide-back)):hover{
+  background:#b91d32!important;color:white!important;
+}
+.sim-desktop .desktop-titlebar .desktop-window-controls button:focus-visible{
+  outline:1px solid #aeb7c2!important;outline-offset:-3px!important;
+}
+.sim-desktop .desktop-titlebar button svg,
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button svg,
+.sim-desktop .sim-shell dialog .dialog-heading button svg{
+  color:inherit!important;stroke:currentColor!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading :is(.sim-cad-move,.sim-cad-index){
+  color:#c2c8d0!important;opacity:.85!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading .sim-cad-position{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='4.5' r='1.25' fill='%23e2e6eb'/%3E%3Ccircle cx='10' cy='10' r='1.25' fill='%23e2e6eb'/%3E%3Ccircle cx='10' cy='15.5' r='1.25' fill='%23e2e6eb'/%3E%3C/svg%3E")!important;
+}
+.sim-desktop .sim-shell .sim-cad-panel[data-sim-cad-mode="float"] .sim-cad-heading button:disabled{
+  opacity:.45!important;
+}
+.sim-desktop[data-theme="light"] .sim-shell .command-bar button:not(:disabled){
+  color:#333b43;
+}
+.sim-desktop[data-theme="light"] .sim-shell .command-bar button:not(:disabled):focus-visible{
+  outline:1px solid #77828d;outline-offset:-2px;box-shadow:none;
+}
+
+.sim-desktop #desktop-help-dialog{width:min(880px,calc(100vw - 32px));max-width:calc(100vw - 32px)}
+.sim-desktop #desktop-help-dialog .desktop-help-body{padding:18px 24px;line-height:1.65}
+.sim-desktop #desktop-help-dialog .desktop-help-body h3{margin:16px 0 8px}
+.sim-desktop #desktop-help-dialog .desktop-help-body table{width:100%;border-collapse:collapse}
+.sim-desktop #desktop-help-dialog .desktop-help-body :is(th,td){padding:7px 9px;text-align:left;border-bottom:1px solid var(--spx-border)}

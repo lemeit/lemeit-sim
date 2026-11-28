@@ -1,6 +1,6 @@
 <img src="site/assets/sim-logo.svg" alt="ΣiM · Simulación de procesos" width="360">
 
-[![Portal 0.51.9](https://img.shields.io/badge/portal-0.51.9-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
+[![Portal 0.53.0](https://img.shields.io/badge/portal-0.51.9-CF263B?style=flat-square&labelColor=101215&color=CF263B)](https://sim.lemeit.ar)
 [![Motor DWSIM 10.2.15](https://img.shields.io/badge/motor-DWSIM%2010.2.15-F4F3EE?style=flat-square&labelColor=101215)](https://dwsim.org/)
 [![Windows y Debian](https://img.shields.io/badge/motores-Windows%20%2F%20Debian-F4F3EE?style=flat-square&labelColor=101215)](docs/seleccion-manual-motores.md)
 [![Licencia GPL](https://img.shields.io/badge/licencia-GPL--3.0--or--later-CF263B?style=flat-square&labelColor=101215)](LICENSE)
@@ -14,9 +14,44 @@ Sitio: https://sim.lemeit.ar · Identidad propia ΣiM, inspirada en tecnología 
 Es un piloto, no una réplica completa del editor de DWSIM.
 [Catálogo de objetos](https://sim.lemeit.ar/catalogo.html) · [Hoja de ruta](docs/roadmap.md).
 
+## Modalidades de ΣiM
+
+| | ΣiM Online | ΣiM Desktop |
+| --- | --- | --- |
+| Acceso | [sim.lemeit.ar](https://sim.lemeit.ar) | Aplicación nativa Tauri 2, en desarrollo |
+| Cálculo | Gateway y DWSIM MCP | Gateway local y DWSIM MCP local |
+| Proyectos | Nube y copias JSON | Copias JSON y biblioteca local |
+| Estado | Portal 0.51.9 | Prototipo funcional en Debian; 0.53.0-alpha.1 |
+
+Desktop comparte el código científico y el formato de proyectos de Online, pero dispone de una capa visual específica. No hay todavía instaladores autónomos publicados. El prototipo requiere Python y un servicio DWSIM MCP existente; la independencia completa y las pruebas sin Internet siguen pendientes.
+
+[Desarrollo de Desktop](desktop/README.md) · [Historial de Desktop](desktop/CHANGELOG.md) · [PR #167](https://github.com/lemeit/lemeit-sim/pull/167).
+
+## Ejemplo 20 · Tanque dinámico con dos válvulas
+
+Simulación temporal real mediante el adaptador DWSIM del circuito de agua a 25 °C. Abrir el Ejemplo 20, seleccionar el régimen dinámico y pulsar Calcular; Gráficas presenta la evolución del nivel.
+
+| Magnitud | Referencia comprobada en Online |
+| --- | --- |
+| Duración | 600 s |
+| Paso temporal | 5 s |
+| Muestras | 121 |
+| Alimentación | 10 kg/s |
+| Nivel final | ≈ 0,333 m |
+| Descarga final | ≈ 10 kg/s |
+
+La integración también finalizó correctamente en el prototipo Desktop Debian (6,832 s según diagnóstico del 26/11/2026). El registro confirma la finalización, no contiene las 121 muestras ni permite comprobar nuevamente el cierre numérico. Se trata de una comprobación numérica, no experimental. El adaptador no integra cualquier topología dinámica; el explorador paso a paso dinámico permanece pendiente en ambas modalidades.
+
+[Guía del Ejemplo 20](docs/ejemplo-20-tanque-dinamico-dwsim.md) · [Gráficas científicas](docs/graficas-cientificas.md).
+
 ## Ejercicios 18 y 19 · Recirculación
 
 Adaptaciones didácticas del [tutorial oficial de DWSIM](https://dwsim.org/tutorials/en/intermediate/04-recycle-loops.html): lazo Mixer–Splitter con 70/30 y 50/50; balances de masa analíticos y archivos ΣiM disponibles en la guía. No incluyen el Heater a 350 K ni el bloque lógico Recycle nativo (todavía en pruebas), y requieren gateway con `simple_material_recycle`. Sin validación física completada en ambos motores.
+
+## Versión Desktop en desarrollo · 0.53.0
+
+En el PFD, arrastrá el cuerpo de un equipo o el recorrido de una corriente. Los puertos conservan su función de conexión. En la barra de herramientas, arrastrá el tirador sobre otro grupo para reordenarlo o hacia el área de trabajo para desacoplarlo. Arrastrá el borde derecho de un grupo para ajustar su ancho tanto en la barra como en el área de trabajo. La distribución se guarda localmente y se puede restablecer desde Ver. Con el tirador enfocado, Alt + ←/→ reordena, Alt + ↓ desacopla y Alt + ↑ vuelve a acoplar.
+
 
 ## Versión en desarrollo · 0.53.0
 

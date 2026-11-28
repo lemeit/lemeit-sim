@@ -54,6 +54,7 @@ const SimCloudProjects=(()=>{
     $('cloud-admin-classes').hidden=student();
   }
   async function open(){
+    if(globalThis.SimDesktop)return;
     closeMenus();status('Conectando con la biblioteca…');
     $('cloud-project-dialog').showModal();
     try{await refreshIdentity();if(available())await list();}
@@ -150,6 +151,14 @@ const SimCloudProjects=(()=>{
   }
   function bind(options){
     ({getGraph,hasProject,loadGraph,clearWorkspace,notice,closeMenus}=options);
+    if(globalThis.SimDesktop){
+      for(const id of ['cloud-projects-open','cloud-open-toolbar','cloud-save-menu','cloud-save-toolbar']){
+        const element=$(id);if(element)element.hidden=true;
+      }
+      $('cloud-user-label').textContent='Desktop · local';
+      $('project-backups').hidden=false;
+      return;
+    }
     $('cloud-projects-open').onclick=open;
     $('cloud-open-toolbar').onclick=open;
     $('cloud-save-toolbar').onclick=()=>$('cloud-save-menu').click();
