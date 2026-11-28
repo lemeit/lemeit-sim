@@ -67,7 +67,9 @@ fn main(){
     }
     tauri_build::try_build(
         tauri_build::Attributes::new()
-            .app_manifest(tauri_build::AppManifest::new().commands(&["save_project_copy", "startup_status", "retry_startup", "open_editor"])),
+            .app_manifest(tauri_build::AppManifest::new().commands(&[
+                "save_project_copy", "open_project", "save_pdf", "startup_status", "retry_startup", "open_editor",
+            ])),
     )
     .expect("configure Desktop permissions");
 }

@@ -787,6 +787,24 @@ function updateCompound(name,remove){
   changed();renderCompounds();renderInspector();
 }
 let desktopSavedProject=null;
+let openingDesktopFile=false;
+async function openDesktopProject(fromLaunch=false){
+  if(busy||openingDesktopFile)return;
+  const invoke=globalThis.__TAURI__?.core?.invoke;
+  if(!invoke){$('file-input').click();return;}
+  openingDesktopFile=true;
+  closeMenus();
+  try{
+    const contents=await invoke('open_project',{fromLaunch});
+    if(contents===null||contents===undefined)return;
+    const data=JSON.parse(contents);
+    if(!await SimDesktopShell.confirmClose(false))return;
+    loadGraph(data,{saved:true});
+    notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proyecto abierto.');
+  }catch(error){
+    notice('No se pudo abrir el proyecto: '+(error?.message||String(error)),true);
+  }finally{openingDesktopFile=false;}
+}
 function loadGraph(data,{saved=false}={}){
   if(typeof SimProcessExplorer!=='undefined')SimProcessExplorer.invalidate();
   if(!data||data.version!==1||!Array.isArray(data.nodes)||data.nodes.length>30||!Array.isArray(data.edges)||data.edges.length>60||!Array.isArray(data.compounds)||!data.compounds.length||data.compounds.length>8)throw new Error('El archivo no es un proceso compatible (versión 1).');
@@ -1066,7 +1084,7 @@ function bindEvents(){
       savingCopy=false;
     }
   };
-  $('open-button').onclick=()=>$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
+  $('open-button').onclick=()=>globalThis.SimDesktop?openDesktopProject():$('file-input').click();$('file-input').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw new Error('El archivo supera los 2 MB.');const data=JSON.parse(await file.text());loadGraph(data,{saved:true});notice(graph.saved_run?'Proyecto abierto con su última corrida guardada.':'Proceso abierto. Calculá para obtener resultados.');}catch(error){notice(error.message,true);}e.target.value='';};
 }
 async function init(){
   SimproxTheme.init();graph=emptyProject();
@@ -1093,6 +1111,7 @@ async function init(){
   }
   if(catalog)$('model-select').innerHTML='<option value="">Sin modelo seleccionado</option>'+catalog.models.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('');
   renderCompounds();updateControls();
+  if(globalThis.SimDesktop&&location.hash==='#abrir-proyecto')await openDesktopProject(true);
 }
 function newProject(){
   if(busy)return;if(!catalog)return notice('El catálogo todavía se está cargando. Volvé a intentar.',true);
@@ -1172,7 +1191,7 @@ function bindProjectEvents(){
   $('new-component-search').oninput=()=>{newComponentDisplayLimit=35;renderNewProject();};$('new-project-model').onchange=renderNewProject;
   $('new-project-dialog').addEventListener('click',e=>{if(e.target.closest('#new-compounds-more')){newComponentDisplayLimit+=35;renderNewProject();return;}const add=e.target.closest('[data-new-add]'),remove=e.target.closest('[data-new-remove]');if(add&&draftCompounds.length<8&&!draftCompounds.includes(add.dataset.newAdd))draftCompounds.push(add.dataset.newAdd);if(remove)draftCompounds=draftCompounds.filter(c=>c!==remove.dataset.newRemove);renderNewProject();});
   $('new-project-form').onsubmit=e=>{e.preventDefault();const model=$('new-project-model').value;if(!draftCompounds.length||!model)return;if(model==='Steam Tables (IAPWS-IF97)'&&(draftCompounds.length!==1||draftCompounds[0]!=='Water')){$('new-project-error').textContent='IAPWS-IF97 es para agua pura. Elegí otro modelo para esta mezcla.';return;}loadGraph({...emptyProject(),title:$('new-project-name').value.trim()||'Proceso sin título',compounds:[...draftCompounds],model});$('new-project-dialog').close();notice('');$('calculation-state').textContent='Proyecto nuevo · diagrama vacío';};
-  $('start-panel').onclick=e=>{const action=e.target.closest('[data-start]')?.dataset.start;if(action==='new')newProject();if(action==='open')$('file-input').click();};
+  $('start-panel').onclick=e=>{const action=e.target.closest('[data-start]')?.dataset.start;if(action==='new')newProject();if(action==='open')$('open-button').click();};
   $('recent-button').onclick=()=>{try{const saved=localStorage.getItem('lemeit-process-v1');if(saved)loadGraph(JSON.parse(saved));closeMenus();}catch(error){notice(error.message,true);}};
   $('confirm-example').onclick=()=>{resetExample();closeMenus();};
   document.querySelectorAll('.menu-panel>button').forEach(b=>b.addEventListener('click',()=>{if(b.id!=='example-button')closeMenus();}));
@@ -1337,6 +1356,7 @@ function bindDiagramExport(){
   };
   const nodesForExport=()=>scope.value==='selection'?selectedNodes():graph.nodes;
   function updateOptions(){
+    submit.textContent=globalThis.SimDesktop&&format.value==='pdf'?'Guardar PDF…':'Descargar';
     for(const group of form.querySelectorAll('[data-format]')){
       group.hidden=!group.dataset.format.split(' ').includes(format.value);
       group.disabled=group.hidden;
@@ -1413,11 +1433,22 @@ function bindDiagramExport(){
     submit.disabled=true;status.textContent='Preparando archivo…';
     try{
       const stem=exportStem()+(scope.value==='selection'?'-seleccion':'');
+      await new Promise(resolve=>setTimeout(resolve,0));
       const blob=await SimDiagramFiles.file(diagramMarkup(nodes,true),graph.title,options);
-      downloadLocal(stem+'.'+options.format,blob,blob.type);
+      const filename=stem+'.'+options.format;
+      if(globalThis.SimDesktop&&options.format==='pdf'&&globalThis.__TAURI__?.core?.invoke){
+        status.textContent='Elegí dónde guardar el PDF…';
+        const contents=Array.from(new Uint8Array(await blob.arrayBuffer()));
+        const path=await globalThis.__TAURI__.core.invoke('save_pdf',{filename,contents});
+        if(!path){status.textContent='Guardado cancelado.';return;}
+        notice('PDF guardado en '+path);
+      }else{
+        downloadLocal(filename,blob,blob.type);
+        notice('Se solicitó la descarga de '+filename);
+      }
       recordActivity('Diagrama exportado',options.format);
       dialog.close();
-    }catch(error){status.textContent=error.message||'No se pudo exportar el archivo.';}
+    }catch(error){status.textContent=error?.message||String(error||'No se pudo exportar el archivo.');}
     finally{submit.disabled=false;}
   };
 }

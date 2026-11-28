@@ -163,8 +163,54 @@ fn open_editor(window: WebviewWindow, startup: State<'_, StartupState>) -> Resul
         }
         verify_gateway(&mut state)?;
     }
-    window.navigate(GATEWAY_URL.parse().expect("URL local válida"))
+    let mut url: tauri::Url = GATEWAY_URL.parse().expect("URL local válida");
+    if std::env::args_os().nth(1).is_some() {
+        url.set_fragment(Some("abrir-proyecto"));
+    }
+    window.navigate(url)
         .map_err(|_| "No se pudo abrir el editor. Volvé a intentar.".into())
+}
+
+const PROJECT_LIMIT: u64 = 2_000_000;
+
+struct StartupProject(Mutex<Option<PathBuf>>);
+
+#[tauri::command]
+async fn open_project(
+    window: tauri::WebviewWindow,
+    startup: tauri::State<'_, StartupProject>,
+    from_launch: bool,
+) -> Result<Option<String>, String> {
+    let path = if from_launch {
+        startup.0.lock().map_err(|error| error.to_string())?.take()
+    } else {
+        window.dialog().file().set_parent(&window)
+            .set_title("Abrir proyecto")
+            .add_filter("Proyectos ΣIM", &["sim", "json"])
+            .blocking_pick_file()
+            .map(|selection| selection.into_path())
+            .transpose().map_err(|error| error.to_string())?
+    };
+    let Some(path) = path else { return Ok(None); };
+    if !["sim", "json"].iter().any(|extension| has_extension(&path, extension)) {
+        return Err("Elegí un archivo .sim o .json.".into());
+    }
+    let file = std::fs::File::open(path).map_err(|error| error.to_string())?;
+    if !file.metadata().map_err(|error| error.to_string())?.is_file() {
+        return Err("Elegí un archivo de proyecto.".into());
+    }
+    let mut contents = String::new();
+    use std::io::Read;
+    file.take(PROJECT_LIMIT + 1).read_to_string(&mut contents).map_err(|error| error.to_string())?;
+    if contents.len() as u64 > PROJECT_LIMIT {
+        return Err("El archivo supera los 2 MB.".into());
+    }
+    Ok(Some(contents))
+}
+
+fn has_extension(path: &Path, extension: &str) -> bool {
+    path.extension().and_then(|ext| ext.to_str())
+        .is_some_and(|ext| ext.eq_ignore_ascii_case(extension))
 }
 
 #[tauri::command]
@@ -173,33 +219,56 @@ async fn save_project_copy(
     filename: String,
     contents: String,
 ) -> Result<Option<String>, String> {
+    if contents.len() as u64 > PROJECT_LIMIT {
+        return Err("El proyecto supera los 2 MB admitidos para volver a abrirlo.".into());
+    }
+    save_file(window, filename, contents.as_bytes(), "sim", "Proyecto ΣIM", "Guardar proyecto")
+}
+
+#[tauri::command]
+async fn save_pdf(
+    window: tauri::WebviewWindow,
+    filename: String,
+    contents: Vec<u8>,
+) -> Result<Option<String>, String> {
+    save_file(window, filename, &contents, "pdf", "Documento PDF", "Guardar PDF")
+}
+
+fn save_file(
+    window: tauri::WebviewWindow,
+    filename: String,
+    contents: &[u8],
+    extension: &str,
+    label: &str,
+    title: &str,
+) -> Result<Option<String>, String> {
     let suggested = Path::new(&filename);
     if suggested.file_name().and_then(|name| name.to_str()) != Some(filename.as_str())
-        || suggested.extension().and_then(|ext| ext.to_str()) != Some("sim")
+        || !has_extension(suggested, extension)
     {
-        return Err("El nombre sugerido debe ser un archivo .sim.".into());
+        return Err(format!("El nombre sugerido debe terminar en .{extension}."));
     }
 
     let Some(selection) = window
         .dialog()
         .file()
         .set_parent(&window)
-        .set_title("Guardar copia de proyecto")
+        .set_title(title)
         .set_file_name(filename)
-        .add_filter("Proyecto ΣIM", &["sim"])
+        .add_filter(label, &[extension])
         .blocking_save_file()
     else {
         return Ok(None);
     };
 
     let path = selection.into_path().map_err(|error| error.to_string())?;
-    if !path.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| ext.eq_ignore_ascii_case("sim")) {
-        return Err("Elegí un nombre de archivo que termine en .sim.".into());
+    if !has_extension(&path, extension) {
+        return Err(format!("Elegí un nombre de archivo que termine en .{extension}."));
     }
     let directory = path.parent().ok_or("La carpeta seleccionada no es válida.")?;
     // Write beside the destination so a failed export cannot truncate an existing copy.
     let mut file = tempfile::NamedTempFile::new_in(directory).map_err(|error| error.to_string())?;
-    file.write_all(contents.as_bytes()).map_err(|error| error.to_string())?;
+    file.write_all(contents).map_err(|error| error.to_string())?;
     file.as_file().sync_all().map_err(|error| error.to_string())?;
     file.persist(&path).map_err(|error| error.error.to_string())?;
     Ok(Some(path.display().to_string()))
@@ -208,7 +277,10 @@ async fn save_project_copy(
 fn main() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![save_project_copy, startup_status, retry_startup, open_editor])
+        .manage(StartupProject(Mutex::new(std::env::args_os().nth(1).map(PathBuf::from))))
+        .invoke_handler(tauri::generate_handler![
+            save_project_copy, open_project, save_pdf, startup_status, retry_startup, open_editor
+        ])
         .plugin(tauri_plugin_opener::Builder::new().open_js_links_on_click(false).build())
         .setup(|app| {
             let startup = Arc::new(Mutex::new(Startup {

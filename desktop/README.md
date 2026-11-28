@@ -1,8 +1,8 @@
 # ΣiM Desktop — prototipo de desarrollo
 
-Base científica y frontend compartido: ΣIM 0.53.4, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
+Base científica y frontend compartido: ΣIM 0.53.5, desde la rama `main`. Motor: DWSIM MCP 10.2.15. Licencia GPL-3.0-or-later.
 
-**Estado al 28/11/2026:** prototipo 0.53.4-alpha.3. El editor se probó en Debian x86_64 con el motor local. El flujo de CI genera un paquete piloto Debian para el motor local existente. La distribución autónoma sigue pendiente.
+**Estado al 28/11/2026:** prototipo 0.53.5-alpha.4. El editor se probó en Debian x86_64 con el motor local. El flujo de CI genera un paquete piloto Debian para el motor local existente. La distribución autónoma sigue pendiente.
 
 Al iniciar, la bienvenida muestra el estado del servicio local, DWSIM y el catálogo termodinámico. Cuando termine la carga, elegí **Abrir editor**. Si el arranque se detiene, corregí la configuración indicada y elegí **Reintentar**.
 
@@ -14,7 +14,7 @@ Para construirlo en Debian 12 con las dependencias de desarrollo ya instaladas:
 
 ```bash
 bash desktop/scripts/build-debian.sh
-sudo apt install ./desktop/dist/sim-desktop_0.53.4~alpha.3_amd64.deb
+sudo apt install ./desktop/dist/sim-desktop_0.53.5~alpha.4_amd64.deb
 ```
 
 Para iniciarlo desde la terminal, exportá `SIM_DESKTOP_MCP_TOKEN_FILE` como en las instrucciones de desarrollo y ejecutá `sim-desktop`. Para usar el menú de aplicaciones, configurá un enlace en `~/.config/sim-desktop/mcp-token` que apunte al archivo autorizado del motor local. El paquete no copia tokens ni modifica servicios.
@@ -44,8 +44,8 @@ El registro de diagnóstico del 26/11 contiene también un cálculo estacionario
 
 ## Guardar y recuperar proyectos
 
-- **Archivo → Guardar copia de proyecto (.sim)…**, el icono de disquete o **Ctrl + S** abren el selector del sistema. Elegí la carpeta y confirmá el nombre. El aviso muestra la ruta cuando la escritura termina. Cancelar deja el proyecto abierto.
-- **Archivo → Abrir proyecto…** o **Ctrl + O** admite copias `.sim` y proyectos `.json` de Online. El archivo conserva el diagrama, el formato de Gráficas y la última corrida válida, si está disponible.
+- **Archivo → Guardar…**, el icono de disquete o **Ctrl + S** abren el selector del sistema. Elegí la carpeta y confirmá el nombre. El aviso muestra la ruta cuando la escritura termina. Cancelar deja el proyecto abierto.
+- **Archivo → Abrir…** o **Ctrl + O** admite copias `.sim` y proyectos `.json` de Online. El archivo conserva el diagrama, el formato de Gráficas y la última corrida válida, si está disponible.
 - **Biblioteca local…** conserva proyectos dentro de la aplicación. **Recuperar borrador local** permite volver al último borrador. Para llevar el proyecto a otro equipo, guardá una copia `.sim`.
 
 ## Ejecutar el prototipo en Debian 12

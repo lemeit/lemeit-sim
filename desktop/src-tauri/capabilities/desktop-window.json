@@ -11,6 +11,8 @@
   },
   "permissions": [
     "allow-save-project-copy",
+    "allow-open-project",
+    "allow-save-pdf",
     "core:window:allow-minimize",
     "core:window:allow-toggle-maximize",
     "core:window:allow-close",

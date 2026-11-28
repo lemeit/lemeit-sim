@@ -21,6 +21,7 @@ install -d "$stage/DEBIAN" "$stage/usr/share/sim-desktop" "$stage/usr/share/doc/
 install -Dm755 "$target/build/release/sim-desktop" "$stage/usr/lib/sim-desktop/sim-desktop"
 install -Dm755 desktop/debian/sim-desktop "$stage/usr/bin/sim-desktop"
 install -Dm644 desktop/debian/ar.lemeit.sim.desktop "$stage/usr/share/applications/ar.lemeit.sim.desktop"
+install -Dm644 desktop/debian/ar.lemeit.sim.desktop.xml "$stage/usr/share/mime/packages/ar.lemeit.sim.desktop.xml"
 install -Dm644 desktop/src-tauri/icons/icon.png "$stage/usr/share/icons/hicolor/256x256/apps/ar.lemeit.sim.desktop.png"
 install -m644 server.py dynamic_tank_mcp.py recycle.py package.json "$stage/usr/share/sim-desktop/"
 cp -R site "$stage/usr/share/sim-desktop/"
@@ -33,7 +34,7 @@ Section: science
 Priority: optional
 Architecture: amd64
 Maintainer: Lemeit <contacto@lemeit.ar>
-Depends: python3 (>= 3.11), libwebkit2gtk-4.1-0, libgtk-3-0, libglib2.0-0, libc6, libgcc-s1
+Depends: python3 (>= 3.11), libwebkit2gtk-4.1-0, libgtk-3-0, libglib2.0-0, libc6, libgcc-s1, shared-mime-info
 Homepage: https://github.com/lemeit/lemeit-sim
 Description: Simulador educativo de procesos (paquete piloto Desktop)
  Incluye el editor y gateway local. Requiere un motor DWSIM MCP
