@@ -1185,7 +1185,7 @@ test('Desktop avisa tras calcular y guarda la última corrida antes de cerrar',a
   assert.equal(await warning.isVisible(),false);
   assert.ok(await page.locator('#diagram .node').count());
   await closeProject();
-  const save=warning.getByRole('button',{name:'Guardar y cerrar'});
+  const save=warning.getByRole('button',{name:'Guardar en biblioteca y cerrar'});
   await page.evaluate(()=>{
     const setItem=Storage.prototype.setItem;
     Storage.prototype.setItem=function(key,value){
@@ -1322,7 +1322,10 @@ test('Desktop: Abrir usa el selector nativo y Exportar PDF confirma el archivo e
  await page.waitForFunction(()=>document.querySelector('#calculation-state').textContent==='Resultados vigentes');
  await page.locator('#file-menu > summary').click();
  await page.locator('#report-pdf-menu').click();
+ await page.locator("#diagram-export-dialog [name=paper]").selectOption("a3");
  await page.getByRole('button',{name:'Guardar PDF…',exact:true}).click();
- await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('PDF guardado en /home/alumno/'));
+ await page.waitForFunction(()=>!document.querySelector('#diagram-export-submit').disabled);
+ assert.match(await page.locator('#notice').textContent(),/PDF guardado en \/home\/alumno\//,
+   await page.locator('#diagram-export-status').textContent());
  assert.equal(await page.evaluate(()=>globalThis.pdfSignature),'%PDF-');
 });
