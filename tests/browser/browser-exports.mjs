@@ -606,7 +606,7 @@ test('Barra por categorías, rótulo desde Proyecto y resultados acoplables a la
  await openProject(page,example);
  const toolbar=page.getByRole('toolbar',{name:'Herramientas del proyecto y del diagrama'});
  assert.deepEqual(await toolbar.locator('.command-group').evaluateAll(groups=>groups.map(g=>g.getAttribute('aria-label'))),
-   ['Archivo','Proyecto','Diagrama','Simulación','Vista','Portal']);
+   ['Archivo','Proyecto','Simulación','Diagrama','Vista','Portal']);
  for(const text of ['Insertar texto en el diagrama','Datos del rótulo','Encuadrar todo el proceso','Mostrar cuadrícula','Abrir diagrama en otra ventana','Pantalla completa']){
    assert.equal(await toolbar.getByRole('button',{name:text,exact:true}).locator('svg').count(),1);
  }
@@ -762,7 +762,7 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(await page.locator('#view-menu [data-toolbar-action="fit-button"]').count(),0,'Vista no repite el encuadre de la barra');
   const admin=page.locator('#admin-nav-link');
   assert.equal(await admin.getAttribute('target'),null,'Administración no abre otra pestaña');
-  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools'].includes(k))));
+  const order=()=>page.locator('.command-bar > .command-group').evaluateAll(els=>els.map(el=>[...el.classList].find(k=>['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools'].includes(k))));
   const original=await order();
   await page.locator('.simulation-tools .toolbar-grip').evaluate(el=>el.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',altKey:true,bubbles:true})));
   const changed=await order();
@@ -770,7 +770,7 @@ test('ΣIM 0.47.7: Calcular propio, barra reordenable, tema único y navegación
   assert.equal(changed.indexOf('simulation-tools'),original.indexOf('simulation-tools')-1);
   await page.locator('#view-menu > summary').click();
   await page.locator('#toolbar-layout-reset').click();
-  assert.deepEqual(await order(),['file-tools','project-tools','drawing-tools','simulation-tools','zoom-controls','portal-tools']);
+  assert.deepEqual(await order(),['file-tools','project-tools','simulation-tools','drawing-tools','zoom-controls','portal-tools']);
   await page.locator('#theme-toggle').click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   await page.goto(new URL('/admin.html',page.url()).href,{waitUntil:'networkidle'});
@@ -799,6 +799,8 @@ test('Explorador contextual: el lienzo permanece fijo al avanzar y ampliar detal
  assert.ok(initial.panelHeight>50);
  assert.equal(await panel.locator('math').count()>0,true,'Las ecuaciones usan MathML local');
  assert.equal(await panel.locator('.callout-resize').count(),1);
+ assert.equal(await page.locator('#canvas-wrap > svg.explorer-leader.diagram-callout path.callout-leader').count(),1);
+ assert.equal(await page.locator('#canvas-wrap > svg.explorer-leader circle.callout-tip').count(),1);
  const scale=panel.getByRole('button',{name:'Cambiar escala del texto'});
  await scale.click();
  assert.equal(await panel.evaluate(el=>el.style.getPropertyValue('--callout-scale')),'1.15');
