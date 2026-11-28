@@ -1275,6 +1275,20 @@ test('Ejemplos: contraste de categorías en ambos temas',async t=>{
    await page.locator('#examples-menu > summary').click();
  }
 });
+test('Desktop: las categorías de Ejemplos comparten el fondo de los menús',async t=>{
+ const page=await browserPage(t);
+ await page.locator('body').evaluate(body=>body.classList.add('sim-desktop','desktop-custom-frame'));
+ for(const theme of ['light','dark']){
+   await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+   await page.locator('#file-menu > summary').click();
+   const menuBackground=await page.locator('#file-menu > .menu-panel').evaluate(el=>getComputedStyle(el).backgroundColor);
+   await page.locator('#file-menu > summary').click();
+   await page.locator('#examples-menu > summary').click();
+   const category=page.locator('#examples-quick-menu .examples-category > summary').first();
+   assert.equal(await category.evaluate(el=>getComputedStyle(el).backgroundColor),menuBackground,theme);
+   await page.locator('#examples-menu > summary').click();
+ }
+});
 test('Desktop migra una vez los grupos antiguos sin perder proyectos',async t=>{
  const page=await browserPage(t,result,async page=>{
    await page.route('**/desktop-mode.js',route=>route.fulfill({contentType:'text/javascript',body:"globalThis.SimDesktop=true;globalThis.SimDesktopEngine='windows';"}));
