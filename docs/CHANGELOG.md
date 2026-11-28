@@ -6,6 +6,14 @@ Cada entrega incrementa la versión: correcciones 0.1.x, nuevas capacidades 0.x.
 Actualizar este historial y la sección de versión en Ayuda → Acerca de en cada entrega.
 La versión del portal es independiente de la versión del motor DWSIM.
 
+## 0.53.0 — 2026-11-28
+
+- Viñetas de exploración ancladas al PFD, con flecha, arrastre, tamaño ajustable y escala de texto.
+- Preferencias de presentación locales por proyecto y objeto, con restauración automática.
+- Ecuaciones estructuradas MathML sin conexión ni CDN.
+- Barra de herramientas compacta: Calcular antes de los controles de régimen y vista.
+- Sin cambios del motor DWSIM.
+
 ## 0.52.0 — 2026-11-27
 
 - Exploración contextual en el PFD: tarjeta anclada, navegación, reproducción y detalle técnico, también para muestras dinámicas.
